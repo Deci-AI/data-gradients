@@ -53,7 +53,7 @@ def get_contours(label: torch.Tensor, debug_image=None) -> np.array:
 
     # Return tensor with [C, N, P, 1, 2] where C is # of classes, N # of contours per class and
     # (P, 1, 2) is points vector
-    return np.array(all_onehot_contour)
+    return all_onehot_contour
 
 
 def get_contour_class(contour: np.array, label: np.array) -> int:
