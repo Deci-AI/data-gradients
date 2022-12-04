@@ -1,17 +1,16 @@
+import concurrent
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Callable, Iterable
 
-import torch
-
-from batch_data import BatchData
 import yaml
 import tqdm
 from matplotlib import pyplot as plt
-
 from torch.utils.data import DataLoader
+
 from feature_extractors import FEATURE_EXTRACTORS, FeatureExtractorBuilder
 from preprocessing import contours, onehot
 from tensorboard_logger import TensorBoardLogger
+from batch_data import BatchData
 
 
 class AnalysisManager:
@@ -24,7 +23,6 @@ class AnalysisManager:
         self._threads = ThreadPoolExecutor()
         self._logger = TensorBoardLogger()
         self.reformat: Optional[Callable] = None
-        self._contour = Contours()
 
     def _get_feature_extractors(self, task: str) -> List:
         with open(self._yaml_path, "r") as stream:
@@ -76,9 +74,17 @@ class AnalysisManager:
     def _preprocess(images, labels) -> BatchData:
         onehot_labels = [onehot.get_onehot(label) for label in labels]
 
+        # Debug purposes
+        # for label, image in zip(onehot_labels, images):
+        #     temp = contours.get_contours(label, image)
+        #     break
+
         onehot_contours = [contours.get_contours(onehot_label) for onehot_label in onehot_labels]
 
-        bd = BatchData(images, labels, onehot_contours, onehot_labels)
+        bd = BatchData(images=images,
+                       labels=labels,
+                       batch_onehot_contours=onehot_contours,
+                       batch_onehot_labels=onehot_labels)
 
         return bd
 
@@ -96,6 +102,9 @@ class AnalysisManager:
         return iterable
 
     def execute(self, train_dataloader: DataLoader, val_dataloader: Optional[DataLoader] = None):
+        # Debugging
+        debug_mode = False
+
         # Validate dataloader
         train_iter = self._get_iter(train_dataloader)
         if val_dataloader is not None:
@@ -104,33 +113,40 @@ class AnalysisManager:
 
         # Check how to get length of iterator
         for train_batch in tqdm.trange(len(train_dataloader)):
-            if train_batch > 3:
+            if train_batch > 3 and debug_mode:
                 continue
 
             batch_data = self._get_batch(train_iter)
 
             for extractor in self._train_extractors:
-                extractor.execute(batch_data)
-            # futures = [self._threads.submit(extractor.execute, images, labels) for extractor in self._train_extractors]
+                if not debug_mode:
+                    futures = [self._threads.submit(extractor.execute, batch_data) for extractor in
+                               self._train_extractors]
+                else:
+                    extractor.execute(batch_data)
 
             if train_batch < len(val_dataloader) and not self._train_only:
-                # Next validation batch, reformat and start extractors
                 batch_data = self._get_batch(valid_iter)
                 for extractor in self._val_extractors:
-                    extractor.execute(batch_data)
-                # futures += [self._threads.submit(extractor.execute, images, labels) for extractor in self._val_extractors]
+                    if not debug_mode:
+                        futures += [self._threads.submit(extractor.execute, batch_data) for extractor in
+                                    self._val_extractors]
+                    else:
+                        extractor.execute(batch_data)
 
-            # Wait for all threads to finish
-            # concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+            if not debug_mode:
+                # Wait for all threads to finish
+                concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
 
     def post_process(self):
         for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
             fig, ax = plt.subplots()
 
-            train_extractor.process(ax)
-
+            # First val - because graph params will be overwritten by latest (train) and we want it's params
             if not self._train_only:
                 val_extractor.process(ax)
+
+            train_extractor.process(ax)
 
             fig.tight_layout()
 
