@@ -1,5 +1,4 @@
 import datetime as dt
-import os
 from collections import OrderedDict
 
 import numpy as np
