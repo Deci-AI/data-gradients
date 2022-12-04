@@ -4,11 +4,11 @@ import cv2.cv2 as cv2
 import numpy as np
 import torch
 # find contours
-        # CHAIN_APPROX_SIMPLE reduces number of un-needed points (i.e., straight line)
-        # CHAIN_APPROX_NONE keep all points
-        # RETR_LIST simply retrievs all contours
-        # RETR_EXTERNAL get all outer contours only
-        # RERT_TREE gets all contours + "family" details
+# CHAIN_APPROX_SIMPLE reduces number of un-needed points (i.e., straight line)
+# CHAIN_APPROX_NONE keep all points
+# RETR_LIST simply retrievs all contours
+# RETR_EXTERNAL get all outer contours only
+# RERT_TREE gets all contours + "family" details
 
 
 def get_contours(label: torch.Tensor, debug_image=None) -> np.array:
