@@ -8,7 +8,8 @@ general:
 #  - NumberOfBackgroundImages
 
 semantic-segmentation:
-  - SegmentationCountNumObjects
+  - SegmentationCountNumObjects:
+      max_number_of_objects: 10
   - SegmentationGetClassDistribution:
       number_of_classes: 20
   - SegmentationCountSmallObjects:
