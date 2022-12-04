@@ -6,5 +6,5 @@ from typing import List
 class BatchData:
     images: List
     labels: List
-    onehot_labels: List
-    onehot_contours: List
+    batch_onehot_contours: List
+    batch_onehot_labels: List
