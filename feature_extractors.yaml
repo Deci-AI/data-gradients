@@ -1,0 +1,16 @@
+general:
+  - NumberOfImagesLabels
+#  - NumberOfUniqueClasses
+#  - ImagesResolutions
+#  - ImagesAspectRatios
+#  - AverageBrightness
+#  - AverageContrast
+#  - NumberOfBackgroundImages
+
+semantic-segmentation:
+  - SegmentationCountNumObjects
+  - SegmentationGetClassDistribution:
+      number_of_classes: 20
+  - SegmentationCountSmallObjects:
+      small_object_threshold: 5000
+
