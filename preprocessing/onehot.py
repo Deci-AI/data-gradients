@@ -3,6 +3,10 @@ import torch
 
 def get_onehot(label) -> torch.Tensor:
     all_classes = torch.unique(label)[1:]
+
+    if not all_classes.nelement():
+        return label
+
     masks = []
     for cls in all_classes:
         mask = torch.where((label == cls) & (label > 0), torch.tensor(cls), torch.tensor(0))
