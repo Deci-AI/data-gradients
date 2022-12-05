@@ -3,7 +3,7 @@ import numpy as np
 
 import preprocessing.contours
 from batch_data import BatchData
-from create_torch_loaders import label_to_class
+from data_loaders.get_torch_loaders import sbd_label_to_class
 from feature_extractors.feature_extractor_abstract import FeatureExtractorBuilder
 from tensorboard_logger import create_bar_plot
 
@@ -44,7 +44,7 @@ class SegmentationGetClassDistribution(FeatureExtractorBuilder):
                 self._hist[contours_class - 1] += len(cls_contours)
 
     def process(self, ax):
-        d = {self._hist[i]: label_to_class[self._hist.index(self._hist[i])] for i, _ in enumerate(self._hist)}
+        d = {self._hist[i]: sbd_label_to_class[self._hist.index(self._hist[i])] for i, _ in enumerate(self._hist)}
         labels = [d[self._hist[i]] for i in range(len(self._hist))]
 
         self._hist = np.array(self._hist) / sum(self._hist)
@@ -60,6 +60,7 @@ class SegmentationCountSmallObjects(FeatureExtractorBuilder):
         super().__init__(train_set)
         # TODO: Do params validation before running program
         assert 0 < params['percent_of_an_image'] < 100, "Param percent of image is a % of the image, in (0, 100)"
+
         min_pixels: int = int(512 * 512 / (params['percent_of_an_image'] * 100))
         self.bins = np.array(range(0, min_pixels, int(min_pixels / 10)))
         self._hist: List[int] = [0] * 11

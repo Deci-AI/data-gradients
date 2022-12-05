@@ -1,9 +1,10 @@
 import argparse
 from manager import AnalysisManager
-from create_torch_loaders import train_dataloader, val_dataloader
+from data_loaders.get_torch_loaders import DataLoaders
 
 
 def main(args):
+    train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset='pp_human')
     da = AnalysisManager(args)
     da.build()
     da.execute(train_dataloader, val_dataloader)
