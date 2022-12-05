@@ -13,6 +13,9 @@ from tensorboard_logger import TensorBoardLogger
 from batch_data import BatchData
 
 
+debug_mode = False
+
+
 class AnalysisManager:
     def __init__(self, args):
         self._train_only: bool = True
@@ -48,6 +51,14 @@ class AnalysisManager:
                 raise ValueError
 
     @staticmethod
+    def _validate_classification_dataloader():
+        pass
+
+    @staticmethod
+    def _validate_detection_dataloader():
+        pass
+
+    @staticmethod
     def _validate_segmentation_dataloader(dataloader):
         images, labels = next(iter(dataloader))
 
@@ -67,6 +78,10 @@ class AnalysisManager:
     def _validate_dataloader(self, dataloader):
         if self._task == 'semantic-segmentation':
             self._validate_segmentation_dataloader(dataloader)
+        elif self._task == 'object-detection':
+            self._validate_detection_dataloader()
+        elif self._task == 'classification':
+            self._validate_classification_dataloader()
         else:
             raise NotImplementedError(f"Task {self._task} is not implemented!")
 
@@ -74,10 +89,10 @@ class AnalysisManager:
     def _preprocess(images, labels) -> BatchData:
         onehot_labels = [onehot.get_onehot(label) for label in labels]
 
-        # Debug purposes
-        # for label, image in zip(onehot_labels, images):
-        #     temp = contours.get_contours(label, image)
-        #     break
+        if debug_mode:
+            for label, image in zip(onehot_labels, images):
+                temp = contours.get_contours(label, image)
+                break
 
         onehot_contours = [contours.get_contours(onehot_label) for onehot_label in onehot_labels]
 
@@ -102,9 +117,6 @@ class AnalysisManager:
         return iterable
 
     def execute(self, train_dataloader: DataLoader, val_dataloader: Optional[DataLoader] = None):
-        # Debugging
-        debug_mode = False
-
         # Validate dataloader
         train_iter = self._get_iter(train_dataloader)
         if val_dataloader is not None:
