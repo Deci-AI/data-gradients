@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 
 import preprocessing.contours
-from batch_data import BatchData
+from utils.data_classes import BatchData
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from logger.logger_utils import create_bar_plot
 

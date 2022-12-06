@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from batch_data import BatchData
+from utils.data_classes import BatchData
 
 
 class FeatureExtractorAbstract(ABC):

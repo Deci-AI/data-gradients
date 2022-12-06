@@ -1,18 +1,16 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Callable, Iterable, Iterator
+from typing import List, Optional, Iterator
 
 import yaml
 import tqdm
 from matplotlib import pyplot as plt
-from torch.utils.data import DataLoader
 
 from data_validator.validator_abstract import ValidatorAbstract
 from feature_extractors import FEATURE_EXTRACTORS, FeatureExtractorAbstract
 from preprocess.preprocessor_abstract import PreprocessorAbstract
-from preprocessing import contours, onehot
 from logger.tensorboard_logger import TensorBoardLogger
-from batch_data import BatchData
+from utils.data_classes import BatchData
 
 
 debug_mode = True

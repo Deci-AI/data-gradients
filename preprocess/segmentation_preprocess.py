@@ -1,4 +1,4 @@
-from batch_data import BatchData
+from utils.data_classes import BatchData
 from preprocess.preprocessor_abstract import PreprocessorAbstract
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 
 import preprocessing
-from batch_data import BatchData
+from utils.data_classes import BatchData
 from data_loaders.get_torch_loaders import sbd_label_to_class
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from logger.logger_utils import create_bar_plot
