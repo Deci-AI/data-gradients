@@ -11,7 +11,7 @@ class ValidatorAbstract:
 
     @staticmethod
     def get_validator(task):
-        return ValidatorAbstract.VALIDATORS[task]
+        return ValidatorAbstract.VALIDATORS[task]()
 
     @abstractmethod
     def validate(self, dataloader):
