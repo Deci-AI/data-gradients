@@ -3,11 +3,11 @@ import numpy as np
 import preprocessing
 from batch_data import BatchData
 from data_loaders.get_torch_loaders import sbd_label_to_class
-from feature_extractors import FeatureExtractorBuilder
+from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from tensorboard_logger import create_bar_plot
 
 
-class SegmentationGetClassDistribution(FeatureExtractorBuilder):
+class SegmentationGetClassDistribution(SegmentationFeatureExtractorAbstract):
     def __init__(self, train_set, number_of_classes):
         super().__init__(train_set)
         self._hist = [0] * number_of_classes

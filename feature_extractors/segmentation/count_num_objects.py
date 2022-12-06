@@ -3,11 +3,11 @@ from typing import List
 import numpy as np
 
 from batch_data import BatchData
-from feature_extractors import FeatureExtractorBuilder
+from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from tensorboard_logger import create_bar_plot
 
 
-class SegmentationCountNumObjects(FeatureExtractorBuilder):
+class SegmentationCountNumObjects(SegmentationFeatureExtractorAbstract):
     def __init__(self, train_set, params):
         super().__init__(train_set)
         self._thresh = params['max_number_of_objects']

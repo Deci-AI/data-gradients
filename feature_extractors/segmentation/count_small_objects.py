@@ -3,11 +3,11 @@ import numpy as np
 
 import preprocessing.contours
 from batch_data import BatchData
-from feature_extractors.feature_extractor_abstract import FeatureExtractorBuilder
+from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from tensorboard_logger import create_bar_plot
 
 
-class SegmentationCountSmallObjects(FeatureExtractorBuilder):
+class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
     def __init__(self, train_set, params):
         super().__init__(train_set)
         # TODO: Do params validation before running program

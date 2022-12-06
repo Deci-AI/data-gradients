@@ -1,12 +1,13 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from batch_data import BatchData
+from feature_extractors import FeatureExtractorBuilder
 
 
-class FeatureExtractorBuilder(ABC):
+class SegmentationFeatureExtractorAbstract(FeatureExtractorBuilder):
 
     def __init__(self, train_set: bool):
-        self.train_set: bool = train_set
+        super().__init__(train_set)
 
     @abstractmethod
     def execute(self, data: BatchData):
