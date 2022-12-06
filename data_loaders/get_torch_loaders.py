@@ -1,6 +1,7 @@
+from typing import Tuple, Optional
+
 import torchvision.transforms
-from torchvision import datasets, transforms
-from torchvision.datasets import Cityscapes, Kitti, VOCSegmentation
+from torchvision import datasets
 from torchvision.transforms import ToTensor, CenterCrop
 from torch.utils.data import DataLoader
 
@@ -49,7 +50,7 @@ class DataLoaders:
         val_dataloader = self._dataset_to_dataloader(val)
         return train_dataloader, val_dataloader
 
-    def get_dataloader(self, dataset: str):
+    def get_dataloader(self, dataset: str) -> Tuple[DataLoader, Optional[DataLoader]]:
         if dataset == "sbd":
             return self.sbd()
 

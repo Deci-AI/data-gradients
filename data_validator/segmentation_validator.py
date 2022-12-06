@@ -1,3 +1,5 @@
+from typing import Iterable, Iterator
+
 from data_validator.validator_abstract import ValidatorAbstract
 
 
@@ -5,14 +7,15 @@ class SegmentationValidator(ValidatorAbstract):
     def __init__(self):
         super().__init__()
 
-    def validate(self, dataloader):
-        images, labels = next(iter(dataloader))
+    def validate(self, data_iterator: Iterator):
+        images, labels = next(data_iterator)
         if images.dim() != 4:
             raise ValueError(f"Images batch shape should be (BatchSize x Channels x Width x Height). Got {images.shape}")
         if labels.dim() != 4:
             raise ValueError(f"Labels batch shape should be (BatchSize x Channels x Width x Height). Got {labels.shape}")
         if images[0].shape[0] != self._number_of_channels and images[0].shape[-1] != self._number_of_channels:
             raise ValueError(f"Images should have {self._number_of_channels} number of channels. Got {min(images[0].shape)}")
+
         self._images_channels_last = images[0].shape[0] != self._number_of_channels
         image_shape = images[0].shape[:2] if self._images_channels_last else images[0].shape[1:]
         labels_shape = labels[0].shape

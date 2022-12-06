@@ -1,6 +1,6 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Callable, Iterable
+from typing import List, Optional, Callable, Iterable, Iterator
 
 import yaml
 import tqdm
@@ -19,29 +19,24 @@ debug_mode = True
 
 
 class AnalysisManager:
-    def __init__(self, args, train_dataloader: DataLoader, val_dataloader: Optional[DataLoader] = None):
+    def __init__(self, args, train_data_iterator: Iterator, val_data_iterator: Optional[Iterator] = None):
         self._train_extractors: List[FeatureExtractorAbstract] = []
         self._val_extractors:   List[FeatureExtractorAbstract] = []
-        self._task: str = args.task
-        self._yaml_path: str = args.yaml_path
-
         self._threads = ThreadPoolExecutor()
 
+        # Users Data Iterators
+        self._train_only: bool = val_data_iterator is None
+        self._train_iter: Iterator = train_data_iterator
+        self._val_iter: Iterator = val_data_iterator
+
+        # Logger
         self._logger = TensorBoardLogger()
 
-        # TODO: Will be edited by validator?
-        self.reformat: Optional[Callable] = None
+        # Task Data Validator
+        self._validator: ValidatorAbstract = ValidatorAbstract.get_validator(args.task)
 
-        # TODO: Yes?..
-        self._length_data = len(train_dataloader)
-
-        self._validator = ValidatorAbstract.get_validator(self._task)
-        self._train_only: bool = val_dataloader is None
-        self._train_iter = self._get_iter(train_dataloader)
-        self._val_iter = self._get_iter(val_dataloader)
-
-        self._images_channels_last: bool = False
-        self._preprocessor: PreprocessorAbstract = PreprocessorAbstract.get_preprocessor(self._task)
+        # Task Data Preprocessor
+        self._preprocessor: PreprocessorAbstract = PreprocessorAbstract.get_preprocessor(args.task)
 
     def _get_feature_extractors(self, task: str) -> List:
         with open(self._yaml_path, "r") as stream:
@@ -67,17 +62,15 @@ class AnalysisManager:
             else:
                 raise ValueError
 
+    def validate_data_iterables(self):
+        self._validator.validate(self._train_iter)
+        if not self._train_only:
+            self._validator.validate(self._val_iter)
+
     def _get_batch(self, dataloader) -> BatchData:
         images, labels = next(dataloader)
         bd = self._preprocessor.preprocess(images, labels)
         return bd
-
-    def _get_iter(self, dataloader) -> Optional[Iterable]:
-        if dataloader is None:
-            return None
-        # TODO: Validate here? get iter is necessary?
-        self._validator.validate(dataloader)
-        return iter(dataloader)
 
     def execute(self):
         # TODO: Maybe I do not need length?
@@ -130,6 +123,7 @@ class AnalysisManager:
 
     def run(self):
         self.build()
+        self.validate_data_iterables()
         self.execute()
         self.post_process()
         self.close()
