@@ -4,10 +4,10 @@ import numpy as np
 import torch
 import torchvision
 
-from feature_extractors import FeatureExtractorBuilder
+from feature_extractors import FeatureExtractorAbstract
 
 
-class AverageContrast(FeatureExtractorBuilder):
+class AverageContrast(FeatureExtractorAbstract):
     def __init__(self, train_set):
         super().__init__(train_set)
         self._grayscale: bool = True

@@ -1,7 +1,7 @@
-from feature_extractors import FeatureExtractorBuilder
+from feature_extractors import FeatureExtractorAbstract
 
 
-class ImagesResolutions(FeatureExtractorBuilder):
+class ImagesResolutions(FeatureExtractorAbstract):
     def __init__(self, train_set):
         super().__init__(train_set)
         self._res_dict = dict()

@@ -1,9 +1,9 @@
 from batch_data import BatchData
-from feature_extractors import FeatureExtractorBuilder
+from feature_extractors import FeatureExtractorAbstract
 from tensorboard_logger import create_bar_plot
 
 
-class NumberOfImagesLabels(FeatureExtractorBuilder):
+class NumberOfImagesLabels(FeatureExtractorAbstract):
     def __init__(self, train_set):
         super().__init__(train_set)
         self._num_images: int = 0

@@ -3,10 +3,10 @@ from typing import List
 import numpy as np
 import torch
 
-from feature_extractors import FeatureExtractorBuilder
+from feature_extractors import FeatureExtractorAbstract
 
 
-class AverageBrightness(FeatureExtractorBuilder):
+class AverageBrightness(FeatureExtractorAbstract):
     def __init__(self, train_set):
         super().__init__(train_set)
         self._brightness: List[float] = []

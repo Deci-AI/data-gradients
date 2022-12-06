@@ -1,10 +1,10 @@
 from abc import abstractmethod
 
 from batch_data import BatchData
-from feature_extractors import FeatureExtractorBuilder
+from feature_extractors import FeatureExtractorAbstract
 
 
-class SegmentationFeatureExtractorAbstract(FeatureExtractorBuilder):
+class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
 
     def __init__(self, train_set: bool):
         super().__init__(train_set)

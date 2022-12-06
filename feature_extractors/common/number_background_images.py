@@ -1,8 +1,8 @@
 import torch
-from feature_extractors.feature_extractor_abstract import FeatureExtractorBuilder
+from feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 
 
-class NumberOfBackgroundImages(FeatureExtractorBuilder):
+class NumberOfBackgroundImages(FeatureExtractorAbstract):
     def __init__(self, train_set):
         super().__init__(train_set)
         self._background_counter: int = 0

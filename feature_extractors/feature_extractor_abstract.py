@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from batch_data import BatchData
 
 
-class FeatureExtractorBuilder(ABC):
+class FeatureExtractorAbstract(ABC):
 
     def __init__(self, train_set: bool):
         self.train_set: bool = train_set
