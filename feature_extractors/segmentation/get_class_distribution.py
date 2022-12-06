@@ -4,7 +4,7 @@ import preprocessing
 from batch_data import BatchData
 from data_loaders.get_torch_loaders import sbd_label_to_class
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from tensorboard_logger import create_bar_plot
+from logger.logger_utils import create_bar_plot
 
 
 class SegmentationGetClassDistribution(SegmentationFeatureExtractorAbstract):

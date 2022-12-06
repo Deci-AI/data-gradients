@@ -4,7 +4,7 @@ import numpy as np
 import preprocessing.contours
 from batch_data import BatchData
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from tensorboard_logger import create_bar_plot
+from logger.logger_utils import create_bar_plot
 
 
 class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
@@ -15,6 +15,7 @@ class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
 
         min_pixels: int = int(512 * 512 / (params['percent_of_an_image'] * 100))
         self.bins = np.array(range(0, min_pixels, int(min_pixels / 10)))
+        # TODO: Magic number
         self._hist: List[int] = [0] * 11
 
     def execute(self, data: BatchData):

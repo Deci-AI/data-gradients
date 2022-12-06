@@ -4,7 +4,7 @@ import numpy as np
 
 from batch_data import BatchData
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from tensorboard_logger import create_bar_plot
+from logger.logger_utils import create_bar_plot
 
 
 class SegmentationCountNumObjects(SegmentationFeatureExtractorAbstract):
