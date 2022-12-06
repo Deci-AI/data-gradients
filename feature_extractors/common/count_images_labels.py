@@ -16,4 +16,4 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
     def process(self, ax):
         create_bar_plot(ax=ax, data=[self._num_images, self._num_labels], labels=["images", "labels"],
                         y_label='Total #', title='# Images & Labels', train=self.train_set,
-                        ticks_rotation=0)
+                        ticks_rotation=0, color=self.colors[int(self.train_set)])

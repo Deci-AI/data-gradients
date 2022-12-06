@@ -33,6 +33,6 @@ class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
 
         create_bar_plot(ax, self._hist, label,
                         x_label="Object Size [%]", y_label="# Objects", ticks_rotation=0,
-                        title="Number of small objects", train=self.train_set)
+                        title="Number of small objects", train=self.train_set, color=self.colors[int(self.train_set)])
 
         ax.grid(visible=True, axis='y')

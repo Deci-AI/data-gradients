@@ -26,7 +26,7 @@ class SegmentationGetClassDistribution(SegmentationFeatureExtractorAbstract):
         self._hist = np.array(self._hist) / sum(self._hist)
         # TODO: Colors into base-class-dict
         create_bar_plot(ax, self._hist, labels, x_label="Class", y_label="# Class instances",
-                        title="Classes distribution", train=self.train_set)
+                        title="Classes distribution", train=self.train_set, color=self.colors[int(self.train_set)])
 
         ax.grid(visible=True)
 

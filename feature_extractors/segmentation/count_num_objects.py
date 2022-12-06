@@ -26,6 +26,6 @@ class SegmentationCountNumObjects(SegmentationFeatureExtractorAbstract):
         # TODO: Fix hard coded labels number
         labels = ['BG image', '1', '2', '3', '4', '5', '6', '7', '8', '9+']
         create_bar_plot(ax, hist, labels, x_label="# Objects in image", y_label="# Of images",
-                        title="# Objects per image", train=self.train_set)
+                        title="# Objects per image", train=self.train_set, color=self.colors[int(self.train_set)])
 
         ax.grid(visible=True, axis='y')
