@@ -30,9 +30,6 @@ class AnalysisManager:
         # Logger
         self._logger = TensorBoardLogger()
 
-        # Task Data Validator
-        self._validator: ValidatorAbstract = ValidatorAbstract.get_validator(args.task)
-
         # Task Data Preprocessor
         self._preprocessor: PreprocessorAbstract = PreprocessorAbstract.get_preprocessor(cfg.task)
         self._preprocessor.number_of_classes = cfg.number_of_classes
@@ -44,23 +41,22 @@ class AnalysisManager:
         cfg = hydra.utils.instantiate(self.cfg)
         self._val_extractors = cfg.common + cfg[cfg.task]
 
-    def validate_data_iterables(self):
-        self._validator.validate(self._train_iter)
-        if not self._train_only:
-            self._validator.validate(self._val_iter)
-
-    def _get_batch(self, dataloader) -> BatchData:
-        images, labels = next(dataloader)
+    def _get_batch(self, data_iterator) -> BatchData:
+        images, labels = next(data_iterator)
+        images, labels = self._preprocessor.validate(images, labels)
         bd = self._preprocessor.preprocess(images, labels)
         return bd
 
     def execute(self):
-        # TODO: Maybe I do not need length?
-        for train_batch in tqdm.trange(self._length_data):
+        train_batch = 0
+        while True:
+            print(f'Processing train batch {train_batch}...', flush=True)
             if train_batch > 3 and debug_mode:
-                continue
-
-            batch_data = self._get_batch(self._train_iter)
+                break
+            try:
+                batch_data = self._get_batch(self._train_iter)
+            except StopIteration:
+                break
 
             for extractor in self._train_extractors:
                 if not debug_mode:
@@ -85,6 +81,7 @@ class AnalysisManager:
             if not debug_mode:
                 # Wait for all threads to finish
                 concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+            train_batch += 1
 
     def post_process(self):
         for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
@@ -105,7 +102,6 @@ class AnalysisManager:
 
     def run(self):
         self.build()
-        self.validate_data_iterables()
         self.execute()
         self.post_process()
         self.close()
