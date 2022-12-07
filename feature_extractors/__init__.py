@@ -1,5 +1,5 @@
-from segmentation import *
-from common import *
+from feature_extractors.segmentation import *
+from feature_extractors.common import *
 
 FEATURE_EXTRACTORS = {
     "SegmentationCountNumObjects": SegmentationCountNumObjects,
