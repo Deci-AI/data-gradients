@@ -1,9 +1,9 @@
-from feature_extractors import FeatureExtractorAbstract
+from feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 
 
 class ImagesAspectRatios(FeatureExtractorAbstract):
-    def __init__(self, train_set):
-        super().__init__(train_set)
+    def __init__(self):
+        super().__init__()
         self._ar_dict = dict()
         self._channels_last = False
 
@@ -16,7 +16,7 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
             else:
                 self._ar_dict[ar] += 1
 
-    def process(self, ax):
+    def process(self, ax, train):
         pass
         # print('Aspect ratio dict: ', self._ar_dict)
 

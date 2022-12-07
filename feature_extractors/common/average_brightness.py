@@ -3,12 +3,12 @@ from typing import List
 import numpy as np
 import torch
 
-from feature_extractors import FeatureExtractorAbstract
+from feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 
 
 class AverageBrightness(FeatureExtractorAbstract):
-    def __init__(self, train_set):
-        super().__init__(train_set)
+    def __init__(self):
+        super().__init__()
         self._brightness: List[float] = []
         self._luminance: List[float] = []
 
@@ -17,7 +17,7 @@ class AverageBrightness(FeatureExtractorAbstract):
             self._brightness.append(np.round(torch.sum(image) / 3 / (image.shape[1] * image.shape[2]), 5))
             # self._luminance.append((0.2126 * image[0]) + (0.7152 * image[1]) + (0.0722 * image[2]))
 
-    def process(self, ax):
+    def process(self, ax, train):
         pass
         # print('Average brightness: {}'.format(np.mean(self._brightness)))  #, np.mean(self._luminance)))
 

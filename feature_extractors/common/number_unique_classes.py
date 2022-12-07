@@ -1,9 +1,9 @@
-from feature_extractors import FeatureExtractorAbstract
+from feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 
 
 class NumberOfUniqueClasses(FeatureExtractorAbstract):
-    def __init__(self, train_set):
-        super().__init__(train_set)
+    def __init__(self):
+        super().__init__()
         self._unique_classes = set()
 
     def execute(self, data):
@@ -11,7 +11,7 @@ class NumberOfUniqueClasses(FeatureExtractorAbstract):
             for val in label.unique():
                 self._unique_classes.add(val.item())
 
-    def process(self, ax):
+    def process(self, ax, train):
         pass
         # print('Number of unique classes: ', len(self._unique_classes))
 

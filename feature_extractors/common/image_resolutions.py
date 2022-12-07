@@ -1,9 +1,9 @@
-from feature_extractors import FeatureExtractorAbstract
+from feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 
 
 class ImagesResolutions(FeatureExtractorAbstract):
-    def __init__(self, train_set):
-        super().__init__(train_set)
+    def __init__(self):
+        super().__init__()
         self._res_dict = dict()
         self._channels_last = False
 
@@ -15,7 +15,7 @@ class ImagesResolutions(FeatureExtractorAbstract):
             else:
                 self._res_dict[res] += 1
 
-    def process(self, ax):
+    def process(self, ax, train):
         pass
         # print('Resolutions dict: ', self._res_dict)
 

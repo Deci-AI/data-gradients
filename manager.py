@@ -2,12 +2,10 @@ import concurrent
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Iterator
 
-import yaml
-import tqdm
+import hydra
 from matplotlib import pyplot as plt
 
-from data_validator.validator_abstract import ValidatorAbstract
-from feature_extractors import FEATURE_EXTRACTORS, FeatureExtractorAbstract
+from feature_extractors import FeatureExtractorAbstract
 from preprocess.preprocessor_abstract import PreprocessorAbstract
 from logger.tensorboard_logger import TensorBoardLogger
 from utils.data_classes import BatchData
@@ -17,10 +15,12 @@ debug_mode = True
 
 
 class AnalysisManager:
-    def __init__(self, args, train_data_iterator: Iterator, val_data_iterator: Optional[Iterator] = None):
+    def __init__(self, cfg, train_data_iterator: Iterator, val_data_iterator: Optional[Iterator] = None):
         self._train_extractors: List[FeatureExtractorAbstract] = []
         self._val_extractors:   List[FeatureExtractorAbstract] = []
         self._threads = ThreadPoolExecutor()
+
+        self.cfg = cfg
 
         # Users Data Iterators
         self._train_only: bool = val_data_iterator is None
@@ -34,31 +34,15 @@ class AnalysisManager:
         self._validator: ValidatorAbstract = ValidatorAbstract.get_validator(args.task)
 
         # Task Data Preprocessor
-        self._preprocessor: PreprocessorAbstract = PreprocessorAbstract.get_preprocessor(args.task)
-
-    def _get_feature_extractors(self, task: str) -> List:
-        with open(self._yaml_path, "r") as stream:
-            try:
-                for key, value in yaml.safe_load(stream).items():
-                    if key == task:
-                        return value
-            except yaml.YAMLError as exc:
-                raise exc
-        raise ValueError(f"Did not find right task, arg is {task} and couldn't find it in yaml")
+        self._preprocessor: PreprocessorAbstract = PreprocessorAbstract.get_preprocessor(cfg.task)
+        self._preprocessor.number_of_classes = cfg.number_of_classes
+        self._preprocessor.ignore_labels = cfg.ignore_labels
 
     def build(self):
-        # TODO: Might fold into hydra |  red  down there train_set
-        fe_list = self._get_feature_extractors(self._task) + self._get_feature_extractors('general')
-        for fe in fe_list:
-            if isinstance(fe, str):
-                self._train_extractors += [FEATURE_EXTRACTORS[fe](train_set=True)]
-                self._val_extractors += [FEATURE_EXTRACTORS[fe](train_set=False)]
-            elif isinstance(fe, dict):
-                fe, params = next(iter(fe.items()))
-                self._train_extractors += [FEATURE_EXTRACTORS[fe](True, **params)]
-                self._val_extractors += [FEATURE_EXTRACTORS[fe](False, **params)]
-            else:
-                raise ValueError
+        cfg = hydra.utils.instantiate(self.cfg)
+        self._train_extractors = cfg.common + cfg[cfg.task]
+        cfg = hydra.utils.instantiate(self.cfg)
+        self._val_extractors = cfg.common + cfg[cfg.task]
 
     def validate_data_iterables(self):
         self._validator.validate(self._train_iter)
@@ -108,9 +92,9 @@ class AnalysisManager:
 
             # First val - because graph params will be overwritten by latest (train) and we want it's params
             if not self._train_only:
-                val_extractor.process(ax)
+                val_extractor.process(ax, train=False)
 
-            train_extractor.process(ax)
+            train_extractor.process(ax, train=True)
 
             fig.tight_layout()
 

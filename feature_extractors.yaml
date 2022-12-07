@@ -1,17 +1,17 @@
-general:
-  - NumberOfImagesLabels
-#  - NumberOfUniqueClasses
-#  - ImagesResolutions
-#  - ImagesAspectRatios
-#  - AverageBrightness
-#  - AverageContrast
-#  - NumberOfBackgroundImages
+# User fill
+task: semantic_segmentation
+number_of_classes: 30
+ignore_labels:
 
-semantic-segmentation:
-  - SegmentationCountNumObjects:
-      max_number_of_objects: 10
-  - SegmentationGetClassDistribution:
-      number_of_classes: 2
-  - SegmentationCountSmallObjects:
-      percent_of_an_image: 40
+# dont touch
+common:
+  - _target_: feature_extractors.common.count_images_labels.NumberOfImagesLabels
+
+semantic_segmentation:
+  - _target_: feature_extractors.segmentation.count_num_objects.SegmentationCountNumObjects
+    max_number_of_objects: 9
+  - _target_: feature_extractors.segmentation.get_class_distribution.SegmentationGetClassDistribution
+    number_of_classes: 20
+  - _target_: feature_extractors.segmentation.count_small_objects.SegmentationCountSmallObjects
+    percent_of_an_image: 1
 
