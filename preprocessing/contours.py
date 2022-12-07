@@ -43,6 +43,11 @@ def get_contours(label: torch.Tensor, debug_image=None) -> np.array:
         for i, contours in enumerate(all_onehot_contour):
             color = (0, 0, 255) if i == 0 else ((0, 255, 0) if i == 1 else ((255, 0, 0) if i == 2 else (127, 0, 255)))
             img_contours = cv2.drawContours(img_contours, contours, -1, color, 1)
+            # single_img_contours = np.zeros((512, 512, 3))
+            # single_img_contours = cv2.drawContours(single_img_contours, contours, -1, color, 1)
+            # print(f"Class is: {np.nonzero(np.unique(label[i]))}")
+            # cv2.imshow("single", single_img_contours)
+            # cv2.waitKey(0)
             # for c in contours:
             #     box = self.get_rotated_bounding_rect(c)
             #     img_contours = cv2.drawContours(img_contours, [box], -1, (0, 255, 0), 1)

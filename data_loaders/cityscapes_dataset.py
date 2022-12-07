@@ -5,8 +5,8 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
-class PPHumanSegDataSet(Dataset):
-    CLASS_LABELS = {0: "background", 1: "person"}
+class CityScapesDataSet(Dataset):
+    # CLASS_LABELS = {0: "background", 1: "person"}
 
     def __init__(self, root, image_set, transform=None, target_transform=None):
         self.root = root
@@ -18,7 +18,8 @@ class PPHumanSegDataSet(Dataset):
         return len(self.images_labels)
 
     def __getitem__(self, index):
-        current_line = self.images_labels[index].split(" ")
+        current_line = self.images_labels[index].strip().split("\t")
+
         img_path = os.path.join(self.root, current_line[0].strip())
         label_path = os.path.join(self.root, current_line[1].strip())
         image = Image.open(img_path)
@@ -30,7 +31,7 @@ class PPHumanSegDataSet(Dataset):
         return image, label
 
     def _read_annotations_file(self, image_set) -> List[str]:
-        file = os.path.join(self.root, f"{image_set}.txt")
+        file = os.path.join(self.root, f"lists/{image_set}.lst")
         with open(file) as f:
             lines = f.readlines()
         return lines

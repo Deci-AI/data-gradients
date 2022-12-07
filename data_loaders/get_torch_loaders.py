@@ -5,6 +5,8 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor, CenterCrop
 from torch.utils.data import DataLoader
 
+from data_loaders.bdd_dataset import BDDDataset
+from data_loaders.cityscapes_dataset import CityScapesDataSet
 from data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
 
 
@@ -50,10 +52,34 @@ class DataLoaders:
         val_dataloader = self._dataset_to_dataloader(val)
         return train_dataloader, val_dataloader
 
+    def cityscapes(self):
+        dataset_root = "/Users/tomerkeren/workspace/deci-dataset-analyzer/data/cityscapes"
+        self._batch_size = 16
+        train = CityScapesDataSet(root=dataset_root,
+                                  image_set='train',
+                                  transform=self._transforms)
+        val = CityScapesDataSet(root=dataset_root,
+                                image_set='val',
+                                transform=self._transforms)
+        train_dataloader = self._dataset_to_dataloader(train)
+        val_dataloader = self._dataset_to_dataloader(val)
+        return train_dataloader, val_dataloader
+
+    def bdd(self):
+        dataset_root = "/Users/tomerkeren/workspace/deci-dataset-analyzer/data/bdd100k"
+        train = BDDDataset(data_folder=dataset_root, split='train', transform=self._transforms)
+        val = BDDDataset(data_folder=dataset_root, split='val', transform=self._transforms)
+
+        train_dataloader = self._dataset_to_dataloader(train)
+        val_dataloader = self._dataset_to_dataloader(val)
+        return train_dataloader, val_dataloader
+
     def get_dataloader(self, dataset: str) -> Tuple[DataLoader, Optional[DataLoader]]:
         if dataset == "sbd":
             return self.sbd()
 
+        elif dataset == 'bdd':
+            return self.bdd()
         elif dataset == "kitti":
             raise NotImplementedError
 
@@ -62,6 +88,9 @@ class DataLoaders:
 
         elif dataset == "pp_human":
             return self.pp_human()
+
+        elif dataset == 'cityscapes':
+            return self.cityscapes()
         else:
             raise NotImplementedError
 
