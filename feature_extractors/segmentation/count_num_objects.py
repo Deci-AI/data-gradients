@@ -5,7 +5,7 @@ from feature_extractors.segmentation.segmentation_abstract import SegmentationFe
 from logger.logger_utils import create_bar_plot
 
 
-class SegmentationCountNumObjects(SegmentationFeatureExtractorAbstract):
+class CountNumObjects(SegmentationFeatureExtractorAbstract):
     def __init__(self):
         super().__init__()
         self._number_of_objects_per_image = dict()
