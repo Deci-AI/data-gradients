@@ -12,8 +12,11 @@ common:
   - _target_: feature_extractors.common.count_images_labels.NumberOfImagesLabels
 
 semantic_segmentation:
-  - _target_: feature_extractors.segmentation.count_num_objects.SegmentationCountNumObjects
-  - _target_: feature_extractors.segmentation.get_class_distribution.SegmentationGetClassDistribution
+  - _target_: feature_extractors.segmentation.count_num_objects.CountNumObjects
+  - _target_: feature_extractors.segmentation.get_class_distribution.GetClassDistribution
+    num_classes: ${number_of_classes}
+    ignore_labels: ${ignore_labels}
+  - _target_: feature_extractors.segmentation.pixels_per_class.PixelsPerClass
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
 #  - _target_: feature_extractors.segmentation.count_small_objects.SegmentationCountSmallObjects
