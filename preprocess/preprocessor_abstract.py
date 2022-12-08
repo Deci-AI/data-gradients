@@ -1,5 +1,10 @@
 from abc import ABC, abstractmethod
 
+from PIL.Image import Image
+import numpy as np
+import torch
+from torchvision.transforms import transforms
+
 import preprocess
 from utils.data_classes import BatchData
 
@@ -23,5 +28,12 @@ class PreprocessorAbstract(ABC):
         pass
 
     @staticmethod
-    def channels_last_to_first(tensors):
+    def channels_last_to_first(tensors: torch.Tensor):
         return tensors.permute(0, 3, 1, 2)
+
+    @staticmethod
+    def _to_tensor(objs) -> torch.Tensor:
+        if isinstance(objs, np.ndarray):
+            return torch.from_numpy(objs)
+        elif isinstance(objs, Image):
+            return transforms.ToTensor()(objs)
