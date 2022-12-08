@@ -104,17 +104,17 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     def preprocess(self, images: Tensor, labels: Tensor) -> BatchData:
         labels = self._remove_ignore_labels(labels)
 
-        onehot_labels = [preprocessing.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
+        labels = [preprocessing.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
 
         # if True:
-        #     for label, image in zip(onehot_labels, images):
+        #     for label, image in zip(labels, images):
         #         temp = preprocessing.get_contours(label, image)
         #         break
-        onehot_contours = [preprocessing.get_contours(onehot_label) for onehot_label in labels]
+
+        contours = [preprocessing.get_contours(onehot_label) for onehot_label in labels]
 
         bd = BatchData(images=images,
                        labels=labels,
-                       batch_onehot_contours=onehot_contours,
-                       batch_onehot_labels=onehot_labels)
+                       contours=contours)
 
         return bd
