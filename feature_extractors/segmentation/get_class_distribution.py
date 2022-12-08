@@ -1,5 +1,5 @@
 import numpy as np
-
+from collections import defaultdict
 import preprocessing
 from utils.data_classes import BatchData
 from data_loaders.get_torch_loaders import sbd_label_to_class
@@ -8,28 +8,20 @@ from logger.logger_utils import create_bar_plot
 
 
 class SegmentationGetClassDistribution(SegmentationFeatureExtractorAbstract):
-    def __init__(self, number_of_classes):
+    def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        self._hist = [0] * number_of_classes
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
+        self._hist = dict.fromkeys(keys, 0)
 
     def execute(self, data: BatchData):
-        for i, onehot_contours in enumerate(data.batch_onehot_contours):
-            for cls_contours in onehot_contours:
-                if len(cls_contours) == 0:
-                    break
-                else:
-                    contours_class = preprocessing.contours.get_contour_class(cls_contours[0], data.labels[i])
-                    # TODO: Check why sometimes contours class is 0 (debug mode)
-                    # TODO: NOT WORKING
-                    self._hist[min(contours_class - 1, len(self._hist)-1)] += len(cls_contours)
+        for i, image_contours in enumerate(data.contours):
+            for j, cls_contours in enumerate(image_contours):
+                cls = int(np.delete(np.unique(data.labels[i][j]), 0))
+                self._hist[cls] += len(cls_contours)
 
     def process(self, ax, train):
 
-        d = {self._hist[i]: str(self._hist.index(self._hist[i])) for i, _ in enumerate(self._hist)}
-        labels = [d[self._hist[i]] for i in range(len(self._hist))]
-
-        self._hist = np.array(self._hist) / sum(self._hist)
-        create_bar_plot(ax, self._hist, labels, x_label="Class", y_label="# Class instances",
+        create_bar_plot(ax, self._hist.values(), self._hist.keys(), x_label="Class", y_label="# Class instances",
                         title="Classes distribution", train=train, color=self.colors[int(train)])
 
         ax.grid(visible=True)
