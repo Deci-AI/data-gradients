@@ -7,7 +7,7 @@ from data_loaders.get_torch_loaders import DataLoaders
 
 @hydra.main(version_base=None, config_path=".", config_name='feature_extractors')
 def main(cfg: DictConfig) -> None:
-    train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset='bdd')
+    train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset=cfg.dataset)
     train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
 
     da = AnalysisManager(cfg, train_data_iterator, val_data_iterator)
