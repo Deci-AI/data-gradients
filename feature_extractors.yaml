@@ -1,24 +1,28 @@
 # touch
 task: semantic_segmentation
-ignore_labels: [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
-# [0, 1, 2, 3, 4, 5, 6, 9, 19, 14, 15, 16, 18, 29, 30, -1]
+#  city scapes ignore labels [0, 1, 2, 3, 4, 5, 6, 9, 19, 14, 15, 16, 18, 29, 30, -1]
 # sbd, bdd, pp_human, cityscapes, amat
 # 20,  40,  1,        19
-dataset: cityscapes
-number_of_classes: 19
+dataset: pp_human
+number_of_classes: 1
+ignore_labels: [0] #  [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
 
 # dont touch
 common:
   - _target_: feature_extractors.common.count_images_labels.NumberOfImagesLabels
 
 semantic_segmentation:
-  - _target_: feature_extractors.segmentation.count_num_objects.CountNumObjects
   - _target_: feature_extractors.segmentation.get_class_distribution.GetClassDistribution
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
   - _target_: feature_extractors.segmentation.pixels_per_class.PixelsPerClass
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
+  - _target_: feature_extractors.segmentation.appearances_in_images.AppearancesInImages
+    num_classes: ${number_of_classes}
+    ignore_labels: ${ignore_labels}
+  - _target_: feature_extractors.segmentation.count_num_objects.CountNumObjects
+  - _target_: feature_extractors.segmentation.objects_center_of_mass.ObjectsCenterOfMass
 #  - _target_: feature_extractors.segmentation.count_small_objects.SegmentationCountSmallObjects
 #    percent_of_an_image: 1
 
