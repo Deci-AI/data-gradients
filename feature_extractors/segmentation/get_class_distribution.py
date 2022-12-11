@@ -1,8 +1,6 @@
 import numpy as np
-from collections import defaultdict
-import preprocessing
+
 from utils.data_classes import BatchData
-from data_loaders.get_torch_loaders import sbd_label_to_class
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from logger.logger_utils import create_bar_plot
 
@@ -16,8 +14,10 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
     def execute(self, data: BatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
-                cls = int(np.delete(np.unique(data.labels[i][j]), 0))
-                self._hist[cls] += len(cls_contours)
+                unique = np.unique(data.labels[i][j])
+                if not len(unique) > 1:
+                    continue
+                self._hist[int(np.delete(unique, 0))] += len(cls_contours)
 
     def process(self, ax, train):
 

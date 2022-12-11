@@ -1,5 +1,3 @@
-from typing import List
-
 from utils.data_classes import BatchData
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from logger.logger_utils import create_bar_plot
