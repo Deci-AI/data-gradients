@@ -73,15 +73,15 @@ def get_num_contours(contours: List[np.array]) -> int:
 
 
 def get_contour_area(contour: np.array) -> int:
-    moments = cv2.moments(contour)
-    return int(moments['m00'])
+    area = cv2.contourArea(contour)
+    return int(area)
 
 
 def get_contour_center_of_mass(contour: np.array) -> Tuple[int, int]:
     moments = cv2.moments(contour)
-    area = int(moments['m00'])
+    area = float(moments['m00'])
     if not area > 0:
-        return 0, 0
+        return -1, -1
     cx = int(moments['m10'] / area)
     cy = int(moments['m01'] / area)
     return cx, cy
