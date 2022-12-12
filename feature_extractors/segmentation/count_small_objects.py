@@ -1,7 +1,7 @@
 from typing import List
 import numpy as np
 
-import preprocessing.contours
+import preprocess.contours
 from utils.data_classes import BatchData
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from logger.logger_utils import create_bar_plot
@@ -20,7 +20,7 @@ class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
         for i, onehot_contours in enumerate(data.batch_onehot_contours):
             for cls_contours in onehot_contours:
                 for c in cls_contours:
-                    _, _, contour_area = preprocessing.contours.get_contour_moment(c)
+                    _, _, contour_area = preprocess.contours.get_contour_moment(c)
                     self._hist[np.digitize(contour_area, self.bins) - 1] += 1
 
     def process(self, ax, train):

@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 
 from logger.logger_utils import create_heatmap_plot
-from preprocessing import contours
+from preprocess import contours
 from utils.data_classes import BatchData
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 

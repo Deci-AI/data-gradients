@@ -1,6 +1,6 @@
 import numpy as np
 
-from preprocessing import contours
+from preprocess import contours
 from utils.data_classes import BatchData
 from feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from logger.logger_utils import create_bar_plot
