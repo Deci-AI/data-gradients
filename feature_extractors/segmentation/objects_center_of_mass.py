@@ -17,6 +17,7 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
         self._y: List = []
         self._sigma: float = 0
         self._bins: int = 0
+        self.single_axis = False
 
     def execute(self, data: BatchData):
         for i, image_contours in enumerate(data.contours):
@@ -31,5 +32,6 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
         # TODO: My thumb rules numbers
         self._bins = int(np.sqrt(len(self._x)) * 4)
         self._sigma = 2 * (self._bins / 150)
-        create_heatmap_plot(ax=ax, x=self._x, y=self._y, bins=self._bins, sigma=self._sigma,
+
+        create_heatmap_plot(ax=ax, x=self._x, y=self._y,  train=train, bins=self._bins, sigma=self._sigma,
                             title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')

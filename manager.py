@@ -85,7 +85,10 @@ class AnalysisManager:
 
     def post_process(self):
         for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
-            fig, ax = plt.subplots()
+            if train_extractor.single_axis:
+                fig, ax = plt.subplots(figsize=(10, 5))
+            else:
+                fig, ax = plt.subplots(1, 2, figsize=(10, 5))
 
             # First val - because graph params will be overwritten by latest (train) and we want it's params
             if not self._train_only:
