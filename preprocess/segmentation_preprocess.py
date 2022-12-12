@@ -3,9 +3,8 @@ from typing import List, Optional
 import torch
 from torch import Tensor
 
-import preprocessing
 from utils.data_classes import BatchData
-from preprocess.preprocessor_abstract import PreprocessorAbstract
+from preprocess import PreprocessorAbstract, contours, squeeze_by_class
 
 
 class SegmentationPreprocessor(PreprocessorAbstract):
@@ -104,17 +103,17 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     def preprocess(self, images: Tensor, labels: Tensor) -> BatchData:
         labels = self._remove_ignore_labels(labels)
 
-        labels = [preprocessing.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
+        labels = [squeeze_by_class.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
 
         # if True:
         #     for label, image in zip(labels, images):
         #         temp = preprocessing.get_contours(label, image)
         #         break
 
-        contours = [preprocessing.get_contours(onehot_label) for onehot_label in labels]
+        all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
         bd = BatchData(images=images,
                        labels=labels,
-                       contours=contours)
+                       contours=all_contours)
 
         return bd
