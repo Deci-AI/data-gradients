@@ -11,7 +11,7 @@ from logger.tensorboard_logger import TensorBoardLogger
 from utils.data_classes import BatchData
 
 
-debug_mode = True
+debug_mode = False
 
 
 class AnalysisManager:
@@ -50,20 +50,16 @@ class AnalysisManager:
     def execute(self):
         train_batch = 0
         while True:
-            print(f'Processing train batch {train_batch}...', flush=True)
-            if train_batch > 3 and debug_mode:
+            if train_batch > 1:
                 break
+
             try:
                 batch_data = self._get_batch(self._train_iter)
             except StopIteration:
                 break
-
-            for extractor in self._train_extractors:
-                if not debug_mode:
-                    futures = [self._threads.submit(extractor.execute, batch_data) for extractor in
-                               self._train_extractors]
-                else:
-                    extractor.execute(batch_data)
+            else:
+                futures = [self._threads.submit(extractor.execute, batch_data) for extractor in
+                           self._train_extractors]
 
             if not self._train_only:
                 try:
@@ -71,16 +67,11 @@ class AnalysisManager:
                 except StopIteration:
                     self._train_only = True
                 else:
-                    for extractor in self._val_extractors:
-                        if not debug_mode:
-                            futures += [self._threads.submit(extractor.execute, batch_data) for extractor in
-                                        self._val_extractors]
-                        else:
-                            extractor.execute(batch_data)
+                    futures += [self._threads.submit(extractor.execute, batch_data) for extractor in
+                                self._val_extractors]
 
-            if not debug_mode:
-                # Wait for all threads to finish
-                concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+            # Wait for all threads to finish
+            concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
             train_batch += 1
 
     def post_process(self):
@@ -91,8 +82,7 @@ class AnalysisManager:
                 fig, ax = plt.subplots(1, 2, figsize=(10, 5))
 
             # First val - because graph params will be overwritten by latest (train) and we want it's params
-            if not self._train_only:
-                val_extractor.process(ax, train=False)
+            val_extractor.process(ax, train=False)
 
             train_extractor.process(ax, train=True)
 
