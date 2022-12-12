@@ -20,11 +20,7 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
                 self._hist[int(np.delete(unique, 0))] += len(cls_contours)
 
     def process(self, ax, train):
-
         create_bar_plot(ax, self._hist.values(), self._hist.keys(), x_label="Class", y_label="# Class instances",
                         title="Classes distribution", train=train, color=self.colors[int(train)])
-        if self.single_axis:
-            ax.grid(visible=True)
-        else:
-            ax[int(train)].grid(visible=True)
 
+        ax.grid(visible=True)

@@ -6,8 +6,6 @@ from scipy.ndimage import gaussian_filter
 def create_bar_plot(ax, data, labels, x_label: str = "", y_label: str = "", title: str = "",
                     train: bool = True, width: float = 0.4, ticks_rotation: int = 270,
                     color: str = 'yellow'):
-    if isinstance(ax, np.ndarray):
-        ax = ax[int(train)]
 
     number_of_labels = len(labels)
     ax.bar(x=np.arange(number_of_labels) - (width / 2 if train else -width / 2),
@@ -27,8 +25,6 @@ def create_bar_plot(ax, data, labels, x_label: str = "", y_label: str = "", titl
 
 
 def create_heatmap_plot(ax, x, y, train, bins=50, sigma=2, title="", x_label="", y_label="", use_gaussian_filter: bool=True):
-    if isinstance(ax, np.ndarray):
-        ax = ax[int(train)]
 
     heatmap, xedges, yedges = np.histogram2d(x, y, bins=bins)
     if use_gaussian_filter:

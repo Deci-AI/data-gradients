@@ -38,6 +38,7 @@ class AnalysisManager:
     def build(self):
         cfg = hydra.utils.instantiate(self.cfg)
         self._train_extractors = cfg.common + cfg[cfg.task]
+        # Create another instances for same classes
         cfg = hydra.utils.instantiate(self.cfg)
         self._val_extractors = cfg.common + cfg[cfg.task]
 
@@ -76,15 +77,18 @@ class AnalysisManager:
 
     def post_process(self):
         for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
+            axes = dict()
             if train_extractor.single_axis:
                 fig, ax = plt.subplots(figsize=(10, 5))
+                axes['train'] = axes['val'] = ax
             else:
                 fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+                axes['train'], axes['val'] = ax
 
             # First val - because graph params will be overwritten by latest (train) and we want it's params
-            val_extractor.process(ax, train=False)
+            val_extractor.process(axes['val'], train=False)
 
-            train_extractor.process(ax, train=True)
+            train_extractor.process(axes['train'], train=True)
 
             fig.tight_layout()
 
