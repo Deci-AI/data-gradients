@@ -53,6 +53,19 @@ class AnalysisManager:
     def _get_batch(self, data_iterator) -> BatchData:
         batch = next(data_iterator)
         batch = tuple(batch) if isinstance(batch, list) else batch
+
+        # # TODO: Check dictionaries
+        # images, labels = batch
+        # new_labels_dict = dict()
+        # new_labels_dict['all_labels'] = dict()
+        # new_labels_dict['all_labels']['not_good_torch_labels'] = torch.zeros((1, 1))
+        # new_labels_dict['all_labels']['not_good_np_labels'] = np.zeros_like(labels)
+        # new_labels_dict['all_labels']['good_torch_labels'] = labels
+        # new_labels_dict['something_other_then_labels'] = np.zeros_like(images)
+        # images_dict = dict()
+        # images_dict['only_images'] = images
+        # batch = images_dict, new_labels_dict
+
         images, labels = self._preprocessor.validate(batch)
 
         bd = self._preprocessor.preprocess(images, labels)
@@ -60,12 +73,11 @@ class AnalysisManager:
 
     def execute(self):
         pbar = tqdm.tqdm(desc='Working on batch #')
-
         train_batch = 0
+
         while True:
-            # if train_batch > 5:
-            #     break
-            pbar.update()
+            if train_batch > 2:
+                break
             try:
                 batch_data = self._get_batch(self._train_iter)
             except StopIteration:
@@ -85,6 +97,8 @@ class AnalysisManager:
 
             # Wait for all threads to finish
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+
+            pbar.update()
             train_batch += 1
 
     def post_process(self):

@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Sequence
 
 import torch
 from torch import Tensor
@@ -23,7 +23,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         self._ignore_labels = ignore_labels if ignore_labels is not None else []
 
     def _type_validate(self, objs):
-        if isinstance(objs, tuple):
+        if isinstance(objs, Sequence):
             if len(objs) == 2:
                 images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], 'first')
                 labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], 'second')

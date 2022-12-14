@@ -13,7 +13,7 @@ from data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
 class DataLoaders:
     def __init__(self):
         self._transforms = torchvision.transforms.Compose([ToTensor(), CenterCrop(512)])
-        self._batch_size = 64
+        self._batch_size = 128
 
     def _dataset_to_dataloader(self, dataset):
         return DataLoader(dataset, batch_size=self._batch_size, shuffle=True)
@@ -101,5 +101,5 @@ voc_segmentation = False
 # [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
 # sbd, pp_human, cityscapes, bdd
 # 20,  1,        19,         40
-train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset="sbd")
+train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset="pp_human")
 train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
