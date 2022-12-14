@@ -10,5 +10,6 @@ def main(cfg: DictConfig) -> None:
     da = AnalysisManager(cfg, train_data_iterator, val_data_iterator)
     da.run()
 
+
 if __name__ == '__main__':
     main()
