@@ -43,8 +43,9 @@ class AnalysisManager:
         self._val_extractors = cfg.common + cfg[cfg.task]
 
     def _get_batch(self, data_iterator) -> BatchData:
-        images, labels = next(data_iterator)
-        images, labels = self._preprocessor.validate(images, labels)
+        batch = next(data_iterator)
+        images, labels = self._preprocessor.validate(batch)
+
         bd = self._preprocessor.preprocess(images, labels)
         return bd
 

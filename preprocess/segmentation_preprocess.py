@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import torch
 from torch import Tensor
 
+import preprocess
 from utils.data_classes import BatchData
 from preprocess import PreprocessorAbstract, contours, squeeze_by_class
 
@@ -22,10 +23,19 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         self._ignore_labels = ignore_labels if ignore_labels is not None else []
 
     def _type_validate(self, objs):
-        objs = objs if isinstance(objs, torch.Tensor) else self._to_tensor(objs)
-        return objs
+        if isinstance(objs, tuple):
+            if len(objs) == 2:
+                images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], 'first')
+                labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], 'second')
+            else:
+                raise NotImplementedError
+        elif isinstance(objs, dict):
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
+        return images, labels
 
-    def _dim_validate(self, images, labels):
+    def _dim_validate_images(self, images):
         if images.dim() != 4:
             raise ValueError(
                 f"Images batch shape should be (BatchSize x Channels x Width x Height). Got {images.shape}")
@@ -33,7 +43,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         if images.shape[1] != self._number_of_channels and images.shape[-1] != self._number_of_channels:
             raise ValueError(
                 f"Images should have {self._number_of_channels} number of channels. Got {min(images[0].shape)}")
+        return images
 
+    def _dim_validate_labels(self, labels):
         if labels.dim() == 3:
             # Probably (B, W, H)
             labels = labels.unsqueeze(1)
@@ -41,8 +53,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         if labels.dim() != 4:
             raise ValueError(
                 f"Labels batch shape should be (BatchSize x Channels x Width x Height). Got {labels.shape}")
-
-        return images, labels
+        return labels
 
     @staticmethod
     def _normalize_validate(labels):
@@ -53,16 +64,19 @@ class SegmentationPreprocessor(PreprocessorAbstract):
             raise ValueError("Labels pixel-values should be either floats in [0, 1] or integers in [0, 255]")
         return labels
 
-    def _channels_first_validate(self, images, labels):
-        # B, W, H, C-> B, C, W, H
+    def _channels_first_validate_images(self, images):
         if images.shape[1] != self._number_of_channels:
             images = self.channels_last_to_first(images)
+        return images
+
+    def _channels_first_validate_labels(self, labels):
+        # B, W, H, C-> B, C, W, H
         if labels.shape[1] != self.number_of_classes and labels.shape[1] > 1:
             labels = self.channels_last_to_first(labels)
-        return images, labels
+        return labels
 
     def _pixel_values_validate(self, values):
-        # TODO: All of the below is weird
+        # TODO: All the below is weird
         if not self._onehot:
             if len(values) == self.number_of_classes + 1:
                 # Regular
@@ -74,18 +88,18 @@ class SegmentationPreprocessor(PreprocessorAbstract):
             if len(values) != 2:
                 print(f'Weird, OneHot should have two values only! Got {len(values)} != 2 ({values})')
 
-    def validate(self, images: Optional[Tensor], labels: Optional[Tensor]) -> (Tensor, Tensor):
-        images = self._type_validate(images)
-        labels = self._type_validate(labels)
+    def validate(self, objects: Optional[Tuple]) -> Tuple[Tensor, Tensor]:
+        images, labels = self._type_validate(objects)
 
-        images, labels = self._dim_validate(images, labels)
+        images = self._dim_validate_images(images)
+        labels = self._dim_validate_labels(labels)
+
+        images = self._channels_first_validate_images(images)
+        labels = self._channels_first_validate_labels(labels)
 
         labels = self._normalize_validate(labels)
 
-        images, labels = self._channels_first_validate(images, labels)
-
         self._onehot = labels.shape[1] == self.number_of_classes and self.number_of_classes > 1
-
         self._pixel_values_validate(torch.unique(labels))
 
         return images, labels
@@ -105,10 +119,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         labels = [squeeze_by_class.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
 
-        # if True:
-        #     for label, image in zip(labels, images):
-        #         temp = preprocessing.get_contours(label, image)
-        #         break
+        if False:
+            for label, image in zip(labels, images):
+                temp = preprocess.get_contours(label, image)
 
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
