@@ -8,3 +8,4 @@ torchaudio >= 0.13.0
 omegaconf >= 2.2.3
 numpy >= 1.23.5
 pygments >= 2.13.0
+tqdm >= 4.64.1

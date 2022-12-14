@@ -27,9 +27,9 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
         for cls in self._hist:
             if len(self._hist[cls]):
                 hist[cls] = float(np.mean(self._hist[cls]))
-
-        create_bar_plot(ax, hist.values(), self._hist.keys(),
-                        x_label="Class", y_label="Average # Pixels per object", title="Average Pixels Per Object",
+        hist_vales = np.array(list(hist.values())) / 1000
+        create_bar_plot(ax, hist_vales, self._hist.keys(),
+                        x_label="Class", y_label="Average # Pixels per object [K]", title="Average Pixels Per Object",
                         train=train, color=self.colors[int(train)])
 
         ax.grid(visible=True, axis='y')
