@@ -50,13 +50,6 @@ class AnalysisManager:
         cfg = hydra.utils.instantiate(self.cfg)
         self._val_extractors = cfg.common + cfg[cfg.task]
 
-    def _get_batch(self, data_iterator) -> BatchData:
-        batch = next(data_iterator)
-        images, labels = self._preprocessor.validate(batch)
-
-        bd = self._preprocessor.preprocess(images, labels)
-        return bd
-
     def execute(self):
         datasets = [('train', self._train_iter, self._train_extractors)]
         if not self._train_only:
