@@ -98,58 +98,8 @@ class DataLoaders:
 sbd = True
 kitti = False
 voc_segmentation = False
-
-
-# elif kitti:
-#     def get_only_seg(target):
-#         print(target.keys())
-#         pass
-#
-#
-#     training_data = Kitti(root='data/Kitty',
-#                           download=True,
-#                           train=True,
-#                           transform=torchvision.transforms.Compose([ToTensor(), CenterCrop(512)]))
-#     val_data = Kitti(root='data/Kitty',
-#                      download=True,
-#                      train=False,
-#                      transform=torchvision.transforms.Compose([ToTensor(), CenterCrop(512)]),
-#                      target_transform=get_only_seg)
-
-# elif voc_segmentation:
-#     training_data = VOCSegmentation(root="data/VOC",
-#                                     image_set='train',
-#                                     download=True,
-#                                     transform=torchvision.transforms.Compose([ToTensor(), CenterCrop(512)]))
-#     val_data = VOCSegmentation(root="data/VOC",
-#                                image_set='val',
-#                                download=True,
-#                                transform=torchvision.transforms.Compose([ToTensor(), CenterCrop(512)]))
-# else:
-#     print("No dataset has been chosen")
-#     exit(0)
-#
-
-
-
-sbd_label_to_class = {0: 'aeroplane',
-                      1: 'bicycle',
-                      2: 'bird',
-                      3: 'boat',
-                      4: 'bottle',
-                      5: 'bus',
-                      6: 'car',
-                      7: 'cat',
-                      8: 'chair',
-                      9: 'cow',
-                      10: 'diningtable',
-                      11: 'dog',
-                      12: 'horse',
-                      13: 'motorbike',
-                      14: 'person',
-                      15: 'pottedplant',
-                      16: 'sheep',
-                      17: 'sofa',
-                      18: 'train',
-                      19: 'tvmonitor'
-                      }
+# [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
+# sbd, pp_human, cityscapes, bdd
+# 20,  1,        19,         40
+train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset="sbd")
+train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
