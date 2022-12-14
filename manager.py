@@ -48,6 +48,7 @@ class AnalysisManager:
 
     def _get_batch(self, data_iterator) -> BatchData:
         batch = next(data_iterator)
+        batch = tuple(batch) if isinstance(batch, list) else batch
         images, labels = self._preprocessor.validate(batch)
 
         bd = self._preprocessor.preprocess(images, labels)
