@@ -2,4 +2,5 @@ logs
 .idea
 data
 __pycache__
+outputs
 feature_extractors.yaml
