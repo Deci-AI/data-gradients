@@ -58,33 +58,16 @@ class AnalysisManager:
         return bd
 
     def execute(self):
-        pbar = tqdm.tqdm(desc='Working on batch #')
+        datasets = [('train', self._train_iter, self._train_extractors)]
+        if not self._train_only:
+            datasets.append(('val', self._val_iter, self._val_extractors))
 
-        train_batch = 0
-        while True:
-            # if train_batch > 5:
-            #     break
-            pbar.update()
-            try:
-                batch_data = self._get_batch(self._train_iter)
-            except StopIteration:
-                break
-            else:
-                futures = [self._threads.submit(extractor.execute, batch_data) for extractor in
-                           self._train_extractors]
-
-            if not self._train_only:
-                try:
-                    batch_data = self._get_batch(self._val_iter)
-                except StopIteration:
-                    self._train_only = True
-                else:
-                    futures += [self._threads.submit(extractor.execute, batch_data) for extractor in
-                                self._val_extractors]
-
-            # Wait for all threads to finish
-            concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
-            train_batch += 1
+        for dataset_name, dataset_iterator, feature_extractors in datasets:
+            for batch in tqdm.tqdm(dataset_iterator, desc=f'Working on {dataset_name} dataset'):
+                images, labels = self._preprocessor.validate(batch)
+                bd: BatchData = self._preprocessor.preprocess(images, labels)
+                futures = [self._threads.submit(extractor.execute, bd) for extractor in feature_extractors]
+                concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
 
     def post_process(self):
         for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
