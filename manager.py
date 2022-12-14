@@ -49,11 +49,13 @@ class AnalysisManager:
         return bd
 
     def execute(self):
+        pbar = tqdm.tqdm(desc='Working on batch #')
+
         train_batch = 0
         while True:
-            if train_batch > 1:
-                break
-
+            # if train_batch > 5:
+            #     break
+            pbar.update()
             try:
                 batch_data = self._get_batch(self._train_iter)
             except StopIteration:
