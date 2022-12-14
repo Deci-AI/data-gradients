@@ -15,7 +15,7 @@ debug_mode = False
 
 
 class AnalysisManager:
-    def __init__(self, cfg, train_data_iterator: Iterator, val_data_iterator: Optional[Iterator] = None):
+    def __init__(self, cfg, train_data_iterator: Iterable, val_data_iterator: Optional[Iterator] = None):
         self._train_extractors: List[FeatureExtractorAbstract] = []
         self._val_extractors:   List[FeatureExtractorAbstract] = []
         self._threads = ThreadPoolExecutor()
@@ -24,8 +24,8 @@ class AnalysisManager:
 
         # Users Data Iterators
         self._train_only: bool = val_data_iterator is None
-        self._train_iter: Iterator = train_data_iterator
-        self._val_iter: Iterator = val_data_iterator
+        self._train_iter: Iterator = train_data_iterator if isinstance(train_data_iterator, Iterator) else iter(train_data_iterator)
+        self._val_iter: Iterator = train_data_iterator if isinstance(train_data_iterator, Iterator) else iter(train_data_iterator)
 
         # Logger
         self._logger = TensorBoardLogger()
