@@ -1,8 +1,12 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Iterator
+from typing import List, Optional, Iterator, Iterable
 
 import hydra
+import numpy as np
+import torch
+import tqdm
+
 from matplotlib import pyplot as plt
 
 from feature_extractors import FeatureExtractorAbstract
