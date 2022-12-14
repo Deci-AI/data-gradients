@@ -1,8 +1,9 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Iterator
+from typing import List, Optional, Iterator, Iterable, Union
 
 import hydra
+import tqdm
 from matplotlib import pyplot as plt
 
 from feature_extractors import FeatureExtractorAbstract
@@ -10,22 +11,27 @@ from preprocess.preprocessor_abstract import PreprocessorAbstract
 from logger.tensorboard_logger import TensorBoardLogger
 from utils.data_classes import BatchData
 
-
 debug_mode = False
 
 
 class AnalysisManager:
-    def __init__(self, cfg, train_data_iterator: Iterable, val_data_iterator: Optional[Iterator] = None):
+    def __init__(self, cfg,
+                 train_data: Union[Iterable, Iterator],
+                 val_data: Optional[Union[Iterable, Iterator]] = None):
         self._train_extractors: List[FeatureExtractorAbstract] = []
-        self._val_extractors:   List[FeatureExtractorAbstract] = []
+        self._val_extractors: List[FeatureExtractorAbstract] = []
         self._threads = ThreadPoolExecutor()
 
         self.cfg = cfg
 
         # Users Data Iterators
-        self._train_only: bool = val_data_iterator is None
-        self._train_iter: Iterator = train_data_iterator if isinstance(train_data_iterator, Iterator) else iter(train_data_iterator)
-        self._val_iter: Iterator = train_data_iterator if isinstance(train_data_iterator, Iterator) else iter(train_data_iterator)
+        self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
+        if val_data is not None:
+            self._train_only = False
+            self._val_iter: Iterator = val_data if isinstance(train_data, Iterator) else iter(train_data)
+        else:
+            self._train_only = True
+            self._val_iter = None
 
         # Logger
         self._logger = TensorBoardLogger()
