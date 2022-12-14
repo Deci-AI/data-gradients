@@ -22,7 +22,7 @@ train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_datalo
 import hydra
 from omegaconf import DictConfig
 
-from manager import AnalysisManager
+from src.manager import AnalysisManager
 from data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator
 
 
