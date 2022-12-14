@@ -4,6 +4,8 @@ from typing import List, Optional, Iterator, Iterable, Union
 
 import hydra
 import tqdm
+import numpy as np
+import torch
 from matplotlib import pyplot as plt
 
 from feature_extractors import FeatureExtractorAbstract
