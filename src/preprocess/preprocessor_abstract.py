@@ -16,10 +16,6 @@ class PreprocessorAbstract(ABC):
         self._number_of_channels: int = 3
         self._container_mapper = {"first": None, "second": None}
 
-    @staticmethod
-    def get_preprocessor(task):
-        return preprocess.PREPROCESSORS[task]()
-
     @abstractmethod
     def validate(self, objects):
         pass
