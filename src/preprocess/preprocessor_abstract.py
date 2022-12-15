@@ -11,8 +11,8 @@ from src.utils import BatchData
 
 class PreprocessorAbstract(ABC):
 
-    def __init__(self):
-        self.number_of_classes: int = 0
+    def __init__(self, num_classes=0):
+        self.number_of_classes: int = num_classes
         self._number_of_channels: int = 3
         self._container_mapper = {"first": None, "second": None}
 

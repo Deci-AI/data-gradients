@@ -1,8 +1,9 @@
-from abc import abstractmethod
+import concurrent
 from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, Optional, Union, List
 
 import hydra
+import tqdm
 from matplotlib import pyplot as plt
 
 from src.feature_extractors import FeatureExtractorAbstract
@@ -13,7 +14,8 @@ from src.utils import BatchData
 
 class AnalysisManagerAbstract:
     def __init__(self, train_data: Union[Iterable, Iterator],
-                 val_data: Optional[Union[Iterable, Iterator]] = None):
+                 val_data: Optional[Union[Iterable, Iterator]],
+                 task: str):
 
         self._train_extractors: List[FeatureExtractorAbstract] = []
         self._val_extractors: List[FeatureExtractorAbstract] = []
@@ -31,9 +33,11 @@ class AnalysisManagerAbstract:
 
         # Logger
         self._logger = TensorBoardLogger()
+
         self._preprocessor: PreprocessorAbstract = Optional[None]
         self._cfg = None
-        self._task = ""
+
+        self._task = task
 
     def build(self):
         cfg = hydra.utils.instantiate(self._cfg)
@@ -51,9 +55,35 @@ class AnalysisManagerAbstract:
         bd = self._preprocessor.preprocess(images, labels)
         return bd
 
-    @abstractmethod
     def execute(self):
-        pass
+        pbar = tqdm.tqdm(desc='Working on batch #')
+        train_batch = 0
+
+        while True:
+            if train_batch > 3:
+                break
+            try:
+                batch_data = self._get_batch(self._train_iter)
+            except StopIteration:
+                break
+            else:
+                futures = [self._threads.submit(extractor.execute, batch_data) for extractor in
+                           self._train_extractors]
+
+            if not self._train_only:
+                try:
+                    batch_data = self._get_batch(self._val_iter)
+                except StopIteration:
+                    self._train_only = True
+                else:
+                    futures += [self._threads.submit(extractor.execute, batch_data) for extractor in
+                                self._val_extractors]
+
+            # Wait for all threads to finish
+            concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+
+            pbar.update()
+            train_batch += 1
 
     def post_process(self):
         for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
