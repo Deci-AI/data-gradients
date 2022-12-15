@@ -41,6 +41,10 @@ class AnalysisManager:
         self._preprocessor.number_of_classes = cfg.number_of_classes
         self._preprocessor.ignore_labels = cfg.ignore_labels
 
+    def _parse_cfg(self):
+        with hydra.initialize_config_dir(config_dir="", version_base=None):
+            self._cfg = hydra.compose(config_name="")
+
     def build(self):
         cfg = hydra.utils.instantiate(self.cfg)
         self._train_extractors = cfg.common + cfg[cfg.task]
