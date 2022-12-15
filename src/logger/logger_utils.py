@@ -5,7 +5,7 @@ from scipy.ndimage import gaussian_filter
 
 def create_bar_plot(ax, data, labels, x_label: str = "", y_label: str = "", title: str = "",
                     train: bool = True, width: float = 0.4, ticks_rotation: int = 270,
-                    color: str = 'yellow'):
+                    color: str = 'yellow', yticks: bool = False):
 
     number_of_labels = len(labels)
     ax.bar(x=np.arange(number_of_labels) - (width / 2 if train else -width / 2),
@@ -17,6 +17,10 @@ def create_bar_plot(ax, data, labels, x_label: str = "", y_label: str = "", titl
     plt.xticks(ticks=[label for label in range(number_of_labels)],
                labels=labels,
                rotation=ticks_rotation)
+
+    if yticks:
+        for i in range(len(labels)):
+            plt.text(i - (width / 2 if train else -width / 2), data[i], np.round(data[i],1), ha='center', size='x-small')
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
