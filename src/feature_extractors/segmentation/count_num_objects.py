@@ -21,17 +21,28 @@ class CountNumObjects(SegmentationFeatureExtractorAbstract):
                 self._number_of_objects_per_image.update({num_objects_in_image: 1})
 
     def process(self, ax, train):
-        # TODO: Make it work
+
         if len(self._number_of_objects_per_image) > 10:
-            self._into_buckets()
-        # TODO: Make normalization as a abstract method
-        values = [((100 * value) / self._total_objects) for value in self._number_of_objects_per_image.values()]
-        create_bar_plot(ax, values, self._number_of_objects_per_image.keys(),
+            self._number_of_objects_per_image = self._into_buckets()
+
+        # values = [((100 * value) / self._total_objects) for value in self._number_of_objects_per_image.values()]
+        create_bar_plot(ax, self._number_of_objects_per_image.values(), self._number_of_objects_per_image.keys(),
                         x_label="# Objects in image", y_label="# Of images", title="# Objects per image",
                         train=train, color=self.colors[int(train)])
 
         ax.grid(visible=True, axis='y')
 
     def _into_buckets(self):
-        buckets = np.array([*range(10), *range(10, len(self._number_of_objects_per_image), 5)])
-        # TODO: Add numpy digitize to put values into new buckets
+        bins = [*range(10), *range(10, max(list(self._number_of_objects_per_image.keys())), 5)]
+        values = list(self._number_of_objects_per_image.values())
+        indexes = np.digitize(values, bins)
+        bins += [999]
+
+        indexes_for_bins = np.array([bins[i] for i in indexes])
+
+        hist = dict.fromkeys(bins)
+
+        for b in bins:
+            hist[b] = np.count_nonzero(indexes_for_bins == int(b))
+
+        return hist
