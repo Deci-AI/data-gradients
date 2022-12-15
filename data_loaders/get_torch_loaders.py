@@ -103,3 +103,6 @@ voc_segmentation = False
 # 20,  1,        19,         40
 train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset="pp_human")
 train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
+num_classes = 1
+ignore_labels = [0]
+

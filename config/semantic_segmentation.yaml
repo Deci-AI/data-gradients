@@ -1,3 +1,6 @@
+number_of_classes:
+ignore_labels:
+
 common:
   - _target_: src.feature_extractors.common.count_images_labels.NumberOfImagesLabels
 

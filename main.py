@@ -1,16 +1,9 @@
-import hydra
-from omegaconf import DictConfig
-
-from src.manager import AnalysisManager
-from data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator
+from src.managers.segmentation_manager import SegmentationAnalysisManager
+from data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes, ignore_labels
 
 
-# TODO: Maybe get hydra implementation inside analysis manager as parser
-@hydra.main(version_base=None, config_path="config/", config_name='feature_extractors')
-def main(cfg: DictConfig) -> None:
-    da = AnalysisManager(cfg, train_data_iterator, val_data_iterator)
-    da.run()
-
-
-if __name__ == '__main__':
-    main()
+da = SegmentationAnalysisManager(num_classes=num_classes,
+                                 train_data=train_data_iterator,
+                                 val_data=val_data_iterator,
+                                 ignore_labels=ignore_labels)
+da.run()

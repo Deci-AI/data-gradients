@@ -3,4 +3,3 @@ logs
 data
 __pycache__
 outputs
-config/feature_extractors.yaml
