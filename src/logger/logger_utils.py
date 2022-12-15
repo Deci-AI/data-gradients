@@ -20,7 +20,8 @@ def create_bar_plot(ax, data, labels, x_label: str = "", y_label: str = "", titl
 
     if yticks:
         for i in range(len(labels)):
-            plt.text(i - (width / 2 if train else -width / 2), data[i], np.round(data[i],1), ha='center', size='x-small')
+            v = np.round(data[i],1) if np.round(data[i],1) > 0. else ""
+            plt.text(i - (width / 2 if train else -width / 2), data[i], v, ha='center', size='x-small')
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
