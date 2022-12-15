@@ -19,21 +19,16 @@ train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_datalo
 ### 4. At `main.py` import dataset and run script
 
 ```python
-import hydra
-from omegaconf import DictConfig
-
-from src.manager import AnalysisManager
-from data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator
+from src import SegmentationAnalysisManager
+from data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes, ignore_labels
 
 
-@main.main(version_base=None, config_path=".", config_name='feature_extractors')
-def main(cfg: DictConfig) -> None:
-    da = AnalysisManager(cfg, train_data_iterator, val_data_iterator)
-    da.run()
+da = SegmentationAnalysisManager(num_classes=num_classes,
+                                 train_data=train_data_iterator,
+                                 val_data=val_data_iterator,
+                                 ignore_labels=ignore_labels)
+da.run()
 
-
-if __name__ == '__main__':
-    main()
 ```
 ### 5. After progress is finished, view results through tensorboard
 
