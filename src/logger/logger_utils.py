@@ -41,6 +41,6 @@ def create_heatmap_plot(ax, x, y, train, bins=50, sigma=2, title="", x_label="",
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
-    ax.set_title(("train" if train else "val") + " - " + title)
+    ax.set_title(("Train" if train else "Val") + " - " + title)
 
 
