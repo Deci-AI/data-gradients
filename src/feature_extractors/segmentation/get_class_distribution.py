@@ -22,7 +22,7 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
                 self._total_objects += len(cls_contours)
 
     def process(self, ax, train):
-        values = [((100 * value) / self._total_objects) for value in self._hist.values()]
+        values = self.normalize(self._hist.values(), self._total_objects)
         create_bar_plot(ax, values, self._hist.keys(), x_label="Class #",
                         y_label="# Class instances [%]", title="Classes distribution across dataset",
                         train=train, color=self.colors[int(train)], yticks=True)

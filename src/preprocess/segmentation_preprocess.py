@@ -13,7 +13,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__(num_classes)
         self._onehot: bool = False
-        self._ignore_labels: List[int] = ignore_labels
+        self._ignore_labels: List[int] = ignore_labels if ignore_labels is not None else [0]
 
     @property
     def ignore_labels(self) -> List[int]:

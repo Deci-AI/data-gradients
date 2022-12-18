@@ -60,8 +60,6 @@ class AnalysisManagerAbstract:
         train_batch = 0
 
         while True:
-            if train_batch > 3:
-                break
             try:
                 batch_data = self._get_batch(self._train_iter)
             except StopIteration:

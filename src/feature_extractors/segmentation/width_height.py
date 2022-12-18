@@ -17,19 +17,12 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
         for i, image_contours in enumerate(data.contours):
             for cls_contours in image_contours:
                 for c in cls_contours:
-                    extreme_points = contours.get_extreme_points(c)
-                    self._width.append(extreme_points["rightmost"][0] - extreme_points["leftmost"][0])
-                    self._height.append(extreme_points["bottommost"][1] - extreme_points["topmost"][1])
+                    rect = contours.get_rotated_bounding_rect(c)
+                    self._width.append(rect[1][0])
+                    self._height.append(rect[1][1])
 
     def process(self, ax, train):
-        # TODO: It's shit
-        width = []
-        height = []
-        for w, h in zip(self._width, self._height):
-            if w == 0 or h == 0:
-                continue
-            else:
-                width.append(w)
-                height.append(h)
-        create_heatmap_plot(ax=ax, x=width, y=height, train=train, bins=25,
-                            sigma=0, title=f'Width / Height', x_label='Width', y_label='Height')
+        width = [w for w in self._width if w > 0]
+        height = [h for h in self._height if h > 0]
+        create_heatmap_plot(ax=ax, x=width, y=height, train=train, bins=50,
+                            sigma=0, title=f'Width / Height', x_label='Width [px]', y_label='Height [px]')

@@ -17,3 +17,7 @@ class FeatureExtractorAbstract(ABC):
     @abstractmethod
     def process(self, ax, train: bool):
         pass
+
+    @staticmethod
+    def normalize(values, total):
+        return [((100 * value) / total) for value in values]

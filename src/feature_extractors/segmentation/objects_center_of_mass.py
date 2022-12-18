@@ -32,8 +32,8 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
         # TODO: My thumb rules numbers
         self._bins = int(np.sqrt(len(self._x)) * 4)
         self._sigma = 2 * (self._bins / 150)
+
         # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
-        # TODO: Maybe bring number of classes and the other thing to abstract constructor?
 
         create_heatmap_plot(ax=ax, x=self._x, y=self._y,  train=train, bins=self._bins, sigma=self._sigma,
                             title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')

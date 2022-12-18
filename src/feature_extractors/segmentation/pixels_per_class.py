@@ -15,22 +15,23 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
 
     def execute(self, data: BatchData):
         for i, image_contours in enumerate(data.contours):
+            img_dim = (data.images[i].shape[1] * data.images[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
                 unique = np.unique(data.labels[i][j])
                 if not len(unique) > 1:
                     continue
                 for contour in cls_contours:
-                    self._hist[int(np.delete(unique, 0))].append(contours.get_contour_area(contour))
+                    self._hist[int(np.delete(unique, 0))].append(100 * contours.get_contour_area(contour) / img_dim)
 
     def process(self, ax, train):
-        # TODO Normalize by: Highest value is little bit more then biggest object
+
         hist = dict.fromkeys(self._hist.keys(), 0.)
         for cls in self._hist:
             if len(self._hist[cls]):
                 hist[cls] = float(np.mean(self._hist[cls]))
         hist_vales = np.array(list(hist.values())) / 1000
         create_bar_plot(ax, hist_vales, self._hist.keys(),
-                        x_label="Class", y_label="Average # Pixels per object [K]", title="Average Pixels Per Object",
-                        train=train, color=self.colors[int(train)])
+                        x_label="Class", y_label="Size of object [% of image]", title="Average Pixels Per Object",
+                        train=train, color=self.colors[int(train)], yticks=True)
 
         ax.grid(visible=True, axis='y')

@@ -108,9 +108,10 @@ def get_contour_is_convex(contour: np.array) -> bool:
 
 def get_rotated_bounding_rect(contour: np.array) -> np.array:
     rect = cv2.minAreaRect(contour)  # rect = ((cx, cy), (w, h), rotated angle)
-    box = cv2.boxPoints(rect)
-    box = np.int0(box)
-    return box
+    return rect
+    # box = cv2.boxPoints(rect)
+    # box = np.int0(box)
+    # return box
 
 
 def get_aspect_ratio_of_bounding_rect(contour: np.array) -> float:

@@ -15,27 +15,24 @@ class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
 
     def execute(self, data: BatchData):
         for i, image_contours in enumerate(data.contours):
+            img_dim = (data.images[i].shape[1] * data.images[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
                 unique = np.unique(data.labels[i][j])
                 if not len(unique) > 1:
                     continue
                 for c in cls_contours:
-                    box = contours.get_rotated_bounding_rect(c)
-                    wh = box[1]
-                    self._hist[int(np.delete(unique, 0))].append(int(wh[0] * wh[1]))
-                    # if wh[0] * wh[1] < 1:
-                    #     print(c)
-                    #     print(f'Appended {int(wh[0] * wh[1])}')
+                    rect = contours.get_rotated_bounding_rect(c)
+                    wh = rect[1]
+                    self._hist[int(np.delete(unique, 0))].append(100 * int(wh[0] * wh[1]) / img_dim)
 
     def process(self, ax, train):
-        # TODO: Try to normalize it somehow. Needs to define "Biggest object" and "Smallest one", or boundaries
-
         hist = dict.fromkeys(self._hist.keys(), 0.)
         for cls in self._hist:
             if len(self._hist[cls]):
                 hist[cls] = float(np.mean(self._hist[cls]))
-        create_bar_plot(ax, hist.values(), self._hist.keys(),
-                        x_label="Class", y_label="Size of BBOX", title="Objects BBOX size",
-                        train=train, color=self.colors[int(train)])
+
+        create_bar_plot(ax, list(hist.values()), hist.keys(),
+                        x_label="Class", y_label="Size of BBOX [% of image]", title="Objects minimal bounding-boxes size",
+                        train=train, color=self.colors[int(train)], yticks=True)
 
         ax.grid(visible=True, axis='y')

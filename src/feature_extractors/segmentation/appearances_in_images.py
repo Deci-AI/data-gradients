@@ -23,7 +23,7 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
                 self._hist[int(np.delete(unique, 0))] += 1
 
     def process(self, ax, train):
-        values = [((100 * value) / self._number_of_images) for value in self._hist.values()]
+        values = self.normalize(self._hist.values(), self._number_of_images)
         create_bar_plot(ax, values, self._hist.keys(), x_label="Class #", y_label="Images appeared in [%]",
                         title="% Images that class appears in", train=train, color=self.colors[int(train)], yticks=True)
 
