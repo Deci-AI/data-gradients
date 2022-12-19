@@ -7,6 +7,11 @@ from src.logger.logger_utils import create_heatmap_plot
 
 
 class WidthHeight(SegmentationFeatureExtractorAbstract):
+    """
+    Semantic Segmentation task feature extractor -
+    Get all Width, Height of bounding-box for every object in every image for every class.
+    Plot those W, H values as a heat-map
+    """
     def __init__(self):
         super().__init__()
         self._width: List = []

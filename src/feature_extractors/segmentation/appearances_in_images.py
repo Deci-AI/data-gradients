@@ -6,7 +6,10 @@ from src.feature_extractors.segmentation.segmentation_abstract import Segmentati
 
 
 class AppearancesInImages(SegmentationFeatureExtractorAbstract):
-
+    """
+    Semantic Segmentation task feature extractor -
+    For each class, calculate percentage of images it appears in out of all images in set.
+    """
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]

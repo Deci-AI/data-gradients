@@ -9,14 +9,17 @@ from src.feature_extractors.segmentation.segmentation_abstract import Segmentati
 
 
 class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
-    ERROR_CENTER = (-1, -1)
-
+    """
+    Semantic Segmentation task feature extractor -
+    Get all X, Y positions of center of mass of every object in every image for every class.
+    Plot those X, Y positions as a heat-map
+    """
     def __init__(self):
         super().__init__()
         self._x: List = []
         self._y: List = []
         self._sigma: float = 0
-        self._bins: int = 0
+        self._bins: int = 50
         self.single_axis = False
 
     def execute(self, data: SegBatchData):
@@ -24,9 +27,8 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
             for cls_contours in image_contours:
                 for c in cls_contours:
                     center = contours.get_contour_center_of_mass(c)
-                    if center != self.ERROR_CENTER:
-                        self._x.append(center[0])
-                        self._y.append(center[1])
+                    self._x.append(center[0])
+                    self._y.append(center[1])
 
     def process(self, ax, train):
         # TODO: My thumb rules numbers

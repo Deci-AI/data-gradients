@@ -4,6 +4,10 @@ from src.logger.logger_utils import create_bar_plot
 
 
 class NumberOfImagesLabels(FeatureExtractorAbstract):
+    """
+    Common task feature extractor -
+    Count number of images, labels and background images and display as plot-bar.
+    """
     def __init__(self):
         super().__init__()
         self._num_images: int = 0

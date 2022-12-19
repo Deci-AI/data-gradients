@@ -7,6 +7,10 @@ from src.logger.logger_utils import create_bar_plot
 
 
 class PixelsPerClass(SegmentationFeatureExtractorAbstract):
+    """
+    Semantic Segmentation task feature extractor -
+    Get all sums of pixels per object per class and show the distribution among all classes
+    """
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
 

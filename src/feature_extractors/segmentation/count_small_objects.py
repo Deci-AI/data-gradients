@@ -8,6 +8,10 @@ from src.logger.logger_utils import create_bar_plot
 
 
 class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
+    """
+    Semantic Segmentation task feature extractor -
+    TODO: NOT IMPLEMENTED WELL YET
+    """
     def __init__(self, percent_of_an_image):
         super().__init__()
         # TODO NUMBERS DOES NOT WORK

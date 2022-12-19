@@ -7,6 +7,10 @@ from src.logger.logger_utils import create_bar_plot
 
 
 class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
+    """
+    Semantic Segmentation task feature extractor -
+    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
+    """
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
 
