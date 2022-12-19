@@ -15,6 +15,8 @@ class BDDDataset(Dataset):
     PyTorch Dataset implementation of the BDD100K dataset.
     The BDD100K data and annotations can be obtained at https://bdd-data.berkeley.edu/.
     """
+    NUM_CLASSES = 20
+    IGNORE_LABELS = [0, 19]
 
     def __init__(self, data_folder, split: str, ignore_label=19, transform=transforms.Compose([])):
         """
@@ -24,7 +26,6 @@ class BDDDataset(Dataset):
         """
         data_location = os.path.join(data_folder, split)
         files_list = os.listdir(data_location)
-        print(f'Got {len(files_list)} in {split} ')
         self.ignore_label = ignore_label
         self.samples_fn = []
         for f in files_list:
