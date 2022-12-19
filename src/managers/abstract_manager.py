@@ -78,11 +78,8 @@ class AnalysisManagerAbstract:
         train_batch = 0
 
         while True:
-            if train_batch > 2:
-                break
             try:
                 batch_data = self._get_batch(self._train_iter)
-                print(f'Got {len(batch_data.images)} images from train')
             except StopIteration:
                 break
             else:
@@ -92,7 +89,6 @@ class AnalysisManagerAbstract:
             if not self._train_only:
                 try:
                     batch_data = self._get_batch(self._val_iter)
-                    print(f'Got {len(batch_data.images)} images from val')
                 except StopIteration:
                     self._train_only = True
                 else:
