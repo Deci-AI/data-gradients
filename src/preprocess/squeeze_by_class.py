@@ -9,7 +9,8 @@ def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool) -> torch.Tensor:
     :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
     """
     # Take all classes but ignored/background
-    all_classes = torch.unique(label)[1:]
+    unique = torch.unique(label)
+    all_classes = unique[unique > 0]
 
     # If no classes appear in the annotation it's a background image full of zeros
     if not all_classes.nelement():
