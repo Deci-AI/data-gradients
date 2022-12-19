@@ -33,7 +33,7 @@ class AnalysisManagerAbstract:
             self._val_iter = None
 
         # Logger
-        self._logger = TensorBoardLogger()
+        self._loggers = [TensorBoardLogger(), JsonLogger()]
 
         self._preprocessor: PreprocessorAbstract = Optional[None]
         self._cfg = None
@@ -95,13 +95,15 @@ class AnalysisManagerAbstract:
                 axes['train'], axes['val'] = ax
 
             # First val - because graph params will be overwritten by latest (train) and we want it's params
-            val_extractor.process(axes['val'], train=False)
+            val_hist = val_extractor.process(axes['val'], train=False)
 
-            train_extractor.process(axes['train'], train=True)
+            train_hist = train_extractor.process(axes['train'], train=True)
 
             fig.tight_layout()
 
-            self._logger.log_graph(val_extractor.__class__.__name__ + "/fig", fig)
+            for logger in self._loggers:
+                title = val_extractor.__class__.__name__
+                logger.log(title, fig if isinstance(logger, TensorBoardLogger) else [train_hist, val_hist])
 
     def close(self):
         self._logger.close()
