@@ -26,7 +26,8 @@ class AnalysisManagerAbstract:
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
             self._train_only = False
-            self._val_iter: Iterator = val_data if isinstance(train_data, Iterator) else iter(train_data)
+            self._val_iter: Iterator = val_data if isinstance(val_data, Iterator) else iter(val_data)
+
         else:
             self._train_only = True
             self._val_iter = None
