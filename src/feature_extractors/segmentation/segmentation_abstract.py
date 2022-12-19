@@ -7,7 +7,9 @@ from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAb
 
 
 class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
-
+    """
+    Semantic Segmentation task feature extractor abstract class.
+    """
     def __init__(self):
         super().__init__()
 
@@ -20,5 +22,5 @@ class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
         pass
 
     @staticmethod
-    def normalize_hist(hist):
-        return list(np.array(hist) / sum(hist))
+    def normalize(values, total):
+        return [((100 * value) / total) for value in values]
