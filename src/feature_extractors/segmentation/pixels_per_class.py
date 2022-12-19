@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.preprocess import contours
-from src.utils import BatchData
+from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot
 
@@ -13,7 +13,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {k: [] for k in keys}
 
-    def execute(self, data: BatchData):
+    def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.images[i].shape[1] * data.images[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
@@ -29,9 +29,10 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
         for cls in self._hist:
             if len(self._hist[cls]):
                 hist[cls] = float(np.mean(self._hist[cls]))
-        hist_vales = np.array(list(hist.values())) / 1000
-        create_bar_plot(ax, hist_vales, self._hist.keys(),
+        hist_values = np.array(list(hist.values()))
+        create_bar_plot(ax, hist_values, self._hist.keys(),
                         x_label="Class", y_label="Size of object [% of image]", title="Average Pixels Per Object",
                         train=train, color=self.colors[int(train)], yticks=True)
 
         ax.grid(visible=True, axis='y')
+        return dict(zip(self._hist.keys(), hist_values))

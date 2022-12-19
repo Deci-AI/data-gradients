@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.utils import BatchData
+from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot
 
@@ -12,7 +12,7 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
         self._hist = dict.fromkeys(keys, 0)
         self._total_objects: int = 0
 
-    def execute(self, data: BatchData):
+    def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
                 unique = np.unique(data.labels[i][j])
@@ -28,3 +28,4 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
                         train=train, color=self.colors[int(train)], yticks=True)
 
         ax.grid(visible=True)
+        return dict(zip(self._hist.keys(), values))

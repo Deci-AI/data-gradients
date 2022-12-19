@@ -4,7 +4,7 @@ import numpy as np
 
 from src.logger.logger_utils import create_heatmap_plot
 from src.preprocess import contours
-from src.utils import BatchData
+from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 
 
@@ -19,7 +19,7 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
         self._bins: int = 0
         self.single_axis = False
 
-    def execute(self, data: BatchData):
+    def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for cls_contours in image_contours:
                 for c in cls_contours:
@@ -37,3 +37,5 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
 
         create_heatmap_plot(ax=ax, x=self._x, y=self._y,  train=train, bins=self._bins, sigma=self._sigma,
                             title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')
+
+        return {"Am I implemented?": False}

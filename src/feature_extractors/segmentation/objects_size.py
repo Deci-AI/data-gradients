@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.preprocess import contours
-from src.utils import BatchData
+from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot
 
@@ -13,7 +13,7 @@ class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {k: [] for k in keys}
 
-    def execute(self, data: BatchData):
+    def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.images[i].shape[1] * data.images[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
@@ -36,3 +36,4 @@ class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
                         train=train, color=self.colors[int(train)], yticks=True)
 
         ax.grid(visible=True, axis='y')
+        return dict(zip(hist.keys(), list(hist.values())))

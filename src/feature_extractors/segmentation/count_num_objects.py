@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.utils import BatchData
+from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot
 
@@ -11,7 +11,7 @@ class CountNumObjects(SegmentationFeatureExtractorAbstract):
         self._number_of_objects_per_image = dict()
         self._total_objects: int = 0
 
-    def execute(self, data: BatchData):
+    def execute(self, data: SegBatchData):
         for image_contours in data.contours:
             num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
             self._total_objects += num_objects_in_image
@@ -31,6 +31,7 @@ class CountNumObjects(SegmentationFeatureExtractorAbstract):
                         title="# Objects per image", train=train, color=self.colors[int(train)], yticks=True)
 
         ax.grid(visible=True, axis='y')
+        return dict(zip(hist.keys(), hist.values()))
 
     def _into_buckets(self):
         if len(self._number_of_objects_per_image) < 10:

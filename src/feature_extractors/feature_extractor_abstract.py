@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.utils import BatchData
+from src.utils import SegBatchData
 
 
 class FeatureExtractorAbstract(ABC):
@@ -11,7 +11,7 @@ class FeatureExtractorAbstract(ABC):
         self.single_axis: bool = True
 
     @abstractmethod
-    def execute(self, data: BatchData):
+    def execute(self, data: SegBatchData):
         pass
 
     @abstractmethod
