@@ -13,27 +13,43 @@ pip install -r requirements.txt
 ### 3. Connect dataset with Python-Iterables objects
 
 ```python
-train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset="sbd")
-train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
+from torchvision import datasets
+from torch.utils.data import DataLoader
+
+train_dataset = datasets.SBDataset(root="data/sbd",
+                                   image_set="train",
+                                   mode="segmentation")
+train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+
 ```
 ### 4. At `main.py` import dataset and run script
 
 ```python
-from src import SegmentationAnalysisManager
-from internal_use_data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes,
-    ignore_labels
+from torch.utils.data import DataLoader
+from torchvision.transforms import CenterCrop, ToTensor, Compose
 
-da = SegmentationAnalysisManager(num_classes=num_classes,
-                                 train_data=train_data_iterator,
-                                 val_data=val_data_iterator,
-                                 ignore_labels=ignore_labels)
+from src import SegmentationAnalysisManager
+from data.bdd_dataset import BDDDataset
+
+# Create torch DataSet
+train_dataset = BDDDataset(data_folder="data/bdd_example", split='train', transform=Compose([ToTensor(), CenterCrop(512)]))
+val_dataset = BDDDataset(data_folder="data/bdd_example", split='val', transform=Compose([ToTensor(), CenterCrop(512)]))
+
+# Create torch DataLoader
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
+
+da = SegmentationAnalysisManager(train_data=train_loader,
+                                 val_data=val_loader,
+                                 num_classes=BDDDataset.NUM_CLASSES,
+                                 ignore_labels=BDDDataset.IGNORE_LABELS)
 da.run()
 
 ```
 ### 5. After progress is finished, view results through tensorboard
 
 ```bash
-tensorboard --logdir=logs/train_data --bind_all
+tensorboard --logdir=logs --bind_all
 ```
 Click on link and view results:
 

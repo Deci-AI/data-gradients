@@ -3,7 +3,6 @@ from torchvision.transforms import CenterCrop, ToTensor, Compose
 
 from data.bdd_dataset import BDDDataset
 from src import SegmentationAnalysisManager
-from internal_use_data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes, ignore_labels
 
 """
 Main script for running the Deci-Dataset-Analyzer tool.
@@ -34,6 +33,6 @@ val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
 
 da = SegmentationAnalysisManager(train_data=train_loader,
                                  val_data=val_loader,
-                                 num_classes=num_classes,
-                                 ignore_labels=ignore_labels)
+                                 num_classes=BDDDataset.NUM_CLASSES,
+                                 ignore_labels=BDDDataset.IGNORE_LABELS)
 da.run()
