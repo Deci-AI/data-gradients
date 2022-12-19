@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.logger.logger_utils import create_bar_plot
-from src.utils import BatchData
+from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 
 
@@ -13,7 +13,7 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
         self._hist = dict.fromkeys(keys, 0)
         self._number_of_images: int = 0
 
-    def execute(self, data: BatchData):
+    def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             self._number_of_images += 1
             for j, cls_contours in enumerate(image_contours):
@@ -26,5 +26,6 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
         values = self.normalize(self._hist.values(), self._number_of_images)
         create_bar_plot(ax, values, self._hist.keys(), x_label="Class #", y_label="Images appeared in [%]",
                         title="% Images that class appears in", train=train, color=self.colors[int(train)], yticks=True)
-
         ax.grid(visible=True)
+
+        return dict(zip(self._hist.keys(), values))

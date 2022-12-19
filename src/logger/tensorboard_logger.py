@@ -10,11 +10,9 @@ class TensorBoardLogger(ResultsLogger):
         super().__init__()
         self.writer = SummaryWriter(log_dir=self.logdir)
 
-    def log_graph(self, title, plot):
-        self.writer.add_figure(title, plot)
-
-    def log_text(self, title, text):
-        self.writer.add_image(title, text)
+    def log(self, title, data):
+        title += "/fig"
+        self.writer.add_figure(title, data)
 
     def close(self):
         self.writer.close()

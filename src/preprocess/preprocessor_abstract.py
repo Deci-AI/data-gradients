@@ -21,7 +21,7 @@ class PreprocessorAbstract(ABC):
         pass
 
     @abstractmethod
-    def preprocess(self, images, labels) -> BatchData:
+    def preprocess(self, images, labels) -> SegBatchData:
         pass
 
     @staticmethod

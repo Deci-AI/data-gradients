@@ -120,14 +120,10 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         labels = [squeeze_by_class.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
 
-        if False:
-            for label, image in zip(labels, images):
-                temp = preprocess.get_contours(label, image)
-
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
-        bd = BatchData(images=images,
-                       labels=labels,
-                       contours=all_contours)
+        sbd = SegBatchData(images=images,
+                           labels=labels,
+                           contours=all_contours)
 
-        return bd
+        return sbd

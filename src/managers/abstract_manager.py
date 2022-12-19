@@ -7,6 +7,7 @@ import tqdm
 from matplotlib import pyplot as plt
 
 from src.feature_extractors import FeatureExtractorAbstract
+from src.logger.json_logger import JsonLogger
 from src.logger.tensorboard_logger import TensorBoardLogger
 from src.preprocess import PreprocessorAbstract
 from src.utils import BatchData
@@ -106,7 +107,10 @@ class AnalysisManagerAbstract:
                 logger.log(title, fig if isinstance(logger, TensorBoardLogger) else [train_hist, val_hist])
 
     def close(self):
-        self._logger.close()
+        """
+        Safe logger closing
+        """
+        [logger.close() for logger in self._loggers]
 
     def run(self):
         self.build()
