@@ -1,5 +1,12 @@
 logs
 .idea
-data
+data/amat
+data/bdd100k
+data/cityscapes
+data/pascal_voc
+data/pp_humanseg
+data/sbd
 __pycache__
 outputs
+.DS_Store
+full
