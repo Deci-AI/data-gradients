@@ -3,32 +3,21 @@ from typing import List, Tuple, Dict
 import cv2.cv2 as cv2
 import numpy as np
 import torch
-# find contours
-# CHAIN_APPROX_SIMPLE reduces number of un-needed points (i.e., straight line)
-# CHAIN_APPROX_NONE keep all points
-# RETR_LIST simply retrievs all contours
-# RETR_EXTERNAL get all outer contours only
-# RERT_TREE gets all contours + "family" details
 
 
-def get_contours(label: torch.Tensor, debug_image=None) -> np.array:
+def get_contours(label: torch.Tensor) -> np.array:
     """
-
-    :param label: Tensor [C, W, H] where C is number of classes
-    :param debug_image: Optional, debug purposes
-    :return:
+    Find contours in each class-channel individually, using opencv findContours method
+    :param label: Tensor [N, W, H] where N is number of valid classes
+    :return: List with the shape [N, Nc, P, 1, 2] where N is number of valid classes, Nc are number of contours
+    per class, P are number of points for each contour and (1, 2) are set of points.
     """
-    if debug_image is not None:
-        debug_image = debug_image.numpy()
-        debug_image = debug_image.transpose(1, 2, 0)
-        debug_image = cv2.cvtColor(debug_image, cv2.COLOR_RGB2BGR)
-        cv2.imshow("orig_image", debug_image)
-        # orig_image_shape = (512, 512)
-
-    label = label.numpy().astype(np.uint8)
+    # Tensor to numpy (for opencv usage)
+    label = label.numpy()
+    # Type to INT8 as for Index array
+    label = label.astype(np.uint8)
 
     all_onehot_contour = []
-
     # For each class
     for class_channel in range(label.shape[0]):
         # Get tensor [class, W, H]
@@ -41,60 +30,45 @@ def get_contours(label: torch.Tensor, debug_image=None) -> np.array:
             # Attach to the Channel dim to get a [C, N, P, 1, 2] Tensor
             all_onehot_contour.append(valid_onehot_contours)
 
-    if debug_image is not None:
-        img_contours = np.zeros((512, 512, 3))
-        for i, contours in enumerate(all_onehot_contour):
-            color = (0, 0, 255) if i == 0 else ((0, 255, 0) if i == 1 else ((255, 0, 0) if i == 2 else (127, 0, 255)))
-            img_contours = cv2.drawContours(img_contours, contours, -1, color, 1)
-            single_img_contours = np.zeros((512, 512, 3))
-            single_img_contours = cv2.drawContours(single_img_contours, contours, -1, color, 1)
-            for c in contours:
-                box = get_rotated_bounding_rect(c)
-                single_img_contours = cv2.drawContours(single_img_contours, [box], -1, (0, 255, 0), 1)
-                single_img_contours = cv2.circle(single_img_contours, get_contour_center_of_mass(c), 5, (255, 255, 255), 2)
-            print(f"Class is: {np.delete((np.unique(label[i, ... ])), 0)} got {len(contours)} contours")
-            cv2.imshow("single", single_img_contours)
-            cv2.waitKey(0)
-
-        cv2.imshow("img_contours", img_contours)
-        q = cv2.waitKey(0)
-        if q == ord('q'):
-            exit(0)
-
-    # Return tensor with [C, N, P, 1, 2] where C is # of classes, N # of contours per class and
-    # (P, 1, 2) is points vector
+    # Return tensor with [N, Nc, P, 1, 2] where N is # of classes, Nc # of contours per class and
     return all_onehot_contour
 
 
 def get_valid_contours(contours: Tuple) -> List:
-    # TODO: Who is valid? minimal contour size for now
-    minimal_contour_size = 8
+    """
+    Contours sometimes are buggy, as for 2-points-contour, a stragith line, etc.
+    We'll remove the by the valid - criteria (temporary) - minimal size of (3 ^ 2) pixels
+    :param contours: Any list of contours
+    :return: Valid list of contours
+    """
+    minimal_contour_size = 9
     valid_contours = [c for c in contours if get_contour_area(c) > minimal_contour_size]
     return valid_contours
-
-
-def get_contour_class(contour: np.array, label: np.array) -> int:
-    centers, _, _ = cv2.minAreaRect(contour)
-    centers = np.array(centers).astype(np.uint16)
-    return int(label[0][centers[1]][centers[0]] * 255)
 
 
 def get_num_contours(contours: List[np.array]) -> int:
     return len(contours)
 
 
-def get_contour_area(contour: np.array) -> int:
+def get_contour_area(contour: np.array) -> float:
+    """
+    Get area of contours [pixels]
+    :param contour: List of points
+    :return: number of pixels inside contour (integer)
+    """
     area = cv2.contourArea(contour)
-    return int(area)
+    return float(area)
 
 
 def get_contour_center_of_mass(contour: np.array) -> Tuple[int, int]:
+    """
+    Find contours center of mass by its moments
+    :param contour: List of points
+    :return: X, Y pixels of contour's center of mass
+    """
     moments = cv2.moments(contour)
-    area = float(moments['m00'])
-    if area <= 0:
-        return -1, -1
-    cx = int(moments['m10'] / area)
-    cy = int(moments['m01'] / area)
+    cx = int(moments['m10'] / float(moments['m00']))
+    cy = int(moments['m01'] / float(moments['m00']))
     return cx, cy
 
 
@@ -107,11 +81,20 @@ def get_contour_is_convex(contour: np.array) -> bool:
 
 
 def get_rotated_bounding_rect(contour: np.array) -> np.array:
+    """
+    Get the minimum area bounding rectangle of the contour given
+    :param contour: List of points
+    :return: [[Center X, Center Y], [Width, Height], [Box angle]]
+    """
     rect = cv2.minAreaRect(contour)  # rect = ((cx, cy), (w, h), rotated angle)
+    # return rect_to_box(rect)
     return rect
-    # box = cv2.boxPoints(rect)
-    # box = np.int0(box)
-    # return box
+
+
+def rect_to_box(rect):
+    box = cv2.boxPoints(rect)
+    box = np.int0(box)
+    return box
 
 
 def get_aspect_ratio_of_bounding_rect(contour: np.array) -> float:

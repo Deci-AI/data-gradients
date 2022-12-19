@@ -6,7 +6,7 @@ import torch
 from torchvision.transforms import transforms
 
 from src import preprocess
-from src.utils import BatchData
+from src.utils import SegBatchData
 
 
 class PreprocessorAbstract(ABC):
@@ -26,9 +26,21 @@ class PreprocessorAbstract(ABC):
 
     @staticmethod
     def channels_last_to_first(tensors: torch.Tensor):
+        """
+        Permute BS, W, H, C -> BS, C, W, H
+                0   1  2  3 -> 0   3  1  2
+        :param tensors: Tensor[BS, W, H, C]
+        :return: Tensor[BS, C, W, H]
+        """
         return tensors.permute(0, 3, 1, 2)
 
     def _to_tensor(self, objs, tuple_place: str = "") -> torch.Tensor:
+        """
+
+        :param objs:
+        :param tuple_place:
+        :return:
+        """
         if isinstance(objs, np.ndarray):
             return torch.from_numpy(objs)
         elif isinstance(objs, Image):

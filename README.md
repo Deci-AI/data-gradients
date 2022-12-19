@@ -20,8 +20,8 @@ train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_datalo
 
 ```python
 from src import SegmentationAnalysisManager
-from data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes, ignore_labels
-
+from internal_use_data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes,
+    ignore_labels
 
 da = SegmentationAnalysisManager(num_classes=num_classes,
                                  train_data=train_data_iterator,

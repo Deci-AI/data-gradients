@@ -5,18 +5,30 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor, CenterCrop
 from torch.utils.data import DataLoader
 
-from data_loaders.bdd_dataset import BDDDataset
-from data_loaders.cityscapes_dataset import CityScapesDataSet
-from data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
+from data.bdd_dataset import BDDDataset
+from internal_use_data_loaders.cityscapes_dataset import CityScapesDataSet
+from internal_use_data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
+
+# TODO: Clean up all methods but "bdd"
+# Make dataset root path relative to project's, pointing at small example bdd dataset
 
 
 class DataLoaders:
     def __init__(self):
         self._transforms = torchvision.transforms.Compose([ToTensor(), CenterCrop(512)])
-        self._batch_size = 128
+        self._batch_size = 32
 
     def _dataset_to_dataloader(self, dataset):
         return DataLoader(dataset, batch_size=self._batch_size, shuffle=True)
+
+    def bdd(self):
+        dataset_root = "/Users/tomerkeren/workspace/deci-dataset-analyzer/data/bdd100k"
+        train = BDDDataset(data_folder=dataset_root, split='train', transform=self._transforms)
+        val = BDDDataset(data_folder=dataset_root, split='val', transform=self._transforms)
+
+        train_loader = self._dataset_to_dataloader(train)
+        val_loader = self._dataset_to_dataloader(val)
+        return train_loader, val_loader
 
     def sbd(self):
         train = datasets.SBDataset(
@@ -54,22 +66,12 @@ class DataLoaders:
 
     def cityscapes(self):
         dataset_root = "/Users/tomerkeren/workspace/deci-dataset-analyzer/data/cityscapes"
-        self._batch_size = 16
         train = CityScapesDataSet(root=dataset_root,
                                   image_set='train',
                                   transform=self._transforms)
         val = CityScapesDataSet(root=dataset_root,
                                 image_set='val',
                                 transform=self._transforms)
-        train_dataloader = self._dataset_to_dataloader(train)
-        val_dataloader = self._dataset_to_dataloader(val)
-        return train_dataloader, val_dataloader
-
-    def bdd(self):
-        dataset_root = "/Users/tomerkeren/workspace/deci-dataset-analyzer/data/bdd100k"
-        train = BDDDataset(data_folder=dataset_root, split='train', transform=self._transforms)
-        val = BDDDataset(data_folder=dataset_root, split='val', transform=self._transforms)
-
         train_dataloader = self._dataset_to_dataloader(train)
         val_dataloader = self._dataset_to_dataloader(val)
         return train_dataloader, val_dataloader
@@ -101,8 +103,8 @@ voc_segmentation = False
 # [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
 # sbd, pp_human, cityscapes, bdd
 # 20,  1,        19,         40
-train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset="pp_human")
+train_dataloader, val_dataloader = DataLoaders().get_dataloader(dataset="bdd")
 train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
-num_classes = 1
+num_classes = 20
 ignore_labels = [0]
 
