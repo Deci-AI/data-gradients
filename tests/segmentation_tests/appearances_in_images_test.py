@@ -28,8 +28,9 @@ class AppearancesInImagesTest(unittest.TestCase):
             unique = torch.unique(label)
             all_unique_labels = torch.concat((all_unique_labels, unique[unique > 0]), dim=0)
 
-        for i in range(1, num_classes - 1):
-            assert torch.count_nonzero(all_unique_labels == i).item() == self._feature_extractor._hist[i], "Number of objects in the {i}th class"
+        hist = [torch.count_nonzero(all_unique_labels == i).item() for i in range(1, num_classes -1)]
+
+        self.assertEqual(hist, list(self._feature_extractor._hist.values()))
 
 
 if __name__ == '__main__':
