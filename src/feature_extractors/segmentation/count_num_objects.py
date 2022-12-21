@@ -43,10 +43,12 @@ class CountNumObjects(SegmentationFeatureExtractorAbstract):
     def _into_buckets(self):
         if len(self._number_of_objects_per_image) < 10:
             return self._number_of_objects_per_image
-        if max(self._number_of_objects_per_image) > 100:
+        min_bin = min(list(self._number_of_objects_per_image.keys()))
+        max_bin = max(list(self._number_of_objects_per_image.keys()))
+        if max_bin > 100:
             self._bin_size = 10
 
-        bins = [*range(10), *range(10, max(list(self._number_of_objects_per_image.keys())), self._bin_size)]
+        bins = [*range(min_bin - 1, 10), *range(10, max(list(self._number_of_objects_per_image.keys())), self._bin_size)]
 
         indexes = np.digitize(list(self._number_of_objects_per_image.keys()), bins)
 

@@ -25,7 +25,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
                 if not len(unique) > 1:
                     continue
                 for contour in cls_contours:
-                    self._hist[int(np.delete(unique, 0))].append(100 * contours.get_contour_area(contour) / img_dim)
+                    self._hist[int(np.delete(unique, 0))].append(np.round(100 * contours.get_contour_area(contour) / img_dim, 3))
 
     def process(self, ax, train):
 

@@ -23,4 +23,4 @@ class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
 
     @staticmethod
     def normalize(values, total):
-        return [((100 * value) / total) for value in values]
+        return [np.round(((100 * value) / total), 3) for value in values]

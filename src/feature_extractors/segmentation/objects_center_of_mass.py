@@ -44,5 +44,5 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
         # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
         create_heatmap_plot(ax=ax, x=x, y=y,  train=train, bins=bins, sigma=sigma,
                             title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')
-
-        return {"Am I implemented?": False}
+        quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
+        return {"Quantized heat map values": quantized_heat_map.tolist()}

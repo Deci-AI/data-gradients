@@ -1,5 +1,7 @@
 from typing import List
 
+import numpy as np
+
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
@@ -29,6 +31,9 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
     def process(self, ax, train):
         width = [w for w in self._width if w > 0]
         height = [h for h in self._height if h > 0]
-        create_heatmap_plot(ax=ax, x=width, y=height, train=train, bins=50,
-                            sigma=0, title=f'Width / Height', x_label='Width [px]', y_label='Height [px]')
-        return {'Am I implemented?': False}
+        create_heatmap_plot(ax=ax, x=width, y=height, train=train, bins=10,
+                            sigma=2, title=f'Width / Height', x_label='Width [px]', y_label='Height [px]',
+                            use_gaussian_filter=True, use_extent=True)
+
+        quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
+        return {"Quantized width height values": quantized_heat_map.tolist()}

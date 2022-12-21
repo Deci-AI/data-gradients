@@ -31,4 +31,4 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
                         title="% Images that class appears in", train=train, color=self.colors[int(train)], yticks=True)
         ax.grid(visible=True)
 
-        return dict(zip(self._hist.keys(), values))
+        return dict(zip(self._hist.keys(), self._hist.values()))

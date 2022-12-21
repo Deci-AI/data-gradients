@@ -21,9 +21,20 @@ class AverageBrightness(FeatureExtractorAbstract):
             self._brightness.append(np.mean(n_lightness))
 
     def process(self, ax, train):
-        values, bins = np.histogram(self._brightness, bins=int(np.sqrt(len(self._brightness))))
-        # values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
-        new_keys = []
+        values, bins = np.histogram(self._brightness, bins=10)
+        values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
+        bins = self._create_keys(bins)
+
+        create_bar_plot(ax, list(values), bins,
+                        x_label="", y_label="% out of all images",
+                        title="Average brightness of images", ticks_rotation=0,
+                        train=train, color=self.colors[int(train)], yticks=True)
+
+        return dict(zip(bins, list(values)))
+
+    @staticmethod
+    def _create_keys(bins):
+        new_keys: List[str] = []
         for i, key in enumerate(bins):
             new = round(key, 2)
             if i == 0:
@@ -34,10 +45,5 @@ class AverageBrightness(FeatureExtractorAbstract):
                 new_keys.append('%.2f<' % new)
             else:
                 new_keys.append('<%.2f<' % new)
-        print(new_keys)
-        print(values)
-        create_bar_plot(ax, list(values), new_keys,
-                        x_label="", y_label="% out of all images",
-                        title="Average brightness of images", ticks_rotation=0,
-                        train=train, color=self.colors[int(train)], yticks=True)
+        return new_keys
 
