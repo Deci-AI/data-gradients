@@ -43,6 +43,8 @@ class CountNumObjects(SegmentationFeatureExtractorAbstract):
     def _into_buckets(self):
         if len(self._number_of_objects_per_image) < 10:
             return self._number_of_objects_per_image
+        if max(self._number_of_objects_per_image) > 100:
+            self._bin_size = 10
 
         bins = [*range(10), *range(10, max(list(self._number_of_objects_per_image.keys())), self._bin_size)]
 
@@ -62,7 +64,7 @@ class CountNumObjects(SegmentationFeatureExtractorAbstract):
                 hist[f'{bins[-2]}+'] = hist[999]
                 del hist[999]
             elif key > 10:
-                new_key = f'{key-5}<{key}'
+                new_key = f'{key-self._bin_size}<{key}'
                 hist[new_key] = hist[key]
                 del hist[key]
             else:
