@@ -19,7 +19,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
 
     def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
-            img_dim = (data.images[i].shape[1] * data.images[i].shape[2])
+            img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
                 unique = np.unique(data.labels[i][j])
                 if not len(unique) > 1:
