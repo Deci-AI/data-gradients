@@ -21,7 +21,7 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
 
         self.single_axis = False
 
-    def _execute(self, data: SegBatchData):
+    def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
                 unique = np.unique(data.labels[i][j])
