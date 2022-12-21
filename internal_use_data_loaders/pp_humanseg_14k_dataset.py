@@ -25,8 +25,8 @@ class PPHumanSegDataSet(Dataset):
         label = Image.open(label_path)
         if self.transform is not None:
             image = self.transform(image)
-        if self.transform is not None:
-            label = self.transform(label)
+        if self.target_transform is not None:
+            label = self.target_transform(label)
         return image, label
 
     def _read_annotations_file(self, image_set) -> List[str]:

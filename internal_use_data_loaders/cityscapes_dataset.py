@@ -6,7 +6,6 @@ from torch.utils.data import Dataset
 
 
 class CityScapesDataSet(Dataset):
-    # CLASS_LABELS = {0: "background", 1: "person"}
 
     def __init__(self, root, image_set, transform=None, target_transform=None):
         self.root = root
@@ -26,8 +25,8 @@ class CityScapesDataSet(Dataset):
         label = Image.open(label_path)
         if self.transform is not None:
             image = self.transform(image)
-        if self.transform is not None:
-            label = self.transform(label)
+        if self.target_transform is not None:
+            label = self.target_transform(label)
         return image, label
 
     def _read_annotations_file(self, image_set) -> List[str]:
