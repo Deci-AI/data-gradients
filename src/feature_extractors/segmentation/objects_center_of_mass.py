@@ -14,30 +14,35 @@ class ObjectsCenterOfMass(SegmentationFeatureExtractorAbstract):
     Get all X, Y positions of center of mass of every object in every image for every class.
     Plot those X, Y positions as a heat-map
     """
-    def __init__(self):
+    def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        self._x: List = []
-        self._y: List = []
-        self._sigma: float = 0
-        self._bins: int = 50
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
+        self._hist = {k: {'x': list(), 'y': list()} for k in keys}
+
         self.single_axis = False
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
-            for cls_contours in image_contours:
+            for j, cls_contours in enumerate(image_contours):
+                unique = np.unique(data.labels[i][j])
+                if not len(unique) > 1:
+                    continue
                 for c in cls_contours:
                     center = contours.get_contour_center_of_mass(c)
-                    self._x.append(center[0])
-                    self._y.append(center[1])
+                    self._hist[int(np.delete(unique, 0))]['x'].append(center[0])
+                    self._hist[int(np.delete(unique, 0))]['y'].append(center[1])
 
     def process(self, ax, train):
+        x, y = [], []
+        for val in self._hist.values():
+            x.extend(val['x'])
+            y.extend(val['y'])
         # TODO: My thumb rules numbers
-        self._bins = int(np.sqrt(len(self._x)) * 4)
-        self._sigma = 2 * (self._bins / 150)
+        bins = int(np.sqrt(len(x)) * 4)
+        sigma = 2 * (bins / 150)
 
         # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
-
-        create_heatmap_plot(ax=ax, x=self._x, y=self._y,  train=train, bins=self._bins, sigma=self._sigma,
+        create_heatmap_plot(ax=ax, x=x, y=y,  train=train, bins=bins, sigma=sigma,
                             title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')
 
         return {"Am I implemented?": False}
