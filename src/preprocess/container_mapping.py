@@ -92,10 +92,15 @@ def container_mapping(obj: Any, path: str, targets: list):
         printable_map = {}
         for k, v in obj.items():
             printable_map[k] = container_mapping(v, path + f"['{k}']", targets)
-    elif isinstance(obj, Sequence):
-        printable_map = []
-        for i, o in enumerate(obj):
-            printable_map.append(f'{i}: ' + container_mapping(o, path + f"[{i}]", targets))
+    elif isinstance(obj, tuple):
+        printable_map = f'List [{type(obj[0])}] {numbers[len(targets) % len(numbers)]}'
+        targets.append(path)
+    elif isinstance(obj, list):
+        printable_map = f'List [{type(obj[0])}] {numbers[len(targets) % len(numbers)]}'
+        targets.append(path)
+    elif isinstance(obj, str):
+        return "string"
+        # targets.append(path)
     elif isinstance(obj, torch.Tensor):
         printable_map = f"Tensor {numbers[len(targets) % len(numbers)]}"
         targets.append(path)
