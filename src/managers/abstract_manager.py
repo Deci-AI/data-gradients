@@ -26,6 +26,7 @@ class AnalysisManagerAbstract:
 
         self._threads = ThreadPoolExecutor()
 
+        self._dataset_size = len(train_data) if isinstance(train_data, Iterable) else None
         # Users Data Iterators
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
@@ -74,7 +75,7 @@ class AnalysisManagerAbstract:
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
         """
-        pbar = tqdm.tqdm(desc='Working on batch #')
+        pbar = tqdm.tqdm(desc='Working on batch #', total=self._dataset_size)
         train_batch = 0
 
         while True:
