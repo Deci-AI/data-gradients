@@ -17,8 +17,9 @@ class AnalysisManagerAbstract:
     """
     Main dataset analyzer manager abstract class.
     """
-    def __init__(self, train_data: Union[Iterable, Iterator],
-                 val_data: Optional[Union[Iterable, Iterator]],
+
+    def __init__(self, train_data: Iterable,
+                 val_data: Optional[Iterable],
                  task: str):
 
         self._train_extractors: List[FeatureExtractorAbstract] = []
@@ -26,7 +27,8 @@ class AnalysisManagerAbstract:
 
         self._threads = ThreadPoolExecutor()
 
-        self._dataset_size = len(train_data) if isinstance(train_data, Iterable) else None
+        # TODO: Check if object has hasattr(bar, '__len__')
+        self._dataset_size = len(train_data) if hasattr(train_data, '__len__') else None
         # Users Data Iterators
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
