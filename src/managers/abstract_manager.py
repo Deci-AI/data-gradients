@@ -1,6 +1,6 @@
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
-from typing import Iterator, Iterable, Optional, Union, List
+from typing import Iterator, Iterable, Optional, List
 
 import hydra
 import tqdm
