@@ -1,12 +1,8 @@
 number_of_classes:
 ignore_labels:
 
-# TODO: Make it inherit the common features
-common:
-  - _target_: src.feature_extractors.common.count_images_labels.NumberOfImagesLabels
-  - _target_: src.feature_extractors.common.image_resolutions.ImagesResolutions
-  - _target_: src.feature_extractors.common.image_aspect_ratios.ImagesAspectRatios
-  - _target_: src.feature_extractors.common.average_brightness.AverageBrightness
+defaults:
+  - common
 
 semantic_segmentation:
   - _target_: src.feature_extractors.segmentation.get_class_distribution.GetClassDistribution
