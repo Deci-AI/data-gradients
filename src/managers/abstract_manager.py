@@ -136,6 +136,9 @@ class AnalysisManagerAbstract:
         Safe logger closing
         """
         [logger.close() for logger in self._loggers]
+        print(f'{"*" * 50}'
+              f'\nWe have finished evaluating your dataset!'
+              f'\nThe results can be seen in {self._loggers[0].logdir}')
 
     def run(self):
         """
