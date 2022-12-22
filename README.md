@@ -1,4 +1,61 @@
-# deci-dataset-analyzer
+# Deci dataset analyzer
+## What is this?
+The Deci`s dataset analyzer tool provide valuable information about your dataset
+#### Benefits 
+1. User could validate his data, find corruptions, check diversity and many more. 
+2. Deci will use this meta-data as an input to our NAS, which results in a better model finding suited for the user's specific data.
+#### What we DO collect
+Metadata and statistics describing your data: histograms, heat maps and such.
+#### What we DO NOT collect
+Images themselves, Labels themselves, annotations, locations of each object. Any actual data.
+You can also censor any classes you`de like, can hide class names and can remove features you are not interested in publishing. 
+
+
+<details>
+<summary>Available input types</summary>
+
+### Iterables
+Python iterables objects implement the `next()` method for getting next object from iterator.
+For now, we only support the situation where the objects are:
+* Tuple
+* Two objects
+
+where the two objects should be in this form:
+``
+(images, labels)
+``
+### Tuples Objects
+We support various of object types:
+* `torch.Tensor`
+* `numpy.ndarray`
+* `PIL.Image`
+* `Python Dictionary`
+
+As for the python dictionary, because of the various ways of getting
+an item out of it, we will activate an interactive small utility
+for extracting the right object out of the dictionary. This tool will map all the 
+objects that this dictionary holds, and will ask you to choose which one is
+the right one, either for "images" or for "labels".
+
+Example:
+```yaml
+{
+     all_labels: {
+          not_good_torch_labels: Tensor ⓪,
+          not_good_np_labels: ndarray ①,
+          good_torch_labels: Tensor ②
+     },
+     something_other_then_labels: ndarray ③
+}
+
+prompt >> which one of the yellow items is your required data?
+user input >> 2
+```
+
+</details>
+
+
+####
 <details>
     <summary>How to use</summary>
 
@@ -57,45 +114,13 @@ Click on link and view results:
 
 </details>
 
-<details>
-    <summary>Available input types</summary>
+### Our point of view on augmentations
+Using this tool will have different benefits working with data augmentations, and without.
 
-### Iterables
-Python iterables objects implement the `next()` method for getting next object from iterator.
-For now, we only support the situation where the objects are:
-* Tuple
-* Two objects
+Augmented data will give us a better visualization of the model's point of view of the data, which will be more realistic in terms of finding problems with the training data, etc.
 
-where the two objects should be in this form:
-``
-(images, labels)
-``
-### Tuples Objects
-We support various of object types:
-* `torch.Tensor`
-* `numpy.ndarray`
-* `PIL.Image`
-* `Python Dictionary`
+Raw data could be a stronger validation for the data aggregating, labeling and diversity of it.
 
-As for the python dictionary, because of the various ways of getting
-an item out of it, we will activate an interactive small utility
-for extracting the right object out of the dictionary. This tool will map all the 
-objects that this dictionary holds, and will ask you to choose which one is
-the right one, either for "images" or for "labels".
+Both options are good, but it is more important for us to see what the model will see on his training.
 
-Example:
-```yaml
-{
-     all_labels: {
-          not_good_torch_labels: Tensor ⓪,
-          not_good_np_labels: ndarray ①,
-          good_torch_labels: Tensor ②
-     },
-     something_other_then_labels: ndarray ③
-}
 
-prompt >> which one of the yellow items is your required data?
-user input >> 2
-```
-
-</details>
