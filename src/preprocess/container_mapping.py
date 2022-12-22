@@ -19,6 +19,10 @@ class ContainerMapper:
         self._mapper: Optional[Callable] = None
         self._route: List[str] = []
 
+    @property
+    def route(self):
+        return self._route
+
     def analyze(self, objs):
         """
         Check which kind of object we received. Raise a NotImplementedError exception if not handling the specific type.
@@ -59,7 +63,7 @@ class ContainerMapper:
         map_for_printing = json.dumps(res, indent=5, ensure_ascii=False)
         colorful_json = highlight(map_for_printing, lexers.JsonLexer(), formatters.TerminalFormatter())
         print(colorful_json.replace("\"", ""))
-        value = int(input("which one of the yellow items is your required data?\n"))
+        value = int(input("Please insert the circled number of the required data:\n"))
         print(f'Path for getting objects out of container: {targets[value]}')
         keys = [r.replace("'", "").replace('[', '').replace(']', '') for r in targets[value].split(']')][:-1]
         return keys
@@ -93,25 +97,32 @@ def container_mapping(obj: Any, path: str, targets: list):
         for k, v in obj.items():
             printable_map[k] = container_mapping(v, path + f"['{k}']", targets)
     elif isinstance(obj, tuple):
-        printable_map = f'List [{type(obj[0])}] {numbers[len(targets) % len(numbers)]}'
+        types = []
+        if len(obj) < 5:
+            for o in obj:
+                types.append(str(type(o)))
+        else:
+            types.append(str(type(obj[0])))
+        printable_map = f' {numbers[len(targets) % len(numbers)]}: Tuple [{types}]'
         targets.append(path)
     elif isinstance(obj, list):
-        printable_map = f'List [{type(obj[0])}] {numbers[len(targets) % len(numbers)]}'
+        printable_map = f' {numbers[len(targets) % len(numbers)]}: List [{type(obj[0])}]'
         targets.append(path)
     elif isinstance(obj, str):
         return "string"
         # targets.append(path)
     elif isinstance(obj, torch.Tensor):
-        printable_map = f"Tensor {numbers[len(targets) % len(numbers)]}"
+        printable_map = f" {numbers[len(targets) % len(numbers)]}: Tensor"
         targets.append(path)
     elif isinstance(obj, ndarray):
-        printable_map = f"ndarray {numbers[len(targets) % len(numbers)]}"
+        printable_map = f" {numbers[len(targets) % len(numbers)]}: ndarray"
         targets.append(path)
     elif isinstance(obj, Image.Image):
-        printable_map = f"PIL Image {numbers[len(targets) % len(numbers)]}"
+        printable_map = f" {numbers[len(targets) % len(numbers)]}: PIL Image"
         targets.append(path)
     else:
-        raise RuntimeError("unsupported object")
+        raise RuntimeError(f"unsupported object! Object found has a type of {type(obj)} which is not supported for now.\n"
+                           f"Supported types: [Mapping, Tuple, List, String, Tensor, Numpy array, PIL Image]")
     return printable_map
 
 
