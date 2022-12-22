@@ -13,9 +13,9 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
     TASK = "semantic_segmentation"
 
     def __init__(self, *, num_classes: int,
-                 train_data: Union[Iterable, Iterator],
+                 train_data: Iterable,
                  ignore_labels: List[int] = None,
-                 val_data: Optional[Union[Iterable, Iterator]] = None,
+                 val_data: Optional[Iterable] = None,
                  ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
