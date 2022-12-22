@@ -36,7 +36,7 @@ class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
                 hist[cls] = float(np.round(np.mean(self._hist[cls]), 3))
 
         create_bar_plot(ax, list(hist.values()), hist.keys(),
-                        x_label="Class", y_label="Size of BBOX [% of image]", title="Objects minimal bounding-boxes size",
+                        x_label="Class", y_label="Size of BBOX [% of image]", title="Objects minimal bounding-boxes area",
                         train=train, color=self.colors[int(train)], yticks=True)
 
         ax.grid(visible=True, axis='y')

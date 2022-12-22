@@ -2,7 +2,7 @@ import unittest
 
 import torch
 
-from src.feature_extractors.segmentation.appearances_in_images import AppearancesInImages
+from src.feature_extractors.segmentation.classes_appearances_in_images import AppearancesInImages
 from src.preprocess import SegmentationPreprocessor
 from tests.segmentation_tests.example_dataset import train_loader, num_classes, ignore_labels
 

@@ -10,8 +10,7 @@ from src.logger.logger_utils import create_bar_plot
 class AverageBrightness(FeatureExtractorAbstract):
     def __init__(self):
         super().__init__()
-        self._brightness: List[float] = []
-        self._luminance: List[float] = []
+        self._brightness: List[np.ndarray] = []
 
     def execute(self, data):
         for image in data.images:
