@@ -137,6 +137,16 @@ class SegmentationPreprocessor(PreprocessorAbstract):
             if len(values) != 2:
                 print(f'Weird, OneHot should have two values only! Got {len(values)} != 2 ({values})')
 
+    @staticmethod
+    def _nan_validate(objects):
+        # TODO: Keep that nan indices in mind
+        nans = torch.isnan(objects)
+        if nans.any():
+            nan_indices = set(nans.nonzero()[:, 0].tolist())
+            all_indices = set(i for i in range(objects.shape[0]))
+            valid_indices = all_indices - nan_indices
+            return objects[valid_indices]
+
     def validate(self, objects: Optional[Tuple]) -> Tuple[Tensor, Tensor]:
         """
         Validating object came out of next() method activated on the iterator.
@@ -145,6 +155,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :return: images, labels as Tuple[Tensor, Tensor] with shape [[BS, C, W, H], [BS, N, W, H]]
         """
         images, labels = self._type_validate(objects)
+
+        images = self._nan_validate(images)
+        labels = self._nan_validate(labels)
 
         images = self._dim_validate_images(images)
         labels = self._dim_validate_labels(labels)
