@@ -14,6 +14,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
     def __init__(self, *, num_classes: int,
                  train_data: Iterable,
+                 samples_to_visualize: int,
                  ignore_labels: List[int] = None,
                  val_data: Optional[Iterable] = None,
                  ):
@@ -24,7 +25,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param ignore_labels: List of not-valid labeled classes such as background.
         :param val_data: Iterable object contains images and labels of the validation dataset
         """
-        super().__init__(train_data, val_data, self.TASK)
+        super().__init__(train_data, val_data, self.TASK, samples_to_visualize)
 
         self._preprocessor = SegmentationPreprocessor(num_classes, ignore_labels)
 
