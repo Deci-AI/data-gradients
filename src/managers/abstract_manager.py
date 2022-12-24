@@ -1,4 +1,5 @@
 import concurrent
+import itertools
 from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, Optional, List
 
@@ -20,7 +21,8 @@ class AnalysisManagerAbstract:
 
     def __init__(self, train_data: Iterable,
                  val_data: Optional[Iterable],
-                 task: str):
+                 task: str,
+                 samples_to_visualize: int):
 
         self._train_extractors: List[FeatureExtractorAbstract] = []
         self._val_extractors: List[FeatureExtractorAbstract] = []
@@ -40,7 +42,8 @@ class AnalysisManagerAbstract:
             self._val_iter = None
 
         # Logger
-        self._loggers = [TensorBoardLogger(), JsonLogger()]
+        self._loggers = {'TB': TensorBoardLogger(itertools.cycle(self._train_iter), samples_to_visualize),
+                         'JSON': JsonLogger()}
 
         self._preprocessor: PreprocessorAbstract = Optional[None]
         self._cfg = None
@@ -111,6 +114,8 @@ class AnalysisManagerAbstract:
         Then, it logs the information through the logger.
         :return:
         """
+        self._loggers['TB'].visualize()
+
         for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
             axes = dict()
             if train_extractor.single_axis:
@@ -127,18 +132,18 @@ class AnalysisManagerAbstract:
 
             fig.tight_layout()
 
-            for logger in self._loggers:
-                title = val_extractor.__class__.__name__
-                logger.log(title, fig if isinstance(logger, TensorBoardLogger) else [train_hist, val_hist])
+            title = val_extractor.__class__.__name__
+            self._loggers['TB'].log(title, fig)
+            self._loggers['JSON'].log(title, [train_hist, val_hist])
 
     def close(self):
         """
         Safe logger closing
         """
-        [logger.close() for logger in self._loggers]
+        [self._loggers[logger].close() for logger in self._loggers.keys()]
         print(f'{"*" * 50}'
               f'\nWe have finished evaluating your dataset!'
-              f'\nThe results can be seen in {self._loggers[0].logdir}')
+              f'\nThe results can be seen in {self._loggers["TB"].logdir}')
 
     def run(self):
         """
