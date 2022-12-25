@@ -146,6 +146,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
             all_indices = set(i for i in range(objects.shape[0]))
             valid_indices = all_indices - nan_indices
             return objects[valid_indices]
+        return objects
 
     def validate(self, objects: Optional[Tuple]) -> Tuple[Tensor, Tensor]:
         """
@@ -202,6 +203,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         labels = self._remove_ignore_labels(labels)
 
         labels = [squeeze_by_class.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
+
+        # TODO: Debug convexity things
+        # contours.debug_convexity_things(labels, images)
 
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
