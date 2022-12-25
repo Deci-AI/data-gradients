@@ -1,3 +1,4 @@
+import torch
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
 
@@ -13,12 +14,16 @@ class TensorBoardLogger(ResultsLogger):
         self.writer = SummaryWriter(log_dir=self.logdir)
 
     def visualize(self):
+        to_gray_scale = torchvision.transforms.Grayscale()
         n = 0
         while n < self.samples_to_visualize:
             images, labels = next(self._train_iter)
-            n += len(images)
-            img_grid = torchvision.utils.make_grid(images)
+            images = to_gray_scale(images)
+            labels *= 255
 
+            img_grid = torchvision.utils.make_grid(torch.cat([images, labels]), nrow=len(images))
+
+            n += len(images)
             # write to tensorboard
             self.writer.add_image(f'{n}_images_labels', img_grid)
 
