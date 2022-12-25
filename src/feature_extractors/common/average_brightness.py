@@ -16,6 +16,11 @@ class AverageBrightness(FeatureExtractorAbstract):
         for image in data.images:
             np_image = image.numpy().transpose(1, 2, 0)
             lightness, _, _ = cv2.split(cv2.cvtColor(np_image, cv2.COLOR_BGR2LAB))
+            # TODO: Handle zero division better
+            if lightness is None:
+                continue
+            if np.max(lightness) is 0:
+                continue
             n_lightness = lightness / np.max(lightness)
             self._brightness.append(np.mean(n_lightness))
 
