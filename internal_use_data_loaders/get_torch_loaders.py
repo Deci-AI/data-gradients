@@ -17,7 +17,7 @@ from internal_use_data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
 
 class DataLoaders:
     def __init__(self, batch_size: int = 16):
-        self._transforms = torchvision.transforms.Compose([ToTensor(), Resize(size=256)])
+        self._transforms = torchvision.transforms.Compose([ToTensor()])
         self._target_transforms = torchvision.transforms.Compose([ToTensor()])
         self._batch_size = batch_size
 
@@ -104,7 +104,7 @@ class DataLoaders:
 # 1,        19,         19,  ?
 
 dataloader = DataLoaders(batch_size=16)
-train_dataloader, val_dataloader = dataloader.get_dataloader(dataset="bdd")
+train_dataloader, val_dataloader = dataloader.get_dataloader(dataset="pp_human")
 train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
-num_classes = 19
+num_classes = 1
 ignore_labels = [0] #  [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
