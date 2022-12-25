@@ -81,7 +81,6 @@ class AnalysisManagerAbstract:
         return bd
 
     def execute(self):
-        return
         """
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
@@ -89,16 +88,9 @@ class AnalysisManagerAbstract:
         pbar = tqdm.tqdm(desc='Working on batch # ', total=self._dataset_size)
         train_batch = 0
         val_batch_data = None
-        # self._train_only = True
         while True:
-            # total = time.time()
-            if train_batch > 1000000:
-                break
             try:
-                # s = time.time()
                 train_batch_data = self._get_batch(self._train_iter)
-                # print()
-                # print(f'Got train batch in {time.time() - s} seconds')
             except StopIteration:
                 break
             else:
@@ -106,29 +98,17 @@ class AnalysisManagerAbstract:
 
             if not self._train_only:
                 try:
-                    # s = time.time()
                     val_batch_data = self._get_batch(self._val_iter)
-                    # print()
-                    # print(f'Got val batch in {time.time() - s} seconds')
                 except StopIteration:
                     self._train_only = True
                 else:
                     pass
-            # s = time.time()
             futures = [self._threads.submit(extractor.execute, train_batch_data) for extractor in
                        self._train_extractors]
             if not self._train_only:
                 futures += [self._threads.submit(extractor.execute, val_batch_data) for extractor in
                             self._val_extractors]
-            # print()
-            # print(f'Submitted all threads in {time.time() -s} seconds')
-            # Wait for all threads to finish
-            # s = time.time()
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
-            # print()
-            # print(f'Finished all features in {time.time() - s} seconds')
-            # print()
-            # print(f'Total time for batch of {len(train_batch_data.images)} - {time.time() - total}')
             pbar.update()
             train_batch += 1
 
