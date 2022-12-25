@@ -28,11 +28,19 @@ train_dataset = BDDDataset(data_folder="data/bdd_example", split='train', transf
 val_dataset = BDDDataset(data_folder="data/bdd_example", split='val', transform=Compose([ToTensor(), CenterCrop(512)]))
 
 # Create torch DataLoader
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+# train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+# val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+#
+# da = SegmentationAnalysisManager(train_data=train_loader,
+#                                  val_data=val_loader,
+#                                  num_classes=BDDDataset.NUM_CLASSES,
+#                                  ignore_labels=BDDDataset.IGNORE_LABELS)
 
-da = SegmentationAnalysisManager(train_data=train_loader,
-                                 val_data=val_loader,
-                                 num_classes=BDDDataset.NUM_CLASSES,
-                                 ignore_labels=BDDDataset.IGNORE_LABELS)
+
+from internal_use_data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes, ignore_labels
+da = SegmentationAnalysisManager(train_data=train_data_iterator,
+                                 val_data=val_data_iterator,
+                                 num_classes=num_classes,
+                                 ignore_labels=ignore_labels,
+                                 samples_to_visualize=10)
 da.run()
