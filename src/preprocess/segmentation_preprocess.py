@@ -206,11 +206,12 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         # TODO: Debug convexity things
         # contours.debug_convexity_things(labels, images)
-
+        # exit(0)
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
         sbd = SegBatchData(images=images,
                            labels=labels,
-                           contours=all_contours)
+                           contours=all_contours,
+                           split="")
 
         return sbd

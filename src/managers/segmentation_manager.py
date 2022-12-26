@@ -1,4 +1,4 @@
-from typing import Optional, Iterator, Iterable, Union, List
+from typing import Optional, Iterable, List
 
 import hydra
 from src.managers.abstract_manager import AnalysisManagerAbstract

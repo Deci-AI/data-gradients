@@ -8,6 +8,7 @@ from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAb
 
 
 class AverageContrast(FeatureExtractorAbstract):
+    # TODO: Not implemented correcetly
     def __init__(self):
         super().__init__()
         self._grayscale: bool = True
@@ -22,7 +23,7 @@ class AverageContrast(FeatureExtractorAbstract):
         images = torch.stack(images)
         self._contrast.append(np.round(torch.std(images).item(), 5))
 
-    def process(self, ax, train):
+    def _process(self):
         # print('Contrast of images is: ', np.mean(self._contrast))
         pass
 

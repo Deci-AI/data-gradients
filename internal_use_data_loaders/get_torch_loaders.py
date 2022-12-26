@@ -107,4 +107,5 @@ dataloader = DataLoaders(batch_size=16)
 train_dataloader, val_dataloader = dataloader.get_dataloader(dataset="pp_human")
 train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
 num_classes = 1
-ignore_labels = [0] #  [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
+ignore_labels = [0] # [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
+

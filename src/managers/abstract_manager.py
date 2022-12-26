@@ -1,11 +1,9 @@
 import concurrent
-import itertools
 from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, Optional, List
 
 import hydra
 import tqdm
-from matplotlib import pyplot as plt
 
 from src.feature_extractors import FeatureExtractorAbstract
 from src.logger.json_logger import JsonLogger
@@ -29,8 +27,7 @@ class AnalysisManagerAbstract:
                  task: str,
                  samples_to_visualize: int):
 
-        self._train_extractors: List[FeatureExtractorAbstract] = []
-        self._val_extractors: List[FeatureExtractorAbstract] = []
+        self._extractors: List[FeatureExtractorAbstract] = []
 
         self._threads = ThreadPoolExecutor()
 
@@ -47,7 +44,7 @@ class AnalysisManagerAbstract:
             self._val_iter = None
 
         # Logger
-        self._loggers = {'TB': TensorBoardLogger(itertools.cycle(self._train_iter), samples_to_visualize),
+        self._loggers = {'TB': TensorBoardLogger(),
                          'JSON': JsonLogger()}
 
         self._preprocessor: PreprocessorAbstract = Optional[None]
@@ -61,10 +58,7 @@ class AnalysisManagerAbstract:
         Create lists of feature extractors, both to train and val iterables.
         """
         cfg = hydra.utils.instantiate(self._cfg)
-        self._train_extractors = cfg.common + cfg[self._task]
-        # Create another instances for same classes
-        cfg = hydra.utils.instantiate(self._cfg)
-        self._val_extractors = cfg.common + cfg[self._task]
+        self._extractors = cfg.common + cfg[self._task]
 
     def _get_batch(self, data_iterator: Iterator) -> BatchData:
         """
@@ -89,26 +83,32 @@ class AnalysisManagerAbstract:
         train_batch = 0
         val_batch_data = None
         while True:
+            if train_batch > 50:
+                break
+            # Try to get train batch
             try:
                 train_batch_data = self._get_batch(self._train_iter)
+                train_batch_data.split = 'train'
             except StopIteration:
                 break
-            else:
-                pass
-
+            # Try to get val batch
             if not self._train_only:
                 try:
                     val_batch_data = self._get_batch(self._val_iter)
+                    val_batch_data.split = 'val'
                 except StopIteration:
                     self._train_only = True
-                else:
-                    pass
+
+            # Run threads
             futures = [self._threads.submit(extractor.execute, train_batch_data) for extractor in
-                       self._train_extractors]
+                       self._extractors]
+
             if not self._train_only:
-                futures += [self._threads.submit(extractor.execute, val_batch_data) for extractor in
-                            self._val_extractors]
+                futures = [self._threads.submit(extractor.execute, val_batch_data) for extractor in
+                           self._extractors]
+
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+
             pbar.update()
             train_batch += 1
 
@@ -119,27 +119,8 @@ class AnalysisManagerAbstract:
         Then, it logs the information through the logger.
         :return:
         """
-        self._loggers['TB'].visualize()
-
-        for val_extractor, train_extractor in zip(self._val_extractors, self._train_extractors):
-            axes = dict()
-            if train_extractor.single_axis:
-                fig, ax = plt.subplots(figsize=(10, 5))
-                axes['train'] = axes['val'] = ax
-            else:
-                fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-                axes['train'], axes['val'] = ax
-
-            # First val - because graph params will be overwritten by latest (train) and we want it's params
-            val_hist = val_extractor.process(axes['val'], train=False)
-
-            train_hist = train_extractor.process(axes['train'], train=True)
-
-            fig.tight_layout()
-
-            title = val_extractor.__class__.__name__
-            self._loggers['TB'].log(title, fig)
-            self._loggers['JSON'].log(title, [train_hist, val_hist])
+        for extractor in self._extractors:
+            extractor.process(self._loggers)
 
     def close(self):
         """
@@ -148,7 +129,7 @@ class AnalysisManagerAbstract:
         [self._loggers[logger].close() for logger in self._loggers.keys()]
         print(f'{"*" * 50}'
               f'\nWe have finished evaluating your dataset!'
-              f'\nThe results can be seen in {self._loggers["TB"].logdir}')
+              f'\nThe results can be seen in TODO')
 
     def run(self):
         """

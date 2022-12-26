@@ -18,7 +18,7 @@ class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
         pass
 
     @abstractmethod
-    def process(self, ax, train):
+    def _process(self):
         pass
 
     @staticmethod

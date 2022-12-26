@@ -4,13 +4,13 @@ import cv2
 import numpy as np
 
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot
+from src.logger.logger_utils import create_bar_plot, create_json_object
 
 
 class AverageBrightness(FeatureExtractorAbstract):
     def __init__(self):
         super().__init__()
-        self._brightness: List[np.ndarray] = []
+        self._brightness = {'train': [], 'val': []}
 
     def execute(self, data):
         for image in data.images:
@@ -22,19 +22,23 @@ class AverageBrightness(FeatureExtractorAbstract):
             if np.max(lightness) is 0:
                 continue
             n_lightness = lightness / np.max(lightness)
-            self._brightness.append(np.mean(n_lightness))
+            self._brightness[data.split].append(np.mean(n_lightness))
 
-    def process(self, ax, train):
-        values, bins = np.histogram(self._brightness, bins=10)
+    def _process(self):
+        for split in ['train', 'val']:
+            values, bins = self._post_process(self._brightness[split])
+            create_bar_plot(self.ax, list(values), bins,
+                            x_label="", y_label="% out of all images",
+                            title="Average brightness of images", ticks_rotation=0,
+                            split=split, color=self.colors[split], yticks=True)
+
+            self.json_object.update({split: create_json_object(values, bins)})
+
+    def _post_process(self, data, num_bins=10):
+        values, bins = np.histogram(data, bins=num_bins)
         values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
         bins = self._create_keys(bins)
-
-        create_bar_plot(ax, list(values), bins,
-                        x_label="", y_label="% out of all images",
-                        title="Average brightness of images", ticks_rotation=0,
-                        train=train, color=self.colors[int(train)], yticks=True)
-
-        return dict(zip(bins, list(values)))
+        return values, bins
 
     @staticmethod
     def _create_keys(bins):

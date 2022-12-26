@@ -3,7 +3,7 @@ import numpy as np
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot
+from src.logger.logger_utils import create_bar_plot, create_json_object
 
 
 class PixelsPerClass(SegmentationFeatureExtractorAbstract):
@@ -15,7 +15,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
         super().__init__()
 
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
-        self._hist = {k: [] for k in keys}
+        self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
 
     def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
@@ -25,18 +25,19 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
                 if not len(unique) > 1:
                     continue
                 for contour in cls_contours:
-                    self._hist[int(np.delete(unique, 0))].append(np.round(100 * contours.get_contour_area(contour) / img_dim, 3))
+                    size = np.round(100 * contours.get_contour_area(contour) / img_dim, 3)
+                    self._hist[data.split][int(np.delete(unique, 0))].append(size)
 
-    def process(self, ax, train):
+    def _process(self):
+        for split in ['train', 'val']:
+            hist = dict.fromkeys(self._hist[split].keys(), 0.)
+            for cls in self._hist[split]:
+                if len(self._hist[split][cls]):
+                    hist[cls] = float(np.round((np.mean(self._hist[split][cls])), 3))
+            hist_values = np.array(list(hist.values()))
+            create_bar_plot(self.ax, hist_values, self._hist[split].keys(),
+                            x_label="Class", y_label="Size of component [% of image]", title="Average Pixels Per Component",
+                            split=split, color=self.colors[split], yticks=True)
 
-        hist = dict.fromkeys(self._hist.keys(), 0.)
-        for cls in self._hist:
-            if len(self._hist[cls]):
-                hist[cls] = float(np.mean(self._hist[cls]))
-        hist_values = np.array(list(hist.values()))
-        create_bar_plot(ax, hist_values, self._hist.keys(),
-                        x_label="Class", y_label="Size of object [% of image]", title="Average Pixels Per Object",
-                        train=train, color=self.colors[int(train)], yticks=True)
-
-        ax.grid(visible=True, axis='y')
-        return dict(zip(self._hist.keys(), hist_values))
+            self.ax.grid(visible=True, axis='y')
+            self.json_object.update({split: create_json_object(hist_values, self._hist[split].keys())})
