@@ -5,25 +5,31 @@ defaults:
   - common
 
 semantic_segmentation:
-  - _target_: src.feature_extractors.segmentation.get_class_distribution.GetClassDistribution
+  - _target_: src.feature_extractors.segmentation.classes_distribution.GetClassDistribution
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.pixels_per_class.PixelsPerClass
+  - _target_: src.feature_extractors.segmentation.classes_number_of_pixels.PixelsPerClass
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.appearances_in_images.AppearancesInImages
+  - _target_: src.feature_extractors.segmentation.classes_appearances_in_images.AppearancesInImages
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.objects_size.ObjectSizeDistribution
+  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.objects_center_of_mass.ObjectsCenterOfMass
+  - _target_: src.feature_extractors.segmentation.components_center_of_mass.ComponentsCenterOfMass
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.labels_aspect_ratios
-  - _target_: src.feature_extractors.segmentation.labels_resolutions
-  - _target_: src.feature_extractors.segmentation.count_num_objects.CountNumObjects
-  - _target_: src.feature_extractors.segmentation.width_height.WidthHeight
+  - _target_: src.feature_extractors.segmentation.components_convexity.ComponentsConvexity
+    num_classes: ${number_of_classes}
+    ignore_labels: ${ignore_labels}
+  - _target_: src.feature_extractors.segmentation.components_erosion.ErosionTest
+    num_classes: ${number_of_classes}
+    ignore_labels: ${ignore_labels}
+  - _target_: src.feature_extractors.segmentation.labels_aspect_ratios.LabelsAspectRatios
+  - _target_: src.feature_extractors.segmentation.labels_resolutions.LabelsResolutions
+  - _target_: src.feature_extractors.segmentation.count_num_components.CountNumComponents
+  - _target_: src.feature_extractors.segmentation.bounding_boxes_width_height.WidthHeight
 #  - _target_: feature_extractors.segmentation.count_small_objects.SegmentationCountSmallObjects
 #    percent_of_an_image: 1
 

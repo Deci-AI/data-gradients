@@ -7,7 +7,7 @@ from src.feature_extractors.segmentation.segmentation_abstract import Segmentati
 from src.logger.logger_utils import create_bar_plot
 
 
-class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
+class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     TODO: NOT IMPLEMENTED WELL YET
@@ -27,12 +27,12 @@ class SegmentationCountSmallObjects(SegmentationFeatureExtractorAbstract):
                     _, _, contour_area = src.preprocess.contours.get_contour_moment(c)
                     self._hist[np.digitize(contour_area, self.bins) - 1] += 1
 
-    def process(self, ax, train):
+    def _process(self):
         # TODO: Make it work
         hist = list(np.array(self._hist) / sum(self._hist))
         create_bar_plot(ax, hist, self.label,
                         x_label="Object Size [%]", y_label="# Objects", ticks_rotation=0,
-                        title="Number of small objects", train=train, color=self.colors[int(train)])
+                        title="Number of small objects", split=split, color=self.colors[split])
 
         ax.grid(visible=True, axis='y')
         return dict(zip(self.label, hist))

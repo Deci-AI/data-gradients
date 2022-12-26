@@ -3,10 +3,10 @@ import numpy as np
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot
+from src.logger.logger_utils import create_bar_plot, create_json_object
 
 
-class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
+class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     Get all Bounding Boxes areas and plot them as a percentage of the whole image.
@@ -15,7 +15,7 @@ class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
         super().__init__()
 
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
-        self._hist = {k: [] for k in keys}
+        self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
 
     def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
@@ -27,17 +27,19 @@ class ObjectSizeDistribution(SegmentationFeatureExtractorAbstract):
                 for c in cls_contours:
                     rect = contours.get_rotated_bounding_rect(c)
                     wh = rect[1]
-                    self._hist[int(np.delete(unique, 0))].append(100 * int(wh[0] * wh[1]) / img_dim)
+                    self._hist[data.split][int(np.delete(unique, 0))].append(100 * int(wh[0] * wh[1]) / img_dim)
 
-    def process(self, ax, train):
-        hist = dict.fromkeys(self._hist.keys(), 0.)
-        for cls in self._hist:
-            if len(self._hist[cls]):
-                hist[cls] = float(np.round(np.mean(self._hist[cls]), 3))
+    def _process(self):
+        for split in ['train', 'val']:
+            hist = dict.fromkeys(self._hist[split].keys(), 0.)
+            for cls in self._hist[split]:
+                if len(self._hist[split][cls]):
+                    hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
 
-        create_bar_plot(ax, list(hist.values()), hist.keys(),
-                        x_label="Class", y_label="Size of BBOX [% of image]", title="Objects minimal bounding-boxes area",
-                        train=train, color=self.colors[int(train)], yticks=True)
+            create_bar_plot(self.ax, list(hist.values()), hist.keys(), x_label="Class",
+                            y_label="Size of BBOX [% of image]", title="Components Bounding-Boxes area",
+                            split=split, color=self.colors[split], yticks=True)
 
-        ax.grid(visible=True, axis='y')
-        return dict(zip(hist.keys(), list(hist.values())))
+            self.ax.grid(visible=True, axis='y')
+            self.json_object.update({split: create_json_object(hist.values(), hist.keys())})
+

@@ -16,24 +16,25 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
     """
     def __init__(self):
         super().__init__()
-        self._width: List = []
-        self._height: List = []
-        self.single_axis = False
+        self._width = {'train': [], 'val': []}
+        self._height = {'train': [], 'val': []}
+        self.num_axis = (1, 2)
 
     def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for cls_contours in image_contours:
                 for c in cls_contours:
                     rect = contours.get_rotated_bounding_rect(c)
-                    self._width.append(rect[1][0])
-                    self._height.append(rect[1][1])
+                    self._width[data.split].append(rect[1][0])
+                    self._height[data.split].append(rect[1][1])
 
-    def process(self, ax, train):
-        width = [w for w in self._width if w > 0]
-        height = [h for h in self._height if h > 0]
-        create_heatmap_plot(ax=ax, x=width, y=height, train=train, bins=10,
-                            sigma=2, title=f'Bounding Boxes Width / Height', x_label='Width [px]', y_label='Height [px]',
-                            use_gaussian_filter=True, use_extent=True)
+    def _process(self):
+        for split in ['train', 'val']:
+            width = [w for w in self._width[split] if w > 0]
+            height = [h for h in self._height[split] if h > 0]
+            create_heatmap_plot(ax=self.ax[int(split == 'train')], x=width, y=height, split=split, bins=10, sigma=2,
+                                title=f'Bounding Boxes Width / Height', x_label='Width [px]', y_label='Height [px]',
+                                use_gaussian_filter=True, use_extent=True)
 
-        quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
-        return {"Quantized width height values": quantized_heat_map.tolist()}
+            quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
+            self.json_object.update({split: quantized_heat_map.tolist()})

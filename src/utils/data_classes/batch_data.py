@@ -9,9 +9,11 @@ class BatchData:
     """
         Images - [BS, 3, W, H]
         Labels - [BS, N, W, H] where N is number of classes in each image
+        split  - train / val
     """
     images: Tensor
     labels: List
+    split: str
 
 
 @dataclass
