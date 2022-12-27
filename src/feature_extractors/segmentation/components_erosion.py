@@ -20,7 +20,7 @@ class ErosionTest(SegmentationFeatureExtractorAbstract):
         self._hist_eroded = {'train': {k: 0. for k in keys}, 'val': {k: 0. for k in keys}}
         self._kernel = np.ones((3, 3), np.uint8)
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
 
         for i, image_contours in enumerate(data.contours):
             label = data.labels[i].numpy().transpose(1, 2, 0).astype(np.uint8)

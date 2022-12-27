@@ -20,7 +20,7 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
         self._height = {'train': [], 'val': []}
         self.num_axis = (1, 2)
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for cls_contours in image_contours:
                 for c in cls_contours:

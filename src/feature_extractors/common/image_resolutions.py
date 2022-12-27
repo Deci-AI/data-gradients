@@ -7,7 +7,7 @@ class ImagesResolutions(FeatureExtractorAbstract):
         super().__init__()
         self._res_dict = {'train': dict(), 'val': dict()}
 
-    def execute(self, data):
+    def _execute(self, data):
         for image in data.images:
             res = str(tuple(image.shape[1:]))
             if res not in self._res_dict[data.split]:

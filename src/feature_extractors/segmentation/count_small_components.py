@@ -20,7 +20,7 @@ class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):
         self._hist: List[int] = [0] * 11
         self.label = ['<0.01', '0.02', '0.03', '0.04', '0.05', '0.06', '0.07', '0.08', '0.09', '0.1', '>0.1']
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, onehot_contours in enumerate(data.batch_onehot_contours):
             for cls_contours in onehot_contours:
                 for c in cls_contours:

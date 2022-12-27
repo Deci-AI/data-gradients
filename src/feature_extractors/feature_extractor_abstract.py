@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 
 from src.logger.results_logger import ResultsLogger
 from src.utils import BatchData
+from src.utils.common.stopwatch import Stopwatch
 
 
 class FeatureExtractorAbstract(ABC):
@@ -28,9 +29,14 @@ class FeatureExtractorAbstract(ABC):
         self.ax = None
         self.json_object: Dict[str, Optional[ResultsLogger]] = {'train': None, 'val': None}
 
-    @abstractmethod
     def execute(self, data: BatchData):
-        pass
+        sw = Stopwatch()
+        self._execute(data)
+        sw.tick_and_print(f'{self.__class__.__name__ + data.split}')
+
+    @abstractmethod
+    def _execute(self, data: BatchData):
+        raise NotImplementedError
 
     def process(self, loggers: Dict[str, ResultsLogger]):
         self.fig, self.ax = plt.subplots(*self.num_axis, figsize=(10, 5))
@@ -41,6 +47,7 @@ class FeatureExtractorAbstract(ABC):
         self.log(logger=loggers['TB'],
                  title=self.__class__.__name__,
                  data=self.fig)
+        
         self.log(logger=loggers['JSON'],
                  title=self.__class__.__name__,
                  data=self.json_object)

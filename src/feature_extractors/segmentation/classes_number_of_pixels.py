@@ -17,7 +17,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
             for j, cls_contours in enumerate(image_contours):

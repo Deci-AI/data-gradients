@@ -14,7 +14,7 @@ class AverageContrast(FeatureExtractorAbstract):
         self._grayscale: bool = True
         self._contrast: List[float] = []
 
-    def execute(self, data):
+    def _execute(self, data):
         # if self._grayscale:
         #     images = self._get_gray_scaled_images()
         images = [torchvision.transforms.ToPILImage()(x) for x in data.images]

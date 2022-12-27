@@ -14,7 +14,7 @@ class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
         super().__init__()
 
     @abstractmethod
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         pass
 
     @abstractmethod
@@ -23,4 +23,7 @@ class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
 
     @staticmethod
     def normalize(values, total):
+        # TODO: Fix it better
+        if total == 0:
+            total = 1
         return [np.round(((100 * value) / total), 3) for value in values]

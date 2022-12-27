@@ -10,7 +10,7 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
         self._ar_dict = {'train': dict(), 'val': dict()}
         self._channels_last = False
 
-    def execute(self, data):
+    def _execute(self, data):
         for label in data.labels:
             ar = np.round(label.shape[1] / label.shape[2], 2)
             if ar not in self._ar_dict[data.split]:

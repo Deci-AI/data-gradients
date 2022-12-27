@@ -9,7 +9,7 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
         super().__init__()
         self._ar_dict = {'train': dict(), 'val': dict()}
 
-    def execute(self, data):
+    def _execute(self, data):
         for image in data.images:
             ar = np.round(image.shape[1] / image.shape[2], 2)
             if ar not in self._ar_dict[data.split]:

@@ -12,7 +12,7 @@ class AverageBrightness(FeatureExtractorAbstract):
         super().__init__()
         self._brightness = {'train': [], 'val': []}
 
-    def execute(self, data):
+    def _execute(self, data):
         for image in data.images:
             np_image = image.numpy().transpose(1, 2, 0)
             lightness, _, _ = cv2.split(cv2.cvtColor(np_image, cv2.COLOR_BGR2LAB))
