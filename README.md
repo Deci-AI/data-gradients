@@ -11,26 +11,58 @@ Images themselves, Labels themselves, annotations, locations of each object. Any
 You can also censor any classes you`de like, can hide class names and can remove features you are not interested in publishing. 
 
 
+#### What is MUST-HAVE
+
+* Train set data-loader that compatible to the [available input types](#Available input types)
+
+#### What is Optional
+
+* Validation set data-loader that compatible to the [available input types](#Available input types)
+
+<br>
+
+
 <details>
-<summary>Available input types</summary>
+    <summary> Available input types     </summary>
+
+
 
 ### Iterables
 Python iterables objects implement the `next()` method for getting next object from iterator.
-For now, we only support the situation where the objects are:
-* Tuple
-* Two objects
+<br>
+Can be ``torch.dataloader``, but not must.
 
-where the two objects should be in this form:
-``
-(images, labels)
-``
-### Tuples Objects
-We support various of object types:
+### Images & Labels Objects
+We support various of types for handling images or labels:
 * `torch.Tensor`
 * `numpy.ndarray`
 * `PIL.Image`
-* `Python Dictionary`
+* `Python Dictionary` (See [Python Dictionary Handling](#Python dictionary handling]))
 
+<br>
+<pre>
+<details>
+<summary>My dataset returns dictionary</summary>
+ 
+OR
+```python
+def __getitem__(...):
+    return {'my_images': images: torch.Tensor,
+            'my_labels': labels: numpy.ndarray,
+            'my_extras': extras: List[str]
+            }
+```
+OR
+```python
+def __getitem__(...):
+    return images: torch.Tensor, {'my_labels': labels, 'my_other_labels': other_labels, 'labels_paths': labels_paths}
+```
+OR
+```python
+def __getitem__(...):
+    return {'bgr_images': bgr_images, 'grayscale_images': grayscale_images}, labels: torch.Tensor
+```
+#### Python dictionary handling
 As for the python dictionary, because of the various ways of getting
 an item out of it, we will activate an interactive small utility
 for extracting the right object out of the dictionary. This tool will map all the 
@@ -53,11 +85,67 @@ user input >> 2
 ```
 
 </details>
+</pre>
+<br>
+<pre>
+<details>
+<summary> My dataset returns a tuple</summary>
+
+```python
+def __getitem__(...):
+    return images, labels
+```
+</details>
+</pre>
+<br>
+<pre>
+<details>
+
+<summary> My dataset is really crooked </summary>
+
+Not Implemented Yet - contact support for help.
+
+Soon will be available passing a lambda function for extracting images and labels out of any custom object.
+```python
+def __getitem__(...):
+    return BlackBox()
+
+da = SegmentationAnalysisManager(
+    train_data=train_loader,
+    val_data=val_loader,
+    get_images=get_image_from_blackbox,
+    get_labels=get_labels_from_blackbox,
+)
+```
+</details>
+</pre>
+
+<br>
 
 
-####
+</details>
+
+<br>
+<details>
+<summary>
+Our point of view on augmentations
+</summary>
+Using this tool will have different benefits working with data augmentations, and without.
+
+Augmented data will give us a better visualization of the model's point of view of the data, which will be more realistic in terms of finding problems with the training data, etc.
+
+Raw data could be a stronger validation for the data aggregating, labeling and diversity of it.
+
+Both options are good, but it is more important for us to see what the model will see on his training.
+
+</details>
+
+<br>
 <details>
     <summary>How to use</summary>
+
+
+
 
 ### 1. clone GitHub repository
 ```bash
@@ -113,14 +201,5 @@ Click on link and view results:
 ``TensorBoard 2.11.0 at http://localhost:6007/ (Press CTRL+C to quit)``
 
 </details>
-
-### Our point of view on augmentations
-Using this tool will have different benefits working with data augmentations, and without.
-
-Augmented data will give us a better visualization of the model's point of view of the data, which will be more realistic in terms of finding problems with the training data, etc.
-
-Raw data could be a stronger validation for the data aggregating, labeling and diversity of it.
-
-Both options are good, but it is more important for us to see what the model will see on his training.
-
+<br>
 

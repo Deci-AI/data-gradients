@@ -9,7 +9,7 @@ def create_json_object(values, keys):
 
 
 def create_bar_plot(ax, data, labels, split: str, x_label: str = "", y_label: str = "", title: str = "",
-                    width: float = 0.4, ticks_rotation: int = 270,
+                    width: float = 0.4, ticks_rotation: int = 45,
                     color: str = 'yellow', yticks: bool = False):
 
     number_of_labels = len(labels)
@@ -25,8 +25,12 @@ def create_bar_plot(ax, data, labels, split: str, x_label: str = "", y_label: st
 
     if yticks:
         for i in range(len(labels)):
-            v = np.round(data[i], 1) if np.round(data[i], 1) > 0. else ""
-            plt.text(i - (width / 2 if (split == 'train') else -width / 2), data[i], v, ha='center', size='x-small')
+            v = np.round(data[i], 2) if np.round(data[i], 2) > 0. else ""
+            plt.text(x=i - (width / 2 if (split == 'train') else -width / 2),
+                     y=data[i] + 0.5,
+                     s=v,
+                     ha='center',
+                     size='xx-small')
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
@@ -35,6 +39,8 @@ def create_bar_plot(ax, data, labels, split: str, x_label: str = "", y_label: st
 
 
 def create_heatmap_plot(ax, x, y, split: str, bins=50, sigma=2, title="", x_label="", y_label="", use_gaussian_filter: bool=True, use_extent: bool=True):
+    if bins == 0:
+        bins = 1
     heatmap, xedges, yedges = np.histogram2d(x, y, bins=bins)
     if use_gaussian_filter:
         heatmap = gaussian_filter(heatmap, sigma=sigma)

@@ -32,7 +32,7 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
         for split in ['train', 'val']:
             width = [w for w in self._width[split] if w > 0]
             height = [h for h in self._height[split] if h > 0]
-            create_heatmap_plot(ax=self.ax[int(split == 'train')], x=width, y=height, split=split, bins=10, sigma=2,
+            create_heatmap_plot(ax=self.ax[int(split != 'train')], x=width, y=height, split=split, bins=10, sigma=2,
                                 title=f'Bounding Boxes Width / Height', x_label='Width [px]', y_label='Height [px]',
                                 use_gaussian_filter=True, use_extent=True)
 
