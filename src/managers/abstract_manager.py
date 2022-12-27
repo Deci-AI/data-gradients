@@ -127,9 +127,12 @@ class AnalysisManagerAbstract:
         Safe logger closing
         """
         [self._loggers[logger].close() for logger in self._loggers.keys()]
-        print(f'{"*" * 50}'
+        print(f'{"*" * 100}'
               f'\nWe have finished evaluating your dataset!'
-              f'\nThe results can be seen in TODO')
+              f'\nThe results can be seen in {list(self._loggers.values())[0].logdir}'
+              f'\n\nShow tensorboard by writing in terminal:'
+              f'\n\ttensorboard --logdir={list(self._loggers.values())[0].logdir} --bind_all'
+              f'\n')
 
     def run(self):
         """
