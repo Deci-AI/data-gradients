@@ -10,7 +10,6 @@ from src.logger.json_logger import JsonLogger
 from src.logger.tensorboard_logger import TensorBoardLogger
 from src.preprocess import PreprocessorAbstract
 from src.utils import BatchData
-from src.utils.common.stopwatch import Stopwatch
 
 
 # TODO: Check this out
@@ -67,14 +66,12 @@ class AnalysisManagerAbstract:
         :param data_iterator: Iterable for getting next item out of it
         :return: BatchData object, holding images, labels and preprocessed objects in accordance to task
         """
-        sw = Stopwatch()
         batch = next(data_iterator)
         batch = tuple(batch) if isinstance(batch, list) else batch
 
         images, labels = self._preprocessor.validate(batch)
 
         bd = self._preprocessor.preprocess(images, labels)
-        sw.tick_and_print(f"Loading a batch of {len(images)}")
         return bd
 
     def execute(self):
@@ -82,12 +79,10 @@ class AnalysisManagerAbstract:
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
         """
-        # pbar = tqdm.tqdm(desc='Working on batch # ', total=self._dataset_size)
+        pbar = tqdm.tqdm(desc='Working on batch # ', total=self._dataset_size)
         train_batch = 0
         val_batch_data = None
         while True:
-            print("*" * 50)
-            print(f'Batch # {train_batch}')
             if train_batch > 5:
                 break
             # Try to get train batch
@@ -114,7 +109,7 @@ class AnalysisManagerAbstract:
 
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
 
-            # pbar.update()
+            pbar.update()
             train_batch += 1
 
     def post_process(self):
