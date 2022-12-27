@@ -9,14 +9,13 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     Count number of objects in each image, over all classes.
-    For better display, show bins of 0-10 objects and then show bins with size of 5.
+    For better display, show bins of 0-10 objects and then show bins with size of num_bins.
     Full histogram will be with X-axis of [0, 1, ... 10, 11-15, 16-20, ... 81-85, 85+]
     """
     def __init__(self):
         super().__init__()
         self._hist = {'train': dict(), 'val': dict()}
         self._total_objects = {'train': 0, 'val': 0}
-        self._bin_size: int = 5
 
     def execute(self, data: SegBatchData):
         for image_contours in data.contours:
@@ -42,15 +41,16 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
 
             self.json_object.update({split: create_json_object(values, hist.keys())})
 
-    def _into_buckets(self, number_of_objects_per_image):
+    @staticmethod
+    def _into_buckets(number_of_objects_per_image):
         if len(number_of_objects_per_image) < 10:
             return number_of_objects_per_image
         min_bin = min(list(number_of_objects_per_image.keys()))
-        max_bin = max(list(number_of_objects_per_image.keys()))
-        if max_bin > 100:
-            self._bin_size = 10
+        max_bin = int(np.average((sorted(list(number_of_objects_per_image.keys())))[-10:]))
 
-        bins = [*range(min_bin - 1, 10), *range(10, max(list(number_of_objects_per_image.keys())), self._bin_size)]
+        bin_size = int(5 + 5 * (int(max_bin / 50)))
+
+        bins = [*range(min_bin - 1, 10), *range(10, max(list(number_of_objects_per_image.keys())), bin_size)]
 
         indexes = np.digitize(list(number_of_objects_per_image.keys()), bins)
 
@@ -68,7 +68,7 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
                 hist[f'{bins[-2]}+'] = hist[999]
                 del hist[999]
             elif key > 10:
-                new_key = f'{key-self._bin_size}<{key}'
+                new_key = f'{key-bin_size}<{key}'
                 hist[new_key] = hist[key]
                 del hist[key]
             else:
