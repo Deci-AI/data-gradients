@@ -91,9 +91,12 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         """
         unique_values = torch.unique(labels)
         if 0 <= min(unique_values) and max(unique_values) < 1:
+            # TODO:
+            #  If resize uses BiLinear, I'll get here with an error message
             if any(u not in range(0, 255) for u in unique_values * 255):
                 raise NotImplementedError("Values were not matching for integer numbers even after inverse"
-                                          "normalization, Maybe labels are soft-labels? ")
+                                          "normalization.\nYou might using resize transformation with bilinear "
+                                          "interpolation mode - please change it to 'nearest'")
             labels = labels * 255
         elif any(unique_values < 0) or max(unique_values) > 255:
             raise ValueError("Labels pixel-values should be either floats in [0, 1] or integers in [0, 255]")
