@@ -14,7 +14,7 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
     """
     def __init__(self):
         super().__init__()
-        self._number_of_objects_per_image = {'train': dict(), 'val': dict()}
+        self._hist = {'train': dict(), 'val': dict()}
         self._total_objects = {'train': 0, 'val': 0}
         self._bin_size: int = 5
 
@@ -22,15 +22,16 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
         for image_contours in data.contours:
             num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
             self._total_objects[data.split] += num_objects_in_image
-            if num_objects_in_image in self._number_of_objects_per_image[data.split]:
-                self._number_of_objects_per_image[data.split][num_objects_in_image] += 1
+            if num_objects_in_image in self._hist[data.split]:
+                self._hist[data.split][num_objects_in_image] += 1
             else:
 
-                self._number_of_objects_per_image[data.split].update({num_objects_in_image: 1})
+                self._hist[data.split].update({num_objects_in_image: 1})
 
     def _process(self):
+        self.merge_dict_splits(self._hist)
         for split in ['train', 'val']:
-            hist = self._into_buckets(self._number_of_objects_per_image[split])
+            hist = self._into_buckets(self._hist[split])
 
             values = self.normalize(hist.values(), sum(list(hist.values())))
 

@@ -16,6 +16,8 @@ class ImagesResolutions(FeatureExtractorAbstract):
                 self._res_dict[data.split][res] += 1
 
     def _process(self):
+        self.merge_dict_splits(self._hist)
+
         for split in ['train', 'val']:
             create_bar_plot(ax=self.ax, data=list(self._res_dict[split].values()),
                             labels=list(self._res_dict[split].keys()), y_label='# Of Images',

@@ -18,6 +18,8 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
                 self._ar_dict[data.split][ar] += 1
 
     def _process(self):
+        self.merge_dict_splits(self._hist)
+
         for split in ['train', 'val']:
             create_bar_plot(ax=self.ax, data=list(self._ar_dict[split].values()),
                             labels=list(self._ar_dict[split].keys()), y_label='# Of Images',
