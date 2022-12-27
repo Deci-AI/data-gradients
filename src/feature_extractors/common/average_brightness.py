@@ -29,7 +29,7 @@ class AverageBrightness(FeatureExtractorAbstract):
             values, bins = self._post_process(self._brightness[split])
             create_bar_plot(self.ax, list(values), bins,
                             x_label="", y_label="% out of all images",
-                            title="Average brightness of images", ticks_rotation=0,
+                            title="Average brightness of images",
                             split=split, color=self.colors[split], yticks=True)
 
             self.json_object.update({split: create_json_object(values, bins)})

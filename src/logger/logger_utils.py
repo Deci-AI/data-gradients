@@ -9,7 +9,7 @@ def create_json_object(values, keys):
 
 
 def create_bar_plot(ax, data, labels, split: str, x_label: str = "", y_label: str = "", title: str = "",
-                    width: float = 0.4, ticks_rotation: int = 270,
+                    width: float = 0.4, ticks_rotation: int = 45,
                     color: str = 'yellow', yticks: bool = False):
 
     number_of_labels = len(labels)
@@ -26,7 +26,11 @@ def create_bar_plot(ax, data, labels, split: str, x_label: str = "", y_label: st
     if yticks:
         for i in range(len(labels)):
             v = np.round(data[i], 1) if np.round(data[i], 1) > 0. else ""
-            plt.text(i - (width / 2 if (split == 'train') else -width / 2), data[i], v, ha='center', size='x-small')
+            plt.text(x=i - (width / 2 if (split == 'train') else -width / 2),
+                     y=data[i] + 0.75,
+                     s=v,
+                     ha='center',
+                     size='x-small')
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
