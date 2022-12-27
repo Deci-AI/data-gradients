@@ -43,7 +43,7 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
             bins = int(np.sqrt(len(x)) * 4)
             sigma = 2 * (bins / 150)
             # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
-            create_heatmap_plot(ax=self.ax[int(split == 'train')], x=x, y=y, split=split, bins=bins, sigma=sigma,
+            create_heatmap_plot(ax=self.ax[int(split != 'train')], x=x, y=y, split=split, bins=bins, sigma=sigma,
                                 title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')
             quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
             self.json_object.update({split: quantized_heat_map.tolist()})
