@@ -3,6 +3,7 @@ ignore_labels:
 
 defaults:
   - common
+  - _self_
 
 semantic_segmentation:
   - _target_: src.feature_extractors.segmentation.classes_distribution.GetClassDistribution
