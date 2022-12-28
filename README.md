@@ -132,6 +132,7 @@ da = SegmentationAnalysisManager(
 <summary>
 Our point of view on augmentations
 </summary>
+<br>
 Using this tool will have different benefits working with data augmentations, and without.
 
 Augmented data will give us a better visualization of the model's point of view of the data, which will be more realistic in terms of finding problems with the training data, etc.
