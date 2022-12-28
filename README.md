@@ -215,4 +215,10 @@ Click on link and view results:
 Output Example
 </summary>
 
+![Example output 1](data/example_outputs/output_example1.png)
+
+![Example output 2](data/example_outputs/output_example2.png)
+
+![Example output 3](data/example_outputs/output_example3.png)
+
 </details>
