@@ -27,7 +27,7 @@ def create_bar_plot(ax, data, labels, split: str, x_label: str = "", y_label: st
         for i in range(len(labels)):
             v = np.round(data[i], 2) if np.round(data[i], 2) > 0. else ""
             plt.text(x=i - (width / 2 if (split == 'train') else -width / 2),
-                     y=data[i] + 0.5,
+                     y=1.01 * data[i],
                      s=v,
                      ha='center',
                      size='xx-small')

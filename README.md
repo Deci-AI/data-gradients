@@ -14,10 +14,13 @@ You can also censor any classes you`de like, can hide class names and can remove
 #### What is MUST-HAVE
 
 * Train set data-loader that compatible to the [available input types](#Available input types)
+* Number of valid classes (in the binary case, number of classes will be 1 while 0 will be ignored)
 
 #### What is Optional
 
 * Validation set data-loader that compatible to the [available input types](#Available input types)
+* Class ID-to-name mapping (in a form of a dictionary)
+* Number of samples to visualize (will output only on tensorboard, can pass 0 if you prefer not to visualize)
 
 <br>
 
@@ -43,8 +46,7 @@ We support various of types for handling images or labels:
 <pre>
 <details>
 <summary>My dataset returns dictionary</summary>
- 
-OR
+
 ```python
 def __getitem__(...):
     return {'my_images': images: torch.Tensor,
@@ -184,11 +186,16 @@ val_dataset = BDDDataset(data_folder="data/bdd_example", split='val', transform=
 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
 
+# id_to_name, samples_to_visualize are OPTIONAL
 da = SegmentationAnalysisManager(train_data=train_loader,
                                  val_data=val_loader,
                                  num_classes=BDDDataset.NUM_CLASSES,
-                                 ignore_labels=BDDDataset.IGNORE_LABELS)
+                                 ignore_labels=BDDDataset.IGNORE_LABELS,
+                                 id_to_name=BDDDataset.CLASS_ID_TO_NAMES,
+                                 samples_to_visualize=5)
 da.run()
+
+
 
 ```
 ### 5. After progress is finished, view results through tensorboard
@@ -203,3 +210,9 @@ Click on link and view results:
 </details>
 <br>
 
+<details>
+<summary>
+Output Example
+</summary>
+
+</details>

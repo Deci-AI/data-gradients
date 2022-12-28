@@ -44,14 +44,13 @@ class AverageBrightness(FeatureExtractorAbstract):
     def _create_keys(bins):
         new_keys: List[str] = []
         for i, key in enumerate(bins):
-            new = round(key, 2)
             if i == 0:
                 continue
             elif i == 1:
-                new_keys.append('<%.2f' % new)
+                new_keys.append('<%.2f' % key)
             elif i == len(bins) - 1:
-                new_keys.append('%.2f<' % new)
+                new_keys.append('%.2f<' % key)
             else:
-                new_keys.append('<%.2f<' % new)
+                new_keys.append('%.2f<%.2f' % (key, bins[i+1]))
         return new_keys
 

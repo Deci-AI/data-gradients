@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 from src.logger.logger_utils import create_bar_plot, create_json_object, class_id_to_name
 from src.utils import SegBatchData
@@ -12,18 +13,22 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
     """
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
+        self.ignore_labels = ignore_labels
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {'train': dict.fromkeys(keys, 0), 'val': dict.fromkeys(keys, 0)}
         self._number_of_images = {'train': 0, 'val': 0}
 
     def execute(self, data: SegBatchData):
-        for i, image_contours in enumerate(data.contours):
-            self._number_of_images[data.split] += 1
-            for j, cls_contours in enumerate(image_contours):
-                unique = np.unique(data.labels[i][j])
-                if not len(unique) > 1:
-                    continue
-                self._hist[data.split][int(np.delete(unique, 0))] += 1
+        try:
+            self._number_of_images[data.split] += len(data.labels)
+            for label in data.labels:
+                for u in label.unique():
+                    u = int(u.item())
+                    if u not in self.ignore_labels:
+                        self._hist[data.split][u] += 1
+
+        except Exception as e:
+            print(self.__class__.__name__, e)
 
     def _process(self):
         for split in ['train', 'val']:

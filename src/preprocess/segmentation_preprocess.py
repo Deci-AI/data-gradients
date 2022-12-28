@@ -183,8 +183,12 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :param labels: Tensor with unique values of all classes, including ignored ones.
         :return: Tensor with no representation of the ignored classes (all are zeros).
         """
+        if 0 not in self._ignore_labels:
+            return labels
+
         for ignore_label in self.ignore_labels:
             if self._onehot:
+                # TODO: Check it out (Right channel (ignore level channel) should be ignore label values
                 # Turn specific channel into zeros
                 labels[:, ignore_label, ...] = 0
             else:
@@ -205,7 +209,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         """
         labels = self._remove_ignore_labels(labels)
 
-        labels = [squeeze_by_class.squeeze_by_classes(label, is_one_hot=self._onehot) for label in labels]
+        labels = [squeeze_by_class.squeeze_by_classes(label,
+                                                      is_one_hot=self._onehot,
+                                                      ignore_labels=self.ignore_labels) for label in labels]
 
         # TODO: Debug convexity things
         # contours.debug_convexity_things(labels, images)

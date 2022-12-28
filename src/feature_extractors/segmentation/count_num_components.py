@@ -69,8 +69,9 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
                 del hist[999]
             elif key > 10:
                 new_key = f'{key-bin_size}<{key}'
-                hist[new_key] = hist[key]
-                del hist[key]
+                if key-bin_size > 0:
+                    hist[new_key] = hist[key]
+                    del hist[key]
             else:
                 continue
 

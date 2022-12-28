@@ -16,18 +16,20 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
 
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
+        self.ignore_labels = ignore_labels
 
     def execute(self, data: SegBatchData):
+
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
-                unique = np.unique(data.labels[i][j])
-                if not len(unique) > 1:
-                    continue
-                for c in cls_contours:
-                    rect = contours.get_rotated_bounding_rect(c)
-                    wh = rect[1]
-                    self._hist[data.split][int(np.delete(unique, 0))].append(100 * int(wh[0] * wh[1]) / img_dim)
+                for u in data.labels[i][j].unique():
+                    u = int(u.item())
+                    if u not in self.ignore_labels:
+                        for c in cls_contours:
+                            rect = contours.get_rotated_bounding_rect(c)
+                            wh = rect[1]
+                            self._hist[data.split][u].append(100 * int(wh[0] * wh[1]) / img_dim)
 
     def _process(self):
         for split in ['train', 'val']:

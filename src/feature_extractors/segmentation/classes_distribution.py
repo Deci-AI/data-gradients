@@ -11,15 +11,16 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {'train': dict.fromkeys(keys, 0), 'val': dict.fromkeys(keys, 0)}
         self._total_objects = {'train': 0, 'val': 0}
+        self.ignore_labels = ignore_labels
 
     def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
-                unique = np.unique(data.labels[i][j])
-                if not len(unique) > 1:
-                    continue
-                self._hist[data.split][int(np.delete(unique, 0))] += len(cls_contours)
-                self._total_objects[data.split] += len(cls_contours)
+                for u in data.labels[i][j].unique():
+                    u = int(u.item())
+                    if u not in self.ignore_labels:
+                        self._hist[data.split][u] += len(cls_contours)
+                        self._total_objects[data.split] += len(cls_contours)
 
     def _process(self):
         for split in ['train', 'val']:
