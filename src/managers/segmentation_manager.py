@@ -14,7 +14,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
     def __init__(self, *, num_classes: int,
                  train_data: Iterable,
-                 samples_to_visualize: int,
+                 samples_to_visualize: int = 10,
                  ignore_labels: List[int] = None,
                  val_data: Optional[Iterable] = None,
                  id_to_name: Optional[Dict] = None,
