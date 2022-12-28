@@ -6,7 +6,8 @@ from torch.utils.data import Dataset
 
 
 class PPHumanSegDataSet(Dataset):
-    CLASS_LABELS = {0: "background", 1: "person"}
+    CLASS_ID_TO_NAMES = {0: "background", 1: "person"}
+    NUM_CLASSES = 1
 
     def __init__(self, root, image_set, transform=None, target_transform=None):
         self.root = root

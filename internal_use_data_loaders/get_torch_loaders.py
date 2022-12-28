@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 
 import torchvision.transforms
 from torchvision import datasets
-from torchvision.transforms import ToTensor, Resize
+from torchvision.transforms import ToTensor, Resize, InterpolationMode, CenterCrop
 from torch.utils.data import DataLoader
 
 from data.bdd_dataset import BDDDataset
@@ -17,8 +17,8 @@ from internal_use_data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
 
 class DataLoaders:
     def __init__(self, batch_size: int = 16):
-        self._transforms = torchvision.transforms.Compose([ToTensor()])
-        self._target_transforms = torchvision.transforms.Compose([ToTensor()])
+        self._transforms = torchvision.transforms.Compose([ToTensor(), CenterCrop((512, 512))])
+        self._target_transforms = torchvision.transforms.Compose([ToTensor(), CenterCrop((512, 512))])
         self._batch_size = batch_size
 
     def _dataset_to_dataloader(self, dataset):
@@ -61,8 +61,9 @@ class DataLoaders:
 
         val = PPHumanSegDataSet(root=dataset_root,
                                 image_set='val',
-                                transform=self._transforms,
-                                target_transform=self._target_transforms)
+                                transform=torchvision.transforms.Compose([ToTensor()]),
+                                target_transform=torchvision.transforms.Compose([ToTensor()]))
+
         train_dataloader = self._dataset_to_dataloader(train)
         val_dataloader = self._dataset_to_dataloader(val)
         return train_dataloader, val_dataloader
@@ -99,13 +100,38 @@ class DataLoaders:
             raise NotImplementedError
 
 
-# [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
-# pp_human, cityscapes, bdd, sbd,
-# 1,        19,         19,  ?
 
 dataloader = DataLoaders(batch_size=16)
-train_dataloader, val_dataloader = dataloader.get_dataloader(dataset="pp_human")
-train_data_iterator, val_data_iterator = iter(train_dataloader), iter(val_dataloader)
-num_classes = 1
-ignore_labels = [0] # [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
 
+
+## CityScapes
+# train_loader, val_loader = dataloader.get_dataloader(dataset="cityscapes")
+# num_classes = CityScapesDataSet.NUM_CLASSES
+# ignore_labels = CityScapesDataSet.IGNORE_LABELS
+# class_id_to_name = CityScapesDataSet.CLASS_ID_TO_NAMES
+
+## PPHuman
+# train_loader, val_loader = dataloader.get_dataloader(dataset="pp_human")
+# num_classes = PPHumanSegDataSet.NUM_CLASSES
+# ignore_labels = getattr(PPHumanSegDataSet, 'IGNORE_LABELS', None)
+# class_id_to_name = PPHumanSegDataSet.CLASS_ID_TO_NAMES
+
+## BDD
+train_loader, val_loader = dataloader.get_dataloader(dataset="bdd")
+num_classes = BDDDataset.NUM_CLASSES
+ignore_labels = BDDDataset.IGNORE_LABELS
+class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
+
+## SBD
+# SBDDataset = datasets.SBDataset(root="data/sbd",
+#                                 image_set="train",
+#                                 mode="segmentation",
+#                                 download=False)
+# CLASS_ID_TO_NAMES = {0: 'background', 1: 'aeroplane', 2: 'bicycle', 3: 'bird', 4: 'boat', 5: 'bottle', 6: 'bus',
+#                      7: 'car', 8: 'cat', 9: 'chair', 10: 'cow', 11: 'diningtable', 12: 'dog', 13: 'horse',
+#                      14: 'motorbike', 15: 'person', 16: 'pottedplant', 17: 'sheep', 18: 'sofa', 19: 'train',
+#                      20: 'tvmonitor'}
+# train_loader, val_loader = dataloader.get_dataloader(dataset="sbd")
+# num_classes = SBDDataset.num_classes
+# ignore_labels = None
+# class_id_to_name = CLASS_ID_TO_NAMES
