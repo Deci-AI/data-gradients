@@ -2,7 +2,7 @@ import numpy as np
 
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot, create_json_object
+from src.logger.logger_utils import create_bar_plot, create_json_object, class_id_to_name
 
 
 class GetClassDistribution(SegmentationFeatureExtractorAbstract):
@@ -23,6 +23,7 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
 
     def _process(self):
         for split in ['train', 'val']:
+            self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
             values = self.normalize(self._hist[split].values(), self._total_objects[split])
             create_bar_plot(self.ax, values, self._hist[split].keys(), x_label="Class #",
                             y_label="# Class instances [%]", title="Classes distribution across dataset",

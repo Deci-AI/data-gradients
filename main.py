@@ -23,13 +23,12 @@ if __name__ == "__main__":
         ignore_labels = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30, -1]
 
     """
-
     # Create torch DataSet
-    train_dataset = BDDDataset(data_folder="data/bdd_example", split='train',
-                               transform=Compose([ToTensor(), CenterCrop(512)]))
-    val_dataset = BDDDataset(data_folder="data/bdd_example", split='val',
-                             transform=Compose([ToTensor(), CenterCrop(512)]))
-
+    # train_dataset = BDDDataset(data_folder="data/bdd_example", split='train',
+    #                            transform=Compose([ToTensor(), CenterCrop(512)]))
+    # val_dataset = BDDDataset(data_folder="data/bdd_example", split='val',
+    #                          transform=Compose([ToTensor(), CenterCrop(512)]))
+    #
     # Create torch DataLoader
     # train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     # val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
@@ -40,12 +39,14 @@ if __name__ == "__main__":
     #                                  ignore_labels=BDDDataset.IGNORE_LABELS)
 
     from internal_use_data_loaders.get_torch_loaders import train_data_iterator, val_data_iterator, num_classes, \
-        ignore_labels
+        ignore_labels, class_id_to_name
 
     da = SegmentationAnalysisManager(train_data=train_data_iterator,
                                      val_data=val_data_iterator,
                                      num_classes=num_classes,
                                      ignore_labels=ignore_labels,
-                                     samples_to_visualize=10)
+                                     samples_to_visualize=10,
+                                     id_to_name=class_id_to_name)
+
     da.run()
 

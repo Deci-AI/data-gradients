@@ -55,3 +55,16 @@ def create_heatmap_plot(ax, x, y, split: str, bins=50, sigma=2, title="", x_labe
     ax.set_title(split.capitalize() + " - " + title)
 
 
+def class_id_to_name(id_to_name, hist: Dict):
+    if id_to_name is None:
+        return hist
+
+    new_hist = {}
+    for key in list(hist.keys()):
+        try:
+            new_hist.update({id_to_name[key]: hist[key]})
+        except KeyError as e:
+            new_hist.update({key: hist[key]})
+    return new_hist
+
+

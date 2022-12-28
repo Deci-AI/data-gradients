@@ -25,7 +25,9 @@ class AnalysisManagerAbstract:
     def __init__(self, train_data: Iterable,
                  val_data: Optional[Iterable],
                  task: str,
-                 samples_to_visualize: int):
+                 samples_to_visualize: int,
+                 id_to_name
+                 ):
 
         self._extractors: List[FeatureExtractorAbstract] = []
 
@@ -33,7 +35,7 @@ class AnalysisManagerAbstract:
 
         # TODO: Check if object has hasattr(bar, '__len__')
         self._dataset_size = len(train_data) if hasattr(train_data, '__len__') else None
-        # Users Data Iteratorsnnb
+        # Users Data Iterator
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
             self._train_only = False
@@ -51,6 +53,7 @@ class AnalysisManagerAbstract:
         self._cfg = None
 
         self._task = task
+        self.id_to_name = id_to_name
 
     def build(self):
         """
@@ -120,7 +123,7 @@ class AnalysisManagerAbstract:
         :return:
         """
         for extractor in self._extractors:
-            extractor.process(self._loggers)
+            extractor.process(self._loggers, self.id_to_name)
 
     def close(self):
         """

@@ -3,7 +3,7 @@ import numpy as np
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot, create_json_object
+from src.logger.logger_utils import create_bar_plot, create_json_object, class_id_to_name
 
 
 class PixelsPerClass(SegmentationFeatureExtractorAbstract):
@@ -30,6 +30,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
 
     def _process(self):
         for split in ['train', 'val']:
+            self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
             hist = dict.fromkeys(self._hist[split].keys(), 0.)
             for cls in self._hist[split]:
                 if len(self._hist[split][cls]):

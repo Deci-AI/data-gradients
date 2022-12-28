@@ -19,7 +19,7 @@ class AverageBrightness(FeatureExtractorAbstract):
             # TODO: Handle zero division better
             if lightness is None:
                 continue
-            if np.max(lightness) is 0:
+            if np.max(lightness) == 0:
                 continue
             n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))

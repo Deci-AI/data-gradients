@@ -28,12 +28,15 @@ class FeatureExtractorAbstract(ABC):
         self.fig = None
         self.ax = None
         self.json_object: Dict[str, Optional[ResultsLogger]] = {'train': None, 'val': None}
+        self.id_to_name = None
 
     @abstractmethod
     def execute(self, data: BatchData):
         pass
 
-    def process(self, loggers: Dict[str, ResultsLogger]):
+    def process(self, loggers: Dict[str, ResultsLogger], id_to_name):
+        self.id_to_name = id_to_name
+
         self.fig, self.ax = plt.subplots(*self.num_axis, figsize=(10, 5))
 
         self._process()

@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.logger.logger_utils import create_bar_plot, create_json_object
+from src.logger.logger_utils import create_bar_plot, create_json_object, class_id_to_name
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 
@@ -27,6 +27,8 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
 
     def _process(self):
         for split in ['train', 'val']:
+            # TODO: Split normalization / class id to name / create bar plot from _process
+            self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
             values = self.normalize(self._hist[split].values(), self._number_of_images[split])
             create_bar_plot(self.ax, values, self._hist[split].keys(), x_label="Class #",
                             y_label="Images appeared in [%]", title="% Images that class appears in", split=split,
