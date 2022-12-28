@@ -3,7 +3,7 @@
 The Deci`s dataset analyzer tool provide valuable information about your dataset
 #### Benefits 
 1. User could validate his data, find corruptions, check diversity and many more. 
-2. Deci will use this meta-data as an input to our NAS, which results in a better model finding suited for the user's specific data.
+2. Deci will use this meta-data as an input to our NAS, which results in a better model found, suited for the user's specific data.
 #### What we DO collect
 Metadata and statistics describing your data: histograms, heat maps and such.
 #### What we DO NOT collect
@@ -13,12 +13,12 @@ You can also censor any classes you`de like, can hide class names and can remove
 
 #### What is MUST-HAVE
 
-* Train set data-loader that compatible to the [available input types](#Available input types)
+* Train set data-loader that compatible to the [available input types](#available-input-types)
 * Number of valid classes (in the binary case, number of classes will be 1 while 0 will be ignored)
 
 #### What is Optional
 
-* Validation set data-loader that compatible to the [available input types](#Available input types)
+* Validation set data-loader that compatible to the [available input types](#Available-input-types)
 * Class ID-to-name mapping (in a form of a dictionary)
 * Number of samples to visualize (will output only on tensorboard, can pass 0 if you prefer not to visualize)
 
