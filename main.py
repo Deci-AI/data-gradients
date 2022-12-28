@@ -1,10 +1,29 @@
 from torch.utils.data import DataLoader
-from torchvision.transforms import CenterCrop, ToTensor, Compose
+from torchvision.transforms import CenterCrop, ToTensor, Compose, Resize, InterpolationMode
 
 from data.bdd_dataset import BDDDataset
 from src import SegmentationAnalysisManager
 
+
+def debug():
+    import internal_use_data_loaders.get_torch_loaders as debug_data
+    da = SegmentationAnalysisManager(train_data=debug_data.train_loader,
+                                     val_data=debug_data.val_loader,
+                                     num_classes=debug_data.num_classes,
+                                     ignore_labels=debug_data.ignore_labels,
+                                     id_to_name=debug_data.class_id_to_name,
+                                     samples_to_visualize=2)
+
+
+    da.run()
+    exit(0)
+
+
 if __name__ == "__main__":
+
+    debug()
+
+
     """
     Main script for running the Deci-Dataset-Analyzer tool.
     Arguments required for SegmentationAnalysisManager() are:
@@ -13,7 +32,7 @@ if __name__ == "__main__":
         num_classes -> Number of valid classes
     Also if there are ignore labels, please pass them as a List[int].
     Default ignore label will be [0] as for background only.
-
+    
     Example of use (CityScapes):
         train_dataset = CityScapesDataSet(root=dataset_root,
                                           image_set='train',
@@ -25,19 +44,19 @@ if __name__ == "__main__":
     """
     # Create torch DataSet
     train_dataset = BDDDataset(data_folder="data/bdd_example", split='train',
-                               transform=Compose([ToTensor(), CenterCrop(512)]))
+                               transform=Compose([ToTensor(), Resize(512, interpolation=InterpolationMode.NEAREST)]))
     val_dataset = BDDDataset(data_folder="data/bdd_example", split='val',
-                             transform=Compose([ToTensor(), CenterCrop(512)]))
+                             transform=Compose([ToTensor()]))
 
     # Create torch DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
 
-    da = SegmentationAnalysisManager(num_classes=BDDDataset.NUM_CLASSES,
-                                     train_data=train_loader,
+    da = SegmentationAnalysisManager(train_data=train_loader,
                                      val_data=val_loader,
+                                     num_classes=BDDDataset.NUM_CLASSES,
                                      ignore_labels=BDDDataset.IGNORE_LABELS,
+                                     id_to_name=BDDDataset.CLASS_ID_TO_NAMES,
                                      samples_to_visualize=2)
 
     da.run()
-
