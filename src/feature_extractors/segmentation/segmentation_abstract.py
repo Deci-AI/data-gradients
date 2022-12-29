@@ -23,7 +23,6 @@ class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
 
     @staticmethod
     def normalize(values, total):
-        # TODO: Fix it better
         if total == 0:
             total = 1
         return [np.round(((100 * value) / total), 3) for value in values]

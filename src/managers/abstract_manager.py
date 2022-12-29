@@ -1,4 +1,5 @@
 import concurrent
+import os
 from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, Optional, List
 
@@ -12,11 +13,6 @@ from src.preprocess import PreprocessorAbstract
 from src.utils import BatchData
 
 
-# TODO: Check this out
-# Itertools.chain(train, val) --> train0, train1, ..., trainN, val0, val1, ... valN
-# Itertools.cycle(train) --> train0, train1, ... trainN, train0 , train1, ...
-# Itertools.tee(train, n) --> iter(train[0, N/n]), iter(train[N/n, 2*(N/n)]), ... , iter(train[(n-1)*(N/n), N])
-
 class AnalysisManagerAbstract:
     """
     Main dataset analyzer manager abstract class.
@@ -25,15 +21,16 @@ class AnalysisManagerAbstract:
     def __init__(self, train_data: Iterable,
                  val_data: Optional[Iterable],
                  task: str,
-                 samples_to_visualize: int):
+                 samples_to_visualize: int,
+                 id_to_name
+                 ):
 
         self._extractors: List[FeatureExtractorAbstract] = []
 
         self._threads = ThreadPoolExecutor()
 
-        # TODO: Check if object has hasattr(bar, '__len__')
         self._dataset_size = len(train_data) if hasattr(train_data, '__len__') else None
-        # Users Data Iterators
+        # Users Data Iterator
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
             self._train_only = False
@@ -44,13 +41,14 @@ class AnalysisManagerAbstract:
             self._val_iter = None
 
         # Logger
-        self._loggers = {'TB': TensorBoardLogger(),
+        self._loggers = {'TB': TensorBoardLogger(iter(train_data), samples_to_visualize),
                          'JSON': JsonLogger()}
 
         self._preprocessor: PreprocessorAbstract = Optional[None]
         self._cfg = None
 
         self._task = task
+        self.id_to_name = id_to_name
 
     def build(self):
         """
@@ -59,6 +57,9 @@ class AnalysisManagerAbstract:
         """
         cfg = hydra.utils.instantiate(self._cfg)
         self._extractors = cfg.common + cfg[self._task]
+
+    def visualize(self):
+        self._loggers['TB'].visualize()
 
     def _get_batch(self, data_iterator: Iterator) -> BatchData:
         """
@@ -120,22 +121,26 @@ class AnalysisManagerAbstract:
         :return:
         """
         for extractor in self._extractors:
-            extractor.process(self._loggers)
+            extractor.process(self._loggers, self.id_to_name)
 
     def close(self):
         """
         Safe logger closing
         """
         [self._loggers[logger].close() for logger in self._loggers.keys()]
-        print(f'{"*" * 50}'
+        print(f'{"*" * 100}'
               f'\nWe have finished evaluating your dataset!'
-              f'\nThe results can be seen in TODO')
+              f'\nThe results can be seen in {list(self._loggers.values())[0].logdir}'
+              f'\n\nShow tensorboard by writing in terminal:'
+              f'\n\ttensorboard --logdir={os.path.join(os.getcwd() ,list(self._loggers.values())[0].logdir)} --bind_all'
+              f'\n')
 
     def run(self):
         """
         Run method activating build, execute, post process and close the manager.
         """
         self.build()
+        self.visualize()
         self.execute()
         self.post_process()
         self.close()

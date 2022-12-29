@@ -12,7 +12,12 @@ class JsonLogger(ResultsLogger):
 
     def log(self, title: str, data):
         with open(os.path.join(self.logdir, self._output_file), 'w') as output:
-            json.dump(data, output, indent=2)
+            try:
+                json.dump(data, output, indent=2)
+            except Exception as e:
+                print(f'Could not serialize {title}!'
+                      f'\nObject type is {type(data)}'
+                      f'\nException is\n{e}')
 
     def close(self):
         pass

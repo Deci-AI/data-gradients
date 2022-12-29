@@ -19,7 +19,7 @@ class AverageBrightness(FeatureExtractorAbstract):
             # TODO: Handle zero division better
             if lightness is None:
                 continue
-            if np.max(lightness) is 0:
+            if np.max(lightness) == 0:
                 continue
             n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))
@@ -29,7 +29,7 @@ class AverageBrightness(FeatureExtractorAbstract):
             values, bins = self._post_process(self._brightness[split])
             create_bar_plot(self.ax, list(values), bins,
                             x_label="", y_label="% out of all images",
-                            title="Average brightness of images", ticks_rotation=0,
+                            title="Average brightness of images",
                             split=split, color=self.colors[split], yticks=True)
 
             self.json_object.update({split: create_json_object(values, bins)})
@@ -44,14 +44,13 @@ class AverageBrightness(FeatureExtractorAbstract):
     def _create_keys(bins):
         new_keys: List[str] = []
         for i, key in enumerate(bins):
-            new = round(key, 2)
             if i == 0:
                 continue
             elif i == 1:
-                new_keys.append('<%.2f' % new)
+                new_keys.append('<%.2f' % key)
             elif i == len(bins) - 1:
-                new_keys.append('%.2f<' % new)
+                new_keys.append('%.2f<' % key)
             else:
-                new_keys.append('<%.2f<' % new)
+                new_keys.append('%.2f<%.2f' % (key, bins[i+1]))
         return new_keys
 

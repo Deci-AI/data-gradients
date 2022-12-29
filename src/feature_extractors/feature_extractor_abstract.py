@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from typing import Tuple, Dict, Optional
 
 from matplotlib import pyplot as plt
@@ -61,3 +62,11 @@ class FeatureExtractorAbstract(ABC):
     @staticmethod
     def log(logger: ResultsLogger, title: str, data):
         logger.log(title, data)
+
+    @staticmethod
+    def merge_dict_splits(hist: Dict):
+        for key in [*hist['train'], *hist['val']]:
+            for split in [*hist]:
+                if key not in list(hist[split].keys()):
+                    hist[split][key] = 0.
+                hist[split] = OrderedDict(sorted(hist[split].items()))

@@ -1,7 +1,9 @@
+from typing import List
+
 import torch
 
 
-def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool) -> torch.Tensor:
+def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool, ignore_labels: List) -> torch.Tensor:
     """
     Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
     param label: Tensor
@@ -9,11 +11,10 @@ def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool) -> torch.Tensor:
     :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
     """
     # Take all classes but ignored/background
-    unique = torch.unique(label)
-    all_classes = unique[unique > 0]
+    all_classes = [int(u.item()) for u in torch.unique(label) if u not in ignore_labels]
 
     # If no classes appear in the annotation it's a background image full of zeros
-    if not all_classes.nelement():
+    if not all_classes:
         # TODO If it's one hot I should handle it differently. Also background images?
         return label
 
@@ -31,8 +32,8 @@ def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool) -> torch.Tensor:
     else:
         for cls in all_classes:
             mask = torch.where((label == cls) & (label > 0),
-                               cls.clone(),
-                               torch.tensor(0, dtype=cls.dtype)
+                               torch.tensor(cls),
+                               torch.tensor(0, dtype=torch.tensor(cls).dtype)
                                ).squeeze()
             masks.append(mask)
 

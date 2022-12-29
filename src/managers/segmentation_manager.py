@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, List
+from typing import Optional, Iterable, List, Dict
 
 import hydra
 from src.managers.abstract_manager import AnalysisManagerAbstract
@@ -14,9 +14,10 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
     def __init__(self, *, num_classes: int,
                  train_data: Iterable,
-                 samples_to_visualize: int,
+                 samples_to_visualize: int = 10,
                  ignore_labels: List[int] = None,
                  val_data: Optional[Iterable] = None,
+                 id_to_name: Optional[Dict] = None,
                  ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -24,8 +25,10 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param train_data: Iterable object contains images and labels of the training dataset
         :param ignore_labels: List of not-valid labeled classes such as background.
         :param val_data: Iterable object contains images and labels of the validation dataset
+        :param samples_to_visualize:
+        :param class_id_to_name:
         """
-        super().__init__(train_data, val_data, self.TASK, samples_to_visualize)
+        super().__init__(train_data, val_data, self.TASK, samples_to_visualize, id_to_name)
 
         self._preprocessor = SegmentationPreprocessor(num_classes, ignore_labels)
 
