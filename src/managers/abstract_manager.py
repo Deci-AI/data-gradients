@@ -1,4 +1,5 @@
 import concurrent
+import os
 from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, Optional, List
 
@@ -33,7 +34,6 @@ class AnalysisManagerAbstract:
 
         self._threads = ThreadPoolExecutor()
 
-        # TODO: Check if object has hasattr(bar, '__len__')
         self._dataset_size = len(train_data) if hasattr(train_data, '__len__') else None
         # Users Data Iterator
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
@@ -46,7 +46,7 @@ class AnalysisManagerAbstract:
             self._val_iter = None
 
         # Logger
-        self._loggers = {'TB': TensorBoardLogger(),
+        self._loggers = {'TB': TensorBoardLogger(iter(train_data), samples_to_visualize),
                          'JSON': JsonLogger()}
 
         self._preprocessor: PreprocessorAbstract = Optional[None]
@@ -62,6 +62,9 @@ class AnalysisManagerAbstract:
         """
         cfg = hydra.utils.instantiate(self._cfg)
         self._extractors = cfg.common + cfg[self._task]
+
+    def visualize(self):
+        self._loggers['TB'].visualize()
 
     def _get_batch(self, data_iterator: Iterator) -> BatchData:
         """
@@ -134,7 +137,7 @@ class AnalysisManagerAbstract:
               f'\nWe have finished evaluating your dataset!'
               f'\nThe results can be seen in {list(self._loggers.values())[0].logdir}'
               f'\n\nShow tensorboard by writing in terminal:'
-              f'\n\ttensorboard --logdir={list(self._loggers.values())[0].logdir} --bind_all'
+              f'\n\ttensorboard --logdir={os.path.join(os.getcwd() ,list(self._loggers.values())[0].logdir)} --bind_all'
               f'\n')
 
     def run(self):
@@ -142,6 +145,7 @@ class AnalysisManagerAbstract:
         Run method activating build, execute, post process and close the manager.
         """
         self.build()
+        self.visualize()
         self.execute()
         self.post_process()
         self.close()
