@@ -83,7 +83,7 @@ class AnalysisManagerAbstract:
         train_batch = 0
         val_batch_data = None
         while True:
-            if train_batch > 50:
+            if train_batch > 5:
                 break
             # Try to get train batch
             try:

@@ -28,17 +28,19 @@ class FeatureExtractorAbstract(ABC):
         self.fig = None
         self.ax = None
         self.json_object: Dict[str, Optional[ResultsLogger]] = {'train': None, 'val': None}
+        self.sw = Stopwatch()
 
     def execute(self, data: BatchData):
-        sw = Stopwatch()
         self._execute(data)
-        sw.tick_and_print(f'{self.__class__.__name__ + data.split}')
+        self.sw.tick()
 
     @abstractmethod
     def _execute(self, data: BatchData):
         raise NotImplementedError
 
     def process(self, loggers: Dict[str, ResultsLogger]):
+        print(f'{self.__class__.__name__:<40} Executing {len(self.sw.ticks)} times with average of {round(self.sw.average(), 4)} per execute')
+
         self.fig, self.ax = plt.subplots(*self.num_axis, figsize=(10, 5))
 
         self._process()
@@ -47,7 +49,7 @@ class FeatureExtractorAbstract(ABC):
         self.log(logger=loggers['TB'],
                  title=self.__class__.__name__,
                  data=self.fig)
-        
+
         self.log(logger=loggers['JSON'],
                  title=self.__class__.__name__,
                  data=self.json_object)
