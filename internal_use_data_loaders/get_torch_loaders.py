@@ -2,7 +2,7 @@ from typing import Tuple, Optional
 
 import torchvision.transforms
 from torchvision import datasets
-from torchvision.transforms import ToTensor, Resize, InterpolationMode, CenterCrop
+from torchvision.transforms import ToTensor, Resize, InterpolationMode
 from torch.utils.data import DataLoader
 
 from data.bdd_dataset import BDDDataset
@@ -12,8 +12,8 @@ from internal_use_data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
 
 class DataLoaders:
     def __init__(self, batch_size: int = 16):
-        self._transforms = torchvision.transforms.Compose([ToTensor(), CenterCrop((512, 512))])
-        self._target_transforms = torchvision.transforms.Compose([ToTensor(), CenterCrop((512, 512))])
+        self._transforms = torchvision.transforms.Compose([ToTensor()]) #, Resize(256, interpolation=InterpolationMode.NEAREST)])
+        self._target_transforms = torchvision.transforms.Compose([ToTensor()]) #, Resize(384, interpolation=InterpolationMode.NEAREST)])
         self._batch_size = batch_size
 
     def _dataset_to_dataloader(self, dataset):
@@ -68,10 +68,10 @@ class DataLoaders:
         train = CityScapesDataSet(root=dataset_root,
                                   image_set='train',
                                   transform=self._transforms,
-                                  target_transform=self._target_transforms)
+                                  target_transform=self._transforms)
         val = CityScapesDataSet(root=dataset_root,
                                 image_set='val',
-                                transform=self._transforms,
+                                transform=self._target_transforms,
                                 target_transform=self._target_transforms)
 
         train_dataloader = self._dataset_to_dataloader(train)
@@ -100,10 +100,10 @@ dataloader = DataLoaders(batch_size=16)
 
 
 ## CityScapes
-# train_loader, val_loader = dataloader.get_dataloader(dataset="cityscapes")
-# num_classes = CityScapesDataSet.NUM_CLASSES
-# ignore_labels = CityScapesDataSet.IGNORE_LABELS
-# class_id_to_name = CityScapesDataSet.CLASS_ID_TO_NAMES
+train_loader, val_loader = dataloader.get_dataloader(dataset="cityscapes")
+num_classes = CityScapesDataSet.NUM_CLASSES
+ignore_labels = CityScapesDataSet.IGNORE_LABELS
+class_id_to_name = CityScapesDataSet.CLASS_ID_TO_NAMES
 
 ## PPHuman
 # train_loader, val_loader = dataloader.get_dataloader(dataset="pp_human")
@@ -111,11 +111,13 @@ dataloader = DataLoaders(batch_size=16)
 # ignore_labels = getattr(PPHumanSegDataSet, 'IGNORE_LABELS', None)
 # class_id_to_name = PPHumanSegDataSet.CLASS_ID_TO_NAMES
 
+
 ## BDD
-train_loader, val_loader = dataloader.get_dataloader(dataset="bdd")
-num_classes = BDDDataset.NUM_CLASSES
-ignore_labels = BDDDataset.IGNORE_LABELS
-class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
+# train_loader, val_loader = dataloader.get_dataloader(dataset="bdd")
+# num_classes = BDDDataset.NUM_CLASSES
+# ignore_labels = BDDDataset.IGNORE_LABELS
+# class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
+
 
 ## SBD
 # SBDDataset = datasets.SBDataset(root="data/sbd",
