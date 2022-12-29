@@ -130,13 +130,16 @@ def get_contour_center_of_mass(contour: np.array) -> Tuple[int, int]:
     :return: X, Y pixels of contour's center of mass
     """
     moments = cv2.moments(contour)
+    if float(moments['m00']) < 10:
+        return -1, -1
     cx = int(moments['m10'] / float(moments['m00']))
     cy = int(moments['m01'] / float(moments['m00']))
     return cx, cy
 
 
 def get_contour_perimeter(contour: np.array) -> float:
-    return cv2.arcLength(contour, closed=True)
+    perimeter = cv2.arcLength(contour, closed=True)
+    return perimeter
 
 
 def get_contour_is_convex(contour: np.array) -> bool:

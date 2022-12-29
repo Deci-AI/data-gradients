@@ -22,19 +22,21 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
 
     def execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
-            for cls_contours in image_contours:
+            for j, cls_contours in enumerate(image_contours):
+                h, w = data.labels[i][j].shape
                 for c in cls_contours:
-                    rect = contours.get_rotated_bounding_rect(c)
-                    self._width[data.split].append(rect[1][0])
-                    self._height[data.split].append(rect[1][1])
+                    # TODO: Add more logic to that, somehow
+                    points = contours.get_extreme_points(c)
+                    self._width[data.split].append(abs((points["rightmost"][0] - points["leftmost"][0]) / w))
+                    self._height[data.split].append(abs((points["bottommost"][1] - points["topmost"][1]) / h))
 
     def _process(self):
         for split in ['train', 'val']:
             width = [w for w in self._width[split] if w > 0]
             height = [h for h in self._height[split] if h > 0]
-            create_heatmap_plot(ax=self.ax[int(split != 'train')], x=width, y=height, split=split, bins=10, sigma=2,
-                                title=f'Bounding Boxes Width / Height', x_label='Width [px]', y_label='Height [px]',
-                                use_gaussian_filter=True, use_extent=True)
+            create_heatmap_plot(ax=self.ax[int(split != 'train')], x=width, y=height, split=split, bins=16, sigma=8,
+                                title=f'Bounding Boxes Width / Height', x_label='Width [% of image]',
+                                y_label='Height [% of image]')
 
             quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
             self.json_object.update({split: quantized_heat_map.tolist()})
