@@ -13,11 +13,6 @@ from src.preprocess import PreprocessorAbstract
 from src.utils import BatchData
 
 
-# TODO: Check this out
-# Itertools.chain(train, val) --> train0, train1, ..., trainN, val0, val1, ... valN
-# Itertools.cycle(train) --> train0, train1, ... trainN, train0 , train1, ...
-# Itertools.tee(train, n) --> iter(train[0, N/n]), iter(train[N/n, 2*(N/n)]), ... , iter(train[(n-1)*(N/n), N])
-
 class AnalysisManagerAbstract:
     """
     Main dataset analyzer manager abstract class.
@@ -89,9 +84,6 @@ class AnalysisManagerAbstract:
         train_batch = 0
         val_batch_data = None
         while True:
-            if train_batch > 5:
-                break
-            # Try to get train batch
             try:
                 train_batch_data = self._get_batch(self._train_iter)
                 train_batch_data.split = 'train'

@@ -9,11 +9,6 @@ from data.bdd_dataset import BDDDataset
 from internal_use_data_loaders.cityscapes_dataset import CityScapesDataSet
 from internal_use_data_loaders.pp_humanseg_14k_dataset import PPHumanSegDataSet
 
-# TODO: Clean up all methods but "bdd"
-# TODO: Fix all transformations!!!
-# TODO: FUCK
-# Make dataset root path relative to project's, pointing at small example bdd dataset
-
 
 class DataLoaders:
     def __init__(self, batch_size: int = 16):

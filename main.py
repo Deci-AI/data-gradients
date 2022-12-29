@@ -5,25 +5,7 @@ from data.bdd_dataset import BDDDataset
 from src import SegmentationAnalysisManager
 
 
-def debug():
-    import internal_use_data_loaders.get_torch_loaders as debug_data
-    da = SegmentationAnalysisManager(train_data=debug_data.train_loader,
-                                     val_data=debug_data.val_loader,
-                                     num_classes=debug_data.num_classes,
-                                     ignore_labels=debug_data.ignore_labels,
-                                     id_to_name=debug_data.class_id_to_name,
-                                     samples_to_visualize=2)
-
-
-    da.run()
-    exit(0)
-
-
 if __name__ == "__main__":
-
-    debug()
-
-
     """
     Main script for running the Deci-Dataset-Analyzer tool.
     Arguments required for SegmentationAnalysisManager() are:
@@ -56,6 +38,7 @@ if __name__ == "__main__":
                                      val_data=val_loader,
                                      num_classes=BDDDataset.NUM_CLASSES,
                                      ignore_labels=BDDDataset.IGNORE_LABELS,
+                                     # Optionals
                                      id_to_name=BDDDataset.CLASS_ID_TO_NAMES,
                                      samples_to_visualize=2)
 
