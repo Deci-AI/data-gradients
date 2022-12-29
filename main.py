@@ -34,12 +34,14 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
 
+    # batches_early_stop is a temporary optional argument for debugging purpose
     da = SegmentationAnalysisManager(train_data=train_loader,
                                      val_data=val_loader,
                                      num_classes=BDDDataset.NUM_CLASSES,
                                      ignore_labels=BDDDataset.IGNORE_LABELS,
                                      # Optionals
                                      id_to_name=BDDDataset.CLASS_ID_TO_NAMES,
-                                     samples_to_visualize=2)
+                                     samples_to_visualize=2,
+                                     batches_early_stop=3)
 
     da.run()

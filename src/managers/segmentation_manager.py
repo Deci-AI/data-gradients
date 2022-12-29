@@ -18,6 +18,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                  val_data: Optional[Iterable] = None,
                  samples_to_visualize: int = 10,
                  id_to_name: Optional[Dict] = None,
+                 batches_early_stop: int = 999
                  ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -28,7 +29,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param samples_to_visualize: Number of samples to visualize at tensorboard [0-n]
         :param id_to_name: Class ID to class names mapping (Dictionary)
         """
-        super().__init__(train_data, val_data, self.TASK, samples_to_visualize, id_to_name)
+        super().__init__(train_data, val_data, self.TASK, samples_to_visualize, id_to_name, batches_early_stop)
 
         self._preprocessor = SegmentationPreprocessor(num_classes, ignore_labels)
 
