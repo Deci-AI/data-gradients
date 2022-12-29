@@ -1,4 +1,5 @@
-import numpy
+from typing import Dict
+
 import numpy as np
 from matplotlib import pyplot as plt, cm
 from scipy.ndimage import gaussian_filter
@@ -45,7 +46,10 @@ def create_heatmap_plot(ax, x, y, split: str, bins=50, sigma=2, title="", x_labe
     if use_gaussian_filter:
         heatmap = gaussian_filter(heatmap, sigma=sigma)
     if use_extent:
-        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        min_v = min(xedges[0], yedges[0])
+        max_v = max(xedges[-1], yedges[-1])
+        extent = [min_v, max_v, min_v, max_v]
+        # extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
         ax.imshow(heatmap.T, extent=extent, origin='lower', aspect='auto', cmap=cm.jet)
     else:
         ax.imshow(heatmap.T, origin='lower', aspect='auto', cmap=cm.jet)
