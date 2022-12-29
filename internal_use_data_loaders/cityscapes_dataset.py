@@ -11,7 +11,7 @@ class CityScapesDataSet(Dataset):
                          24: 'person', 25: ' rider', 26: 'car', 27: 'truck', 28: 'bus', 31: 'train', 32: 'motorcycle',
                          33: 'bicycle'}
     NUM_CLASSES = 19
-    IGNORE_LABELS = [-1, 0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30]
+    IGNORE_LABELS = [0, 1, 2, 3, 4, 5, 6, 9, 10, 14, 15, 16, 18, 29, 30]
 
     def __init__(self, root, image_set, transform=None, target_transform=None):
         self.root = root
@@ -33,6 +33,9 @@ class CityScapesDataSet(Dataset):
             image = self.transform(image)
         if self.target_transform is not None:
             label = self.target_transform(label)
+
+        label[label == -1] = 0
+
         return image, label
 
     def _read_annotations_file(self, image_set) -> List[str]:
