@@ -22,8 +22,7 @@ class AnalysisManagerAbstract:
                  val_data: Optional[Iterable],
                  task: str,
                  samples_to_visualize: int,
-                 id_to_name
-                 ):
+                 id_to_name):
 
         self._extractors: List[FeatureExtractorAbstract] = []
 
