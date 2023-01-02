@@ -157,6 +157,17 @@ def get_contours(label: torch.Tensor) -> np.array:
     return all_onehot_contour
 
 
+def get_bbox_area(contours: List):
+    sizes = []
+    for image in range(len(contours)):
+        for cls in range(len(image)):
+            for c in contours:
+                rect = get_rotated_bounding_rect(c)
+                wh = rect[1]
+                sizes.append(int(wh[0] * wh[1]))
+    return sizes
+
+
 def get_valid_contours(contours: Tuple) -> List:
     """
     Contours sometimes are buggy, as for 2-points-contour, a stragith line, etc.

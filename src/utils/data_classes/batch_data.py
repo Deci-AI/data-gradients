@@ -23,3 +23,4 @@ class SegBatchData(BatchData):
                                    is number of classes
     """
     contours: List
+    # bbox_areas: List
