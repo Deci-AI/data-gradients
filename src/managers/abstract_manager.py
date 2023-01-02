@@ -71,6 +71,7 @@ class AnalysisManagerAbstract:
         """
         batch = next(data_iterator)
         batch = tuple(batch) if isinstance(batch, list) else batch
+        batch = batch[0], {'labels': {'lbaels_of_labels': {'labels_of_labels_of...': batch[1]}}}
 
         images, labels = self._preprocessor.validate(batch)
 

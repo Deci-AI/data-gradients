@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Sequence
+from typing import List, Optional, Tuple, Sequence, Dict
 
 import torch
 from torch import Tensor
@@ -33,16 +33,17 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :param objs: output of next(iterator)
         :return: (images, labels) as Tuple[Tensor, Tensor]
         """
-        if isinstance(objs, Sequence):
+        if isinstance(objs, Tuple) or isinstance(objs, List):
             if len(objs) == 2:
                 images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], 'first')
                 labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], 'second')
             else:
-                raise NotImplementedError
+                raise NotImplementedError(f'Got tuple/list object with length {len(objs)}! Supporting only len == 2')
         elif isinstance(objs, dict):
-            raise NotImplementedError
+            images = self._handle_dict(objs, 'first')
+            labels = self._handle_dict(objs, 'second')
         else:
-            raise NotImplementedError
+            raise NotImplementedError(f"Got object {type(objs)} from Iterator - supporting dict, tuples and lists Only!")
         return images, labels
 
     def _dim_validate_images(self, images: Tensor):

@@ -18,6 +18,15 @@ class ContainerMapper:
     def __init__(self):
         self._mapper: Optional[Callable] = None
         self._route: List[str] = []
+        self._images: bool = True
+
+    @property
+    def images(self) -> bool:
+        return self._images
+
+    @images.setter
+    def images(self, images: bool):
+        self._images = images
 
     @property
     def route(self):
@@ -38,7 +47,7 @@ class ContainerMapper:
         Get either a Json serialized object or a dictionary object and find the "route" out of its keys.
         param objs: a Mapping type of object
         """
-        self._route = self._get_users_string(objs)
+        self._route = self._get_users_string(objs, self.images)
         self._mapper = self._dict_mapping
 
     def _dict_mapping(self, objs):
@@ -50,7 +59,7 @@ class ContainerMapper:
         return self._mapper(objs)
 
     @staticmethod
-    def _get_users_string(objs):
+    def _get_users_string(objs, images):
         """
         Auxiliary method for the container_mapping recursive method. It holds the keys sequence target and ask the
         user to input which of the above keys mapping is the right one, in order to retrieve the correct data
@@ -63,8 +72,9 @@ class ContainerMapper:
         map_for_printing = json.dumps(res, indent=5, ensure_ascii=False)
         colorful_json = highlight(map_for_printing, lexers.JsonLexer(), formatters.TerminalFormatter())
         print(colorful_json.replace("\"", ""))
-        value = int(input("Please insert the circled number of the required data:\n"))
+        value = int(input(f"Please insert the circled number of the required {'images' if images else 'labels'} data:\n"))
         print(f'Path for getting objects out of container: {targets[value]}')
+        print('*' * 50)
         keys = [r.replace("'", "").replace('[', '').replace(']', '') for r in targets[value].split(']')][:-1]
         return keys
 

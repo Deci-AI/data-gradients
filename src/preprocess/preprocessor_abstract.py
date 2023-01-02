@@ -45,9 +45,15 @@ class PreprocessorAbstract(ABC):
             return torch.from_numpy(objs)
         elif isinstance(objs, Image):
             return transforms.ToTensor()(objs)
-        elif self._container_mapper[tuple_place] is not None:
+        else:
+            return self._handle_dict(objs, tuple_place)
+
+    def _handle_dict(self, objs, tuple_place):
+        if self._container_mapper[tuple_place] is not None:
             return self._container_mapper[tuple_place].container_to_tensor(objs)
         else:
             self._container_mapper[tuple_place] = preprocess.ContainerMapper()
+            self._container_mapper[tuple_place].images = tuple_place == 'first'
             self._container_mapper[tuple_place].analyze(objs)
             return self._container_mapper[tuple_place].container_to_tensor(objs)
+
