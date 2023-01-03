@@ -35,8 +35,8 @@ class AnalysisManagerAbstract:
                  val_data: Optional[Iterable],
                  task: str,
                  samples_to_visualize: int,
-                 id_to_name
-                 ):
+                 id_to_name,
+                 batches_early_stop):
 
         self._extractors: List[FeatureExtractorAbstract] = []
 
@@ -64,6 +64,7 @@ class AnalysisManagerAbstract:
         self.id_to_name = id_to_name
 
         self.sw: Optional[Stopwatch] = None
+        self.batches_early_stop = batches_early_stop
 
     def build(self):
         """
@@ -100,9 +101,9 @@ class AnalysisManagerAbstract:
         val_batch_data = None
         self.sw = Stopwatch()
         while True:
-            if train_batch > 2:
-                break
             # Try to get train batch
+            if train_batch > self.batches_early_stop:
+                break
             try:
                 train_batch_data = self._get_batch(self._train_iter)
                 train_batch_data.split = 'train'

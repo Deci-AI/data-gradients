@@ -11,9 +11,9 @@ class JsonLogger(ResultsLogger):
         self._output_file = 'raw_data.json'
 
     def log(self, title: str, data):
-        with open(os.path.join(self.logdir, self._output_file), 'w') as output:
+        with open(os.path.join(self.logdir, self._output_file), 'a') as output:
             try:
-                json.dump(data, output, indent=2)
+                json.dump(data, output, indent=6, separators=(',', ': '))
             except Exception as e:
                 print(f'Could not serialize {title}!'
                       f'\nObject type is {type(data)}'

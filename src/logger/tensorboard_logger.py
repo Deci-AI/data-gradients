@@ -1,3 +1,4 @@
+import cv2
 import torch
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
@@ -14,16 +15,21 @@ class TensorBoardLogger(ResultsLogger):
         self.writer = SummaryWriter(log_dir=self.logdir)
 
     def visualize(self):
-        to_gray_scale = torchvision.transforms.Grayscale()
         n = 0
         while n < self.samples_to_visualize:
+            # TODO: Still WIP
             images, labels = next(self._train_iter)
-            images = to_gray_scale(images)
-            labels *= 255
+            if len(images) > self.samples_to_visualize:
+                images = images[:self.samples_to_visualize]
+                labels = labels[:self.samples_to_visualize]
+
+            labels *= (255. / max(labels.unique()))
+            labels = labels.repeat(1, 3, 1, 1)
 
             img_grid = torchvision.utils.make_grid(torch.cat([images, labels]), nrow=len(images))
 
             n += len(images)
+
             # write to tensorboard
             self.writer.add_image(f'{n}_images_labels', img_grid)
 

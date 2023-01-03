@@ -1,7 +1,5 @@
 import os
 
-import numpy as np
-import torch
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -20,7 +18,9 @@ class BDDDataset(Dataset):
     CLASS_ID_TO_NAMES = {0: 'road', 1: 'sidewalk', 2: 'building', 3: 'wall', 4: 'fence', 5: 'pole', 6: 'traffic light',
                          7: 'traffic sign', 8: 'vegetation', 9: 'terrain', 10: 'sky', 11: 'person', 12: 'rider',
                          13: 'car', 14: 'truck', 15: 'bus', 16: 'train', 17: 'motorcycle', 18: 'bicycle'}
-    def __init__(self, data_folder, split: str, ignore_label=19, transform=transforms.Compose([])):
+
+    def __init__(self, data_folder, split: str, ignore_label=19, transform=transforms.Compose([]).transforms,
+                 target_transform=transforms.Compose([])):
         """
         :param data_folder: Folder where data files are stored
         :param split: 'train' or 'test'
@@ -36,22 +36,14 @@ class BDDDataset(Dataset):
                 self.samples_fn.append([os.path.join(data_location, f), os.path.join(data_location, f[0:-3] + "png")])
 
         self.transforms = transform
-
-    @staticmethod
-    def target_transform(target):
-        """
-        target_transform - Transforms the sample image
-          :param target: The target mask to transform
-          :return:    The transformed target mask
-        """
-        return torch.from_numpy(np.array(target)).long()
+        self.target_transforms = transform
 
     def __getitem__(self, i):
         image = Image.open(self.samples_fn[i][0]).convert('RGB')
         label = Image.open(self.samples_fn[i][1])
         if self.transforms:
             image = self.transforms(image)
-            label = self.transforms(label)
+            label = self.target_transforms(label)
 
         label[label == 1] = self.ignore_label / 255.
 
