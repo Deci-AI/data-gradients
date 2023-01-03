@@ -1,8 +1,6 @@
-from typing import List
-
 import numpy as np
 
-from src.logger.logger_utils import create_heatmap_plot
+from src.logger.logger_utils import create_heatmap_plot, create_json_object
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
@@ -46,4 +44,4 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
             create_heatmap_plot(ax=self.ax[int(split != 'train')], x=x, y=y, split=split, bins=bins, sigma=sigma,
                                 title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')
             quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-            self.json_object.update({split: quantized_heat_map.tolist()})
+            self.json_object.update({split: create_json_object(quantized_heat_map.tolist(), ['X', 'Y'])})

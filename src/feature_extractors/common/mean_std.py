@@ -31,4 +31,4 @@ class MeanAndSTD(FeatureExtractorAbstract):
             labels = ['Blue-Mean', 'Blue-STD', 'Green-Mean', 'Green-STD', 'Red-Mean', 'Red-STD']
             create_bar_plot(ax=self.ax, data=values, labels=labels, y_label='Mean / STD', title='Images mean & std',
                             split=split, ticks_rotation=0, color=self.colors[split], yticks=True)
-            self.json_object.update(create_json_object(values, labels))
+            self.json_object.update({split: create_json_object(values, labels)})
