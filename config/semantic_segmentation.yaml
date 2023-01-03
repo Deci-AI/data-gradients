@@ -6,52 +6,31 @@ defaults:
   - _self_
 
 semantic_segmentation:
-#  - _target_: src.feature_extractors.segmentation.classes_distribution.GetClassDistribution
-#    num_classes: ${number_of_classes}
-#    ignore_labels: ${ignore_labels}
-#  - _target_: src.feature_extractors.segmentation.classes_number_of_pixels.PixelsPerClass
-#    num_classes: ${number_of_classes}
-#    ignore_labels: ${ignore_labels}
-#  - _target_: src.feature_extractors.segmentation.classes_appearances_in_images.AppearancesInImages
-#    num_classes: ${number_of_classes}
-#    ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
+  - _target_: src.feature_extractors.segmentation.classes_distribution.GetClassDistribution
+    num_classes: ${number_of_classes}
+    ignore_labels: ${ignore_labels}
+  - _target_: src.feature_extractors.segmentation.classes_number_of_pixels.PixelsPerClass
+    num_classes: ${number_of_classes}
+    ignore_labels: ${ignore_labels}
+  - _target_: src.feature_extractors.segmentation.classes_appearances_in_images.AppearancesInImages
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
   - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
+  - _target_: src.feature_extractors.segmentation.components_center_of_mass.ComponentsCenterOfMass
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
+  - _target_: src.feature_extractors.segmentation.components_convexity.ComponentsConvexity
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
+  - _target_: src.feature_extractors.segmentation.components_erosion.ErosionTest
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
-    num_classes: ${number_of_classes}
-    ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
-    num_classes: ${number_of_classes}
-    ignore_labels: ${ignore_labels}
-  - _target_: src.feature_extractors.segmentation.bounding_boxes_area.ComponentsSizeDistribution
-    num_classes: ${number_of_classes}
-    ignore_labels: ${ignore_labels}
-#  - _target_: src.feature_extractors.segmentation.components_center_of_mass.ComponentsCenterOfMass
-#    num_classes: ${number_of_classes}
-#    ignore_labels: ${ignore_labels}
-#  - _target_: src.feature_extractors.segmentation.components_convexity.ComponentsConvexity
-#    num_classes: ${number_of_classes}
-#    ignore_labels: ${ignore_labels}
-#  - _target_: src.feature_extractors.segmentation.components_erosion.ErosionTest
-#    num_classes: ${number_of_classes}
-#    ignore_labels: ${ignore_labels}
-#  - _target_: src.feature_extractors.segmentation.labels_aspect_ratios.LabelsAspectRatios
-#  - _target_: src.feature_extractors.segmentation.labels_resolutions.LabelsResolutions
-#  - _target_: src.feature_extractors.segmentation.count_num_components.CountNumComponents
-#  - _target_: src.feature_extractors.segmentation.bounding_boxes_width_height.WidthHeight
+  - _target_: src.feature_extractors.segmentation.labels_aspect_ratios.LabelsAspectRatios
+  - _target_: src.feature_extractors.segmentation.labels_resolutions.LabelsResolutions
+  - _target_: src.feature_extractors.segmentation.count_num_components.CountNumComponents
+  - _target_: src.feature_extractors.segmentation.bounding_boxes_width_height.WidthHeight
 #  - _target_: feature_extractors.segmentation.count_small_objects.SegmentationCountSmallObjects
 #    percent_of_an_image: 1
 

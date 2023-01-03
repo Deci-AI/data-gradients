@@ -115,9 +115,25 @@ class AnalysisManagerAbstract:
 
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
 
-            # pbar.update()
-            print(f'Batch {train_batch} Took {self.sw.tick()}')
+            if train_batch < 1:
+                self.measure()
+
+            pbar.update()
             train_batch += 1
+
+    def measure(self):
+        import datetime
+        batch_time = self.sw.tick()
+        total_seconds = self._val_dataset_size * batch_time + (self._train_dataset_size - self._val_dataset_size) * batch_time * 0.75
+        if total_seconds < 1800:
+            return
+        total_time = str(datetime.timedelta(seconds=total_seconds))
+        print(f'\n\nEstimated time for the whole analyze is {total_time}')
+        inp = input(f'Do you want to shorten the amount of data to analyze? [y / n]\n')
+        if inp == 'y':
+            inp = input('Please provide amount of data to analyze [%]\n')
+            self.batches_early_stop = int(self._train_dataset_size * (int(inp) / 100))
+            print(f'Running for {self.batches_early_stop} batches!')
 
     def post_process(self):
         """
