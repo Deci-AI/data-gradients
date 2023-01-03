@@ -7,7 +7,7 @@ class LabelsResolutions(FeatureExtractorAbstract):
         super().__init__()
         self._hist = {'train': dict(), 'val': dict()}
 
-    def execute(self, data):
+    def _execute(self, data):
         for label in data.labels:
             res = str(tuple((label.shape[2], label.shape[1])))
             if res not in self._hist[data.split]:

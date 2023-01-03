@@ -18,15 +18,14 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
         self._height = {'train': [], 'val': []}
         self.num_axis = (1, 2)
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
-                h, w = data.labels[i][j].shape
+                height, width = data.labels[i][j].shape
                 for c in cls_contours:
                     # TODO: Add more logic to that, somehow
-                    points = contours.get_extreme_points(c)
-                    self._width[data.split].append(abs((points["rightmost"][0] - points["leftmost"][0]) / w))
-                    self._height[data.split].append(abs((points["bottommost"][1] - points["topmost"][1]) / h))
+                    self._width[data.split].append(c.w / width)
+                    self._height[data.split].append(c.h / height)
 
     def _process(self):
         for split in ['train', 'val']:

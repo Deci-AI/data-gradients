@@ -17,16 +17,15 @@ class ComponentsConvexity(SegmentationFeatureExtractorAbstract):
         self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
                 for u in data.labels[i][j].unique():
                     u = int(u.item())
                     if u not in self.ignore_labels:
                         for c in cls_contours:
-                            contour_perimeter = contours.get_contour_perimeter(c)
                             convex_hull_perimeter = contours.get_contour_perimeter(contours.get_convex_hull(c))
-                            convexity_measure = (contour_perimeter - convex_hull_perimeter) / contour_perimeter
+                            convexity_measure = (c.perimeter - convex_hull_perimeter) / c.perimeter
                             self._hist[data.split][u].append(convexity_measure)
 
     def _process(self):

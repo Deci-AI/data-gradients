@@ -14,7 +14,7 @@ class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):
         super().__init__()
 
     @abstractmethod
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         pass
 
     @abstractmethod

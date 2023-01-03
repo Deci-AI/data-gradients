@@ -17,7 +17,7 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
         self._hist = {'train': dict(), 'val': dict()}
         self._total_objects = {'train': 0, 'val': 0}
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for image_contours in data.contours:
             num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
             self._total_objects[data.split] += num_objects_in_image

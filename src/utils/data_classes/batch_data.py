@@ -3,6 +3,8 @@ from typing import List
 
 from torch import Tensor
 
+from src.utils.data_classes.contour import Contour
+
 
 @dataclass()
 class BatchData:
@@ -22,4 +24,4 @@ class SegBatchData(BatchData):
     contours - [BS, N, C, P, 1, 2] where (P, 1, 2) is a contour representation, C is number of contours and N
                                    is number of classes
     """
-    contours: List
+    contours: List[List[List[Contour]]]

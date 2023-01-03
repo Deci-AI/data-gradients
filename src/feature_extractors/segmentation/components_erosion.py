@@ -21,7 +21,7 @@ class ErosionTest(SegmentationFeatureExtractorAbstract):
         self._kernel = np.ones((3, 3), np.uint8)
         self.ignore_labels = ignore_labels
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
 
         for i, image_contours in enumerate(data.contours):
             label = data.labels[i].numpy().transpose(1, 2, 0).astype(np.uint8)

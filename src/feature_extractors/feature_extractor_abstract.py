@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 
 from src.logger.results_logger import ResultsLogger
 from src.utils import BatchData
+from src.utils.common.stopwatch import Stopwatch
 
 
 class FeatureExtractorAbstract(ABC):
@@ -30,9 +31,12 @@ class FeatureExtractorAbstract(ABC):
         self.json_object: Dict[str, Optional[ResultsLogger]] = {'train': None, 'val': None}
         self.id_to_name = None
 
-    @abstractmethod
     def execute(self, data: BatchData):
-        pass
+        self._execute(data)
+
+    @abstractmethod
+    def _execute(self, data: BatchData):
+        raise NotImplementedError
 
     def process(self, loggers: Dict[str, ResultsLogger], id_to_name):
         self.id_to_name = id_to_name
@@ -45,6 +49,7 @@ class FeatureExtractorAbstract(ABC):
         self.log(logger=loggers['TB'],
                  title=self.__class__.__name__,
                  data=self.fig)
+
         self.log(logger=loggers['JSON'],
                  title=self.__class__.__name__,
                  data=self.json_object)

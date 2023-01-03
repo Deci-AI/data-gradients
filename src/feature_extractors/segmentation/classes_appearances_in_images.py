@@ -18,7 +18,7 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
         self._hist = {'train': dict.fromkeys(keys, 0), 'val': dict.fromkeys(keys, 0)}
         self._number_of_images = {'train': 0, 'val': 0}
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         try:
             self._number_of_images[data.split] += len(data.labels)
             for label in data.labels:

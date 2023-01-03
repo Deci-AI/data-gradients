@@ -13,7 +13,7 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
         self._total_objects = {'train': 0, 'val': 0}
         self.ignore_labels = ignore_labels
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
                 for u in data.labels[i][j].unique():

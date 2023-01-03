@@ -20,16 +20,15 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
 
         self.num_axis = (1, 2)
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
                 unique = np.unique(data.labels[i][j])
                 if not len(unique) > 1:
                     continue
                 for c in cls_contours:
-                    center = contours.get_contour_center_of_mass(c)
-                    self._hist[data.split][int(np.delete(unique, 0))]['x'].append(center[0])
-                    self._hist[data.split][int(np.delete(unique, 0))]['y'].append(center[1])
+                    self._hist[data.split][int(np.delete(unique, 0))]['x'].append(c.center[0])
+                    self._hist[data.split][int(np.delete(unique, 0))]['y'].append(c.center[1])
 
     def _process(self):
         for split in ['train', 'val']:

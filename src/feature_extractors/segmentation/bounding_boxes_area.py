@@ -18,8 +18,7 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
         self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
-    def execute(self, data: SegBatchData):
-
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
@@ -27,9 +26,7 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
                     u = int(u.item())
                     if u not in self.ignore_labels:
                         for c in cls_contours:
-                            rect = contours.get_rotated_bounding_rect(c)
-                            wh = rect[1]
-                            self._hist[data.split][u].append(100 * int(wh[0] * wh[1]) / img_dim)
+                            self._hist[data.split][u].append(100 * int(c.area) / img_dim)
 
     def _process(self):
         for split in ['train', 'val']:
@@ -45,4 +42,3 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
 
             self.ax.grid(visible=True, axis='y')
             self.json_object.update({split: create_json_object(hist.values(), hist.keys())})
-

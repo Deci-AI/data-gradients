@@ -18,7 +18,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
         self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
-    def execute(self, data: SegBatchData):
+    def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
             for j, cls_contours in enumerate(image_contours):
@@ -26,7 +26,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
                     u = int(u.item())
                     if u not in self.ignore_labels:
                         for contour in cls_contours:
-                            size = np.round(100 * contours.get_contour_area(contour) / img_dim, 3)
+                            size = np.round(100 * contour.area / img_dim, 3)
                             self._hist[data.split][u].append(size)
 
     def _process(self):

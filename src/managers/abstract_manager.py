@@ -11,6 +11,7 @@ from src.logger.json_logger import JsonLogger
 from src.logger.tensorboard_logger import TensorBoardLogger
 from src.preprocess import PreprocessorAbstract
 from src.utils import BatchData
+from src.utils.common.stopwatch import Stopwatch
 
 
 class AnalysisManagerAbstract:
@@ -50,6 +51,7 @@ class AnalysisManagerAbstract:
         self._task = task
         self.id_to_name = id_to_name
 
+        self.sw: Optional[Stopwatch] = None
         self.batches_early_stop = batches_early_stop
 
     def build(self):
@@ -58,7 +60,7 @@ class AnalysisManagerAbstract:
         Create lists of feature extractors, both to train and val iterables.
         """
         cfg = hydra.utils.instantiate(self._cfg)
-        self._extractors = cfg.common + cfg[self._task]
+        self._extractors = cfg[self._task] #  cfg.common +
 
     def visualize(self):
         self._loggers['TB'].visualize()
@@ -82,10 +84,12 @@ class AnalysisManagerAbstract:
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
         """
-        pbar = tqdm.tqdm(desc='Working on batch # ', total=self._dataset_size)
+        # pbar = tqdm.tqdm(desc='Working on batch # ', total=self._dataset_size)
         train_batch = 0
         val_batch_data = None
+        self.sw = Stopwatch()
         while True:
+            # Try to get train batch
             if train_batch > self.batches_early_stop:
                 break
             try:
@@ -111,7 +115,8 @@ class AnalysisManagerAbstract:
 
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
 
-            pbar.update()
+            # pbar.update()
+            print(f'Batch {train_batch} Took {self.sw.tick()}')
             train_batch += 1
 
     def post_process(self):
@@ -121,6 +126,8 @@ class AnalysisManagerAbstract:
         Then, it logs the information through the logger.
         :return:
         """
+        print(f'Total time is: {self.sw.total()}')
+
         for extractor in self._extractors:
             extractor.process(self._loggers, self.id_to_name)
 
