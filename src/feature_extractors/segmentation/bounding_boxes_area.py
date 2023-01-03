@@ -25,11 +25,8 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
                 for u in data.labels[i][j].unique():
                     u = int(u.item())
                     if u not in self.ignore_labels:
-                        # self._hist[data.split][u] += list(((100 * np.array(data.bbox_areas)) / img_dim))
                         for c in cls_contours:
-                            rect = contours.get_rotated_bounding_rect(c)
-                            wh = rect[1]
-                            self._hist[data.split][u].append(100 * int(wh[0] * wh[1]) / img_dim)
+                            self._hist[data.split][u].append(100 * int(c.area) / img_dim)
 
     def _process(self):
         for split in ['train', 'val']:

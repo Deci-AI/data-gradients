@@ -13,18 +13,6 @@ from src.preprocess import PreprocessorAbstract
 from src.utils import BatchData
 from src.utils.common.stopwatch import Stopwatch
 
-"""
-Optimization results:
-1. Cityscapes, bs 16, 8 x ComponentsSizeDistribution
-    Batch 1 - 11.48
-    Batch 2 - 10.85
-    Batch 3 - 10.17
-    Total -   32.6
-2. Cityscapes, bs 16, 8 x ComponentsSizeDistribution, Computing contours's features beforehand
- 
-"""
-
-
 
 class AnalysisManagerAbstract:
     """

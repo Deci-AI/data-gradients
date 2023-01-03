@@ -24,9 +24,8 @@ class ComponentsConvexity(SegmentationFeatureExtractorAbstract):
                     u = int(u.item())
                     if u not in self.ignore_labels:
                         for c in cls_contours:
-                            contour_perimeter = contours.get_contour_perimeter(c)
                             convex_hull_perimeter = contours.get_contour_perimeter(contours.get_convex_hull(c))
-                            convexity_measure = (contour_perimeter - convex_hull_perimeter) / contour_perimeter
+                            convexity_measure = (c.perimeter - convex_hull_perimeter) / c.perimeter
                             self._hist[data.split][u].append(convexity_measure)
 
     def _process(self):

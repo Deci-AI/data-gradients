@@ -27,9 +27,8 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
                 if not len(unique) > 1:
                     continue
                 for c in cls_contours:
-                    center = contours.get_contour_center_of_mass(c)
-                    self._hist[data.split][int(np.delete(unique, 0))]['x'].append(center[0])
-                    self._hist[data.split][int(np.delete(unique, 0))]['y'].append(center[1])
+                    self._hist[data.split][int(np.delete(unique, 0))]['x'].append(c.center[0])
+                    self._hist[data.split][int(np.delete(unique, 0))]['y'].append(c.center[1])
 
     def _process(self):
         for split in ['train', 'val']:

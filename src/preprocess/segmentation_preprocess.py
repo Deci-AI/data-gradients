@@ -219,11 +219,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         # exit(0)
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
-        # bbox_areas = contours.get_bbox_area(all_contours)
         sbd = SegBatchData(images=images,
                            labels=labels,
                            contours=all_contours,
-                           # bbox_areas=bbox_areas,
                            split="")
 
         return sbd

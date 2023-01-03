@@ -4,6 +4,9 @@ import cv2
 import numpy as np
 import torch
 
+from src.utils import Contour
+
+
 def debug_convexity_things(labels, images):
     for label, image in zip(labels, images):
         drawing = image.numpy()
@@ -157,14 +160,16 @@ def get_contours(label: torch.Tensor) -> np.array:
     return all_onehot_contour
 
 
-def get_bbox_area(contours: List):
-    sizes = []
-    for image in range(len(contours)):
-        for cls in range(len(image)):
-            for c in contours:
-                rect = get_rotated_bounding_rect(c)
-                wh = rect[1]
-                sizes.append(int(wh[0] * wh[1]))
+def get_bbox_area(all_contours: List):
+    # [N, Nc, P, 1, 2] where N is # of classes, Nc # of contours per class and
+    sizes = np.zeros(len(all_contours))
+    for i, class_channel in enumerate(all_contours):
+        channel_sizes = np.zeros(len(class_channel))
+        for j, contour in enumerate(class_channel):
+            rect = get_rotated_bounding_rect(contour)
+            wh = rect[1]
+            channel_sizes[j] = (int(wh[0] * wh[1]))
+        sizes[i] = channel_sizes
     return sizes
 
 
@@ -175,8 +180,18 @@ def get_valid_contours(contours: Tuple) -> List:
     :param contours: Any list of contours
     :return: Valid list of contours
     """
+    valid_contours = []
     minimal_contour_size = 9
-    valid_contours = [c for c in contours if get_contour_area(c) > minimal_contour_size]
+    for contour in contours:
+        contour_area = get_contour_area(contour)
+        if contour_area > minimal_contour_size:
+            _, w, h = get_extreme_points(contour)
+            valid_contours += [Contour(points=contour,
+                                       area=contour_area,
+                                       center=get_contour_center_of_mass(contour),
+                                       perimeter=get_contour_perimeter(contour),
+                                       w=w,
+                                       h=h)]
     return valid_contours
 
 
@@ -244,10 +259,13 @@ def get_aspect_ratio_of_bounding_rect(contour: np.array) -> float:
     return rect[1][0] / rect[1][1]
 
 
-def get_extreme_points(contour: np.array) -> Dict:
+def get_extreme_points(contour: np.array) -> Tuple[Dict, int, int]:
     extreme_points = dict()
     extreme_points["leftmost"] = tuple(contour[contour[:, :, 0].argmin()][0])
     extreme_points["rightmost"] = tuple(contour[contour[:, :, 0].argmax()][0])
     extreme_points["topmost"] = tuple(contour[contour[:, :, 1].argmin()][0])
     extreme_points["bottommost"] = tuple(contour[contour[:, :, 1].argmax()][0])
-    return extreme_points
+    w = (extreme_points["rightmost"][0] - extreme_points["leftmost"][0])
+    h = (extreme_points["bottommost"][1] - extreme_points["topmost"][1])
+
+    return extreme_points, abs(w), abs(h)

@@ -26,7 +26,7 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
                     u = int(u.item())
                     if u not in self.ignore_labels:
                         for contour in cls_contours:
-                            size = np.round(100 * contours.get_contour_area(contour) / img_dim, 3)
+                            size = np.round(100 * contour.area / img_dim, 3)
                             self._hist[data.split][u].append(size)
 
     def _process(self):
