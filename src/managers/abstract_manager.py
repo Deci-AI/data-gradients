@@ -30,7 +30,8 @@ class AnalysisManagerAbstract:
 
         self._threads = ThreadPoolExecutor()
 
-        self._dataset_size = len(train_data) if hasattr(train_data, '__len__') else None
+        self._train_dataset_size = len(train_data) if hasattr(train_data, '__len__') else None
+        self._val_dataset_size = len(val_data) if hasattr(val_data, '__len__') else None
         # Users Data Iterator
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
@@ -60,7 +61,7 @@ class AnalysisManagerAbstract:
         Create lists of feature extractors, both to train and val iterables.
         """
         cfg = hydra.utils.instantiate(self._cfg)
-        self._extractors = cfg[self._task] #  cfg.common +
+        self._extractors = cfg[self._task] + cfg.common
 
     def visualize(self):
         self._loggers['TB'].visualize()
@@ -84,7 +85,7 @@ class AnalysisManagerAbstract:
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
         """
-        # pbar = tqdm.tqdm(desc='Working on batch # ', total=self._dataset_size)
+        pbar = tqdm.tqdm(desc='Analyzing...', total=self._train_dataset_size)
         train_batch = 0
         val_batch_data = None
         self.sw = Stopwatch()
