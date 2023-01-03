@@ -25,8 +25,10 @@ class ErosionTest(SegmentationFeatureExtractorAbstract):
 
         for i, image_contours in enumerate(data.contours):
             label = data.labels[i].numpy().transpose(1, 2, 0).astype(np.uint8)
-            eroded_label = cv2.erode(label, self._kernel, iterations=2)
-            eroded_label_tensor = torch.tensor(eroded_label)
+
+            label = cv2.morphologyEx(label, cv2.MORPH_OPEN, self._kernel)
+
+            eroded_label_tensor = torch.tensor(label)
             if len(eroded_label_tensor.shape) == 2:
                 eroded_label_tensor = eroded_label_tensor.unsqueeze(-1)
             eroded_contours = contours.get_contours(eroded_label_tensor.permute(2, 0, 1))
@@ -37,6 +39,7 @@ class ErosionTest(SegmentationFeatureExtractorAbstract):
                         self._hist[data.split][u] += len(cls_contours)
                         if eroded_contours:
                             self._hist_eroded[data.split][u] += len(eroded_contours)
+
     def _process(self):
         for split in ['train', 'val']:
             hist = dict.fromkeys(self._hist[split].keys(), 0.)

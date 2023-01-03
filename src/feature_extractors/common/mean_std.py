@@ -12,7 +12,7 @@ class MeanAndSTD(FeatureExtractorAbstract):
         self._hist = {'train': {'mean': [], 'std': []},
                       'val': {'mean': [], 'std': []}}
 
-    def execute(self, data):
+    def _execute(self, data):
         for image in data.images:
             self._hist[data.split]['mean'].append(torch.mean(image, [1, 2]))
             self._hist[data.split]['std'].append(torch.std(image, [1, 2]))
