@@ -1,6 +1,5 @@
 import numpy as np
 
-from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 from src.logger.logger_utils import create_heatmap_plot, create_json_object

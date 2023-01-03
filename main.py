@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader
-from torchvision.transforms import CenterCrop, ToTensor, Compose, Resize, InterpolationMode, Normalize
+from torchvision.transforms import Compose, ToTensor
 
 from data.bdd_dataset import BDDDataset
 from src import SegmentationAnalysisManager
@@ -31,10 +31,10 @@ if __name__ == "__main__":
                              transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
 
     # Create torch DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=16, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=1, shuffle=True)
 
-    from internal_use_data_loaders.get_torch_loaders import train_loader, val_loader, num_classes, ignore_labels, class_id_to_name
+    from internal_use_data_loaders.get_torch_loaders import *
     # batches_early_stop is a temporary optional argument for debugging purpose
     da = SegmentationAnalysisManager(train_data=train_loader,
                                      val_data=val_loader,
@@ -42,7 +42,7 @@ if __name__ == "__main__":
                                      ignore_labels=ignore_labels,
                                      # Optionals
                                      id_to_name=class_id_to_name,
-                                     samples_to_visualize=2)
-                                     batches_early_stop=3)
+                                     samples_to_visualize=2,
+                                     batches_early_stop=48)
 
     da.run()

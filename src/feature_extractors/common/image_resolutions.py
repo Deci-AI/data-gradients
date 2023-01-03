@@ -1,7 +1,6 @@
-from collections import OrderedDict
-from typing import Dict
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot
+from src.utils import BatchData
 
 
 class ImagesResolutions(FeatureExtractorAbstract):
@@ -9,7 +8,7 @@ class ImagesResolutions(FeatureExtractorAbstract):
         super().__init__()
         self._hist = {'train': dict(), 'val': dict()}
 
-    def _execute(self, data):
+    def _execute(self, data: BatchData):
         for image in data.images:
             res = str(tuple((image.shape[2], image.shape[1])))
             if res not in self._hist[data.split]:

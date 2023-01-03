@@ -1,5 +1,6 @@
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot
+from src.utils import SegBatchData
 
 
 class LabelsResolutions(FeatureExtractorAbstract):
@@ -7,7 +8,7 @@ class LabelsResolutions(FeatureExtractorAbstract):
         super().__init__()
         self._hist = {'train': dict(), 'val': dict()}
 
-    def _execute(self, data):
+    def _execute(self, data: SegBatchData):
         for label in data.labels:
             res = str(tuple((label.shape[2], label.shape[1])))
             if res not in self._hist[data.split]:

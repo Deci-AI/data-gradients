@@ -3,6 +3,7 @@ import torch
 
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot, create_json_object
+from src.utils import BatchData
 
 
 class MeanAndSTD(FeatureExtractorAbstract):
@@ -12,7 +13,7 @@ class MeanAndSTD(FeatureExtractorAbstract):
         self._hist = {'train': {'mean': [], 'std': []},
                       'val': {'mean': [], 'std': []}}
 
-    def _execute(self, data):
+    def _execute(self, data: BatchData):
         for image in data.images:
             self._hist[data.split]['mean'].append(torch.mean(image, [1, 2]))
             self._hist[data.split]['std'].append(torch.std(image, [1, 2]))

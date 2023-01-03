@@ -6,7 +6,6 @@ from matplotlib import pyplot as plt
 
 from src.logger.results_logger import ResultsLogger
 from src.utils import BatchData
-from src.utils.common.stopwatch import Stopwatch
 
 
 class FeatureExtractorAbstract(ABC):

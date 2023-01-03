@@ -1,4 +1,4 @@
-from typing import Mapping, Sequence, Callable, Optional, Any, List, Dict, Union
+from typing import Mapping, Callable, Optional, Any, List, Dict, Union
 import json
 
 from PIL import Image

@@ -96,7 +96,7 @@ class DataLoaders:
 
 
 
-dataloader = DataLoaders(batch_size=16)
+dataloader = DataLoaders(batch_size=8)
 
 
 ## CityScapes

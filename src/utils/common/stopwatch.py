@@ -1,3 +1,4 @@
+import datetime
 from timeit import default_timer as timer
 
 import numpy as np
@@ -30,3 +31,8 @@ class Stopwatch:
 
     def tick_and_print(self, what):
         print("{} took: {:.4f}s".format(what, self.tick()))
+
+    def get_total_time(self, train_len, val_len) -> str:
+        total_seconds = val_len * self._ticks[-1] + (train_len - val_len) * self._ticks[-1] * 0.75
+        total_time = str(datetime.timedelta(seconds=total_seconds))
+        return total_time

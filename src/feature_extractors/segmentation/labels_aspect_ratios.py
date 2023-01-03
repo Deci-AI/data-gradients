@@ -1,7 +1,8 @@
 import numpy as np
 
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot, create_json_object
+from src.logger.logger_utils import create_bar_plot
+from src.utils import SegBatchData
 
 
 class LabelsAspectRatios(FeatureExtractorAbstract):
@@ -10,7 +11,7 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
         self._hist = {'train': dict(), 'val': dict()}
         self._channels_last = False
 
-    def _execute(self, data):
+    def _execute(self, data: SegBatchData):
         for label in data.labels:
             ar = np.round(label.shape[2] / label.shape[1], 2)
             if ar not in self._hist[data.split]:

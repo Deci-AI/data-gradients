@@ -5,6 +5,7 @@ import numpy as np
 
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot, create_json_object
+from src.utils import BatchData
 
 
 class AverageBrightness(FeatureExtractorAbstract):
@@ -12,7 +13,7 @@ class AverageBrightness(FeatureExtractorAbstract):
         super().__init__()
         self._brightness = {'train': [], 'val': []}
 
-    def _execute(self, data):
+    def _execute(self, data: BatchData):
         for image in data.images:
             np_image = image.numpy().transpose(1, 2, 0)
             lightness, _, _ = cv2.split(cv2.cvtColor(np_image, cv2.COLOR_BGR2LAB))

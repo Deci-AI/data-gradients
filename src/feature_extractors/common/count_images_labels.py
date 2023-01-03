@@ -1,6 +1,6 @@
-from src.utils import SegBatchData
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from src.logger.logger_utils import create_bar_plot, create_json_object
+from src.utils import BatchData
 
 
 class NumberOfImagesLabels(FeatureExtractorAbstract):
@@ -14,7 +14,7 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
         self._num_labels = {'train': 0, 'val': 0}
         self._num_bg_images = {'train': 0, 'val': 0}
 
-    def _execute(self, data):
+    def _execute(self, data: BatchData):
         self._num_images[data.split] += len(data.images)
         self._num_labels[data.split] += len(data.labels)
         # TODO: Fix how to get background image if not segmentation
