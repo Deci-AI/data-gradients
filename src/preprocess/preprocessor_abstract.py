@@ -24,6 +24,15 @@ class PreprocessorAbstract(ABC):
     def preprocess(self, images, labels) -> SegBatchData:
         pass
 
+    @property
+    def route(self):
+        route = {}
+        if self._container_mapper['first'] is not None:
+            route.update({'get images': self._container_mapper['first'].route})
+        if self._container_mapper['second'] is not None:
+            route.update({'get labels': self._container_mapper['second'].route})
+        return route if route else None
+
     @staticmethod
     def channels_last_to_first(tensors: torch.Tensor):
         """

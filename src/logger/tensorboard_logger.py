@@ -22,7 +22,7 @@ class TensorBoardLogger(ResultsLogger):
                 images = images[:self.samples_to_visualize]
                 labels = labels[:self.samples_to_visualize]
 
-            labels *= (255. / max(labels.unique()))
+            labels *= (1. / max(labels.unique()))
             labels = labels.repeat(1, 3, 1, 1)
 
             img_grid = torchvision.utils.make_grid(torch.cat([images, labels]), nrow=len(images))
