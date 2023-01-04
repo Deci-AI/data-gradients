@@ -1,4 +1,4 @@
-# Deci dataset analyzer
+# Data Gradients
 ## What is this?
 The Deci`s dataset analyzer tool provide valuable information about your dataset
 #### Benefits 
