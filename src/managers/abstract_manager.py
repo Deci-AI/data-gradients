@@ -116,8 +116,8 @@ class AnalysisManagerAbstract:
 
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
 
-            if train_batch < 1:
-                self.measure()
+            # if train_batch < 1:
+            #     self.measure()
 
             pbar.update()
             train_batch += 1
