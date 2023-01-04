@@ -63,8 +63,6 @@ class AnalysisManagerAbstract:
         cfg = hydra.utils.instantiate(self._cfg)
         self._extractors = cfg[self._task] + cfg.common
 
-    def visualize(self):
-        self._loggers['TB'].visualize()
 
     def _get_batch(self, data_iterator: Iterator) -> BatchData:
         """
@@ -138,10 +136,18 @@ class AnalysisManagerAbstract:
         Then, it logs the information through the logger.
         :return:
         """
-        print(f'Total time is: {self.sw.total()}')
+        # Visualize images (if given) to tensorboard
+        self._loggers['TB'].visualize()
 
+        # Post process each feature executor to json / tensorboard
         for extractor in self._extractors:
             extractor.process(self._loggers, self.id_to_name)
+
+        # Write meta data to json file
+        self._loggers['JSON'].log_meta_data(self._preprocessor.route)
+
+        # Write all text data to json file
+        self._loggers['JSON'].write_to_json()
 
     def close(self):
         """
@@ -160,7 +166,6 @@ class AnalysisManagerAbstract:
         Run method activating build, execute, post process and close the manager.
         """
         self.build()
-        self.visualize()
         self.execute()
         self.post_process()
         self.close()
