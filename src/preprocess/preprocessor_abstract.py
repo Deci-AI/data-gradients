@@ -11,10 +11,11 @@ from src.utils import SegBatchData
 
 class PreprocessorAbstract(ABC):
 
-    def __init__(self, num_classes=0):
+    def __init__(self, num_classes, get_image_from_dict, get_label_from_dict):
         self.number_of_classes: int = num_classes
         self._number_of_channels: int = 3
         self._container_mapper = {"first": None, "second": None}
+        self._mappers = {'first': get_image_from_dict, 'second': get_label_from_dict}
 
     @abstractmethod
     def validate(self, objects):
@@ -58,11 +59,22 @@ class PreprocessorAbstract(ABC):
             return self._handle_dict(objs, tuple_place)
 
     def _handle_dict(self, objs, tuple_place):
+        """
+
+        :param objs:
+        :param tuple_place:
+        :return:
+        """
         if self._container_mapper[tuple_place] is not None:
             return self._container_mapper[tuple_place].container_to_tensor(objs)
         else:
             self._container_mapper[tuple_place] = preprocess.ContainerMapper()
             self._container_mapper[tuple_place].images = tuple_place == 'first'
-            self._container_mapper[tuple_place].analyze(objs)
+
+            if self._mappers[tuple_place] is not None:
+                self._container_mapper[tuple_place].mapper = self._mappers[tuple_place]
+            else:
+                self._container_mapper[tuple_place].get_mapping(objs)
+
             return self._container_mapper[tuple_place].container_to_tensor(objs)
 

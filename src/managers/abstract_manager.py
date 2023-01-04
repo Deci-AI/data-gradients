@@ -1,7 +1,7 @@
 import concurrent
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Iterator, Iterable, Optional, List
+from typing import Iterator, Iterable, Optional, List, Dict
 
 import hydra
 import tqdm
@@ -23,8 +23,8 @@ class AnalysisManagerAbstract:
                  val_data: Optional[Iterable],
                  task: str,
                  samples_to_visualize: int,
-                 id_to_name,
-                 batches_early_stop):
+                 id_to_name: Dict,
+                 batches_early_stop: int):
 
         self._extractors: List[FeatureExtractorAbstract] = []
 

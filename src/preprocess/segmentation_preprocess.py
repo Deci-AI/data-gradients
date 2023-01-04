@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Callable
 
 import torch
 from torch import Tensor
@@ -12,14 +12,15 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     """
     Segmentation preprocessor class
     """
-    def __init__(self, num_classes, ignore_labels):
+    def __init__(self, num_classes, ignore_labels, get_image_from_dict: Callable, get_label_from_dict: Callable):
         """
         Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
         :param num_classes: number of valid classes
         :param ignore_labels: list of numbers that we should avoid from analyzing as valid classes, such as background
         """
-        super().__init__(num_classes)
+        super().__init__(num_classes, get_image_from_dict, get_label_from_dict)
         self._onehot: bool = False
+        # TODO: Check if default value of [0] is not harming anything
         self._ignore_labels: List[int] = ignore_labels if ignore_labels is not None else [0]
 
     @property

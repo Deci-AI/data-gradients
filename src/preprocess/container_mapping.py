@@ -29,10 +29,18 @@ class ContainerMapper:
         self._images = images
 
     @property
+    def mapper(self) -> Callable:
+        return self._mapper
+
+    @mapper.setter
+    def mapper(self, mapper):
+        self._mapper = mapper
+
+    @property
     def route(self):
         return self._route
 
-    def analyze(self, objs):
+    def get_mapping(self, objs):
         """
         Check which kind of object we received. Raise a NotImplementedError exception if not handling the specific type.
         :param objs: any type of object, suppose to be a python container
