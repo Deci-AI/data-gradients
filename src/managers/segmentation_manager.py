@@ -19,8 +19,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                  samples_to_visualize: int = 10,
                  id_to_name: Optional[Dict] = None,
                  batches_early_stop: int = 999,
-                 get_image_from_dict: Callable = None,
-                 get_label_from_dict: Callable = None,
+                 images_extractor: Callable = None,
+                 labels_extractor: Callable = None,
                  ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -35,8 +35,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
         self._preprocessor = SegmentationPreprocessor(num_classes=num_classes,
                                                       ignore_labels=ignore_labels,
-                                                      get_image_from_dict=get_image_from_dict,
-                                                      get_label_from_dict=get_label_from_dict)
+                                                      images_extractor=images_extractor,
+                                                      labels_extractor=labels_extractor)
 
         self._parse_cfg()
 

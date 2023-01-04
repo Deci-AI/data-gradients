@@ -11,11 +11,11 @@ from src.utils import SegBatchData
 
 class PreprocessorAbstract(ABC):
 
-    def __init__(self, num_classes, get_image_from_dict, get_label_from_dict):
+    def __init__(self, num_classes, images_extractor, labels_extractor):
         self.number_of_classes: int = num_classes
         self._number_of_channels: int = 3
         self._container_mapper = {"first": None, "second": None}
-        self._mappers = {'first': get_image_from_dict, 'second': get_label_from_dict}
+        self._mappers = {'first': images_extractor, 'second': labels_extractor}
 
     @abstractmethod
     def validate(self, objects):
