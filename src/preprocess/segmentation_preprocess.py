@@ -12,13 +12,14 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     """
     Segmentation preprocessor class
     """
-    def __init__(self, num_classes, ignore_labels, images_extractor: Callable, labels_extractor: Callable):
+    def __init__(self, num_classes, ignore_labels, images_extractor: Callable, labels_extractor: Callable,
+                 num_image_channels: int):
         """
         Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
         :param num_classes: number of valid classes
         :param ignore_labels: list of numbers that we should avoid from analyzing as valid classes, such as background
         """
-        super().__init__(num_classes, images_extractor, labels_extractor)
+        super().__init__(num_classes, images_extractor, labels_extractor, num_image_channels)
         self._onehot: bool = False
         # TODO: Check if default value of [0] is not harming anything
         self._ignore_labels: List[int] = ignore_labels if ignore_labels is not None else [0]
@@ -57,9 +58,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
             raise ValueError(
                 f"Images batch shape should be (BatchSize x Channels x Width x Height). Got {images.shape}")
 
-        if images.shape[1] != self._number_of_channels and images.shape[-1] != self._number_of_channels:
+        if images.shape[1] != self._num_image_channels and images.shape[-1] != self._num_image_channels:
             raise ValueError(
-                f"Images should have {self._number_of_channels} number of channels. Got {min(images[0].shape)}")
+                f"Images should have {self._num_image_channels} number of channels. Got {min(images[0].shape)}")
         return images
 
     def _dim_validate_labels(self, labels: Tensor):
@@ -110,7 +111,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :param images: Tensor
         :return: images: Tensor [BS, C, W, H]
         """
-        if images.shape[1] != self._number_of_channels and images.shape[-1] == self._number_of_channels:
+        if images.shape[1] != self._num_image_channels and images.shape[-1] == self._num_image_channels:
             images = self.channels_last_to_first(images)
         return images
 

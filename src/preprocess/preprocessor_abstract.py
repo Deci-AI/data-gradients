@@ -11,9 +11,9 @@ from src.utils import SegBatchData
 
 class PreprocessorAbstract(ABC):
 
-    def __init__(self, num_classes, images_extractor, labels_extractor):
+    def __init__(self, num_classes, images_extractor, labels_extractor, num_image_channels):
         self.number_of_classes: int = num_classes
-        self._number_of_channels: int = 3
+        self._num_image_channels: int = num_image_channels
         self._container_mapper = {"first": None, "second": None}
         self._mappers = {'first': images_extractor, 'second': labels_extractor}
 
