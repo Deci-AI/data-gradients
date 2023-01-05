@@ -7,130 +7,6 @@ import torch
 from src.utils import Contour
 
 
-def debug_convexity_things(labels, images):
-    for label, image in zip(labels, images):
-        drawing = image.numpy()
-        drawing = drawing.transpose(1, 2, 0)
-        drawing_size = drawing.shape[0] * drawing.shape[1]
-        drawing = cv2.cvtColor(drawing, cv2.COLOR_RGB2BGR)
-        cv2.imshow("original", drawing)
-
-        label = label.numpy().astype(np.uint8)
-
-
-        for class_channel in range(label.shape[0]):
-            onehot = label[class_channel, ...]
-            convex_hull = []
-            bbox = []
-            onehot_contours, hierarchy = cv2.findContours(onehot, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            print(f'Class channel is: {class_channel}')
-            class_channel += 1
-            if class_channel == 1:
-                class_channel = 7
-            elif class_channel == 2:
-                class_channel = 8
-            elif class_channel == 3:
-                class_channel = 11
-            elif class_channel == 4:
-                class_channel = 12
-            elif class_channel == 5:
-                class_channel = 13
-            elif class_channel == 6:
-                class_channel = 19
-            elif class_channel == 7:
-                class_channel = 20
-            elif class_channel == 8:
-                class_channel = 21
-            elif class_channel == 9:
-                class_channel = 22
-            elif class_channel == 10:
-                class_channel = 23
-            elif class_channel == 11:
-                class_channel = 24
-            elif class_channel == 12:
-                class_channel = 25
-            elif class_channel == 13:
-                class_channel = 26
-            elif class_channel == 14:
-                class_channel = 27
-            elif class_channel == 15:
-                class_channel = 28
-            elif class_channel == 16:
-                class_channel = 31
-            elif class_channel == 17:
-                class_channel = 32
-            elif class_channel == 18:
-                class_channel = 33
-            from internal_use_data_loaders.get_torch_loaders import class_id_to_name
-            class_name = class_id_to_name[class_channel]
-            for i in range(len(onehot_contours)):
-                # convex_hull.append(get_convex_hull(onehot_contours[i]))
-                bbox.append(rect_to_box(get_rotated_bounding_rect(onehot_contours[i])))
-            for i in range(len(onehot_contours)):
-                img_contours = np.zeros_like(drawing)
-                cv2.drawContours(img_contours, onehot_contours, i, (0, 255, 0), 2, 8, hierarchy)
-
-                contour_perimeter = round(get_contour_perimeter(onehot_contours[i]), 3)
-                if contour_perimeter < 0.1:
-                    continue
-                convex_hull = get_convex_hull(onehot_contours[i])
-                convex_hull_perimeter = round(get_contour_perimeter(convex_hull), 3)
-                cv2.drawContours(img_contours, [convex_hull], -1, (0, 0, 255), 2, 8)
-                convexity_measure = round((contour_perimeter - convex_hull_perimeter) / contour_perimeter, 3)
-
-                # x, y = get_contour_center_of_mass(onehot_contours[i])
-                # x = int(x)
-                # y = int(y)
-                # cv2.circle(img_contours, (x, y), radius=2, color=(255, 255, 255), thickness=2)
-                # cv2.putText(img_contours, "Contour perimeter - {}", (20, 20), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
-                # cv2.drawContours(img_contours, convex_hull, i, (0, 0, 255), 1, 8)
-                # cv2.putText(img_contours, "Convex hull perimeter - {}", (20, 40), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2)
-                # cv2.drawContours(img_contours, bbox, i, (255, 0, 0), 2, 8)
-                # cv2.putText(img_contours, "Bbox", (20, 60), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-                # contour_area = round(100 * round(get_contour_area(onehot_contours[i])) / drawing_size, 2)
-                # hull_area = round(get_contour_area(convex_hull[i]))
-                # if not hull_area > 0:
-                #     print(convex_hull[i], onehot_contours[i], contour_area, hull_area)
-                #     continue
-                # ratio = float(round(contour_area / hull_area, 3))
-                # bbox_area = round(100 * round(get_contour_area((bbox[i]))) / drawing_size, 2)
-                cv2.putText(img_contours, f'Class {class_name}', (20, 40), cv2.FONT_HERSHEY_PLAIN, 3, (255, 255, 0), 3)
-                cv2.putText(img_contours, f"Contour perimeter - {contour_perimeter}", (20, 90), cv2.FONT_HERSHEY_PLAIN, 3, (0, 255, 0), 3)
-                cv2.putText(img_contours, f"Convex Hull perimeter - {convex_hull_perimeter}", (20, 130), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 0), 3)
-                cv2.putText(img_contours, f"Measured convexity - {convexity_measure}", (20, 170), cv2.FONT_HERSHEY_PLAIN, 3, (255, 255, 0), 3)
-
-                # cv2.putText(img_contours, f"HULL area - {hull_area}", (20, 100), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
-                # cv2.putText(img_contours, f'Ratio - {ratio}', (20, 120), cv2.FONT_HERSHEY_PLAIN, 1,
-                #             (255, 255, 255), 1)
-
-                # hull = cv2.convexHull(onehot_contours[i], returnPoints=False)
-                # defects = cv2.convexityDefects(onehot_contours[i], hull)
-                # for defect in defects:
-                #     defect = defect[0]
-                #     startpoint = onehot_contours[i][defect[0]][0]
-                #     endpoint = onehot_contours[i][defect[1]][0]
-                #     farthestpoint = onehot_contours[i][defect[2]][0]
-                #     distance = defect[3]
-                #     if distance > 5000:
-                #         # cv2.line(img_contours, endpoint, startpoint, (255, 0, 255), 1)
-                #         print(endpoint, startpoint)
-                #         mid = [int(abs((endpoint[0] + startpoint[0])/2)), int(abs((endpoint[1] + startpoint[1]))/2)]
-                #         print(mid)
-                #         cv2.circle(img_contours, startpoint, 2, (255, 0, 255), 2)
-                #         cv2.circle(img_contours, endpoint, 2, (255, 0, 255), 2)
-                #         cv2.circle(img_contours, mid, 2, (255, 0, 255), 2)
-                #         cv2.line(img_contours, mid, farthestpoint, (0, 255, 255), 1)
-                #         cv2.putText(img_contours, f"{str(distance)}", mid, cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 255))
-                cv2.imshow(f"contours", img_contours)
-                cv2.waitKey(0)
-def get_box_area(box):
-    print(box)
-    x1, y1 = box[0]
-    x2, y2 = box[1]
-    print(abs(y2-y1), abs(x2-x1))
-    area = abs(y2-y1) * abs(x2-x1)
-    return area
-
 def get_contours(label: torch.Tensor) -> np.array:
     """
     Find contours in each class-channel individually, using opencv findContours method
@@ -180,6 +56,7 @@ def get_valid_contours(contours: Tuple) -> List:
     :param contours: Any list of contours
     :return: Valid list of contours
     """
+    # TODO: Get all contours features in a better way then this function
     valid_contours = []
     minimal_contour_size = 9
     for contour in contours:
