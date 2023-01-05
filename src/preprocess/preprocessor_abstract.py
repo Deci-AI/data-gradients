@@ -25,14 +25,21 @@ class PreprocessorAbstract(ABC):
     def preprocess(self, images, labels) -> SegBatchData:
         pass
 
+    # TODO: Find a better way to pass route to logger
+
     @property
-    def route(self):
-        route = {}
+    def images_route(self):
         if self._container_mapper['first'] is not None:
-            route.update({'get images': self._container_mapper['first'].route})
+            return {'get images': self._container_mapper['first'].route}
+        else:
+            return None
+
+    @property
+    def labels_route(self):
         if self._container_mapper['second'] is not None:
-            route.update({'get labels': self._container_mapper['second'].route})
-        return route if route else None
+            return {'get labels': self._container_mapper['second'].route}
+        else:
+            return None
 
     @staticmethod
     def channels_last_to_first(tensors: torch.Tensor):

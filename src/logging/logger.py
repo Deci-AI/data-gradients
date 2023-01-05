@@ -2,6 +2,7 @@ from typing import Dict
 
 from src.logging.json_logger import JsonLogger
 from src.logging.tensorboard_logger import TensorBoardLogger
+from src.preprocess import PreprocessorAbstract
 
 
 class Logger:
@@ -18,8 +19,11 @@ class Logger:
         if json_data is not None:
             self._json_logger.log(title_name, json_data)
 
-    def log_meta_data(self, route: Dict):
-        self._json_logger.log('Get data out of dictionary', route)
+    def log_meta_data(self, preprocessor: PreprocessorAbstract):
+        if preprocessor.images_route is not None:
+            self._json_logger.log('Get images out of dictionary', preprocessor.images_route)
+        if preprocessor.labels_route is not None:
+            self._json_logger.log('Get images out of dictionary', preprocessor.labels_route)
 
     def to_json(self):
         self._json_logger.write_to_json()

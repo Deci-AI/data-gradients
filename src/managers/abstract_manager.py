@@ -142,7 +142,7 @@ class AnalysisManagerAbstract:
             extractor.process(self._logger, self.id_to_name)
 
         # Write meta data to json file
-        self._logger.log_meta_data(self._preprocessor.route)
+        self._logger.log_meta_data(self._preprocessor)
 
         # Write all text data to json file
         self._logger.to_json()
