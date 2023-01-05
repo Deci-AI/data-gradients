@@ -47,7 +47,7 @@ class FeatureExtractorAbstract(ABC):
 
         self.fig.tight_layout()
 
-        logger.log(title=self.__class__.__name__, tb_data=self.fig, json_data=self.json_object)
+        logger.log(title_name=self.__class__.__name__, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod
     def _process(self):
@@ -58,5 +58,6 @@ class FeatureExtractorAbstract(ABC):
         for key in [*hist['train'], *hist['val']]:
             for split in [*hist]:
                 if key not in list(hist[split].keys()):
+                    # TODO: Fix value for not being always a 0 but might be a empty list instead
                     hist[split][key] = 0.
                 hist[split] = OrderedDict(sorted(hist[split].items()))
