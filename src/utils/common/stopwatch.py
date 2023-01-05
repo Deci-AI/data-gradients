@@ -7,12 +7,7 @@ import numpy as np
 class Stopwatch:
     def __init__(self) -> None:
         super().__init__()
-        self._timer = timer()
-        self._ticks = [self._timer]
-
-    @property
-    def ticks(self):
-        return self._ticks
+        self._ticks = [timer()]
 
     def tick(self):
         self._ticks.append(timer())
@@ -26,13 +21,7 @@ class Stopwatch:
             now = timer()
         return now - self._ticks[0]
 
-    def average(self):
-        return np.average(self._ticks)
-
-    def tick_and_print(self, what):
-        print("{} took: {:.4f}s".format(what, self.tick()))
-
-    def get_total_time(self, train_len, val_len) -> str:
+    def estimate_total_time(self, train_len, val_len) -> str:
         total_seconds = val_len * self._ticks[-1] + (train_len - val_len) * self._ticks[-1] * 0.75
         total_time = str(datetime.timedelta(seconds=total_seconds))
         return total_time

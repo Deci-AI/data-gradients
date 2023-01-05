@@ -119,7 +119,7 @@ class AnalysisManagerAbstract:
             train_batch += 1
 
     def measure(self):
-        total_time = self.sw.get_total_time(self._train_dataset_size, self._val_dataset_size)
+        total_time = self.sw.estimate_total_time(self._train_dataset_size, self._val_dataset_size)
         print(f'\n\nEstimated time for the whole analyze is {total_time}')
         inp = input(f'Do you want to shorten the amount of data to analyze? [y / n]\n')
         if inp == 'y':
