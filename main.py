@@ -34,8 +34,12 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=1, shuffle=True)
 
+    num_classes = BDDDataset.NUM_CLASSES
+    ignore_labels = BDDDataset.IGNORE_LABELS
+    class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
+
     from internal_use_data_loaders.get_torch_loaders import *
-    # batches_early_stop is a temporary optional argument for debugging purpose
+
     da = SegmentationAnalysisManager(train_data=train_loader,
                                      val_data=val_loader,
                                      num_classes=num_classes,
@@ -43,6 +47,9 @@ if __name__ == "__main__":
                                      # Optionals
                                      id_to_name=class_id_to_name,
                                      samples_to_visualize=2,
-                                     batches_early_stop=48)
+                                     images_extractor=None,
+                                     labels_extractor=None,
+                                     # batches_early_stop is a temporary optional argument for debugging purpose
+                                     batches_early_stop=50)
 
     da.run()
