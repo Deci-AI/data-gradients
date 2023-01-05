@@ -1,5 +1,3 @@
-from typing import Dict
-
 from src.logging.json_logger import JsonLogger
 from src.logging.tensorboard_logger import TensorBoardLogger
 from src.preprocess import PreprocessorAbstract
@@ -8,7 +6,7 @@ from src.preprocess import PreprocessorAbstract
 class Logger:
     def __init__(self, samples_to_visualize, train_data):
         self._tb_logger = TensorBoardLogger(iter(train_data), samples_to_visualize)
-        self._json_logger = JsonLogger()
+        self._json_logger = JsonLogger(output_file_name='raw_data')
 
     def visualize(self):
         self._tb_logger.visualize()
