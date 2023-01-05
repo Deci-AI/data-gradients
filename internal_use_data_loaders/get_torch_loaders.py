@@ -95,9 +95,7 @@ class DataLoaders:
             raise NotImplementedError
 
 
-
 dataloader = DataLoaders(batch_size=8)
-
 
 ## CityScapes
 train_loader, val_loader = dataloader.get_dataloader(dataset="cityscapes")

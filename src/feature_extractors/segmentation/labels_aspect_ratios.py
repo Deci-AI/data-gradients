@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot
+from src.logging.logger_utils import create_bar_plot
 from src.utils import SegBatchData
 
 

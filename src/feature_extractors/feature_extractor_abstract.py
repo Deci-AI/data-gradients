@@ -4,7 +4,8 @@ from typing import Tuple, Dict, Optional
 
 from matplotlib import pyplot as plt
 
-from src.logger.results_logger import ResultsLogger
+from src.logging.logger import Logger
+from src.logging.results_logger import ResultsLogger
 from src.utils import BatchData
 
 
@@ -37,7 +38,7 @@ class FeatureExtractorAbstract(ABC):
     def _execute(self, data: BatchData):
         raise NotImplementedError
 
-    def process(self, loggers: Dict[str, ResultsLogger], id_to_name):
+    def process(self, logger: Logger, id_to_name):
         self.id_to_name = id_to_name
 
         self.fig, self.ax = plt.subplots(*self.num_axis, figsize=(10, 5))
@@ -45,21 +46,12 @@ class FeatureExtractorAbstract(ABC):
         self._process()
 
         self.fig.tight_layout()
-        self.log(logger=loggers['TB'],
-                 title=self.__class__.__name__,
-                 data=self.fig)
 
-        self.log(logger=loggers['JSON'],
-                 title=self.__class__.__name__,
-                 data=self.json_object)
+        logger.log(title=self.__class__.__name__, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod
     def _process(self):
         pass
-
-    @staticmethod
-    def log(logger: ResultsLogger, title: str, data):
-        logger.log(title, data)
 
     @staticmethod
     def merge_dict_splits(hist: Dict):

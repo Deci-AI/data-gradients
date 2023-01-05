@@ -2,7 +2,7 @@ import os
 import json
 from typing import Dict
 
-from src.logger.results_logger import ResultsLogger
+from src.logging.results_logger import ResultsLogger
 
 
 class JsonLogger(ResultsLogger):
@@ -14,9 +14,6 @@ class JsonLogger(ResultsLogger):
 
     def log(self, title: str, data):
         self._logging_data.update({title: data})
-
-    def log_meta_data(self, route: Dict):
-        self.log('Get data out of dictionary', route)
 
     def write_to_json(self):
         with open(os.path.join(self.logdir, self._output_file), 'a') as output:

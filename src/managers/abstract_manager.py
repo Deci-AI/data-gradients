@@ -7,8 +7,7 @@ import hydra
 import tqdm
 
 from src.feature_extractors import FeatureExtractorAbstract
-from src.logger.json_logger import JsonLogger
-from src.logger.tensorboard_logger import TensorBoardLogger
+from src.logging.logger import Logger
 from src.preprocess import PreprocessorAbstract
 from src.utils import BatchData
 from src.utils.common.stopwatch import Stopwatch
@@ -43,8 +42,7 @@ class AnalysisManagerAbstract:
             self._val_iter = None
 
         # Logger
-        self._loggers = {'TB': TensorBoardLogger(iter(train_data), samples_to_visualize),
-                         'JSON': JsonLogger()}
+        self._logger = Logger(samples_to_visualize, train_data)
 
         self._preprocessor: PreprocessorAbstract = Optional[None]
         self._cfg = None
@@ -133,32 +131,32 @@ class AnalysisManagerAbstract:
         """
         Post process method runs on all feature extractors, concurrently on valid and train extractors, send each
         of them a matplotlib ax(es) and gets in return the ax filled with the feature extractor information.
-        Then, it logs the information through the logger.
+        Then, it logs the information through the logging.
         :return:
         """
         # Visualize images (if given) to tensorboard
-        self._loggers['TB'].visualize()
+        self._logger.visualize()
 
         # Post process each feature executor to json / tensorboard
         for extractor in self._extractors:
-            extractor.process(self._loggers, self.id_to_name)
+            extractor.process(self._logger, self.id_to_name)
 
         # Write meta data to json file
-        self._loggers['JSON'].log_meta_data(self._preprocessor.route)
+        self._logger.log_meta_data(self._preprocessor.route)
 
         # Write all text data to json file
-        self._loggers['JSON'].write_to_json()
+        self._logger.to_json()
 
     def close(self):
         """
-        Safe logger closing
+        Safe logging closing
         """
-        [self._loggers[logger].close() for logger in self._loggers.keys()]
+        self._logger.close()
         print(f'{"*" * 100}'
               f'\nWe have finished evaluating your dataset!'
-              f'\nThe results can be seen in {list(self._loggers.values())[0].logdir}'
+              f'\nThe results can be seen in {self._logger.results_dir()}'
               f'\n\nShow tensorboard by writing in terminal:'
-              f'\n\ttensorboard --logdir={os.path.join(os.getcwd() ,list(self._loggers.values())[0].logdir)} --bind_all'
+              f'\n\ttensorboard --logdir={os.path.join(os.getcwd(), self._logger.results_dir())} --bind_all'
               f'\n')
 
     def run(self):

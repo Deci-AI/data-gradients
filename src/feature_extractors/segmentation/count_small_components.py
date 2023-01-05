@@ -4,7 +4,7 @@ import numpy as np
 import src.preprocess.contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logger.logger_utils import create_bar_plot
+from src.logging.logger_utils import create_bar_plot
 
 
 class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):

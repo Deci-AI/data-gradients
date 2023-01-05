@@ -1,7 +1,5 @@
-import numpy as np
-import torch
 
-from src.logger.logger_utils import create_bar_plot, create_json_object, class_id_to_name
+from src.logging.logger_utils import create_bar_plot, create_json_object, class_id_to_name
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 
