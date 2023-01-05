@@ -45,7 +45,7 @@ class ContainerMapper:
         Check which kind of object we received. Raise a NotImplementedError exception if not handling the specific type.
         :param objs: any type of object, suppose to be a python container
         """
-        if isinstance(objs, dict) or self.isjson(objs):
+        if isinstance(objs, dict) or self.is_json(objs):
             self._get_dict_mapping(objs)
         else:
             raise NotImplementedError
@@ -77,7 +77,7 @@ class ContainerMapper:
         """
         targets = []
         res = container_mapping(objs, path="", targets=targets)
-        map_for_printing = json.dumps(res, indent=5, ensure_ascii=False)
+        map_for_printing = json.dumps(res, indent=4, ensure_ascii=False)
         colorful_json = highlight(map_for_printing, lexers.JsonLexer(), formatters.TerminalFormatter())
         print(colorful_json.replace("\"", ""))
         value = int(input(f"Please insert the circled number of the required {'images' if images else 'labels'} data:\n"))
@@ -87,7 +87,7 @@ class ContainerMapper:
         return keys
 
     @staticmethod
-    def isjson(myjson) -> bool:
+    def is_json(myjson) -> bool:
         """
         Method return if an object is a json serialized object or not
         :param myjson: any object
@@ -116,6 +116,7 @@ def container_mapping(obj: Any, path: str, targets: list):
             printable_map[k] = container_mapping(v, path + f"['{k}']", targets)
     elif isinstance(obj, tuple):
         types = []
+        # TODO: This magic number if for "reasonable" amount of objects to show in printing
         if len(obj) < 5:
             for o in obj:
                 types.append(str(type(o)))
