@@ -4,7 +4,6 @@ import numpy as np
 import src.preprocess.contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot
 
 
 class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):
@@ -27,12 +26,12 @@ class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):
                     _, _, contour_area = src.preprocess.contours.get_contour_moment(c)
                     self._hist[np.digitize(contour_area, self.bins) - 1] += 1
 
-    def _process(self):
+    def _post_process(self):
         # TODO: Make it work
         hist = list(np.array(self._hist) / sum(self._hist))
-        create_bar_plot(ax, hist, self.label,
-                        x_label="Object Size [%]", y_label="# Objects", ticks_rotation=0,
-                        title="Number of small objects", split=split, color=self.colors[split])
+        create_bar_plot_old(ax, hist, self.label,
+                            x_label="Object Size [%]", y_label="# Objects", ticks_rotation=0,
+                            title="Number of small objects", split=split, color=self.colors[split])
 
         ax.grid(visible=True, axis='y')
         return dict(zip(self.label, hist))

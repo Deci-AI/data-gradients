@@ -1,6 +1,6 @@
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object
 from src.utils import BatchData
+from src.utils.data_classes import Results
 
 
 class NumberOfImagesLabels(FeatureExtractorAbstract):
@@ -22,14 +22,21 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
             if len(image_contours) < 1:
                 self._num_bg_images[data.split] += 1
 
-    def _process(self):
-        for split in ['train', 'val']:
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          title='# Images & Labels',
+                          color=self.colors[split],
+                          y_label='Total #',
+                          ticks_rotation=0,
+                          y_ticks=True)
+        return results
 
-            values = [self._num_images[split], self._num_labels[split], self._num_bg_images[split]]
-            keys = ["images", "labels", "background images"]
-
-            create_bar_plot(ax=self.ax, labels=keys, data=values, y_label='Total #',
-                            title='# Images & Labels', split=split, ticks_rotation=0,
-                            color=self.colors[split], yticks=True)
-            self.json_object.update({split: create_json_object(values, keys)})
+    def _process_data(self, split):
+        values = [self._num_images[split], self._num_labels[split], self._num_bg_images[split]]
+        bins = ["images", "labels", "background images"]
+        return values, bins
 

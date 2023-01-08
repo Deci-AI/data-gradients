@@ -2,10 +2,11 @@ import cv2
 import numpy as np
 import torch
 
+from src.logging.logger_utils import class_id_to_name
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object, class_id_to_name
+from src.utils.data_classes import Results
 
 
 class ErosionTest(SegmentationFeatureExtractorAbstract):
@@ -40,20 +41,29 @@ class ErosionTest(SegmentationFeatureExtractorAbstract):
                         if eroded_contours:
                             self._hist_eroded[data.split][u] += len(eroded_contours)
 
-    def _process(self):
-        for split in ['train', 'val']:
-            hist = dict.fromkeys(self._hist[split].keys(), 0.)
-            for cls in self._hist[split]:
-                if (self._hist[split][cls]) > 0:
-                    hist[cls] = np.round(100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3)
-                else:
-                    hist[cls] = 0
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(values=values,
+                          bins=bins,
+                          title="Erosion & contours comparing",
+                          x_label="Class",
+                          y_label="% of disappearing contours after Erosion",
+                          split=split,
+                          color=self.colors[split],
+                          y_ticks=True,
+                          ax_grid=True,
+                          plot='bar-plot')
+        return results
 
-            hist = class_id_to_name(self.id_to_name, hist)
-            hist_values = np.array(list(hist.values()))
-            create_bar_plot(self.ax, hist_values, hist.keys(), x_label="Class",
-                            y_label="% of disappearing contours after Erosion", title="Erosion & contours comparing",
-                            split=split, color=self.colors[split], yticks=True)
+    def _process_data(self, split):
+        hist = dict.fromkeys(self._hist[split].keys(), 0.)
+        for cls in self._hist[split]:
+            if (self._hist[split][cls]) > 0:
+                hist[cls] = np.round(100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3)
+            else:
+                hist[cls] = 0
 
-            self.ax.grid(visible=True, axis='y')
-            self.json_object.update({split: create_json_object(hist_values, self._hist[split].keys())})
+        hist = class_id_to_name(self.id_to_name, hist)
+        values = np.array(list(hist.values()))
+        bins = hist.keys()
+        return values, bins

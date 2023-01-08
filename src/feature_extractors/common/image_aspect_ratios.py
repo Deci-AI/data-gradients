@@ -1,8 +1,8 @@
 import numpy as np
 
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot
 from src.utils import BatchData
+from src.utils.data_classes import Results
 
 
 class ImagesAspectRatios(FeatureExtractorAbstract):
@@ -18,12 +18,23 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
             else:
                 self._hist[data.split][ar] += 1
 
-    def _process(self):
-        self.merge_dict_splits(self._hist)
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          color=self.colors[split],
+                          title='Image aspect ratios',
+                          x_label='Aspect ratio [W / H]',
+                          y_label='# Of Images',
+                          ticks_rotation=0,
+                          y_ticks=True
+                          )
+        return results
 
-        for split in ['train', 'val']:
-            create_bar_plot(ax=self.ax, data=list(self._hist[split].values()),
-                            labels=list(self._hist[split].keys()), y_label='# Of Images',
-                            title='Image aspect ratios', x_label='Aspect ratio [W / H]', split=split, ticks_rotation=0,
-                            color=self.colors[split], yticks=True)
-            self.json_object.update({split: self._hist[split]})
+    def _process_data(self, split: str):
+        self.merge_dict_splits(self._hist)
+        values = list(self._hist[split].values())
+        bins = list(self._hist[split].keys())
+        return values, bins

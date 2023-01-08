@@ -1,7 +1,7 @@
-
+from src.logging.logger_utils import class_id_to_name
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object, class_id_to_name
+from src.utils.data_classes import Results
 
 
 class GetClassDistribution(SegmentationFeatureExtractorAbstract):
@@ -21,13 +21,24 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
                         self._hist[data.split][u] += len(cls_contours)
                         self._total_objects[data.split] += len(cls_contours)
 
-    def _process(self):
-        for split in ['train', 'val']:
-            self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-            values = self.normalize(self._hist[split].values(), self._total_objects[split])
-            create_bar_plot(self.ax, values, self._hist[split].keys(), x_label="Class #",
-                            y_label="# Class instances [%]", title="Classes distribution across dataset",
-                            split=split, color=self.colors[split], yticks=True)
+    def _post_process(self, split: str):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          title="Classes distribution across dataset",
+                          color=self.colors[split],
+                          x_label="Class #",
+                          y_label="# Class instances [%]",
+                          y_ticks=True,
+                          ax_grid=True,
+                          json_values=self._hist[split].values()
+                          )
+        return results
 
-            self.ax.grid(visible=True)
-            self.json_object.update({split: create_json_object(self._hist[split].values(), self._hist[split].keys())})
+    def _process_data(self, split: str):
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+        values = self.normalize(self._hist[split].values(), self._total_objects[split])
+        bins = self._hist[split].keys()
+        return values, bins

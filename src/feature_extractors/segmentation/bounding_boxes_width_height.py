@@ -2,7 +2,7 @@ import numpy as np
 
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_heatmap_plot, create_json_object
+from src.utils.data_classes.extractor_results import HeatMapResults
 
 
 class WidthHeight(SegmentationFeatureExtractorAbstract):
@@ -26,13 +26,25 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
                     self._width[data.split].append(c.w / width)
                     self._height[data.split].append(c.h / height)
 
-    def _process(self):
-        for split in ['train', 'val']:
-            width = [w for w in self._width[split] if w > 0]
-            height = [h for h in self._height[split] if h > 0]
-            create_heatmap_plot(ax=self.ax[int(split != 'train')], x=width, y=height, split=split, bins=16, sigma=8,
-                                title=f'Bounding Boxes Width / Height', x_label='Width [% of image]',
-                                y_label='Height [% of image]')
+    def _post_process(self, split):
+        x, y = self._process_data(split)
+        results = HeatMapResults(x=x,
+                                 y=y,
+                                 n_bins=16,
+                                 sigma=8,
+                                 split=split,
+                                 plot='heat-map',
+                                 title=f'Bounding Boxes Width / Height',
+                                 x_label='Width [% of image]',
+                                 y_label='Height [% of image]'
+                                 )
 
-            quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
-            self.json_object.update({split: create_json_object(quantized_heat_map.tolist(), ["Width", "Height"])})
+        quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
+        results.json_values = quantized_heat_map.tolist()
+        results.keys = ["Width", "Height"]
+        return results
+
+    def _process_data(self, split: str):
+        width = [w for w in self._width[split] if w > 0]
+        height = [h for h in self._height[split] if h > 0]
+        return width, height

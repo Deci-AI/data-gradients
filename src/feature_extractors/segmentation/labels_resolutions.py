@@ -1,6 +1,6 @@
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot
 from src.utils import SegBatchData
+from src.utils.data_classes import Results
 
 
 class LabelsResolutions(FeatureExtractorAbstract):
@@ -16,12 +16,23 @@ class LabelsResolutions(FeatureExtractorAbstract):
             else:
                 self._hist[data.split][res] += 1
 
-    def _process(self):
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          color=self.colors[split],
+                          title='Labels resolutions',
+                          x_label='Resolution [W, H]',
+                          y_label='# Of Labels',
+                          ticks_rotation=0,
+                          y_ticks=True
+                          )
+        return results
+
+    def _process_data(self, split: str):
         self.merge_dict_splits(self._hist)
-        for split in ['train', 'val']:
-            create_bar_plot(ax=self.ax, data=list(self._hist[split].values()), title='Labels resolutions',
-                            labels=list(self._hist[split].keys()), y_label='# Of Labels', yticks=True,
-                            split=split, ticks_rotation=0, color=self.colors[split], x_label='Resolution [W, H]')
-            self.json_object.update({split: self._hist[split]})
-
-
+        values = list(self._hist[split].values())
+        bins = list(self._hist[split].keys())
+        return values, bins

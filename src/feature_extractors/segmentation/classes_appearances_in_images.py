@@ -1,7 +1,7 @@
-
-from src.logging.logger_utils import create_bar_plot, create_json_object, class_id_to_name
+from src.logging.logger_utils import class_id_to_name
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from src.utils.data_classes import Results
 
 
 class AppearancesInImages(SegmentationFeatureExtractorAbstract):
@@ -28,13 +28,23 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
         except Exception as e:
             print(self.__class__.__name__, e)
 
-    def _process(self):
-        for split in ['train', 'val']:
-            # TODO: Split normalization / class id to name / create bar plot from _process
-            self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-            values = self.normalize(self._hist[split].values(), self._number_of_images[split])
-            create_bar_plot(self.ax, values, self._hist[split].keys(), x_label="Class #",
-                            y_label="Images appeared in [%]", title="% Images that class appears in", split=split,
-                            color=self.colors[split], yticks=True)
-            self.ax.grid(visible=True)
-            self.json_object.update({split: create_json_object(self._hist[split].values(), self._hist[split].keys())})
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          color=self.colors[split],
+                          title="% Images that class appears in",
+                          x_label="Class #",
+                          y_label="Images appeared in [%]",
+                          y_ticks=True,
+                          ax_grid=True
+                          )
+        return results
+
+    def _process_data(self, split: str):
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+        values = self.normalize(self._hist[split].values(), self._number_of_images[split])
+        bins = self._hist[split].keys()
+        return values, bins

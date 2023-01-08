@@ -14,6 +14,8 @@ class TensorBoardLogger(ResultsLogger):
         self.writer = SummaryWriter(log_dir=self.logdir)
 
     def visualize(self):
+        if self.samples_to_visualize == 0:
+            return
         n = 0
         while n < self.samples_to_visualize:
             # TODO: Still WIP

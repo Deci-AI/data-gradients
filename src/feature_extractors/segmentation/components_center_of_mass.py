@@ -1,9 +1,10 @@
 import numpy as np
 
-from src.logging.logger_utils import create_heatmap_plot, create_json_object
+from src.logging.logger_utils import write_heatmap_plot, create_json_object
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from src.utils.data_classes.extractor_results import HeatMapResults
 
 
 class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
@@ -30,17 +31,34 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
                     self._hist[data.split][int(np.delete(unique, 0))]['x'].append(c.center[0])
                     self._hist[data.split][int(np.delete(unique, 0))]['y'].append(c.center[1])
 
-    def _process(self):
-        for split in ['train', 'val']:
-            x, y = [], []
-            for val in self._hist[split].values():
-                x.extend(val['x'])
-                y.extend(val['y'])
-            # TODO: My thumb rules numbers
-            bins = int(np.sqrt(len(x)) * 4)
-            sigma = 2 * (bins / 150)
-            # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
-            create_heatmap_plot(ax=self.ax[int(split != 'train')], x=x, y=y, split=split, bins=bins, sigma=sigma,
-                                title=f'Center of mass average locations', x_label='X axis', y_label='Y axis')
-            quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-            self.json_object.update({split: create_json_object(quantized_heat_map.tolist(), ['X', 'Y'])})
+    def _post_process(self, split):
+        # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
+        x, y = self._process_data(split)
+        # TODO: My thumb rules numbers
+        n_bins = int(np.sqrt(len(x)) * 4)
+        sigma = int(2 * (n_bins / 150))
+
+        results = HeatMapResults(x=x,
+                                 y=y,
+                                 n_bins=n_bins,
+                                 sigma=sigma,
+                                 split=split,
+                                 plot='heat-map',
+                                 title=f'Center of mass average locations',
+                                 x_label='X axis',
+                                 y_label='Y axis'
+                                 )
+
+        quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
+        results.json_values = quantized_heat_map.tolist()
+        results.keys = ["X", "Y"]
+        return results
+
+    def _process_data(self, split):
+        x, y = [], []
+        for val in self._hist[split].values():
+            x.extend(val['x'])
+            y.extend(val['y'])
+        return x, y
+
+

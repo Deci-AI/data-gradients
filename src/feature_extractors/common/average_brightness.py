@@ -4,8 +4,8 @@ import cv2
 import numpy as np
 
 from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object
 from src.utils import BatchData
+from src.utils.data_classes import Results
 
 
 class AverageBrightness(FeatureExtractorAbstract):
@@ -17,26 +17,28 @@ class AverageBrightness(FeatureExtractorAbstract):
         for image in data.images:
             np_image = image.numpy().transpose(1, 2, 0)
             lightness, _, _ = cv2.split(cv2.cvtColor(np_image, cv2.COLOR_BGR2LAB))
-            # TODO: Handle zero division better
             if lightness is None:
                 continue
-            if np.max(lightness) == 0:
-                continue
-            n_lightness = lightness / np.max(lightness)
+            if np.all(lightness == 0) or np.max(lightness) == 0:
+                n_lightness = 0
+            else:
+                n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))
 
-    def _process(self):
-        for split in ['train', 'val']:
-            values, bins = self._post_process(self._brightness[split])
-            create_bar_plot(self.ax, list(values), bins,
-                            x_label="", y_label="% out of all images",
-                            title="Average brightness of images",
-                            split=split, color=self.colors[split], yticks=True)
+    def _post_process(self, split: str):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=list(values),
+                          plot='bar-plot',
+                          split=split,
+                          title="Average brightness of images",
+                          color=self.colors[split],
+                          y_label="% out of all images",
+                          y_ticks=True)
+        return results
 
-            self.json_object.update({split: create_json_object(values, bins)})
-
-    def _post_process(self, data, num_bins=10):
-        values, bins = np.histogram(data, bins=num_bins)
+    def _process_data(self, split, num_bins=10):
+        values, bins = np.histogram(self._brightness[split], bins=num_bins)
         values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
         bins = self._create_keys(bins)
         return values, bins

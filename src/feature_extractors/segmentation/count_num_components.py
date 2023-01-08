@@ -2,7 +2,7 @@ import numpy as np
 
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object
+from src.utils.data_classes import Results
 
 
 class CountNumComponents(SegmentationFeatureExtractorAbstract):
@@ -27,19 +27,28 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
 
                 self._hist[data.split].update({num_objects_in_image: 1})
 
-    def _process(self):
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          color=self.colors[split],
+                          title="# Components per image",
+                          x_label="# Components in image",
+                          y_label="% Of Images",
+                          y_ticks=True,
+                          ax_grid=True
+                          )
+
+        return results
+
+    def _process_data(self, split):
         self.merge_dict_splits(self._hist)
-        for split in ['train', 'val']:
-            hist = self._into_buckets(self._hist[split])
-
-            values = self.normalize(hist.values(), sum(list(hist.values())))
-
-            create_bar_plot(self.ax, values, hist.keys(), x_label="# Components in image", y_label="% Of Images",
-                            title="# Components per image", split=split, color=self.colors[split], yticks=True)
-
-            self.ax.grid(visible=True, axis='y')
-
-            self.json_object.update({split: create_json_object(values, hist.keys())})
+        hist = self._into_buckets(self._hist[split])
+        values = self.normalize(hist.values(), sum(list(hist.values())))
+        bins = hist.keys()
+        return values, bins
 
     @staticmethod
     def _into_buckets(number_of_objects_per_image):

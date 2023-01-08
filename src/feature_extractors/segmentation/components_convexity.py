@@ -1,9 +1,10 @@
 import numpy as np
 
+from src.logging.logger_utils import class_id_to_name
 from src.preprocess import contours
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object, class_id_to_name
+from src.utils.data_classes import Results
 
 
 class ComponentsConvexity(SegmentationFeatureExtractorAbstract):
@@ -24,21 +25,31 @@ class ComponentsConvexity(SegmentationFeatureExtractorAbstract):
                     u = int(u.item())
                     if u not in self.ignore_labels:
                         for c in cls_contours:
-                            convex_hull_perimeter = contours.get_contour_perimeter(contours.get_convex_hull(c))
+                            convex_hull = contours.get_convex_hull(c)
+                            convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
                             convexity_measure = (c.perimeter - convex_hull_perimeter) / c.perimeter
                             self._hist[data.split][u].append(convexity_measure)
 
-    def _process(self):
-        for split in ['train', 'val']:
-            hist = dict.fromkeys(self._hist[split].keys(), 0.)
-            for cls in self._hist[split]:
-                if len(self._hist[split][cls]):
-                    hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
-            hist = class_id_to_name(self.id_to_name, hist)
-            hist_values = np.array(list(hist.values()))
-            create_bar_plot(self.ax, hist_values, hist.keys(),
-                            x_label="Class", y_label="Convexity measure", title="Convexity of components",
-                            split=split, color=self.colors[split], yticks=True)
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(values=values,
+                          bins=bins,
+                          x_label="Class",
+                          y_label="Convexity measure",
+                          title="Convexity of components",
+                          split=split,
+                          color=self.colors[split],
+                          y_ticks=True,
+                          ax_grid=True,
+                          plot='bar-plot')
+        return results
 
-            self.ax.grid(visible=True, axis='y')
-            self.json_object.update({split: create_json_object(hist_values, self._hist[split].keys())})
+    def _process_data(self, split: str):
+        hist = dict.fromkeys(self._hist[split].keys(), 0.)
+        for cls in self._hist[split]:
+            if len(self._hist[split][cls]):
+                hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
+        hist = class_id_to_name(self.id_to_name, hist)
+        values = np.array(list(hist.values()))
+        bins = hist.keys()
+        return values, bins

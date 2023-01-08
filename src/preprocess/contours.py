@@ -109,8 +109,8 @@ def get_contour_is_convex(contour: np.array) -> bool:
     return cv2.isContourConvex(contour)
 
 
-def get_convex_hull(contour: np.array) -> np.array:
-    convex_hull = cv2.convexHull(contour, hull=False)
+def get_convex_hull(contour: Contour) -> np.array:
+    convex_hull = cv2.convexHull(contour.points, hull=False)
     return convex_hull
 
 

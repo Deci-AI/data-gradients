@@ -1,9 +1,9 @@
 import numpy as np
 
-from src.preprocess import contours
+from src.logging.logger_utils import class_id_to_name
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object, class_id_to_name
+from src.utils.data_classes import Results
 
 
 class PixelsPerClass(SegmentationFeatureExtractorAbstract):
@@ -29,17 +29,27 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
                             size = np.round(100 * contour.area / img_dim, 3)
                             self._hist[data.split][u].append(size)
 
-    def _process(self):
-        for split in ['train', 'val']:
-            self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-            hist = dict.fromkeys(self._hist[split].keys(), 0.)
-            for cls in self._hist[split]:
-                if len(self._hist[split][cls]):
-                    hist[cls] = float(np.round((np.mean(self._hist[split][cls])), 3))
-            hist_values = np.array(list(hist.values()))
-            create_bar_plot(self.ax, hist_values, self._hist[split].keys(),
-                            x_label="Class", y_label="Size of component [% of image]", title="Average Pixels Per Component",
-                            split=split, color=self.colors[split], yticks=True)
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          color=self.colors[split],
+                          title="Average Pixels Per Component",
+                          x_label="Class",
+                          y_label="Size of component [% of image]",
+                          y_ticks=True,
+                          ax_grid=True
+                          )
+        return results
 
-            self.ax.grid(visible=True, axis='y')
-            self.json_object.update({split: create_json_object(hist_values, self._hist[split].keys())})
+    def _process_data(self, split):
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+        hist = dict.fromkeys(self._hist[split].keys(), 0.)
+        for cls in self._hist[split]:
+            if len(self._hist[split][cls]):
+                hist[cls] = float(np.round((np.mean(self._hist[split][cls])), 3))
+        values = np.array(list(hist.values()))
+        bins = self._hist[split].keys()
+        return values, bins

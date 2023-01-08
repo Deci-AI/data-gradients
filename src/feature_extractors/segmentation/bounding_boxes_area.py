@@ -1,8 +1,9 @@
 import numpy as np
 
+from src.logging.logger_utils import class_id_to_name
 from src.utils import SegBatchData
 from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.logging.logger_utils import create_bar_plot, create_json_object, class_id_to_name
+from src.utils.data_classes import Results
 
 
 class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
@@ -27,17 +28,27 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
                         for c in cls_contours:
                             self._hist[data.split][u].append(100 * int(c.area) / img_dim)
 
-    def _process(self):
-        for split in ['train', 'val']:
-            self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-            hist = dict.fromkeys(self._hist[split].keys(), 0.)
-            for cls in self._hist[split]:
-                if len(self._hist[split][cls]):
-                    hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          color=self.colors[split],
+                          title="Components Bounding-Boxes area",
+                          x_label="Class",
+                          y_label="Size of BBOX [% of image]",
+                          ax_grid=True,
+                          y_ticks=True
+                          )
+        return results
 
-            create_bar_plot(self.ax, list(hist.values()), hist.keys(), x_label="Class",
-                            y_label="Size of BBOX [% of image]", title="Components Bounding-Boxes area",
-                            split=split, color=self.colors[split], yticks=True)
-
-            self.ax.grid(visible=True, axis='y')
-            self.json_object.update({split: create_json_object(hist.values(), hist.keys())})
+    def _process_data(self, split: str):
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+        hist = dict.fromkeys(self._hist[split].keys(), 0.)
+        for cls in self._hist[split]:
+            if len(self._hist[split][cls]):
+                hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
+        values = list(hist.values())
+        bins = hist.keys()
+        return values, bins
