@@ -43,30 +43,18 @@ def create_heatmap_plot(ax, x, y, split: str, bins=50, sigma=2, title="", x_labe
     if bins == 0:
         bins = 1
 
-    # Load a numpy record array from yahoo csv data with fields date, open, high,
-    # low, close, volume, adj_close from the mpl-data/sample_data directory. The
-    # record array stores the date as an np.datetime64 with a day unit ('D') in
-    # the date column.
+    heatmap, xedges, yedges = np.histogram2d(x, y, bins=bins)
 
-    ax.scatter(x, y)  # c=close, s=volume, alpha=0.5)
-
-    # ax.set_xlabel(r'$\Delta_i$', fontsize=15)
-    # ax.set_ylabel(r'$\Delta_{i+1}$', fontsize=15)
-    # ax.set_title('Volume and percent change')
-    ax.grid(True)
-
-
-    # heatmap, xedges, yedges = np.histogram2d(x, y, bins=bins)
-    # if use_gaussian_filter:
-    #     heatmap = gaussian_filter(heatmap, sigma=sigma)
-    # if use_extent:
-    #     min_v = min(xedges[0], yedges[0])
-    #     max_v = max(xedges[-1], yedges[-1])
-    #     extent = [min_v, max_v, min_v, max_v]
-    #     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-        # ax.imshow(heatmap.T, extent=extent, origin='lower', aspect='auto', cmap=cm.jet)
-    # else:
-    #     ax.imshow(heatmap.T, origin='lower', aspect='auto', cmap=cm.jet)
+    if use_gaussian_filter:
+        heatmap = gaussian_filter(heatmap, sigma=sigma)
+    if use_extent:
+        # min_v = min(xedges[0], yedges[0])
+        # max_v = max(xedges[-1], yedges[-1])
+        # extent = [min_v, max_v, min_v, max_v]
+        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        ax.imshow(heatmap.T, extent=extent, origin='lower', aspect='auto', cmap=cm.jet)
+    else:
+        ax.imshow(heatmap.T, origin='lower', aspect='auto', cmap=cm.jet)
 
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
