@@ -50,6 +50,6 @@ if __name__ == "__main__":
                                      images_extractor=None,
                                      labels_extractor=None,
                                      # batches_early_stop is a temporary optional argument for debugging purpose
-                                     batches_early_stop=50)
+                                     batches_early_stop=999)
 
     da.run()
