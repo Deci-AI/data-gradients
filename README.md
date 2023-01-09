@@ -103,21 +103,23 @@ def __getitem__(...):
 <pre>
 <details>
 
-<summary> My dataset is really crooked </summary>
+<summary> My dataset requires custom support </summary>
 
-Not Implemented Yet - contact support for help.
+In that case, you can pass the manager a Callable (lambda or function), which handles images and labels separately.
 
-Soon will be available passing a lambda function for extracting images and labels out of any custom object.
 ```python
-def __getitem__(...):
-    return BlackBox()
+def images_extractor(x):
+    x = x['images']['bgr_images']
+    x /= 255.
+    return x
+
+labels_extractor = lambda x: (x['labels']['masks'] / 255.)
 
 da = SegmentationAnalysisManager(
     train_data=train_loader,
     val_data=val_loader,
-    get_images=get_image_from_blackbox,
-    get_labels=get_labels_from_blackbox,
-)
+    images_extractor=images_extractor,
+    labels_extarctor=labels_extractor)
 ```
 </details>
 </pre>
@@ -150,15 +152,11 @@ Both options are good, but it is more important for us to see what the model wil
 
 
 
-### 1. clone GitHub repository
+### 1. Install data-gradients
 ```bash
-git clone https://github.com/Deci-AI/deci-dataset-analyzer
+pip install data_gradients-0.0.0-py3-none-any.whl
 ```
-### 2. install requirements
-```bash
-pip install -r requirements.txt
-```
-### 3. Connect dataset with Python-Iterables objects
+### 2. Connect dataset with Python-Iterables objects
 
 ```python
 from torchvision import datasets
@@ -170,7 +168,7 @@ train_dataset = datasets.SBDataset(root="data/sbd",
 train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
 
 ```
-### 4. At `main.py` import dataset and run script
+### 3. Run analysis manager
 
 ```python
 from torch.utils.data import DataLoader
@@ -199,7 +197,7 @@ da.run()
 
 
 ```
-### 5. After progress is finished, view results through tensorboard
+### 4. After progress is finished, view results through tensorboard
 
 ```bash
 tensorboard --logdir=logs --bind_all
