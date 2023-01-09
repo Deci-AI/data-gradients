@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, ToTensor
 
-from data.bdd_dataset import BDDDataset
+from data_gradients.example_dataset.bdd_dataset import BDDDataset
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 
 
@@ -25,9 +25,9 @@ if __name__ == "__main__":
 
     """
     # Create torch DataSet
-    train_dataset = BDDDataset(data_folder="data/bdd_example", split='train',
+    train_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='train',
                                transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
-    val_dataset = BDDDataset(data_folder="data/bdd_example", split='val',
+    val_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='val',
                              transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
 
     # Create torch DataLoader
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     ignore_labels = BDDDataset.IGNORE_LABELS
     class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
 
-    from internal_use_data_loaders.get_torch_loaders import *
+    # from internal_use_data_loaders.get_torch_loaders import *
 
     da = SegmentationAnalysisManager(train_data=train_loader,
                                      val_data=val_loader,
