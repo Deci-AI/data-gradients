@@ -24,8 +24,16 @@ def get_requirements():
         return [r for r in requirements if not r.startswith("--") and not r.startswith("#")]
 
 
+def get_version():
+    import git
+    repo = git.Repo('.')
+    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+    return str(tags[-1])
+
+
 setup(name="data-gradients",
       description="DataGradients",
+      version=get_version(),
       author="Deci AI",
       author_email="rnd@deci.ai",
       url="https://github.com/Deci-AI/data-gradients",
