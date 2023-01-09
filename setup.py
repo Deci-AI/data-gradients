@@ -24,7 +24,7 @@ def get_requirements():
         return [r for r in requirements if not r.startswith("--") and not r.startswith("#")]
 
 
-setup(name="datagradients",
+setup(name="data-gradients",
       description="DataGradients",
       author="Deci AI",
       author_email="rnd@deci.ai",
@@ -33,7 +33,7 @@ setup(name="datagradients",
       install_requires=get_requirements(),
       packages=find_packages(where="./src"),
       package_dir={"": "src"},
-      package_data={"config": ["*.yaml"],
+      package_data={"data_gradients.config": ["*.yaml"],
                     "data_gradients": ["example.ipynb", "requirements.txt"],
                     },
       long_description=readme(),
