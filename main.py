@@ -49,7 +49,8 @@ if __name__ == "__main__":
                                      samples_to_visualize=8,
                                      images_extractor=None,
                                      labels_extractor=None,
+                                     threshold_soft_labels=0.5,
                                      # batches_early_stop is a temporary optional argument for debugging purpose
-                                     batches_early_stop=40)
+                                     batches_early_stop=5)
 
     da.run()

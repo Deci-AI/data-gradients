@@ -21,7 +21,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                  batches_early_stop: int = 999,
                  images_extractor: Callable = None,
                  labels_extractor: Callable = None,
-                 num_image_channels: int = 3
+                 num_image_channels: int = 3,
+                 threshold_soft_labels: float = 0.5
                  ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -38,7 +39,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                                                       ignore_labels=ignore_labels,
                                                       images_extractor=images_extractor,
                                                       labels_extractor=labels_extractor,
-                                                      num_image_channels=num_image_channels)
+                                                      num_image_channels=num_image_channels,
+                                                      threshold_value=threshold_soft_labels)
 
         self._parse_cfg()
 

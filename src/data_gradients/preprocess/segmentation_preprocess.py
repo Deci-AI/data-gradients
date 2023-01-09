@@ -13,7 +13,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     Segmentation preprocessor class
     """
     def __init__(self, num_classes, ignore_labels, images_extractor: Callable, labels_extractor: Callable,
-                 num_image_channels: int):
+                 num_image_channels: int, threshold_value):
         """
         Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
         :param num_classes: number of valid classes
@@ -23,6 +23,8 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         self._onehot: bool = False
         # TODO: Check if default value of [0] is not harming anything
         self._ignore_labels: List[int] = ignore_labels if ignore_labels is not None else [0]
+        self.threshold_value = threshold_value
+        self.soft_labels = False
 
     @property
     def ignore_labels(self) -> List[int]:
@@ -84,25 +86,35 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         return labels
 
     @staticmethod
-    def _normalize_validate(labels: Tensor):
+    def _all_integers(values):
+        for v in values:
+            if v - int(v) != 0:
+                return False
+        return True
+
+    def _normalize_validate(self, labels: Tensor):
         """
         Pixel values for labels are representing class id's, hence they are in the range of [0, 255] or normalized
         in [0, 1] representing (1/255, 2/255, ...).
-        Soft labels (continues in [0, 1] are not supported yet.
         :param labels: Tensor [BS, N, W, H]
         :return: labels: Tensor [BS, N, W, H]
         """
         unique_values = torch.unique(labels)
-        if 0 <= min(unique_values) and max(unique_values) < 1:
-            # TODO:
-            #  If resize uses BiLinear, I'll get here with an error message
-            if any(u not in range(0, 255) for u in unique_values * 255):
-                raise NotImplementedError("Values were not matching for integer numbers even after inverse"
-                                          "normalization.\nYou might using resize transformation with bilinear "
-                                          "interpolation mode - please change it to 'nearest'")
+
+        if self._all_integers(unique_values):
+            pass
+        elif 0 <= min(unique_values) and max(unique_values) < 1 and self._all_integers(unique_values * 255):
             labels = labels * 255
-        elif any(unique_values < 0) or max(unique_values) > 255:
-            raise ValueError("Labels pixel-values should be either floats in [0, 1] or integers in [0, 255]")
+        else:
+            print(f'\nFound Soft labels! There are {len(unique_values)} unique values! max is: {max(unique_values)}, min is {min(unique_values)}')
+            print(f'Clamping & Thresholding to [0, 1] with threshold value {self.threshold_value}')
+            self.soft_labels = True
+            labels = self._clamp_and_thresh(labels)
+        return labels
+
+    def _clamp_and_thresh(self, labels):
+        labels = torch.clamp(labels, min=0, max=1)
+        labels = torch.where(labels > self.threshold_value, 1, 0)
         return labels
 
     def _channels_first_validate_images(self, images: Tensor):
@@ -171,6 +183,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         images = self._channels_first_validate_images(images)
         labels = self._channels_first_validate_labels(labels)
+
+        if self.soft_labels:
+            labels = self._clamp_and_thresh(labels)
 
         labels = self._normalize_validate(labels)
 
