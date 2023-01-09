@@ -1,1 +1,1 @@
-from src.managers.segmentation_manager import SegmentationAnalysisManager
+from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager

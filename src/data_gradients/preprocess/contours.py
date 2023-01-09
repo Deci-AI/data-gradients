@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import torch
 
-from src.utils import Contour
+from data_gradients.utils import Contour
 
 
 def get_contours(label: torch.Tensor) -> np.array:

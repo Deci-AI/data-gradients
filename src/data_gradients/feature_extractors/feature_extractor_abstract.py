@@ -4,11 +4,11 @@ from typing import Tuple, Dict, Optional, List, Union
 
 from matplotlib import pyplot as plt
 
-from src.logging.logger import Logger
-from src.logging.logger_utils import create_json_object, write_bar_ploit, write_heatmap_plot
-from src.logging.results_logger import ResultsLogger
-from src.utils.data_classes import BatchData, Results
-from src.utils.data_classes.extractor_results import HeatMapResults
+from data_gradients.logging.logger import Logger
+from data_gradients.logging.logger_utils import create_json_object, write_bar_ploit, write_heatmap_plot
+from data_gradients.logging.results_logger import ResultsLogger
+from data_gradients.utils.data_classes.batch_data import BatchData
+from data_gradients.utils.data_classes.extractor_results import Results, HeatMapResults
 
 
 class FeatureExtractorAbstract(ABC):
@@ -59,23 +59,23 @@ class FeatureExtractorAbstract(ABC):
         pass
 
     def write_results(self, results: Union[Results, HeatMapResults], ax):
-        if results.ax_grid:
+        if Resultsax_grid:
             ax.grid(visible=True, axis='y')
 
-        if results.plot == 'bar-plot':
+        if Resultsplot == 'bar-plot':
             write_bar_ploit(ax=ax,
                             results=results)
-        elif results.plot == 'heat-map':
+        elif Resultsplot == 'heat-map':
             # TODO: Make better way of splitting axis in same graph
-            write_heatmap_plot(ax=ax[int(results.split != 'train')],
+            write_heatmap_plot(ax=ax[int(Resultssplit != 'train')],
                                results=results)
         else:
-            raise NotImplementedError(f"Got plot key {results.plot}\
+            raise NotImplementedError(f"Got plot key {Resultsplot}\
              while only supported plots are ['bar-plot', 'heat-map']")
 
-        json_obj = create_json_object(results.json_values if results.json_values else results.values,
-                                      results.bins if results.bins else results.keys)
-        self.json_object.update({results.split: json_obj})
+        json_obj = create_json_object(Resultsjson_values if Resultsjson_values else Resultsvalues,
+                                      Resultsbins if Resultsbins else Resultskeys)
+        self.json_object.update({Resultssplit: json_obj})
 
     @staticmethod
     def merge_dict_splits(hist: Dict):

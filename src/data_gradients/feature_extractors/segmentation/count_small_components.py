@@ -1,9 +1,9 @@
 from typing import List
 import numpy as np
 
-import src.preprocess.contours
-from src.utils import SegBatchData
-from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+import data_gradients.preprocess.contours
+from data_gradients.utils import SegBatchData
+from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
 
 
 class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):
@@ -23,7 +23,7 @@ class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):
         for i, onehot_contours in enumerate(data.batch_onehot_contours):
             for cls_contours in onehot_contours:
                 for c in cls_contours:
-                    _, _, contour_area = src.preprocess.contours.get_contour_moment(c)
+                    _, _, contour_area = data_gradients.preprocess.contours.get_contour_moment(c)
                     self._hist[np.digitize(contour_area, self.bins) - 1] += 1
 
     def _post_process(self):

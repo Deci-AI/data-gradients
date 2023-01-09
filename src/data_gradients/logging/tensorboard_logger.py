@@ -2,7 +2,7 @@ import torch
 import torchvision
 from torch.utils.tensorboard import SummaryWriter
 
-from src.logging.results_logger import ResultsLogger
+from data_gradients.logging.results_logger import ResultsLogger
 
 
 class TensorBoardLogger(ResultsLogger):

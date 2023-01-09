@@ -2,8 +2,8 @@ from abc import abstractmethod
 
 import numpy as np
 
-from src.utils import SegBatchData
-from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
+from data_gradients.utils import SegBatchData
+from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 
 
 class SegmentationFeatureExtractorAbstract(FeatureExtractorAbstract):

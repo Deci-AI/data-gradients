@@ -3,9 +3,9 @@ from typing import List
 import cv2
 import numpy as np
 
-from src.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from src.utils import BatchData
-from src.utils.data_classes import Results
+from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
+from data_gradients.utils import BatchData
+from data_gradients.utils.data_classes.extractor_results import Results
 
 
 class AverageBrightness(FeatureExtractorAbstract):
@@ -27,7 +27,6 @@ class AverageBrightness(FeatureExtractorAbstract):
             else:
                 n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))
-            print(np.mean(n_lightness))
 
     def _post_process(self, split: str) -> Results:
         values, bins = self._process_data(split)

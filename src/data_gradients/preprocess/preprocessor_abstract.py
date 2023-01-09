@@ -5,8 +5,7 @@ import numpy as np
 import torch
 from torchvision.transforms import transforms
 
-from src import preprocess
-from src.utils import SegBatchData
+from data_gradients.utils import SegBatchData
 
 
 class PreprocessorAbstract(ABC):

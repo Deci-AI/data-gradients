@@ -1,2 +1,2 @@
-from src.feature_extractors.segmentation import *
-from src.feature_extractors.common import *
+from data_gradients.feature_extractors.segmentation import *
+from data_gradients.feature_extractors.common import *

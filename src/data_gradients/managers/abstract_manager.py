@@ -6,11 +6,11 @@ from typing import Iterator, Iterable, Optional, List, Dict
 import hydra
 import tqdm
 
-from src.feature_extractors import FeatureExtractorAbstract
-from src.logging.logger import Logger
-from src.preprocess import PreprocessorAbstract
-from src.utils import BatchData
-from src.utils.common.stopwatch import Stopwatch
+from data_gradients.feature_extractors import FeatureExtractorAbstract
+from data_gradients.logging.logger import Logger
+from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
+from data_gradients.utils.data_classes.batch_data import BatchData
+from data_gradients.utils.common.stopwatch import Stopwatch
 
 
 class AnalysisManagerAbstract:

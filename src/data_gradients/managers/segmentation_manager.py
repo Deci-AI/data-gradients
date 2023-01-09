@@ -1,8 +1,8 @@
 from typing import Optional, Iterable, List, Dict, Callable
 
 import hydra
-from src.managers.abstract_manager import AnalysisManagerAbstract
-from src.preprocess import SegmentationPreprocessor
+from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
+from data_gradients.preprocess.segmentation_preprocess import SegmentationPreprocessor
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):

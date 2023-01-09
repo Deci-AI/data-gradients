@@ -1,8 +1,8 @@
 import numpy as np
 
-from src.utils import SegBatchData
-from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.utils.data_classes import Results
+from data_gradients.utils import SegBatchData
+from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.utils.data_classes.extractor_results import Results
 
 
 class CountNumComponents(SegmentationFeatureExtractorAbstract):

@@ -1,1 +1,1 @@
-from src.utils.data_classes.batch_data import *
+from data_gradients.utils.data_classes.batch_data import *

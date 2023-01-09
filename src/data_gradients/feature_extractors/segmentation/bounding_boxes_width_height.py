@@ -1,8 +1,8 @@
 import numpy as np
 
-from src.utils import SegBatchData
-from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.utils.data_classes.extractor_results import HeatMapResults
+from data_gradients.utils import SegBatchData
+from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.utils.data_classes.extractor_results import HeatMapResults
 
 
 class WidthHeight(SegmentationFeatureExtractorAbstract):
@@ -40,8 +40,8 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
                                  )
 
         quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-        results.json_values = quantized_heat_map.tolist()
-        results.keys = ["Width", "Height"]
+        Resultsjson_values = quantized_heat_map.tolist()
+        Resultskeys = ["Width", "Height"]
         return results
 
     def _process_data(self, split: str):

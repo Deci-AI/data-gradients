@@ -1,10 +1,8 @@
 import numpy as np
 
-from src.logging.logger_utils import write_heatmap_plot, create_json_object
-from src.preprocess import contours
-from src.utils import SegBatchData
-from src.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
-from src.utils.data_classes.extractor_results import HeatMapResults
+from data_gradients.utils import SegBatchData
+from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.utils.data_classes.extractor_results import HeatMapResults
 
 
 class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
@@ -50,8 +48,8 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
                                  )
 
         quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-        results.json_values = quantized_heat_map.tolist()
-        results.keys = ["X", "Y"]
+        Resultsjson_values = quantized_heat_map.tolist()
+        Resultskeys = ["X", "Y"]
         return results
 
     def _process_data(self, split):

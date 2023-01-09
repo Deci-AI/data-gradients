@@ -1,6 +1,6 @@
-from src.logging.json_logger import JsonLogger
-from src.logging.tensorboard_logger import TensorBoardLogger
-from src.preprocess import PreprocessorAbstract
+from data_gradients.logging.json_logger import JsonLogger
+from data_gradients.logging.tensorboard_logger import TensorBoardLogger
+from data_gradients.preprocess import PreprocessorAbstract
 
 
 class Logger:

@@ -1,2 +1,1 @@
-from src.utils.data_classes.extractor_results import Results
-from src.utils.data_classes.batch_data import BatchData
+from data_gradients.utils.data_classes.batch_data import BatchData

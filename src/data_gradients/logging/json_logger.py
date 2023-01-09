@@ -1,7 +1,7 @@
 import os
 import json
 
-from src.logging.results_logger import ResultsLogger
+from data_gradients.logging.results_logger import ResultsLogger
 
 
 class JsonLogger(ResultsLogger):

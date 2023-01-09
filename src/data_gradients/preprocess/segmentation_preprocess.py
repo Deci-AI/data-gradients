@@ -3,9 +3,9 @@ from typing import List, Optional, Tuple, Callable
 import torch
 from torch import Tensor
 
-from src.utils import SegBatchData
-from src.preprocess import PreprocessorAbstract, squeeze_by_class
-from src.preprocess import contours
+from data_gradients.utils import SegBatchData
+from data_gradients.preprocess import PreprocessorAbstract, squeeze_by_class
+from data_gradients.preprocess import contours
 
 
 class SegmentationPreprocessor(PreprocessorAbstract):

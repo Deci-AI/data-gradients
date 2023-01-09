@@ -3,7 +3,7 @@ from typing import List
 
 from torch import Tensor
 
-from src.utils.data_classes.contour import Contour
+from data_gradients.utils.data_classes.contour import Contour
 
 
 @dataclass()
