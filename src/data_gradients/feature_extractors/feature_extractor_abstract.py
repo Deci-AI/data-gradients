@@ -44,7 +44,6 @@ class FeatureExtractorAbstract(ABC):
         self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
 
         for split in ['train', 'val']:
-            print(self.__class__.__name__)
             results = self._post_process(split)
             self.write_results(results, ax)
 

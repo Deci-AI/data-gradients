@@ -61,7 +61,6 @@ class AnalysisManagerAbstract:
         cfg = hydra.utils.instantiate(self._cfg)
         self._extractors = cfg[self._task] + cfg.common
 
-
     def _get_batch(self, data_iterator: Iterator) -> BatchData:
         """
         Iterates iterable, get a Tuple out of it, validate format and preprocess due to task preprocessor.
@@ -112,6 +111,7 @@ class AnalysisManagerAbstract:
 
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
 
+            # TODO: Improve experimental feature
             # if train_batch < 1:
             #     self.measure()
 
