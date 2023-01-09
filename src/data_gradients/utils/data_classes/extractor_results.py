@@ -33,5 +33,4 @@ class HeatMapResults(Results):
     sigma: int = 2
 
     use_extent: bool = True
-    use_gaussian_filter: bool = True,
-
+    use_gaussian_filter: bool = True
