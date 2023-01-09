@@ -27,7 +27,6 @@ class AverageBrightness(FeatureExtractorAbstract):
             else:
                 n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))
-            print(np.mean(n_lightness))
 
     def _post_process(self, split: str) -> Results:
         values, bins = self._process_data(split)

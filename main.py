@@ -38,15 +38,13 @@ if __name__ == "__main__":
     ignore_labels = BDDDataset.IGNORE_LABELS
     class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
 
-    from internal_use_data_loaders.get_torch_loaders import *
-
     da = SegmentationAnalysisManager(train_data=train_loader,
                                      val_data=val_loader,
                                      num_classes=num_classes,
                                      ignore_labels=ignore_labels,
                                      # Optionals
                                      id_to_name=class_id_to_name,
-                                     samples_to_visualize=2,
+                                     samples_to_visualize=0,
                                      images_extractor=None,
                                      labels_extractor=None,
                                      # batches_early_stop is a temporary optional argument for debugging purpose
