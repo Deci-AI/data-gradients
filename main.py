@@ -1,8 +1,8 @@
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, ToTensor
 
-from data.bdd_dataset import BDDDataset
-from src import SegmentationAnalysisManager
+from data_gradients.example_dataset.bdd_dataset import BDDDataset
+from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 
 
 if __name__ == "__main__":
@@ -25,9 +25,9 @@ if __name__ == "__main__":
 
     """
     # Create torch DataSet
-    train_dataset = BDDDataset(data_folder="data/bdd_example", split='train',
+    train_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='train',
                                transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
-    val_dataset = BDDDataset(data_folder="data/bdd_example", split='val',
+    val_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='val',
                              transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
 
     # Create torch DataLoader
@@ -44,10 +44,10 @@ if __name__ == "__main__":
                                      ignore_labels=ignore_labels,
                                      # Optionals
                                      id_to_name=class_id_to_name,
-                                     samples_to_visualize=0,
+                                     samples_to_visualize=8,
                                      images_extractor=None,
                                      labels_extractor=None,
                                      # batches_early_stop is a temporary optional argument for debugging purpose
-                                     batches_early_stop=999)
+                                     batches_early_stop=20)
 
     da.run()

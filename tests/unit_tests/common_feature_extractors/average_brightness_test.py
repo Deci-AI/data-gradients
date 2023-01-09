@@ -1,12 +1,11 @@
 import unittest
-from typing import List
 
 import cv2
 import numpy as np
 import torch
 
-from src.feature_extractors import AverageBrightness
-from src.utils import BatchData
+from data_gradients.feature_extractors import AverageBrightness
+from data_gradients.utils import BatchData
 
 
 class AverageBrightnessTest(unittest.TestCase):
@@ -24,7 +23,7 @@ class AverageBrightnessTest(unittest.TestCase):
         target_value = 0
         self.feature_extractor.execute(batch)
         results = self.feature_extractor._post_process(self.split)
-        self._check_value_in_right_bin(results.values, results.bins, target_value)
+        self._check_value_in_right_bin(Resultsvalues, Resultsbins, target_value)
 
     def test_white_image(self):
         target_value = 1
@@ -33,7 +32,7 @@ class AverageBrightnessTest(unittest.TestCase):
                           split=self.split)
         self.feature_extractor.execute(batch)
         results = self.feature_extractor._post_process(self.split)
-        self._check_value_in_right_bin(results.values, results.bins, target_value)
+        self._check_value_in_right_bin(Resultsvalues, Resultsbins, target_value)
 
     def test_noise_image(self):
         images = torch.ones((1, 3, 100, 100))
@@ -55,7 +54,7 @@ class AverageBrightnessTest(unittest.TestCase):
         target_value += 0.02
         self.feature_extractor.execute(batch)
         results = self.feature_extractor._post_process(self.split)
-        self._check_value_in_right_bin(results.values, results.bins, target_value)
+        self._check_value_in_right_bin(Resultsvalues, Resultsbins, target_value)
 
     def _check_value_in_right_bin(self, values, bins, target_value):
         bin_index = -1
