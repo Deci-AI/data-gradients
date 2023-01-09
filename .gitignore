@@ -1,5 +1,6 @@
 logs
 .idea
+internal_use_data_loaders/
 data/amat
 data/bdd100k
 data/cityscapes
