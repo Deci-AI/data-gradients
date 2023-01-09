@@ -9,8 +9,11 @@ from src.utils.data_classes import Results
 
 
 class AverageBrightness(FeatureExtractorAbstract):
+    # TODO: Check correlation between mean & std of an image and its brightness.
+    #  Currently, ones == 1, zeros == 0, but N(0.5, 1)?
     def __init__(self):
         super().__init__()
+        self._num_bins: int = 10
         self._brightness = {'train': [], 'val': []}
 
     def _execute(self, data: BatchData):
@@ -24,8 +27,9 @@ class AverageBrightness(FeatureExtractorAbstract):
             else:
                 n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))
+            print(np.mean(n_lightness))
 
-    def _post_process(self, split: str):
+    def _post_process(self, split: str) -> Results:
         values, bins = self._process_data(split)
         results = Results(bins=bins,
                           values=list(values),
@@ -37,8 +41,8 @@ class AverageBrightness(FeatureExtractorAbstract):
                           y_ticks=True)
         return results
 
-    def _process_data(self, split, num_bins=10):
-        values, bins = np.histogram(self._brightness[split], bins=num_bins)
+    def _process_data(self, split):
+        values, bins = np.histogram(self._brightness[split], bins=self._num_bins)
         values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
         bins = self._create_keys(bins)
         return values, bins
@@ -47,13 +51,9 @@ class AverageBrightness(FeatureExtractorAbstract):
     def _create_keys(bins):
         new_keys: List[str] = []
         for i, key in enumerate(bins):
-            if i == 0:
+            if i == len(bins) - 1:
                 continue
-            elif i == 1:
-                new_keys.append('<%.2f' % key)
-            elif i == len(bins) - 1:
-                new_keys.append('%.2f<' % key)
-            else:
-                new_keys.append('%.2f<%.2f' % (key, bins[i+1]))
+            new_keys.append('{:.2f}<{:.2f}'.format(bins[i], bins[i + 1]))
+
         return new_keys
 
