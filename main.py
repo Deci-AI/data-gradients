@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, ToTensor
 
 from data.bdd_dataset import BDDDataset
-from src import SegmentationAnalysisManager
+from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 
 
 if __name__ == "__main__":

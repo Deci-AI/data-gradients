@@ -9,4 +9,5 @@ torch
 torchvision
 torchaudio
 numpy
-
+matplotlib
+scipy
