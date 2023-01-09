@@ -24,7 +24,7 @@ def get_requirements():
         return [r for r in requirements if not r.startswith("--") and not r.startswith("#")]
 
 
-setup(name="data-gradients",
+setup(name="datagradients",
       description="DataGradients",
       author="Deci AI",
       author_email="rnd@deci.ai",
