@@ -1,5 +1,7 @@
 import os
 
+import numpy as np
+import torch
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -14,7 +16,7 @@ class BDDDataset(Dataset):
     The BDD100K data and annotations can be obtained at https://bdd-data.berkeley.edu/.
     """
     NUM_CLASSES = 19
-    IGNORE_LABELS = [19]
+    IGNORE_LABELS = [255]
     CLASS_ID_TO_NAMES = {0: 'road', 1: 'sidewalk', 2: 'building', 3: 'wall', 4: 'fence', 5: 'pole', 6: 'traffic light',
                          7: 'traffic sign', 8: 'vegetation', 9: 'terrain', 10: 'sky', 11: 'person', 12: 'rider',
                          13: 'car', 14: 'truck', 15: 'bus', 16: 'train', 17: 'motorcycle', 18: 'bicycle'}
@@ -38,12 +40,17 @@ class BDDDataset(Dataset):
         self.transforms = transform
         self.target_transforms = transform
 
+
+    def get_target(self, target):
+        mask = torch.from_numpy(np.array(target)).long()
+        return mask
+
     def __getitem__(self, i):
         image = Image.open(self.samples_fn[i][0]).convert('RGB')
         label = Image.open(self.samples_fn[i][1])
         if self.transforms:
             image = self.transforms(image)
-            label = self.target_transforms(label)
+            label = self.get_target(label)
 
         label[label == 1] = self.ignore_label / 255.
 
