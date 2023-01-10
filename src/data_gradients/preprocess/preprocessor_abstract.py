@@ -85,3 +85,6 @@ class PreprocessorAbstract(ABC):
 
             return self._container_mapper[tuple_place].container_to_tensor(objs)
 
+    @staticmethod
+    def _check_all_integers(values):
+        return all(v - int(v) == 0 for v in values)

@@ -85,13 +85,6 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         return labels
 
-    @staticmethod
-    def _all_integers(values):
-        for v in values:
-            if v - int(v) != 0:
-                return False
-        return True
-
     def _normalize_validate(self, labels: Tensor):
         """
         Pixel values for labels are representing class id's, hence they are in the range of [0, 255] or normalized
@@ -101,9 +94,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         """
         unique_values = torch.unique(labels)
 
-        if self._all_integers(unique_values):
+        if self._check_all_integers(unique_values):
             pass
-        elif 0 <= min(unique_values) and max(unique_values) < 1 and self._all_integers(unique_values * 255):
+        elif 0 <= min(unique_values) and max(unique_values) < 1 and self._check_all_integers(unique_values * 255):
             labels = labels * 255
         else:
             print(f'\nFound Soft labels! There are {len(unique_values)} unique values! max is: {max(unique_values)}, min is {min(unique_values)}')
@@ -112,20 +105,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
             labels = self._clamp_and_thresh(labels)
         return labels
 
-    def _clamp_and_thresh(self, labels):
-        labels = torch.clamp(labels, min=0, max=1)
-        labels = torch.where(labels > self.threshold_value, 1, 0)
+    def _clamp_and_thresh(self, labels: Tensor) -> Tensor:
+        labels = torch.where(labels > self.threshold_value, torch.tensor(1), torch.tensor(0))
         return labels
-
-    def _channels_first_validate_images(self, images: Tensor):
-        """
-        Images should be [BS, C, W, H]. If [BS, W, H, C], permute
-        :param images: Tensor
-        :return: images: Tensor [BS, C, W, H]
-        """
-        if images.shape[1] != self._num_image_channels and images.shape[-1] == self._num_image_channels:
-            images = self.channels_last_to_first(images)
-        return images
 
     def _channels_first_validate_labels(self, labels: Tensor):
         """
