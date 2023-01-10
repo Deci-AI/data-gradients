@@ -78,7 +78,8 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         if labels.dim() != 4:
             raise ValueError(
                 f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
-        if labels.shape[1] != 1 and labels.shape[1] != self.number_of_classes:
+
+        if labels.shape[1] != 1 and labels.shape[1] != (self.number_of_classes + 1):
             raise ValueError(
                 f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes"
                 f" ({self.number_of_classes}). Got: {labels.shape[1]}")
@@ -108,6 +109,16 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     def _clamp_and_thresh(self, labels: Tensor) -> Tensor:
         labels = torch.where(labels > self.threshold_value, torch.tensor(1), torch.tensor(0))
         return labels
+
+    def _channels_first_validate_images(self, images: Tensor):
+        """
+        Images should be [BS, C, W, H]. If [BS, W, H, C], permute
+        :param images: Tensor
+        :return: images: Tensor [BS, C, W, H]
+        """
+        if images.shape[1] != self._num_image_channels and images.shape[-1] == self._num_image_channels:
+            images = self.channels_last_to_first(images)
+        return images
 
     def _channels_first_validate_labels(self, labels: Tensor):
         """
@@ -160,18 +171,18 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         images = self._nan_validate(images)
         labels = self._nan_validate(labels)
 
-        images = self._dim_validate_images(images)
-        labels = self._dim_validate_labels(labels)
-
         images = self._channels_first_validate_images(images)
         labels = self._channels_first_validate_labels(labels)
+
+        images = self._dim_validate_images(images)
+        labels = self._dim_validate_labels(labels)
 
         if self.soft_labels:
             labels = self._clamp_and_thresh(labels)
 
         labels = self._normalize_validate(labels)
 
-        self._onehot = labels.shape[1] == self.number_of_classes and self.number_of_classes > 1
+        self._onehot = labels.shape[1] == (self.number_of_classes + 1) and self.number_of_classes > 1
         self._pixel_values_validate(torch.unique(labels))
 
         return images, labels

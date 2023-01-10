@@ -10,16 +10,17 @@ def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool, ignore_labels: Lis
     param is_one_hot: Determine if labels are one-hot shaped
     :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
     """
-    # Take all classes but ignored/background
-    all_classes = [int(u.item()) for u in torch.unique(label) if u not in ignore_labels]
+    if is_one_hot:
+        all_classes = [i for i in range(label.shape[0]) if i not in ignore_labels]
+    else:
+        # Take all classes but ignored/background
+        all_classes = [int(u.item()) for u in torch.unique(label) if u not in ignore_labels]
 
     # If no classes appear in the annotation it's a background image full of zeros
     if not all_classes:
-        # TODO If it's one hot I should handle it differently. Also background images?
         return label
 
     masks = []
-    # TODO: Check that method works for one-hots
     if is_one_hot:
         # Iterate over channels
         for i in range(label.shape[0]):
