@@ -59,9 +59,6 @@ class FeatureExtractorAbstract(ABC):
         pass
 
     def write_results(self, results: Union[Results, HeatMapResults], ax):
-        if results.ax_grid:
-            ax.grid(visible=True, axis='y')
-
         if results.plot == 'bar-plot':
             write_bar_plot(ax=ax,
                            results=results)

@@ -45,8 +45,8 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
                                  )
 
         quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-        Resultsjson_values = quantized_heat_map.tolist()
-        Resultskeys = ["X", "Y"]
+        results.json_values = quantized_heat_map.tolist()
+        results.keys = ["X", "Y"]
         return results
 
     def _process_data(self, split):

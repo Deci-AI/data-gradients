@@ -12,6 +12,9 @@ def create_json_object(values, keys):
 
 
 def write_bar_plot(ax, results: Results):
+    if results.ax_grid:
+        ax.grid(visible=True, axis='y')
+
     number_of_labels = len(results.bins)
     ax.bar(x=np.arange(number_of_labels) - (results.width / 2 if (results.split == 'train') else - results.width / 2),
            height=results.values,
