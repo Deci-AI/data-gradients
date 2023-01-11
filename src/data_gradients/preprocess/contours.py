@@ -24,10 +24,12 @@ def get_contours(label: torch.Tensor) -> np.array:
     for class_channel in range(label.shape[0]):
         # Get tensor [class, W, H]
         onehot = label[class_channel, ...]
+        if np.max(onehot) == 0:
+            continue
         # Find contours and return shape of [N, P, 1, 2] where N is number of contours and P list of points
         onehot_contour, _ = cv2.findContours(onehot, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         # Check if contour is OK
-        valid_onehot_contours = get_valid_contours(onehot_contour)
+        valid_onehot_contours = get_valid_contours(onehot_contour, class_channel)
         if len(valid_onehot_contours):
             # Attach to the Channel dim to get a [C, N, P, 1, 2] Tensor
             all_onehot_contour.append(valid_onehot_contours)
@@ -49,7 +51,7 @@ def get_bbox_area(all_contours: List):
     return sizes
 
 
-def get_valid_contours(contours: Tuple) -> List:
+def get_valid_contours(contours: Tuple, class_id: int) -> List:
     """
     Contours sometimes are buggy, as for 2-points-contour, a stragith line, etc.
     We'll remove the by the valid - criteria (temporary) - minimal size of (3 ^ 2) pixels
@@ -68,7 +70,8 @@ def get_valid_contours(contours: Tuple) -> List:
                                        center=get_contour_center_of_mass(contour),
                                        perimeter=get_contour_perimeter(contour),
                                        w=w,
-                                       h=h)]
+                                       h=h,
+                                       class_id=class_id)]
     return valid_contours
 
 
