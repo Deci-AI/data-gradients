@@ -9,7 +9,7 @@ class CountSmallComponents(SegmentationFeatureExtractorAbstract):
     """
     def __init__(self, minimum_percent_of_an_image):
         super().__init__()
-        self._min_size: float = minimum_percent_of_an_image
+        self._min_size: float = minimum_percent_of_an_image / 100
         self._hist = {'train': {f'<{self._min_size}': 0}, 'val': {f'<{self._min_size}': 0}}
         self._total_objects = {'train': 0, 'val': 0}
 
