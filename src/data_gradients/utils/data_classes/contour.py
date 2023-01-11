@@ -13,3 +13,4 @@ class Contour:
     center: Tuple[int, int]
     perimeter: float
     class_id: int
+    bbox_area: float

@@ -38,17 +38,9 @@ def get_contours(label: torch.Tensor) -> np.array:
     return all_onehot_contour
 
 
-def get_bbox_area(all_contours: List):
-    # [N, Nc, P, 1, 2] where N is # of classes, Nc # of contours per class and
-    sizes = np.zeros(len(all_contours))
-    for i, class_channel in enumerate(all_contours):
-        channel_sizes = np.zeros(len(class_channel))
-        for j, contour in enumerate(class_channel):
-            rect = get_rotated_bounding_rect(contour)
-            wh = rect[1]
-            channel_sizes[j] = (int(wh[0] * wh[1]))
-        sizes[i] = channel_sizes
-    return sizes
+def get_bbox_area(contour):
+    (cx, cy), (w, h), angle = get_rotated_bounding_rect(contour)
+    return w * h
 
 
 def get_valid_contours(contours: Tuple, class_id: int) -> List:
@@ -69,6 +61,7 @@ def get_valid_contours(contours: Tuple, class_id: int) -> List:
                                        area=contour_area,
                                        center=get_contour_center_of_mass(contour),
                                        perimeter=get_contour_perimeter(contour),
+                                       bbox_area=get_bbox_area(contour),
                                        w=w,
                                        h=h,
                                        class_id=class_id)]

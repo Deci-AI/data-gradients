@@ -23,7 +23,7 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
             img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
             for class_channel in image_contours:
                 for contour in class_channel:
-                    self._hist[data.split][contour.class_id].append(100 * int(contour.area) / img_dim)
+                    self._hist[data.split][contour.class_id].append(100 * int(contour.bbox_area) / img_dim)
 
     def _post_process(self, split):
         values, bins = self._process_data(split)
