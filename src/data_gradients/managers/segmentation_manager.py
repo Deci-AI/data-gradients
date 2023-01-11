@@ -22,7 +22,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                  images_extractor: Callable = None,
                  labels_extractor: Callable = None,
                  num_image_channels: int = 3,
-                 threshold_soft_labels: float = 0.5
+                 threshold_soft_labels: float = 0.5,
+                 short_run: bool = False
                  ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -33,14 +34,14 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param samples_to_visualize: Number of samples to visualize at tensorboard [0-n]
         :param id_to_name: Class ID to class names mapping (Dictionary)
         """
-        super().__init__(train_data, val_data, self.TASK, samples_to_visualize, id_to_name, batches_early_stop)
+        super().__init__(train_data, val_data, self.TASK, samples_to_visualize, id_to_name, batches_early_stop, short_run)
 
         self._preprocessor = SegmentationPreprocessor(num_classes=num_classes,
                                                       ignore_labels=ignore_labels,
                                                       images_extractor=images_extractor,
                                                       labels_extractor=labels_extractor,
                                                       num_image_channels=num_image_channels,
-                                                      threshold_value=threshold_soft_labels)
+                                                      threshold_value=threshold_soft_labels,)
 
         self._parse_cfg()
 

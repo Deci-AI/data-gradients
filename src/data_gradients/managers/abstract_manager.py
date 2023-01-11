@@ -23,7 +23,8 @@ class AnalysisManagerAbstract:
                  task: str,
                  samples_to_visualize: int,
                  id_to_name: Dict,
-                 batches_early_stop: int):
+                 batches_early_stop: int,
+                 short_run: bool):
 
         self._extractors: List[FeatureExtractorAbstract] = []
 
@@ -52,6 +53,7 @@ class AnalysisManagerAbstract:
 
         self.sw: Optional[Stopwatch] = None
         self.batches_early_stop = batches_early_stop
+        self.short_run = short_run
 
     def build(self):
         """
@@ -91,6 +93,7 @@ class AnalysisManagerAbstract:
             try:
                 train_batch_data = self._get_batch(self._train_iter)
                 train_batch_data.split = 'train'
+                self.sw.tick()
             except StopIteration:
                 break
             # Try to get val batch
@@ -98,6 +101,7 @@ class AnalysisManagerAbstract:
                 try:
                     val_batch_data = self._get_batch(self._val_iter)
                     val_batch_data.split = 'val'
+                    self.sw.tick()
                 except StopIteration:
                     self._train_only = True
 
@@ -110,10 +114,10 @@ class AnalysisManagerAbstract:
                            self._extractors]
 
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
+            self.sw.tick()
 
-            # TODO: Improve experimental feature
-            # if train_batch < 1:
-            #     self.measure()
+            if train_batch < 1 and self.short_run:
+                self.measure()
 
             pbar.update()
             train_batch += 1

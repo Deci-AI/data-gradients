@@ -51,6 +51,8 @@ if __name__ == "__main__":
                                      labels_extractor=None,
                                      threshold_soft_labels=0.5,
                                      # batches_early_stop is a temporary optional argument for debugging purpose
-                                     batches_early_stop=5)
+                                     batches_early_stop=100,
+                                     # set short run parameter to True if you want to run only on part [%] of your data
+                                     short_run=False)
 
     da.run()

@@ -22,6 +22,12 @@ class Stopwatch:
         return now - self._ticks[0]
 
     def estimate_total_time(self, train_len, val_len) -> str:
-        total_seconds = val_len * self._ticks[-1] + (train_len - val_len) * self._ticks[-1] * 0.75
+        train_load = self._ticks[-3]
+        val_load = self._ticks[-2]
+        features_half = self._ticks[-1] / 2
+        total_train = train_load + features_half
+        total_val = val_load + features_half
+
+        total_seconds = (val_len - 1) * total_val + (train_len - 1) * total_train
         total_time = str(datetime.timedelta(seconds=total_seconds))
         return total_time
