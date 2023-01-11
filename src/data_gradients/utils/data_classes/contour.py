@@ -12,5 +12,4 @@ class Contour:
     h: float
     center: Tuple[int, int]
     perimeter: float
-
-
+    class_id: int
