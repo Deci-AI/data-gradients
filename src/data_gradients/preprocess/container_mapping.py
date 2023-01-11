@@ -116,7 +116,7 @@ def container_mapping(obj: Any, path: str, targets: list):
             printable_map[k] = container_mapping(v, path + f"['{k}']", targets)
     elif isinstance(obj, tuple):
         types = []
-        # TODO: This magic number if for "reasonable" amount of objects to show in printing
+        # This magic number if for "reasonable" amount of objects to show in printing
         if len(obj) < 5:
             for o in obj:
                 types.append(str(type(o)))

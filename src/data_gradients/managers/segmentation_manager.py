@@ -51,6 +51,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         """
         hydra.initialize(config_path="../config/", job_name="", version_base="1.1")
         self._cfg = hydra.compose(config_name=self._task)
-        # TODO: Needs to disable strict mode
+        # Could add those parameters with no defining them in if disabling strict mode
         self._cfg.number_of_classes = self._preprocessor.number_of_classes
         self._cfg.ignore_labels = self._preprocessor.ignore_labels

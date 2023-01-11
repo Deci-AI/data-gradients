@@ -25,8 +25,6 @@ class PreprocessorAbstract(ABC):
     def preprocess(self, images, labels) -> SegBatchData:
         pass
 
-    # TODO: Find a better way to pass route to logger
-
     @property
     def images_route(self):
         if self._container_mapper['first'] is not None:

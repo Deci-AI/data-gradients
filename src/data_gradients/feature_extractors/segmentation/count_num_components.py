@@ -52,6 +52,7 @@ class CountNumComponents(SegmentationFeatureExtractorAbstract):
 
     @staticmethod
     def _into_buckets(number_of_objects_per_image):
+        # TODO: Refactor this code
         if len(number_of_objects_per_image) < 10:
             return number_of_objects_per_image
         min_bin = min(list(number_of_objects_per_image.keys()))

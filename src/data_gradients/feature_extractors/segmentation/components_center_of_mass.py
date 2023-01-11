@@ -29,7 +29,7 @@ class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
     def _post_process(self, split):
         # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
         x, y = self._process_data(split)
-        # TODO: My thumb rules numbers
+
         n_bins = int(np.sqrt(len(x)) * 4)
         sigma = int(2 * (n_bins / 150))
 

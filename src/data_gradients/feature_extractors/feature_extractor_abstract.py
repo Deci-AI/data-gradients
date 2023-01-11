@@ -63,7 +63,6 @@ class FeatureExtractorAbstract(ABC):
             write_bar_plot(ax=ax,
                            results=results)
         elif results.plot == 'heat-map':
-            # TODO: Make better way of splitting axis in same graph
             write_heatmap_plot(ax=ax[int(results.split != 'train')],
                                results=results)
         else:
@@ -79,6 +78,6 @@ class FeatureExtractorAbstract(ABC):
         for key in [*hist['train'], *hist['val']]:
             for split in [*hist]:
                 if key not in list(hist[split].keys()):
-                    # TODO: Fix value for not being always a 0 but might be a empty list instead
+                    # TODO: Find a way to put default value according to original type ([], 0, {})
                     hist[split][key] = 0.
                 hist[split] = OrderedDict(sorted(hist[split].items()))

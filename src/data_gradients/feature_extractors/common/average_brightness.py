@@ -9,8 +9,6 @@ from data_gradients.utils.data_classes.extractor_results import Results
 
 
 class AverageBrightness(FeatureExtractorAbstract):
-    # TODO: Check correlation between mean & std of an image and its brightness.
-    #  Currently, ones == 1, zeros == 0, but N(0.5, 1)?
     def __init__(self):
         super().__init__()
         self._num_bins: int = 10
