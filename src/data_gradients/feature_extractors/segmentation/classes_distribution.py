@@ -15,11 +15,9 @@ class GetClassDistribution(SegmentationFeatureExtractorAbstract):
     def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
-                for u in data.labels[i][j].unique():
-                    u = int(u.item())
-                    if u not in self.ignore_labels:
-                        self._hist[data.split][u] += len(cls_contours)
-                        self._total_objects[data.split] += len(cls_contours)
+                if cls_contours:
+                    self._hist[data.split][cls_contours[0].class_id] += len(cls_contours)
+                    self._total_objects[data.split] += len(cls_contours)
 
     def _post_process(self, split: str):
         values, bins = self._process_data(split)

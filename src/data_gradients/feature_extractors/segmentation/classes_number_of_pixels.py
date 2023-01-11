@@ -21,13 +21,10 @@ class PixelsPerClass(SegmentationFeatureExtractorAbstract):
     def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
-            for j, cls_contours in enumerate(image_contours):
-                for u in data.labels[i][j].unique():
-                    u = int(u.item())
-                    if u not in self.ignore_labels:
-                        for contour in cls_contours:
-                            size = np.round(100 * contour.area / img_dim, 3)
-                            self._hist[data.split][u].append(size)
+            for cls_contours in image_contours:
+                for contour in cls_contours:
+                    size = np.round(100 * contour.area / img_dim, 3)
+                    self._hist[data.split][contour.class_id].append(size)
 
     def _post_process(self, split):
         values, bins = self._process_data(split)

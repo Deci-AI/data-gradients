@@ -14,7 +14,7 @@ class BatchData:
         split  - train / val
     """
     images: Tensor
-    labels: List
+    labels: Tensor
     split: str
 
 

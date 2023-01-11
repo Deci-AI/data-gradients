@@ -17,9 +17,8 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
     def _execute(self, data: BatchData):
         self._num_images[data.split] += len(data.images)
         self._num_labels[data.split] += len(data.labels)
-        # TODO: Fix how to get background image if not segmentation
-        for i, image_contours in enumerate(data.contours):
-            if len(image_contours) < 1:
+        for i, label in enumerate(data.labels):
+            if label.max() == 0:
                 self._num_bg_images[data.split] += 1
 
     def _post_process(self, split):

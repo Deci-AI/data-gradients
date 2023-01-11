@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
@@ -19,12 +20,11 @@ class WidthHeight(SegmentationFeatureExtractorAbstract):
 
     def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
-            for j, cls_contours in enumerate(image_contours):
+            for j, class_channel in enumerate(image_contours):
                 height, width = data.labels[i][j].shape
-                for c in cls_contours:
-                    # TODO: Add more logic to that, somehow
-                    self._width[data.split].append(c.w / width)
-                    self._height[data.split].append(c.h / height)
+                for contour in class_channel:
+                    self._width[data.split].append(contour.w / width)
+                    self._height[data.split].append(contour.h / height)
 
     def _post_process(self, split):
         x, y = self._process_data(split)

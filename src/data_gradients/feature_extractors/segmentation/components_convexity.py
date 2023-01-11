@@ -21,14 +21,11 @@ class ComponentsConvexity(SegmentationFeatureExtractorAbstract):
     def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
-                for u in data.labels[i][j].unique():
-                    u = int(u.item())
-                    if u not in self.ignore_labels:
-                        for c in cls_contours:
-                            convex_hull = contours.get_convex_hull(c)
-                            convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
-                            convexity_measure = (c.perimeter - convex_hull_perimeter) / c.perimeter
-                            self._hist[data.split][u].append(convexity_measure)
+                for contour in cls_contours:
+                    convex_hull = contours.get_convex_hull(contour)
+                    convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
+                    convexity_measure = (contour.perimeter - convex_hull_perimeter) / contour.perimeter
+                    self._hist[data.split][contour.class_id].append(convexity_measure)
 
     def _post_process(self, split):
         values, bins = self._process_data(split)

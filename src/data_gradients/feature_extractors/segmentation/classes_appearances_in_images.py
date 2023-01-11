@@ -1,3 +1,5 @@
+import torch
+
 from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
@@ -17,16 +19,11 @@ class AppearancesInImages(SegmentationFeatureExtractorAbstract):
         self._number_of_images = {'train': 0, 'val': 0}
 
     def _execute(self, data: SegBatchData):
-        try:
-            self._number_of_images[data.split] += len(data.labels)
-            for label in data.labels:
-                for u in label.unique():
-                    u = int(u.item())
-                    if u not in self.ignore_labels:
-                        self._hist[data.split][u] += 1
-
-        except Exception as e:
-            print(self.__class__.__name__, e)
+        self._number_of_images[data.split] += len(data.labels)
+        for i, label in enumerate(data.labels):
+            for j, class_channel in enumerate(label):
+                if torch.max(class_channel) > 0:
+                    self._hist[data.split][j] += 1
 
     def _post_process(self, split):
         values, bins = self._process_data(split)

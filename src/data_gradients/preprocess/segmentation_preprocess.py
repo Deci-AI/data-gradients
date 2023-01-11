@@ -12,8 +12,8 @@ class SegmentationPreprocessor(PreprocessorAbstract):
     """
     Segmentation preprocessor class
     """
-    def __init__(self, num_classes, ignore_labels, images_extractor: Callable, labels_extractor: Callable,
-                 num_image_channels: int, threshold_value):
+    def __init__(self, num_classes, ignore_labels, images_extractor, labels_extractor,
+                 num_image_channels, threshold_value):
         """
         Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
         :param num_classes: number of valid classes
@@ -21,14 +21,15 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         """
         super().__init__(num_classes, images_extractor, labels_extractor, num_image_channels)
         self._onehot: bool = False
-        # TODO: Check if default value of [0] is not harming anything
-        self._ignore_labels: List[int] = ignore_labels if ignore_labels is not None else [0]
+
+        self._ignore_labels: List[int] = ignore_labels
         self.threshold_value = threshold_value
-        self.soft_labels = False
+        self._soft_labels = False
+        self._binary = False
 
     @property
     def ignore_labels(self) -> List[int]:
-        return self._ignore_labels
+        return self._ignore_labels if self._ignore_labels is not None else []
 
     def _type_validate(self, objs):
         """
@@ -74,15 +75,17 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         if labels.dim() == 3:
             # Probably (B, W, H)
             labels = labels.unsqueeze(1)
+            return labels
 
         if labels.dim() != 4:
             raise ValueError(
                 f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
 
-        if labels.shape[1] != 1 and labels.shape[1] != (self.number_of_classes + 1):
+        valid = [self.number_of_classes + len(self.ignore_labels), 1]
+        if labels.shape[1] not in valid and labels.shape[-1] not in valid:
             raise ValueError(
-                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes"
-                f" ({self.number_of_classes}). Got: {labels.shape[1]}")
+                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes + len(ignore_labels)"
+                f" ({self.number_of_classes + len(self.ignore_labels)}). Got: {labels.shape[1]}")
 
         return labels
 
@@ -97,17 +100,23 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         if self._check_all_integers(unique_values):
             pass
-        elif 0 <= min(unique_values) and max(unique_values) < 1 and self._check_all_integers(unique_values * 255):
+        elif 0 <= min(unique_values) and max(unique_values) <= 1 and self._check_all_integers(unique_values * 255):
             labels = labels * 255
         else:
-            print(f'\nFound Soft labels! There are {len(unique_values)} unique values! max is: {max(unique_values)}, min is {min(unique_values)}')
-            print(f'Clamping & Thresholding to [0, 1] with threshold value {self.threshold_value}')
-            self.soft_labels = True
-            labels = self._clamp_and_thresh(labels)
+            print(f'\nFound Soft labels! There are {len(unique_values)} unique values! max is: {max(unique_values)},'
+                  f' min is {min(unique_values)}')
+            print(f'Thresholding to [0, 1] with threshold value {self.threshold_value}')
+            if self.number_of_classes > 1:
+                raise NotImplementedError('Not supporting soft-labeling for number of classes > 1! '
+                                          f'Got {self.number_of_classes} # classes,'
+                                          f' while ignore labels are {self.ignore_labels}.')
+            self._soft_labels = True
+            labels = self._thresh(labels)
         return labels
 
-    def _clamp_and_thresh(self, labels: Tensor) -> Tensor:
-        labels = torch.where(labels > self.threshold_value, torch.tensor(1), torch.tensor(0))
+    def _thresh(self, labels: Tensor) -> Tensor:
+        # Support only for binary segmentation
+        labels = torch.where(labels > self.threshold_value, torch.ones_like(labels), torch.zeros_like(labels))
         return labels
 
     def _channels_first_validate_images(self, images: Tensor):
@@ -127,30 +136,12 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :return: labels: Tensor [BS, N, W, H]
         """
         # B, W, H, C-> B, C, W, H
-        if labels.shape[1] != self.number_of_classes and labels.shape[1] > 1:
+        if labels.shape[1] not in [self.number_of_classes + len(self.ignore_labels), 1]:
             labels = self.channels_last_to_first(labels)
         return labels
 
-    def _pixel_values_validate(self, values: Tensor):
-        """
-        Inner-use validation method. Unique values of pixels in the labels tensor.
-        Will be deprecated!
-        :param values: Tensor of unique pixel values of labels
-        """
-        if not self._onehot:
-            if len(values) == self.number_of_classes + 1:
-                # Regular
-                pass
-            elif len(values) > self.number_of_classes + 1:
-                pass
-                # print(f'Got {len(values)} > {self.number_of_classes + 1} which is number of classes + 1')
-        else:
-            if len(values) != 2:
-                print(f'Weird, OneHot should have two values only! Got {len(values)} != 2 ({values})')
-
     @staticmethod
     def _nan_validate(objects):
-        # TODO: Keep that nan indices in mind
         nans = torch.isnan(objects)
         if nans.any():
             nan_indices = set(nans.nonzero()[:, 0].tolist())
@@ -171,41 +162,21 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         images = self._nan_validate(images)
         labels = self._nan_validate(labels)
 
-        images = self._channels_first_validate_images(images)
-        labels = self._channels_first_validate_labels(labels)
-
         images = self._dim_validate_images(images)
         labels = self._dim_validate_labels(labels)
 
-        if self.soft_labels:
-            labels = self._clamp_and_thresh(labels)
+        images = self._channels_first_validate_images(images)
+        labels = self._channels_first_validate_labels(labels)
+
+        if self._soft_labels:
+            labels = self._thresh(labels)
 
         labels = self._normalize_validate(labels)
 
-        self._onehot = labels.shape[1] == (self.number_of_classes + 1) and self.number_of_classes > 1
-        self._pixel_values_validate(torch.unique(labels))
+        self._binary = self.number_of_classes == 1
+        self._onehot = labels.shape[1] == (self.number_of_classes + len(self.ignore_labels)) and not self._binary
 
         return images, labels
-
-    def _remove_ignore_labels(self, labels):
-        """
-        For user-given ignore labels, put zeros in the specific ignore labels representation, either a whole channel in
-        the one-hot case or only pixels in the one channel annotation case
-        :param labels: Tensor with unique values of all classes, including ignored ones.
-        :return: Tensor with no representation of the ignored classes (all are zeros).
-        """
-        if 0 not in self._ignore_labels:
-            return labels
-
-        for ignore_label in self.ignore_labels:
-            if self._onehot:
-                # TODO: Check it out (Right channel (ignore level channel) should be ignore label values
-                # Turn specific channel into zeros
-                labels[:, ignore_label, ...] = 0
-            else:
-                # Get all labels in the only channel that are ignored and turn them into zeros
-                labels = torch.where((labels > 0) & (labels == ignore_label), torch.zeros_like(labels), labels)
-        return labels
 
     def preprocess(self, images: Tensor, labels: Tensor) -> SegBatchData:
         """
@@ -218,15 +189,9 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :param labels: Tensor
         :return: SegBatchData
         """
-        labels = self._remove_ignore_labels(labels)
+        if not self._binary:
+            labels = self._to_one_hot(labels)
 
-        labels = [squeeze_by_class.squeeze_by_classes(label,
-                                                      is_one_hot=self._onehot,
-                                                      ignore_labels=self.ignore_labels) for label in labels]
-
-        # TODO: Debug convexity things
-        # contours.debug_convexity_things(labels, images)
-        # exit(0)
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
         sbd = SegBatchData(images=images,
@@ -235,3 +200,29 @@ class SegmentationPreprocessor(PreprocessorAbstract):
                            split="")
 
         return sbd
+
+    def _to_one_hot(self, labels: torch.Tensor) -> torch.Tensor:
+        """
+        Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
+        param label: Tensor
+        param is_one_hot: Determine if labels are one-hot shaped
+        :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
+        """
+        masks = []
+        labels = labels.to(torch.int64)
+
+        for label in labels:
+            label = torch.nn.functional.one_hot(label, self.number_of_classes + len(self.ignore_labels))
+            masks.append(label)
+        labels = torch.concat(masks, dim=0).permute(0, -1, 1, 2)
+
+        for ignore_label in self.ignore_labels:
+            labels[:, ignore_label, ...] = torch.zeros_like(labels[:, ignore_label, ...])
+            # labels = torch.where((labels == ignore_label) & (labels > 0),
+            #                      torch.tensor(0, dtype=torch.tensor(ignore_label).dtype),
+            #                      labels)
+            # labels = torch.cat([labels[:, :ignore_label], labels[:, ignore_label + 1:]], dim=1)
+
+        return labels
+
+

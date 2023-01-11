@@ -21,12 +21,9 @@ class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
     def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = (data.labels[i].shape[1] * data.labels[i].shape[2])
-            for j, cls_contours in enumerate(image_contours):
-                for u in data.labels[i][j].unique():
-                    u = int(u.item())
-                    if u not in self.ignore_labels:
-                        for c in cls_contours:
-                            self._hist[data.split][u].append(100 * int(c.area) / img_dim)
+            for class_channel in image_contours:
+                for contour in class_channel:
+                    self._hist[data.split][contour.class_id].append(100 * int(contour.area) / img_dim)
 
     def _post_process(self, split):
         values, bins = self._process_data(split)

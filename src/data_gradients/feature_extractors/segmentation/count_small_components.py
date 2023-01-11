@@ -1,37 +1,42 @@
-from typing import List
-import numpy as np
-
-import data_gradients.preprocess.contours
 from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.utils.data_classes.extractor_results import Results
 
 
-class SegmentationCountSmallComponents(SegmentationFeatureExtractorAbstract):
+class CountSmallComponents(SegmentationFeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
-    TODO: NOT IMPLEMENTED WELL YET
     """
-    def __init__(self, percent_of_an_image):
+    def __init__(self, minimum_percent_of_an_image):
         super().__init__()
-        # TODO NUMBERS DOES NOT WORK
-        min_pixels: int = int(512 * 512 / (percent_of_an_image * 100))
-        self.bins = np.array(range(0, min_pixels, int(min_pixels / 10)))
-        self._hist: List[int] = [0] * 11
-        self.label = ['<0.01', '0.02', '0.03', '0.04', '0.05', '0.06', '0.07', '0.08', '0.09', '0.1', '>0.1']
+        self._min_size: float = minimum_percent_of_an_image
+        self._hist = {'train': {f'<{self._min_size}': 0}, 'val': {f'<{self._min_size}': 0}}
+        self._total_objects = {'train': 0, 'val': 0}
 
     def _execute(self, data: SegBatchData):
-        for i, onehot_contours in enumerate(data.batch_onehot_contours):
-            for cls_contours in onehot_contours:
-                for c in cls_contours:
-                    _, _, contour_area = data_gradients.preprocess.contours.get_contour_moment(c)
-                    self._hist[np.digitize(contour_area, self.bins) - 1] += 1
+        for i, image_contours in enumerate(data.contours):
+            _, labels_h, labels_w = data.labels[i].shape
+            self._total_objects[data.split] += sum([len(cls_contours) for cls_contours in image_contours])
+            for class_contours in image_contours:
+                for contour in class_contours:
+                    self._hist[data.split][f'<{self._min_size}'] += (1 if contour.area < labels_w * labels_h * self._min_size else 0)
 
-    def _post_process(self):
-        # TODO: Make it work
-        hist = list(np.array(self._hist) / sum(self._hist))
-        create_bar_plot_old(ax, hist, self.label,
-                            x_label="Object Size [%]", y_label="# Objects", ticks_rotation=0,
-                            title="Number of small objects", split=split, color=self.colors[split])
+    def _post_process(self, split):
+        values, bins = self._process_data(split)
+        results = Results(bins=bins,
+                          values=values,
+                          plot='bar-plot',
+                          split=split,
+                          color=self.colors[split],
+                          title=f"Components smaller then {self._min_size}% of image",
+                          x_label="% Components",
+                          y_label="",
+                          y_ticks=True,
+                          ax_grid=True
+                          )
+        return results
 
-        ax.grid(visible=True, axis='y')
-        return dict(zip(self.label, hist))
+    def _process_data(self, split):
+        values = self.normalize(self._hist[split].values(), self._total_objects[split])
+        bins = list(self._hist[split].keys())
+        return values, bins
