@@ -16,27 +16,31 @@ class TensorBoardLogger(ResultsLogger):
     def visualize(self):
         if self.samples_to_visualize == 0:
             return
-        n = 0
         try:
-            while n < self.samples_to_visualize:
-
-                # TODO: Still WIP
+            all_images, all_labels = next(self._train_iter)
+            while len(all_images) < self.samples_to_visualize:
                 images, labels = next(self._train_iter)
-                if len(images) > self.samples_to_visualize:
-                    images = images[:self.samples_to_visualize]
-                    labels = labels[:self.samples_to_visualize]
+                all_images = torch.concat([all_images, images], dim=0)
+                all_labels = torch.concat([all_labels, labels], dim=0)
 
-                labels *= (1. / max(labels.unique()))
-                labels = labels.repeat(1, 3, 1, 1)
+            if len(all_images) > self.samples_to_visualize:
+                all_images = all_images[:self.samples_to_visualize, ...]
+                all_labels = all_labels[:self.samples_to_visualize, ...]
 
-                img_grid = torchvision.utils.make_grid(torch.cat([images, labels]), nrow=len(images))
+            all_labels *= (1. / max(all_labels.unique()))
+            all_labels = all_labels.repeat(1, 3, 1, 1)
 
-                n += len(images)
+            if all_images.shape != all_labels.shape:
+                resize = torchvision.transforms.Resize(all_labels.shape[-2:])
+                all_images = resize(all_images)
 
-                # write to tensorboard
-                self.writer.add_image(f'{n}_images_labels', img_grid)
-        except Exception as e:
-            print(f'\nCould not visualize images on tensorboard\n{e}')
+            img_grid = torchvision.utils.make_grid(torch.cat([all_images, all_labels]), nrow=len(all_images))
+            self.writer.add_image(f'{len(all_images)}_images_labels', img_grid)
+
+        except RuntimeError as e:
+            print(f'\nCould not visualize images on tensorboard\n'
+                  f'Images shape: {all_images.shape} , Labels shape: {all_labels.shape}\n'
+                  f'{e}')
 
     def log(self, title, data):
         title += "/fig"
