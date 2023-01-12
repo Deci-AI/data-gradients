@@ -49,7 +49,7 @@ class FeatureExtractorAbstract(ABC):
             self.write_results(results, ax)
 
         self.fig.tight_layout()
-        title_name = logger.get_title_name(self.__class__.__name__)
+        title_name = logger.get_title_name(self.__class__.__name__) + "/fig"
         logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod

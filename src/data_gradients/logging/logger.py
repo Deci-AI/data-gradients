@@ -34,11 +34,10 @@ class Logger:
         return self._json_logger.logdir
 
     @staticmethod
-    def get_title_name(class_name):
+    def get_title_name(class_name) -> str:
         title_name = class_name[0]
         for char in class_name[1:]:
             if char.isupper():
                 title_name += " "
             title_name += char
-        title_name += "/fig"
         return title_name
