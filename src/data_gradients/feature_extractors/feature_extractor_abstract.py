@@ -76,8 +76,10 @@ class FeatureExtractorAbstract(ABC):
     @staticmethod
     def merge_dict_splits(hist: Dict):
         for key in [*hist['train'], *hist['val']]:
-            for split in [*hist]:
-                if key not in list(hist[split].keys()):
-                    # TODO: Find a way to put default value according to original type ([], 0, {})
-                    hist[split][key] = 0.
-                hist[split] = OrderedDict(sorted(hist[split].items()))
+            if key not in hist['train']:
+                hist['train'][key] = type(hist['val'][key])()
+            if key not in hist['val']:
+                hist['val'][key] = type(hist['train'][key])()
+
+        hist['train'] = OrderedDict(sorted(hist['train'].items()))
+        hist['val'] = OrderedDict(sorted(hist['val'].items()))
