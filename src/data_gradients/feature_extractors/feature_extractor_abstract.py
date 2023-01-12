@@ -49,7 +49,8 @@ class FeatureExtractorAbstract(ABC):
             self.write_results(results, ax)
 
         self.fig.tight_layout()
-        logger.log(title_name=self.__class__.__name__, tb_data=self.fig, json_data=self.json_object)
+        title_name = logger.get_title_name(self.__class__.__name__)
+        logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod
     def _post_process(self, split: str) -> Results:
@@ -111,7 +112,7 @@ class MultiClassProcess(FeatureExtractorAbstract):
                 self.write_results(results[split][key], ax)
 
             self.fig.tight_layout()
-            title_name = f'{self.__class__.__name__}/{key}_{split}'
+            title_name = f'{logger.get_title_name(self.__class__.__name__)}/{key}_{split}/fig'
             logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod

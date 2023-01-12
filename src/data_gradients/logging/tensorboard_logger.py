@@ -35,7 +35,8 @@ class TensorBoardLogger(ResultsLogger):
                 all_images = resize(all_images)
 
             img_grid = torchvision.utils.make_grid(torch.cat([all_images, all_labels]), nrow=len(all_images))
-            self.writer.add_image(f'{len(all_images)}_images_labels', img_grid)
+            title = f'Data Visualization/{len(all_images)} Images & Labels'
+            self.writer.add_image(title, img_grid)
 
         except RuntimeError as e:
             print(f'\nCould not visualize images on tensorboard\n'
@@ -43,7 +44,7 @@ class TensorBoardLogger(ResultsLogger):
                   f'{e}')
 
     def log(self, title, data):
-        title += "/fig"
+        # title += "/fig"
         self.writer.add_figure(title, data)
 
     def close(self):

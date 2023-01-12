@@ -60,14 +60,14 @@ def write_heatmap_plot(ax, results: HeatMapResults):
     ax.set_title(results.split.capitalize() + " - " + results.title)
 
 
-def class_id_to_name(id_to_name, hist: Dict):
-    if id_to_name is None:
+def class_id_to_name(mapping, hist: Dict):
+    if mapping is None:
         return hist
 
     new_hist = {}
     for key in list(hist.keys()):
         try:
-            new_hist.update({id_to_name[key]: hist[key]})
+            new_hist.update({mapping[key]: hist[key]})
         except KeyError as e:
             new_hist.update({key: hist[key]})
     return new_hist
