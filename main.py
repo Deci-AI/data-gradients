@@ -31,14 +31,12 @@ if __name__ == "__main__":
                              transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
 
     # Create torch DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=1, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=8)
+    val_loader = DataLoader(val_dataset, batch_size=8)
 
     num_classes = BDDDataset.NUM_CLASSES
     ignore_labels = BDDDataset.IGNORE_LABELS
     class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
-
-    from internal_use_data_loaders.get_torch_loaders import *
 
     da = SegmentationAnalysisManager(train_data=train_loader,
                                      val_data=val_loader,
@@ -46,12 +44,12 @@ if __name__ == "__main__":
                                      # Optionals
                                      ignore_labels=ignore_labels,
                                      id_to_name=class_id_to_name,
-                                     samples_to_visualize=8,
+                                     samples_to_visualize=6,
                                      images_extractor=None,
                                      labels_extractor=None,
                                      threshold_soft_labels=0.5,
                                      # batches_early_stop is a temporary optional argument for debugging purpose
-                                     batches_early_stop=100,
+                                     batches_early_stop=20,
                                      # set short run parameter to True if you want to run only on part [%] of your data
                                      short_run=False)
 
