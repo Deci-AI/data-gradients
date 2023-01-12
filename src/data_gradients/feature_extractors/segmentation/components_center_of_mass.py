@@ -1,5 +1,6 @@
 import numpy as np
 
+from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import MultiClassProcess
 from data_gradients.utils.data_classes.extractor_results import HeatMapResults
@@ -27,33 +28,34 @@ class ComponentsCenterOfMass(MultiClassProcess):
                     self._hist[data.split][contour.class_id]['y'].append(contour.center[1])
 
     def _post_process(self, split):
-        # TODO: Divide each plot for a class. Need to make x, y as a dictionaries (every class..)
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
         x, y = self._process_data(split)
 
-        n_bins = int(np.sqrt(len(x)) * 4)
-        sigma = int(2 * (n_bins / 150))
+        results = dict.fromkeys(self._hist[split])
+        for key in self._hist[split]:
+            n_bins = int(np.sqrt(len(x[key])) * 4)
+            sigma = int(2 * (n_bins / 150))
+            results[key] = (HeatMapResults(x=x[key],
+                                           y=y[key],
+                                           n_bins=n_bins,
+                                           sigma=sigma,
+                                           split=split,
+                                           plot='heat-map',
+                                           title=f'Center of mass average locations',
+                                           x_label='X axis',
+                                           y_label='Y axis',
+                                           keys=['X', 'Y']
+                                           ))
 
-        results = HeatMapResults(x=x,
-                                 y=y,
-                                 n_bins=n_bins,
-                                 sigma=sigma,
-                                 split=split,
-                                 plot='heat-map',
-                                 title=f'Center of mass average locations',
-                                 x_label='X axis',
-                                 y_label='Y axis'
-                                 )
+        # quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
+        # results.json_values = quantized_heat_map.tolist()
 
-        quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-        results.json_values = quantized_heat_map.tolist()
-        results.keys = ["X", "Y"]
         return results
 
     def _process_data(self, split):
-        x, y = [], []
-        for val in self._hist[split].values():
-            x.extend(val['x'])
-            y.extend(val['y'])
+        # self._hist = self.merge_dict_splits(self._hist)
+        x, y = {}, {}
+        for key, val in self._hist[split].items():
+            x[key] = val['x']
+            y[key] = val['y']
         return x, y
-
-

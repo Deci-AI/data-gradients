@@ -97,14 +97,29 @@ class MultiClassProcess(FeatureExtractorAbstract):
         super().__init__()
 
     def process(self, logger: Logger, id_to_name):
-        print('Multi classing ')
+        self.id_to_name = id_to_name
+
+        results = dict.fromkeys(['train', 'val'])
+        for split in results:
+            results[split] = self._post_process(split)
+
+        for key in results['train'].keys():
+
+            self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
+
+            for split in ['train', 'val']:
+                self.write_results(results[split][key], ax)
+
+            self.fig.tight_layout()
+            title_name = f'{self.__class__.__name__}/{key}_{split}'
+            logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod
     def _execute(self, data: BatchData):
         raise NotImplementedError
 
     @abstractmethod
-    def _post_process(self, split: str) -> Results:
+    def _post_process(self, split: str) -> Dict[str, HeatMapResults]:
         raise NotImplementedError
 
     @abstractmethod
