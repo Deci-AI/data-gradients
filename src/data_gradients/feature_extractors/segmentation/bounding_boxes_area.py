@@ -2,11 +2,11 @@ import numpy as np
 
 from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from data_gradients.utils.data_classes.extractor_results import Results
 
 
-class ComponentsSizeDistribution(SegmentationFeatureExtractorAbstract):
+class ComponentsSizeDistribution(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     Get all Bounding Boxes areas and plot them as a percentage of the whole image.

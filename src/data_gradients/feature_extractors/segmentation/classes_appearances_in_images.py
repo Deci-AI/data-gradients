@@ -2,11 +2,11 @@ import torch
 
 from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from data_gradients.utils.data_classes.extractor_results import Results
 
 
-class AppearancesInImages(SegmentationFeatureExtractorAbstract):
+class AppearancesInImages(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     For each class, calculate percentage of images it appears in out of all images in set.

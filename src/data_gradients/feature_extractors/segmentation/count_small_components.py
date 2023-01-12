@@ -1,9 +1,9 @@
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from data_gradients.utils.data_classes.extractor_results import Results
 
 
-class CountSmallComponents(SegmentationFeatureExtractorAbstract):
+class CountSmallComponents(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     """

@@ -1,11 +1,11 @@
 import numpy as np
 
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import MultiClassProcess
 from data_gradients.utils.data_classes.extractor_results import HeatMapResults
 
 
-class ComponentsCenterOfMass(SegmentationFeatureExtractorAbstract):
+class ComponentsCenterOfMass(MultiClassProcess):
     """
     Semantic Segmentation task feature extractor -
     Get all X, Y positions of center of mass of every object in every image for every class.

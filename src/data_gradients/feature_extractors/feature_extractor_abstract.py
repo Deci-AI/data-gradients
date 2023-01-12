@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections import OrderedDict
 from typing import Tuple, Dict, Optional, List, Union
 
+import numpy as np
 from matplotlib import pyplot as plt
 
 from data_gradients.logging.logger import Logger
@@ -52,11 +53,11 @@ class FeatureExtractorAbstract(ABC):
 
     @abstractmethod
     def _post_process(self, split: str) -> Results:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _process_data(self, split: str) -> Tuple[List, List]:
-        pass
+        raise NotImplementedError
 
     def write_results(self, results: Union[Results, HeatMapResults], ax):
         if results.plot == 'bar-plot':
@@ -83,3 +84,29 @@ class FeatureExtractorAbstract(ABC):
 
         hist['train'] = OrderedDict(sorted(hist['train'].items()))
         hist['val'] = OrderedDict(sorted(hist['val'].items()))
+
+    @staticmethod
+    def normalize(values, total):
+        if total == 0:
+            total = 1
+        return [np.round(((100 * value) / total), 3) for value in values]
+
+
+class MultiClassProcess(FeatureExtractorAbstract):
+    def __init__(self):
+        super().__init__()
+
+    def process(self, logger: Logger, id_to_name):
+        print('Multi classing ')
+
+    @abstractmethod
+    def _execute(self, data: BatchData):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _post_process(self, split: str) -> Results:
+        raise NotImplementedError
+
+    @abstractmethod
+    def _process_data(self, split: str) -> Tuple[List, List]:
+        raise NotImplementedError

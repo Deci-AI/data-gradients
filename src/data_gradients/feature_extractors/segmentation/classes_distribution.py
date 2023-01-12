@@ -1,10 +1,10 @@
 from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.segmentation.segmentation_abstract import SegmentationFeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
 from data_gradients.utils.data_classes.extractor_results import Results
 
 
-class GetClassDistribution(SegmentationFeatureExtractorAbstract):
+class GetClassDistribution(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
