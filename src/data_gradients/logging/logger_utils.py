@@ -45,12 +45,13 @@ def write_heatmap_plot(ax, results: HeatMapResults):
     if results.n_bins == 0:
         results.n_bins = 1
 
-    heatmap, xedges, yedges = np.histogram2d(results.x, results.y, bins=results.n_bins)
+    heatmap, xedges, yedges = np.histogram2d(results.x, results.y, bins=(results.n_bins, results.n_bins),
+                                             range=[[0, 1], [0, 1]], normed=True)
 
     if results.use_gaussian_filter:
         heatmap = gaussian_filter(heatmap, sigma=results.sigma)
     if results.use_extent:
-        extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+        extent = [0, 1, 0, 1]
         ax.imshow(heatmap.T, extent=extent, origin='lower', aspect='auto', cmap=cm.jet)
     else:
         ax.imshow(heatmap.T, origin='lower', aspect='auto', cmap=cm.jet)
