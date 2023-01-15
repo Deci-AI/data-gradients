@@ -22,10 +22,11 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
     def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
+            label_shape = data.labels[0][0].shape
             for j, cls_contours in enumerate(image_contours):
                 for contour in cls_contours:
-                    self._hist[data.split][contour.class_id]['x'].append(contour.center[0])
-                    self._hist[data.split][contour.class_id]['y'].append(contour.center[1])
+                    self._hist[data.split][contour.class_id]['x'].append(round(contour.center[0] / label_shape[1], 2))
+                    self._hist[data.split][contour.class_id]['y'].append(round(contour.center[1] / label_shape[0], 2))
 
     def _post_process(self, split):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
@@ -33,7 +34,7 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
         results = dict.fromkeys(self._hist[split])
         for key in self._hist[split]:
-            n_bins = int(np.sqrt(len(x[key])) * 4)
+            n_bins = min(max(int(np.sqrt(len([key])) * 4), 20), 120)
             sigma = int(2 * (n_bins / 150))
             results[key] = (HeatMapResults(x=x[key],
                                            y=y[key],
