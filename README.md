@@ -153,20 +153,14 @@ Both options are good, but it is more important for us to see what the model wil
 
 
 ### 1. Install data-gradients
+
 ```bash
-pip install data_gradients-0.0.0-py3-none-any.whl
+pip install data_gradients-X.Y.Z-py3-none-any.whl
 ```
-### 2. Connect dataset with Python-Iterables objects
+### 2. Install requirements
 
-```python
-from torchvision import datasets
-from torch.utils.data import DataLoader
-
-train_dataset = datasets.SBDataset(root="data/sbd",
-                                   image_set="train",
-                                   mode="segmentation")
-train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-
+```bash
+pip install -r requirements.txt 
 ```
 ### 3. Run analysis manager
 
@@ -178,22 +172,18 @@ from src import SegmentationAnalysisManager
 from data.bdd_dataset import BDDDataset
 
 # Create torch DataSet
-train_dataset = BDDDataset(data_folder="data/bdd_example", split='train', transform=Compose([ToTensor(), CenterCrop(512)]))
-val_dataset = BDDDataset(data_folder="data/bdd_example", split='val', transform=Compose([ToTensor(), CenterCrop(512)]))
+train_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='train', transform=Compose([ToTensor()]))
+val_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='val', transform=Compose([ToTensor()]))
 
 # Create torch DataLoader
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=8, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=8)
+val_loader = DataLoader(val_dataset, batch_size=8)
 
-# id_to_name, samples_to_visualize are OPTIONAL
 da = SegmentationAnalysisManager(train_data=train_loader,
                                  val_data=val_loader,
-                                 num_classes=BDDDataset.NUM_CLASSES,
-                                 ignore_labels=BDDDataset.IGNORE_LABELS,
-                                 id_to_name=BDDDataset.CLASS_ID_TO_NAMES,
-                                 samples_to_visualize=5)
-da.run()
+                                 num_classes=BDDDataset.NUM_CLASSES)
 
+da.run()
 
 
 ```
