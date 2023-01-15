@@ -44,13 +44,11 @@ if __name__ == "__main__":
                                      # Optionals
                                      ignore_labels=ignore_labels,
                                      id_to_name=class_id_to_name,
-                                     samples_to_visualize=6,
+                                     samples_to_visualize=3,
                                      images_extractor=None,
                                      labels_extractor=None,
                                      threshold_soft_labels=0.5,
-                                     # batches_early_stop is a temporary optional argument for debugging purpose
                                      batches_early_stop=20,
-                                     # set short run parameter to True if you want to run only on part [%] of your data
                                      short_run=False)
 
     da.run()
