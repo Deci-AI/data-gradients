@@ -1,8 +1,7 @@
 from typing import Dict
 
 import numpy as np
-from matplotlib import pyplot as plt, cm
-from scipy.ndimage import gaussian_filter
+from matplotlib import pyplot as plt
 
 from data_gradients.utils.data_classes.extractor_results import HeatMapResults, Results
 
@@ -41,20 +40,21 @@ def write_bar_plot(ax, results: Results):
     ax.legend()
 
 
-def write_heatmap_plot(ax, results: HeatMapResults):
+def write_heatmap_plot(ax, results: HeatMapResults, fig=None):
     if results.n_bins == 0:
-        results.n_bins = 1
+        # Set to default
+        results.n_bins = 10
 
-    heatmap, xedges, yedges = np.histogram2d(results.x, results.y, bins=(results.n_bins, results.n_bins),
-                                             range=[[0, 1], [0, 1]], normed=True)
+    hh = ax.hist2d(x=results.x,
+                   y=results.y,
+                   bins=(results.n_bins, results.n_bins),
+                   range=[[0, 1], [0, 1]],
+                   cmap='Reds',
+                   vmin=0,
+                   vmax=1)
 
-    if results.use_gaussian_filter:
-        heatmap = gaussian_filter(heatmap, sigma=results.sigma)
-    if results.use_extent:
-        extent = [0, 1, 0, 1]
-        ax.imshow(heatmap.T, extent=extent, origin='lower', aspect='auto', cmap=cm.jet)
-    else:
-        ax.imshow(heatmap.T, origin='lower', aspect='auto', cmap=cm.jet)
+    if fig is not None:
+        fig.colorbar(hh[3], ax=ax)
 
     ax.set_xlabel(results.x_label)
     ax.set_ylabel(results.y_label)

@@ -34,19 +34,16 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
         results = dict.fromkeys(self._hist[split])
         for key in self._hist[split]:
-            n_bins = min(max(int(np.sqrt(len([key])) * 4), 20), 120)
-            sigma = int(2 * (n_bins / 150))
+            n_bins = max(int(np.sqrt(len([key])) * 4), 20)
             results[key] = (HeatMapResults(x=x[key],
                                            y=y[key],
                                            n_bins=n_bins,
-                                           sigma=sigma,
                                            split=split,
                                            plot='heat-map',
                                            title=f'Center of mass average locations',
                                            x_label='X axis',
                                            y_label='Y axis',
-                                           keys=['X', 'Y']
-                                           ))
+                                           keys=['X', 'Y']))
 
         # quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
         # results.json_values = quantized_heat_map.tolist()

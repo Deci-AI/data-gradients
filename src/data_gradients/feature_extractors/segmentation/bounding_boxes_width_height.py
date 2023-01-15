@@ -31,13 +31,12 @@ class WidthHeight(FeatureExtractorAbstract):
         results = HeatMapResults(x=x,
                                  y=y,
                                  n_bins=16,
-                                 sigma=8,
                                  split=split,
                                  plot='heat-map',
                                  title=f'Bounding Boxes Width / Height',
                                  x_label='Width [% of image]',
-                                 y_label='Height [% of image]'
-                                 )
+                                 y_label='Height [% of image]',
+                                 keys=['Width', 'Height'])
 
         quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
         results.json_values = quantized_heat_map.tolist()

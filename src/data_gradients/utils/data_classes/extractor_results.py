@@ -30,7 +30,3 @@ class HeatMapResults(Results):
     keys: List = field(default_factory=list)
 
     n_bins: int = 50
-    sigma: int = 2
-
-    use_extent: bool = True
-    use_gaussian_filter: bool = True
