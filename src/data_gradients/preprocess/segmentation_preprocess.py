@@ -189,7 +189,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :param labels: Tensor
         :return: SegBatchData
         """
-        if not self._binary:
+        if not self._binary and not self._onehot:
             labels = self._to_one_hot(labels)
 
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
