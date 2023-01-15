@@ -43,7 +43,9 @@ class ComponentsCenterOfMass(MultiClassProcess):
                                            title=f'Center of mass average locations',
                                            x_label='X axis',
                                            y_label='Y axis',
-                                           keys=['X', 'Y']))
+                                           keys=['X', 'Y'],
+                                           range=[[0, 1], [0, 1]],
+                                           invert=True))
 
         # quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
         # results.json_values = quantized_heat_map.tolist()

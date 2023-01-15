@@ -45,13 +45,20 @@ def write_heatmap_plot(ax, results: HeatMapResults, fig=None):
         # Set to default
         results.n_bins = 10
 
+    if not results.range:
+        results.range = [[0, min(max(results.x) + 0.1, 1)], [0, min(max(results.y) + 0.1, 1)]]
+    if results.invert:
+        # Bug occurs only in center of mass feature extractor!
+        # BUG - All results are inverted
+        results.x = [abs(x-1) for x in results.x]
+        results.y = [abs(y-1) for y in results.y]
+
     hh = ax.hist2d(x=results.x,
                    y=results.y,
                    bins=(results.n_bins, results.n_bins),
-                   range=[[0, 1], [0, 1]],
+                   range=results.range,
                    cmap='Reds',
-                   vmin=0,
-                   vmax=1)
+                   vmin=0)
 
     if fig is not None:
         fig.colorbar(hh[3], ax=ax)

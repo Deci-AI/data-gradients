@@ -30,3 +30,5 @@ class HeatMapResults(Results):
     keys: List = field(default_factory=list)
 
     n_bins: int = 50
+    range: List = field(default_factory=list)
+    invert: bool = False
