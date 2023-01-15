@@ -189,8 +189,13 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :param labels: Tensor
         :return: SegBatchData
         """
+        # To One Hot
         if not self._binary and not self._onehot:
             labels = self._to_one_hot(labels)
+
+        # Remove ignore label
+        for ignore_label in self.ignore_labels:
+            labels[:, ignore_label, ...] = torch.zeros_like(labels[:, ignore_label, ...])
 
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
@@ -215,13 +220,6 @@ class SegmentationPreprocessor(PreprocessorAbstract):
             label = torch.nn.functional.one_hot(label, self.number_of_classes + len(self.ignore_labels))
             masks.append(label)
         labels = torch.concat(masks, dim=0).permute(0, -1, 1, 2)
-
-        for ignore_label in self.ignore_labels:
-            labels[:, ignore_label, ...] = torch.zeros_like(labels[:, ignore_label, ...])
-            # labels = torch.where((labels == ignore_label) & (labels > 0),
-            #                      torch.tensor(0, dtype=torch.tensor(ignore_label).dtype),
-            #                      labels)
-            # labels = torch.cat([labels[:, :ignore_label], labels[:, ignore_label + 1:]], dim=1)
 
         return labels
 
