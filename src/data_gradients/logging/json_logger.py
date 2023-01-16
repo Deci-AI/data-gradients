@@ -9,7 +9,7 @@ class JsonLogger(ResultsLogger):
     def __init__(self, output_file_name: str):
         super().__init__()
         self._logging_data = {}
-        self.output_file_name = output_file_name + 'json'
+        self.output_file_name = output_file_name + '.json'
 
     def log(self, title: str, data):
         self._logging_data.update({title: data})
