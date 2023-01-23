@@ -1,4 +1,4 @@
-common:
+feature_extractors:
   - _target_: data_gradients.feature_extractors.common.count_images_labels.NumberOfImagesLabels
   - _target_: data_gradients.feature_extractors.common.image_resolutions.ImagesResolutions
   - _target_: data_gradients.feature_extractors.common.image_aspect_ratios.ImagesAspectRatios

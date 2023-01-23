@@ -1,4 +1,6 @@
+import abc
 import concurrent
+import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, Optional, List, Dict
@@ -18,10 +20,10 @@ class AnalysisManagerAbstract:
     Main dataset analyzer manager abstract class.
     """
 
-    def __init__(self, train_data: Iterable,
+    def __init__(self, *,
+                 train_data: Iterable,
                  val_data: Optional[Iterable],
-                 task: str,
-                 samples_to_visualize: int,
+                 logger: Logger,
                  id_to_name: Dict,
                  batches_early_stop: int,
                  short_run: bool):
@@ -43,17 +45,20 @@ class AnalysisManagerAbstract:
             self._val_iter = None
 
         # Logger
-        self._logger = Logger(samples_to_visualize, train_data)
+        self._logger = logger
 
         self._preprocessor: PreprocessorAbstract = Optional[None]
         self._cfg = None
 
-        self._task = task
         self.id_to_name = id_to_name
 
         self.sw: Optional[Stopwatch] = None
         self.batches_early_stop = batches_early_stop
         self.short_run = short_run
+
+    @abc.abstractmethod
+    def _create_logger(self) -> Logger:
+        raise NotImplementedError
 
     def build(self):
         """
@@ -61,7 +66,7 @@ class AnalysisManagerAbstract:
         Create lists of feature extractors, both to train and val iterables.
         """
         cfg = hydra.utils.instantiate(self._cfg)
-        self._extractors = cfg[self._task] + cfg.common
+        self._extractors = cfg.feature_extractors + cfg.common.feature_extractors
 
     def _get_batch(self, data_iterator: Iterator) -> BatchData:
         """
@@ -93,6 +98,7 @@ class AnalysisManagerAbstract:
             try:
                 train_batch_data = self._get_batch(self._train_iter)
                 train_batch_data.split = 'train'
+                self._logger.visualize(train_batch_data)  # maybe there's a better place to put this?
                 self.sw.tick()
             except StopIteration:
                 break
@@ -138,8 +144,6 @@ class AnalysisManagerAbstract:
         Then, it logs the information through the logging.
         :return:
         """
-        # Visualize images (if given) to tensorboard
-        self._logger.visualize()
 
         # Post process each feature executor to json / tensorboard
         for extractor in self._extractors:
