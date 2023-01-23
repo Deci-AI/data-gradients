@@ -2,10 +2,10 @@ number_of_classes:
 ignore_labels:
 
 defaults:
-  - common
+  - common: common
   - _self_
 
-semantic_segmentation:
+feature_extractors:
   - _target_: data_gradients.feature_extractors.segmentation.classes_distribution.GetClassDistribution
     num_classes: ${number_of_classes}
     ignore_labels: ${ignore_labels}
@@ -33,4 +33,3 @@ semantic_segmentation:
     ignore_labels: ${ignore_labels}
   - _target_: data_gradients.feature_extractors.segmentation.count_small_components.CountSmallComponents
     minimum_percent_of_an_image: 0.0005
-
