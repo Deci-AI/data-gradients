@@ -1,26 +1,31 @@
 # Data Gradients
 ## What is this?
-The Deci`s dataset analyzer tool provide valuable information about your dataset
-#### Benefits 
-1. User could validate his data, find corruptions, check diversity and many more. 
-2. Deci will use this meta-data as an input to our NAS, which results in a better model found, suited for the user's specific data.
-#### What we DO collect
-Metadata and statistics describing your data: histograms, heat maps and such.
-#### What we DO NOT collect
-Images themselves, Labels themselves, annotations, locations of each object. Any actual data.
-You can also censor any classes you`de like, can hide class names and can remove features you are not interested in publishing. 
+A Python-based repository that extracts meta data from your data loaders and visualizes it.
+#### The benefits of Data Gradients
+With Data Gradients, you can analyze your data in order to gain valuable insights.
+1. Data validation: detecting corruption, ensuring diversity, and more.
+2. Metadata extraction for maximizing the customized results for your architecture search
 
+#### What does the data analyzer tool extract?
+Statistics and metadata describe your data: histograms, heat maps, etc.
 
-#### What is MUST-HAVE
+#### What doesn’t the data analyzer tool extract?
+Images, labels, annotations, and locations of each object.
+In addition, you can censor any classes you want, hide class names, and remove features you don’t want the tool to extract.
 
-* Train set data-loader that compatible to the [available input types](#available-input-types)
-* Number of valid classes (in the binary case, number of classes will be 1 while 0 will be ignored)
+#### What does the tool output?
+The tool extracts statistics and metadata into a TB file and a corresponding TXT file. The metadata and statistics in both files are the same.
 
-#### What is Optional
+#### What is a MUST-HAVE in order to use the tool?
 
-* Validation set data-loader that compatible to the [available input types](#Available-input-types)
+* Train set data-loader that compatible to the available input types: Fill in the types
+* Number of valid classes (in the binary case, the number of classes will be 1 while 0 will be ignored)
+
+#### What is Optional in order to use the tool?
+
+* Validation set data-loader that compatible to the available input types
 * Class ID-to-name mapping (in a form of a dictionary)
-* Number of samples to visualize (will output only on tensorboard, can pass 0 if you prefer not to visualize)
+* Number of samples to visualize (will output only on Tensorboard, can pass 0 if you prefer not to visualize)
 
 <br>
 
@@ -135,13 +140,10 @@ da = SegmentationAnalysisManager(
 Our point of view on augmentations
 </summary>
 <br>
-Using this tool will have different benefits working with data augmentations, and without.
-
-Augmented data will give us a better visualization of the model's point of view of the data, which will be more realistic in terms of finding problems with the training data, etc.
-
-Raw data could be a stronger validation for the data aggregating, labeling and diversity of it.
-
-Both options are good, but it is more important for us to see what the model will see on his training.
+There are different benefits to using this tool with or without data augmentations.
+Using augmented data will allow us to see the model’s point of view of the data, which will be more realistic when finding problems with the training data.
+Raw data, on the other hand, could provide stronger validation for data aggregation, labeling, and diversity.
+There are advantages to both options, but as this tool is designed to optimize and customize the architecture for your data, we need to see what the model will see during training.
 
 </details>
 
