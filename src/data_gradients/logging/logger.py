@@ -1,15 +1,16 @@
 from data_gradients.logging.json_logger import JsonLogger
 from data_gradients.logging.tensorboard_logger import TensorBoardLogger
 from data_gradients.preprocess import PreprocessorAbstract
+from data_gradients.utils import BatchData
 
 
 class Logger:
-    def __init__(self, samples_to_visualize, train_data):
-        self._tb_logger = TensorBoardLogger(iter(train_data), samples_to_visualize)
+    def __init__(self, tb_logger: TensorBoardLogger):
+        self._tb_logger = tb_logger
         self._json_logger = JsonLogger(output_file_name='raw_data')
 
-    def visualize(self):
-        self._tb_logger.visualize()
+    def visualize(self, samples: BatchData):
+        self._tb_logger.visualize(samples)
 
     def log(self, title_name: str, tb_data=None, json_data=None):
         if tb_data is not None:
