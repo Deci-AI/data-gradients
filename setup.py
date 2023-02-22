@@ -10,6 +10,7 @@ from setuptools import find_packages
 README_LOCATION = "README.md"
 REQ_LOCATION = "requirements.txt"
 INIT_FILE = "src/__init__.py"
+VERSION_FILE = "version.txt"
 
 
 def readme():
@@ -25,10 +26,10 @@ def get_requirements():
 
 
 def get_version():
-    import git
-    repo = git.Repo('.')
-    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-    return str(tags[-1])
+    with open(VERSION_FILE, encoding="utf-8") as f:
+        ver = f.readline()
+
+    return ver
 
 
 setup(name="data-gradients",
@@ -38,12 +39,13 @@ setup(name="data-gradients",
       author_email="rnd@deci.ai",
       url="https://github.com/Deci-AI/data-gradients",
       keywords=["Deci", "AI", "Data", "Deep Learning", "Computer Vision", "PyTorch"],
-      # install_requires=get_requirements(),
+      install_requires=get_requirements(),
       packages=find_packages(where="./src"),
       package_dir={"": "src"},
-      package_data={"data_gradients.config": ["*.yaml"],
-                    "data_gradients": ["example.ipynb", "requirements.txt"],
-                    },
+      package_data={
+          "data_gradients.config": ["*.yaml", "**/*.yaml"],
+          "data_gradients": ["example.ipynb", "requirements.txt"],
+      },
       long_description=readme(),
       long_description_content_type="text/markdown",
       )

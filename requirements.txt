@@ -1,13 +1,12 @@
 hydra-core>=1.2.0
-omegaconf >= 2.2.3
-pygments >= 2.13.0
-tqdm >= 4.64.1
+omegaconf>=2.2.3
+pygments>=2.13.0
+tqdm>=4.64.1
 opencv-python
 Pillow
 tensorboard
 torch
 torchvision
-torchaudio
 numpy
 matplotlib
 scipy
