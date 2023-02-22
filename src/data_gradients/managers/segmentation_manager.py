@@ -62,7 +62,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         """
         Parsing semantic segmentation configuration file with number of classes and ignore labels
         """
-        hydra.initialize(config_path="../config/", job_name="", version_base="1.1")
+        hydra.initialize(config_path="../config/", version_base="1.2")
         self._cfg = hydra.compose(config_name=self.TASK)
         # Could add those parameters with no defining them in if disabling strict mode
         self._cfg.number_of_classes = self._preprocessor.number_of_classes
