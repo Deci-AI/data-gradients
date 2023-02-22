@@ -27,9 +27,7 @@ def get_requirements():
 
 def get_version():
     with open(VERSION_FILE, encoding="utf-8") as f:
-        ver = f.readline()
-
-    return ver
+        return f.readline()
 
 
 setup(name="data-gradients",
