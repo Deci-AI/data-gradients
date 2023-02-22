@@ -10,6 +10,7 @@ from setuptools import find_packages
 README_LOCATION = "README.md"
 REQ_LOCATION = "requirements.txt"
 INIT_FILE = "src/__init__.py"
+VERSION_FILE = "version.txt"
 
 
 def readme():
@@ -25,10 +26,10 @@ def get_requirements():
 
 
 def get_version():
-    import git
-    repo = git.Repo('.')
-    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
-    return str(tags[-1])
+    with open(VERSION_FILE, encoding="utf-8") as f:
+        ver = f.readline()
+
+    return ver
 
 
 setup(name="data-gradients",
