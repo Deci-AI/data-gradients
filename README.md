@@ -153,43 +153,29 @@ There are advantages to both options, but as this tool is designed to optimize a
 
 
 
-
 ### 1. Install data-gradients
 
 ```bash
 pip install data_gradients-X.Y.Z-py3-none-any.whl
 ```
-### 2. Install requirements
-
-```bash
-pip install -r requirements.txt 
-```
-### 3. Run analysis manager
+### 2. Run analysis manager
 
 ```python
-from torch.utils.data import DataLoader
-from torchvision.transforms import CenterCrop, ToTensor, Compose
-
-from src import SegmentationAnalysisManager
-from data.bdd_dataset import BDDDataset
-
-# Create torch DataSet
-train_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='train', transform=Compose([ToTensor()]))
-val_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='val', transform=Compose([ToTensor()]))
+from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 
 # Create torch DataLoader
-train_loader = DataLoader(train_dataset, batch_size=8)
-val_loader = DataLoader(val_dataset, batch_size=8)
+train_loader = YourDataLoader(train_dataset, batch_size=batch_size)
+val_loader = YourDataLoader(val_dataset, batch_size=batch_size)
 
 da = SegmentationAnalysisManager(train_data=train_loader,
                                  val_data=val_loader,
-                                 num_classes=BDDDataset.NUM_CLASSES)
+                                 num_classes=num_classes)
 
 da.run()
 
 
 ```
-### 4. After progress is finished, view results through tensorboard
+### 3. After progress is finished, view results through tensorboard
 
 ```bash
 tensorboard --logdir=logs --bind_all
