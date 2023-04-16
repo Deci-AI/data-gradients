@@ -10,12 +10,13 @@ from data_gradients.utils import SegBatchData
 
 
 class PreprocessorAbstract(ABC):
-
-    def __init__(self, num_classes, images_extractor, labels_extractor, num_image_channels):
+    def __init__(
+        self, num_classes, images_extractor, labels_extractor, num_image_channels
+    ):
         self.number_of_classes: int = num_classes
         self._num_image_channels: int = num_image_channels
         self._container_mapper = {"first": None, "second": None}
-        self._mappers = {'first': images_extractor, 'second': labels_extractor}
+        self._mappers = {"first": images_extractor, "second": labels_extractor}
 
     @abstractmethod
     def validate(self, objects):
@@ -27,15 +28,15 @@ class PreprocessorAbstract(ABC):
 
     @property
     def images_route(self):
-        if self._container_mapper['first'] is not None:
-            return {'get images': self._container_mapper['first'].route}
+        if self._container_mapper["first"] is not None:
+            return {"get images": self._container_mapper["first"].route}
         else:
             return None
 
     @property
     def labels_route(self):
-        if self._container_mapper['second'] is not None:
-            return {'get labels': self._container_mapper['second'].route}
+        if self._container_mapper["second"] is not None:
+            return {"get labels": self._container_mapper["second"].route}
         else:
             return None
 
@@ -74,7 +75,7 @@ class PreprocessorAbstract(ABC):
             return self._container_mapper[tuple_place].container_to_tensor(objs)
         else:
             self._container_mapper[tuple_place] = preprocess.ContainerMapper()
-            self._container_mapper[tuple_place].images = tuple_place == 'first'
+            self._container_mapper[tuple_place].images = tuple_place == "first"
 
             if self._mappers[tuple_place] is not None:
                 self._container_mapper[tuple_place].mapper = self._mappers[tuple_place]

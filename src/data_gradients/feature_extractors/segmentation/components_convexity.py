@@ -3,7 +3,9 @@ import numpy as np
 from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.preprocess import contours
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import (
+    FeatureExtractorAbstract,
+)
 from data_gradients.utils.data_classes.extractor_results import Results
 
 
@@ -14,8 +16,12 @@ class ComponentsConvexity(FeatureExtractorAbstract):
 
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
-        self._hist = {'train': {k: [] for k in keys}, 'val': {k: [] for k in keys}}
+        keys = [
+            int(i)
+            for i in range(0, num_classes + len(ignore_labels))
+            if i not in ignore_labels
+        ]
+        self._hist = {"train": {k: [] for k in keys}, "val": {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
     def _execute(self, data: SegBatchData):
@@ -24,25 +30,29 @@ class ComponentsConvexity(FeatureExtractorAbstract):
                 for contour in cls_contours:
                     convex_hull = contours.get_convex_hull(contour)
                     convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
-                    convexity_measure = (contour.perimeter - convex_hull_perimeter) / contour.perimeter
+                    convexity_measure = (
+                        contour.perimeter - convex_hull_perimeter
+                    ) / contour.perimeter
                     self._hist[data.split][contour.class_id].append(convexity_measure)
 
-    def _post_process(self, split):
+    def _post_process(self, split: str):
         values, bins = self._process_data(split)
-        results = Results(values=values,
-                          bins=bins,
-                          x_label="Class",
-                          y_label="Convexity measure",
-                          title="Convexity of components",
-                          split=split,
-                          color=self.colors[split],
-                          y_ticks=True,
-                          ax_grid=True,
-                          plot='bar-plot')
+        results = Results(
+            values=values,
+            bins=bins,
+            x_label="Class",
+            y_label="Convexity measure",
+            title="Convexity of components",
+            split=split,
+            color=self.colors[split],
+            y_ticks=True,
+            ax_grid=True,
+            plot="bar-plot",
+        )
         return results
 
     def _process_data(self, split: str):
-        hist = dict.fromkeys(self._hist[split].keys(), 0.)
+        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:
             if len(self._hist[split][cls]):
                 hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
