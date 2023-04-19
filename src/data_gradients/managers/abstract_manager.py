@@ -16,7 +16,6 @@ from data_gradients.feature_extractors import FeatureExtractorAbstract
 from data_gradients.logging.logger import Logger
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
-from data_gradients.utils.common.stopwatch import Stopwatch, Timer
 
 from logging import getLogger
 
@@ -37,19 +36,18 @@ class AnalysisManagerAbstract:
         val_data: Optional[Iterable] = None,
         log_writer: Logger,
         id_to_name: Dict,
-        batches_early_stop: Optional[int],
-        short_run: bool,
+        batches_early_stop: Optional[int] = None,
+        short_run: bool = False,
     ):
-
         self._extractors: List[FeatureExtractorAbstract] = []
 
-        short_run = True
-        self.batches_early_stop = 1
-        # self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
-        # self.val_size = len(train_data) if hasattr(val_data, "__len__") else None
-
-        self.train_size = None
-        self.val_size = None
+        if batches_early_stop:
+            logger.info(
+                "Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed."
+            )
+        self.batches_early_stop = batches_early_stop
+        self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
+        self.val_size = len(train_data) if hasattr(val_data, "__len__") else None
 
         self.train_iter = iter(train_data)
         self.val_iter = iter(val_data) if val_data is not None else iter([])
@@ -62,7 +60,7 @@ class AnalysisManagerAbstract:
 
         self.id_to_name = id_to_name
 
-        if short_run and self.n_iterations is None:
+        if short_run and self.n_batches is None:
             logger.warning(
                 "`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`"
             )
@@ -94,58 +92,54 @@ class AnalysisManagerAbstract:
         Method finish it work after both train & val iterables are exhausted.
         """
         thread_manager = ThreadManager()
-
-        datasets_iterator = tqdm.tqdm(
+        datasets_tqdm = tqdm.tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
-            desc="Analyzing...",
-            total=self.n_iterations,
+            desc="Analyzing... ",
+            total=self.n_batches,
         )
 
-        for i, (train_batch, val_batch) in enumerate(datasets_iterator):
+        for i, (train_batch, val_batch) in enumerate(datasets_tqdm):
 
             if i == self.batches_early_stop:
                 break
 
-            with timer() as train_batch_timer:
-                if train_batch is not None:
-                    preprocessed_batch = self._preprocess_batch(train_batch, "train")
-                    for extractor in self._extractors:
-                        thread_manager.submit(extractor.execute, preprocessed_batch)
-                    self._log_writer.visualize(preprocessed_batch)
+            if train_batch is not None:
+                preprocessed_batch = self._preprocess_batch(train_batch, "train")
+                for extractor in self._extractors:
+                    thread_manager.submit(extractor.execute, preprocessed_batch)
+                self._log_writer.visualize(preprocessed_batch)
 
-            # For the first batch, we want to measure the processing time on train/val individually
-            if i == 0 and self.short_run:
-                thread_manager.wait_complete()
-
-            with timer() as val_batch_timer:
-                if val_batch is not None:
-                    preprocessed_batch = self._preprocess_batch(val_batch, "val")
-                    for extractor in self._extractors:
-                        thread_manager.submit(extractor.execute, preprocessed_batch)
+            if val_batch is not None:
+                preprocessed_batch = self._preprocess_batch(val_batch, "val")
+                for extractor in self._extractors:
+                    thread_manager.submit(extractor.execute, preprocessed_batch)
 
             if i == 0 and self.short_run:
                 thread_manager.wait_complete()
+                datasets_tqdm.refresh()
+                single_batch_duration = datasets_tqdm.format_dict["elapsed"]
                 self.reevaluate_early_stop(
-                    train_batch_timer.elapsed, val_batch_timer.elapsed
+                    remaining_time=(self.n_batches - 1) * single_batch_duration
                 )
 
-    def reevaluate_early_stop(self, train_batch_time: float, val_batch_time: float):
-        self.n_iterations
-        remaining_time = 0
-        remaining_time += (self.n_iterations -1) * (train_batch_time + val_batch_time)
+    def reevaluate_early_stop(self, remaining_time: float) -> None:
+        """Give option to the user to reevaluate the early stop criteria.
 
-        if self.train_size is not None and self.val_size is not None:
-            remaining_time += (self.batches_early_stop -1) * train_batch_time
-            remaining_time += (self.batches_early_stop -1) * val_batch_time
+        :param remaining_time: Time remaining for the whole analyze."""
 
-        remaining_time = min(remaining_time, max(train_size, val_size))
-        total_time = str(datetime.timedelta(seconds=remaining_time))
-
-        print(f"\n\nEstimated time for the whole analyze is {total_time}")
-        inp = input(f"Do you want to shorten the amount of data to analyze? [y / n]\n")
+        print(
+            f"\nEstimated remaining time for the whole analyze is {remaining_time} (1/{self.n_batches} done)"
+        )
+        inp = input(
+            f"Do you want to shorten the amount of data to analyze? (Yes/No) : "
+        )
         if inp.lower() in ("y", "yes"):
-            train_ratio = input("Please provide amount of data to analyze (in %)\n")
-            self.batches_early_stop = int(self.train_size * (int(train_ratio) / 100))
+            early_stop_ratio_100 = input(
+                "What percentage of the remaining data do you want to process? (0-100) : "
+            )
+            early_stop_ratio = float(early_stop_ratio_100) / 100
+            remaining_batches = self.n_batches - 1
+            self.batches_early_stop = int(remaining_batches * early_stop_ratio + 1)
             print(f"Running for {self.batches_early_stop} batches!")
 
     def post_process(self):
@@ -190,8 +184,8 @@ class AnalysisManagerAbstract:
         self.close()
 
     @property
-    def n_iterations(self):
-        # TODO: check if this is correct
+    def n_batches(self) -> Optional[int]:
+        """Number of batches to analyze if available, None otherwise."""
         if not (
             self.train_size is None
             and self.val_size is None
@@ -202,13 +196,6 @@ class AnalysisManagerAbstract:
                 self.train_size or float("inf"),
                 self.val_size or float("inf"),
             )
-
-
-@contextmanager
-def timer() -> Iterator[Timer]:
-    _timer = Timer()
-    yield _timer
-    _timer.stop()
 
 
 class ThreadManager:
