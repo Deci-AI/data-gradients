@@ -79,21 +79,12 @@ class ContainerMapper:
         targets = []
         res = container_mapping(objs, path="", targets=targets)
         map_for_printing = json.dumps(res, indent=4, ensure_ascii=False)
-        colorful_json = highlight(
-            map_for_printing, lexers.JsonLexer(), formatters.TerminalFormatter()
-        )
+        colorful_json = highlight(map_for_printing, lexers.JsonLexer(), formatters.TerminalFormatter())
         print(colorful_json.replace('"', ""))
-        value = int(
-            input(
-                f"Please insert the circled number of the required {'images' if images else 'labels'} data:\n"
-            )
-        )
+        value = int(input(f"Please insert the circled number of the required {'images' if images else 'labels'} data:\n"))
         print(f"Path for getting objects out of container: {targets[value]}")
         print("*" * 50)
-        keys = [
-            r.replace("'", "").replace("[", "").replace("]", "")
-            for r in targets[value].split("]")
-        ][:-1]
+        keys = [r.replace("'", "").replace("[", "").replace("]", "") for r in targets[value].split("]")][:-1]
         return keys
 
     @staticmethod
@@ -135,9 +126,7 @@ def container_mapping(obj: Any, path: str, targets: list):
         printable_map = f" {numbers[len(targets) % len(numbers)]}: Tuple [{types}]"
         targets.append(path)
     elif isinstance(obj, list):
-        printable_map = (
-            f" {numbers[len(targets) % len(numbers)]}: List [{type(obj[0])}]"
-        )
+        printable_map = f" {numbers[len(targets) % len(numbers)]}: List [{type(obj[0])}]"
         targets.append(path)
     elif isinstance(obj, str):
         return "string"

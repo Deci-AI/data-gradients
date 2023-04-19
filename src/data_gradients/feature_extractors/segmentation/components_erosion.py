@@ -18,11 +18,7 @@ class ErosionTest(FeatureExtractorAbstract):
 
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        keys = [
-            int(i)
-            for i in range(0, num_classes + len(ignore_labels))
-            if i not in ignore_labels
-        ]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": {k: 0.0 for k in keys}, "val": {k: 0.0 for k in keys}}
         self._hist_eroded = {
             "train": {k: 0.0 for k in keys},
@@ -39,9 +35,7 @@ class ErosionTest(FeatureExtractorAbstract):
             eroded_label_tensor = torch.tensor(label)
             if len(eroded_label_tensor.shape) == 2:
                 eroded_label_tensor = eroded_label_tensor.unsqueeze(-1)
-            eroded_contours = contours.get_contours(
-                eroded_label_tensor.permute(2, 0, 1)
-            )
+            eroded_contours = contours.get_contours(eroded_label_tensor.permute(2, 0, 1))
             for j, cls_contours in enumerate(image_contours):
                 if cls_contours:
                     class_id = cls_contours[0].class_id
@@ -69,9 +63,7 @@ class ErosionTest(FeatureExtractorAbstract):
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:
             if (self._hist[split][cls]) > 0:
-                hist[cls] = np.round(
-                    100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3
-                )
+                hist[cls] = np.round(100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3)
             else:
                 hist[cls] = 0
 

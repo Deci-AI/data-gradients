@@ -22,9 +22,7 @@ class CountNumComponents(FeatureExtractorAbstract):
 
     def _execute(self, data: SegBatchData):
         for image_contours in data.contours:
-            num_objects_in_image = sum(
-                [len(cls_contours) for cls_contours in image_contours]
-            )
+            num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
             self._total_objects[data.split] += num_objects_in_image
             if num_objects_in_image in self._hist[data.split]:
                 self._hist[data.split][num_objects_in_image] += 1
@@ -62,9 +60,7 @@ class CountNumComponents(FeatureExtractorAbstract):
         if len(number_of_objects_per_image) < 10:
             return number_of_objects_per_image
         min_bin = min(list(number_of_objects_per_image.keys()))
-        max_bin = int(
-            np.average((sorted(list(number_of_objects_per_image.keys())))[-10:])
-        )
+        max_bin = int(np.average((sorted(list(number_of_objects_per_image.keys())))[-10:]))
 
         bin_size = int(5 + 5 * (int(max_bin / 50)))
 

@@ -39,15 +39,9 @@ class MeanAndSTD(FeatureExtractorAbstract):
         bgr_means = np.zeros(3)
         bgr_std = np.zeros(3)
         for channel in range(3):
-            means = [
-                self._hist[split]["mean"][i][channel].item()
-                for i in range(len(self._hist[split]["mean"]))
-            ]
+            means = [self._hist[split]["mean"][i][channel].item() for i in range(len(self._hist[split]["mean"]))]
             bgr_means[channel] = np.mean(means)
-            stds = [
-                self._hist[split]["std"][i][channel].item()
-                for i in range(len(self._hist[split]["std"]))
-            ]
+            stds = [self._hist[split]["std"][i][channel].item() for i in range(len(self._hist[split]["std"]))]
             bgr_std[channel] = np.mean(stds)
         values = [
             bgr_means[0],

@@ -9,11 +9,7 @@ from data_gradients.utils.data_classes.extractor_results import Results
 class GetClassDistribution(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        keys = [
-            int(i)
-            for i in range(0, num_classes + len(ignore_labels))
-            if i not in ignore_labels
-        ]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": dict.fromkeys(keys, 0), "val": dict.fromkeys(keys, 0)}
         self._total_objects = {"train": 0, "val": 0}
         self.ignore_labels = ignore_labels
@@ -22,9 +18,7 @@ class GetClassDistribution(FeatureExtractorAbstract):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
                 if cls_contours:
-                    self._hist[data.split][cls_contours[0].class_id] += len(
-                        cls_contours
-                    )
+                    self._hist[data.split][cls_contours[0].class_id] += len(cls_contours)
                     self._total_objects[data.split] += len(cls_contours)
 
     def _post_process(self, split: str):

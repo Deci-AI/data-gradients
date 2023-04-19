@@ -17,11 +17,7 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        keys = [
-            int(i)
-            for i in range(0, num_classes + len(ignore_labels))
-            if i not in ignore_labels
-        ]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {
             "train": {k: {"x": list(), "y": list()} for k in keys},
             "val": {k: {"x": list(), "y": list()} for k in keys},
@@ -34,12 +30,8 @@ class ComponentsCenterOfMass(MultiClassProcess):
             label_shape = data.labels[0][0].shape
             for j, cls_contours in enumerate(image_contours):
                 for contour in cls_contours:
-                    self._hist[data.split][contour.class_id]["x"].append(
-                        round(contour.center[0] / label_shape[1], 2)
-                    )
-                    self._hist[data.split][contour.class_id]["y"].append(
-                        round(contour.center[1] / label_shape[0], 2)
-                    )
+                    self._hist[data.split][contour.class_id]["x"].append(round(contour.center[0] / label_shape[1], 2))
+                    self._hist[data.split][contour.class_id]["y"].append(round(contour.center[1] / label_shape[0], 2))
 
     def _post_process(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])

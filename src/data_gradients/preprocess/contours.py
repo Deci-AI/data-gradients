@@ -27,9 +27,7 @@ def get_contours(label: torch.Tensor) -> np.array:
         if np.max(onehot) == 0:
             continue
         # Find contours and return shape of [N, P, 1, 2] where N is number of contours and P list of points
-        onehot_contour, _ = cv2.findContours(
-            onehot, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
+        onehot_contour, _ = cv2.findContours(onehot, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         # Check if contour is OK
         valid_onehot_contours = get_valid_contours(onehot_contour, class_channel)
         if len(valid_onehot_contours):
