@@ -31,3 +31,21 @@ class Stopwatch:
         total_seconds = (val_len - 1) * total_val + (train_len - 1) * total_train
         total_time = str(datetime.timedelta(seconds=total_seconds))
         return total_time
+
+
+from typing import List
+
+
+class Timer:
+    def __init__(self) -> None:
+        self.start_time = timer()
+        self.stop_time = None
+
+    def stop(self):
+        if self.stop_time is not None:
+            raise RuntimeError("Timer already stopped")
+        self.stop_time = timer() - self.start_time
+
+    @property
+    def elapsed(self):
+        return self.stop_time - self.start_time

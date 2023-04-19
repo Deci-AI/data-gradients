@@ -199,3 +199,38 @@ Output Example
 ![Example output 3](data/example_outputs/output_example3.png)
 
 </details>
+
+
+
+
+
+
+
+
+
+---
+---
+
+### Question: What don't they want to send us ?
+- Images yes
+- Labels ?
+- What about per-label data:  Center of mass/height/width/area/...?
+- What about aggregated data: Center of mass/height/width/area/...? 
+
+### I. Transform
+Compute image/label specific metrics outside of feature_extractors
+    - image_width, image_weight, aspect_ratio, bbox_area, bbox_center_of_mass, ... 
+
+### II. Aggregation
+    a. Concatenate all these results into a DF, and then aggregate and plot
+        Pro: - Easier to customize/read (pd.groupby) 
+             - Risk taking a lot of memory ? (Not sure because we don't load images, to check)
+    b. Accumulate one image/label at a time (like "update" in Metrics), and then aggregate with compute
+        Pro: - Less memory costly
+
+### III. Save (to share)
+    a. Save all the image/label specific metrics in a file
+        Pro: - Possibility to compute new metrics later on
+        Con: - Risk that the user will not agree on that
+    b. Save only the aggregated results
+    c. Option to choose a, b or a & b

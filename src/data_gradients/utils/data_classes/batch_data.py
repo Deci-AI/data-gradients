@@ -27,3 +27,25 @@ class SegBatchData(BatchData):
     """
 
     contours: List[List[List[Contour]]]
+
+
+@dataclass
+class Sample:
+    """
+    :attr images:  [3, W, H]
+    :attr labels:  [N, W, H] where N is number of classes in each image
+    :attr split:   train / val
+    """
+
+    images: Tensor
+    labels: Tensor
+    split: str
+
+
+@dataclass
+class SegmentationSample(Sample):
+    """
+    :attr contours: [N, C, P, 1, 2] where (P, 1, 2) is a contour representation, C is number of contours and N is number of classes
+    """
+
+    contours: List[List[Contour]]

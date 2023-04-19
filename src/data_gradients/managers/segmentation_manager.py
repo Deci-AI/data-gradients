@@ -49,7 +49,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         super().__init__(
             train_data=train_data,
             val_data=val_data,
-            logger=Logger(
+            log_writer=Logger(
                 tb_logger=SegmentationTensorBoardLogger(samples_to_visualize)
             ),
             id_to_name=id_to_name,
