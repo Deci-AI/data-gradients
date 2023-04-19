@@ -36,7 +36,6 @@ class AnalysisManagerAbstract:
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
     ):
-        self._extractors: List[FeatureExtractorAbstract] = []
 
         if batches_early_stop:
             logger.info(
@@ -54,6 +53,7 @@ class AnalysisManagerAbstract:
 
         self._cfg = None
         self._preprocessor: PreprocessorAbstract = Optional[None]
+        self._extractors: List[FeatureExtractorAbstract] = []
 
         self.id_to_name = id_to_name
 
