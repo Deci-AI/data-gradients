@@ -3,11 +3,8 @@ import concurrent
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Iterator, Iterable, Optional, List, Dict, Optional
+from typing import Iterator, Iterable, List, Dict, Optional
 from itertools import zip_longest
-import datetime
-import time
-from contextlib import contextmanager
 
 import hydra
 import tqdm
