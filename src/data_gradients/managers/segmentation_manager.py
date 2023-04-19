@@ -49,9 +49,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         super().__init__(
             train_data=train_data,
             val_data=val_data,
-            log_writer=Logger(
-                tb_logger=SegmentationTensorBoardLogger(samples_to_visualize)
-            ),
+            log_writer=Logger(tb_logger=SegmentationTensorBoardLogger(samples_to_visualize)),
             id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
             short_run=short_run,

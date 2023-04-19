@@ -71,9 +71,7 @@ class FeatureExtractorAbstract(ABC):
         if results.plot == "bar-plot":
             write_bar_plot(ax=ax, results=results)
         elif results.plot == "heat-map":
-            write_heatmap_plot(
-                ax=ax[int(results.split != "train")], results=results, fig=self.fig
-            )
+            write_heatmap_plot(ax=ax[int(results.split != "train")], results=results, fig=self.fig)
         else:
             raise NotImplementedError(
                 f"Got plot key {results.plot}\
@@ -124,12 +122,8 @@ class MultiClassProcess(FeatureExtractorAbstract):
 
             self.fig.tight_layout()
 
-            title_name = (
-                f"{logger.get_title_name(self.__class__.__name__)}/{key}_{split}/fig"
-            )
-            logger.log(
-                title_name=title_name, tb_data=self.fig, json_data=self.json_object
-            )
+            title_name = f"{logger.get_title_name(self.__class__.__name__)}/{key}_{split}/fig"
+            logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod
     def _execute(self, data: BatchData):

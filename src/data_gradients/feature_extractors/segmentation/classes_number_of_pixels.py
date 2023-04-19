@@ -17,11 +17,7 @@ class PixelsPerClass(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
 
-        keys = [
-            int(i)
-            for i in range(0, num_classes + len(ignore_labels))
-            if i not in ignore_labels
-        ]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": {k: [] for k in keys}, "val": {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 

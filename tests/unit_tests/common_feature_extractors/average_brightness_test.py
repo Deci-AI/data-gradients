@@ -16,9 +16,7 @@ class AverageBrightnessTest(unittest.TestCase):
         self.split = "train"
 
     def test_black_image(self):
-        batch = BatchData(
-            images=torch.zeros((1, 3, 100, 100)), labels=[], split=self.split
-        )
+        batch = BatchData(images=torch.zeros((1, 3, 100, 100)), labels=[], split=self.split)
         target_value = 0
         self.feature_extractor.execute(batch)
         results = self.feature_extractor._post_process(self.split)
@@ -26,9 +24,7 @@ class AverageBrightnessTest(unittest.TestCase):
 
     def test_white_image(self):
         target_value = 1
-        batch = BatchData(
-            images=torch.ones((1, 3, 100, 100)), labels=[], split=self.split
-        )
+        batch = BatchData(images=torch.ones((1, 3, 100, 100)), labels=[], split=self.split)
         self.feature_extractor.execute(batch)
         results = self.feature_extractor._post_process(self.split)
         self._check_value_in_right_bin(Resultsvalues, Resultsbins, target_value)
@@ -45,9 +41,7 @@ class AverageBrightnessTest(unittest.TestCase):
         target_value = np.mean(n_lightness)
 
         if target_value != 0.5:
-            self.fail(
-                f"Target value of half ones and half zeros image should be 0.5! Got {target_value}"
-            )
+            self.fail(f"Target value of half ones and half zeros image should be 0.5! Got {target_value}")
 
         # Move it to be outside its bucket (bucket for 1 value will have this value inside it
         target_value += 0.02

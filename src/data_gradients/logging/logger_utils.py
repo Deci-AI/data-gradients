@@ -16,8 +16,7 @@ def write_bar_plot(ax, results: Results):
 
     number_of_labels = len(results.bins)
     ax.bar(
-        x=np.arange(number_of_labels)
-        - (results.width / 2 if (results.split == "train") else -results.width / 2),
+        x=np.arange(number_of_labels) - (results.width / 2 if (results.split == "train") else -results.width / 2),
         height=results.values,
         width=results.width,
         label=results.split,
@@ -32,18 +31,9 @@ def write_bar_plot(ax, results: Results):
 
     if results.y_ticks:
         for i in range(len(results.bins)):
-            v = (
-                np.round(results.values[i], 2)
-                if np.round(results.values[i], 2) > 0.0
-                else ""
-            )
+            v = np.round(results.values[i], 2) if np.round(results.values[i], 2) > 0.0 else ""
             plt.text(
-                x=i
-                - (
-                    results.width / 2
-                    if (results.split == "train")
-                    else -results.width / 2
-                ),
+                x=i - (results.width / 2 if (results.split == "train") else -results.width / 2),
                 y=1.01 * results.values[i],
                 s=v,
                 ha="center",
