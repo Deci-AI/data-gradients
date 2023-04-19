@@ -38,9 +38,7 @@ class AnalysisManagerAbstract:
     ):
 
         if batches_early_stop:
-            logger.info(
-                "Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed."
-            )
+            logger.info("Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
         self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
         self.val_size = len(train_data) if hasattr(val_data, "__len__") else None
@@ -58,9 +56,7 @@ class AnalysisManagerAbstract:
         self.id_to_name = id_to_name
 
         if short_run and self.n_batches is None:
-            logger.warning(
-                "`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`"
-            )
+            logger.warning("`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`")
             short_run = False
         self.short_run = short_run
 
@@ -115,25 +111,17 @@ class AnalysisManagerAbstract:
                 thread_manager.wait_complete()
                 datasets_tqdm.refresh()
                 single_batch_duration = datasets_tqdm.format_dict["elapsed"]
-                self.reevaluate_early_stop(
-                    remaining_time=(self.n_batches - 1) * single_batch_duration
-                )
+                self.reevaluate_early_stop(remaining_time=(self.n_batches - 1) * single_batch_duration)
 
     def reevaluate_early_stop(self, remaining_time: float) -> None:
         """Give option to the user to reevaluate the early stop criteria.
 
         :param remaining_time: Time remaining for the whole analyze."""
 
-        print(
-            f"\nEstimated remaining time for the whole analyze is {remaining_time} (1/{self.n_batches} done)"
-        )
-        inp = input(
-            f"Do you want to shorten the amount of data to analyze? (Yes/No) : "
-        )
+        print(f"\nEstimated remaining time for the whole analyze is {remaining_time} (1/{self.n_batches} done)")
+        inp = input(f"Do you want to shorten the amount of data to analyze? (Yes/No) : ")
         if inp.lower() in ("y", "yes"):
-            early_stop_ratio_100 = input(
-                "What percentage of the remaining data do you want to process? (0-100) : "
-            )
+            early_stop_ratio_100 = input("What percentage of the remaining data do you want to process? (0-100) : ")
             early_stop_ratio = float(early_stop_ratio_100) / 100
             remaining_batches = self.n_batches - 1
             self.batches_early_stop = int(remaining_batches * early_stop_ratio + 1)
@@ -183,11 +171,7 @@ class AnalysisManagerAbstract:
     @property
     def n_batches(self) -> Optional[int]:
         """Number of batches to analyze if available, None otherwise."""
-        if not (
-            self.train_size is None
-            and self.val_size is None
-            and self.batches_early_stop is None
-        ):
+        if not (self.train_size is None and self.val_size is None and self.batches_early_stop is None):
             return min(
                 self.batches_early_stop or float("inf"),
                 self.train_size or float("inf"),
@@ -204,6 +188,4 @@ class ThreadManager:
         self.futures.append(self.thread.submit(fn, *args))
 
     def wait_complete(self):
-        concurrent.futures.wait(
-            self.futures, return_when=concurrent.futures.ALL_COMPLETED
-        )
+        concurrent.futures.wait(self.futures, return_when=concurrent.futures.ALL_COMPLETED)
