@@ -22,9 +22,7 @@ def readme():
 def get_requirements():
     with open(REQ_LOCATION, encoding="utf-8") as f:
         requirements = f.read().splitlines()
-        return [
-            r for r in requirements if not r.startswith("--") and not r.startswith("#")
-        ]
+        return [r for r in requirements if not r.startswith("--") and not r.startswith("#")]
 
 
 def get_version():

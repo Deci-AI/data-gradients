@@ -17,11 +17,7 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
 
-        keys = [
-            int(i)
-            for i in range(0, num_classes + len(ignore_labels))
-            if i not in ignore_labels
-        ]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": {k: [] for k in keys}, "val": {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
@@ -30,9 +26,7 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
             img_dim = data.labels[i].shape[1] * data.labels[i].shape[2]
             for class_channel in image_contours:
                 for contour in class_channel:
-                    self._hist[data.split][contour.class_id].append(
-                        100 * int(contour.bbox_area) / img_dim
-                    )
+                    self._hist[data.split][contour.class_id].append(100 * int(contour.bbox_area) / img_dim)
 
     def _post_process(self, split: str):
         values, bins = self._process_data(split)

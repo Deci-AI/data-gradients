@@ -46,19 +46,13 @@ class AnalysisManagerAbstract(abc.ABC):
 
         self._threads = ThreadPoolExecutor()
 
-        self._train_dataset_size = (
-            len(train_data) if hasattr(train_data, "__len__") else None
-        )
+        self._train_dataset_size = len(train_data) if hasattr(train_data, "__len__") else None
         self._val_dataset_size = len(val_data) if hasattr(val_data, "__len__") else None
         # Users Data Iterator
-        self._train_iter: Iterator = (
-            train_data if isinstance(train_data, Iterator) else iter(train_data)
-        )
+        self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
             self._train_only = False
-            self._val_iter: Iterator = (
-                val_data if isinstance(val_data, Iterator) else iter(val_data)
-            )
+            self._val_iter: Iterator = val_data if isinstance(val_data, Iterator) else iter(val_data)
 
         else:
             self._train_only = True
@@ -118,9 +112,7 @@ class AnalysisManagerAbstract(abc.ABC):
             try:
                 train_batch_data = self._get_batch(self._train_iter)
                 train_batch_data.split = "train"
-                self._logger.visualize(
-                    train_batch_data
-                )  # maybe there's a better place to put this?
+                self._logger.visualize(train_batch_data)  # maybe there's a better place to put this?
                 self.sw.tick()
             except StopIteration:
                 break
@@ -134,20 +126,12 @@ class AnalysisManagerAbstract(abc.ABC):
                     self._train_only = True
 
             # Run threads
-            futures = [
-                self._threads.submit(extractor.execute, train_batch_data)
-                for extractor in self._extractors
-            ]
+            futures = [self._threads.submit(extractor.execute, train_batch_data) for extractor in self._extractors]
 
             if not self._train_only:
-                futures = [
-                    self._threads.submit(extractor.execute, val_batch_data)
-                    for extractor in self._extractors
-                ]
+                futures = [self._threads.submit(extractor.execute, val_batch_data) for extractor in self._extractors]
 
-            concurrent.futures.wait(
-                futures, return_when=concurrent.futures.ALL_COMPLETED
-            )
+            concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
             self.sw.tick()
 
             if train_batch < 1 and self.short_run:
@@ -157,9 +141,7 @@ class AnalysisManagerAbstract(abc.ABC):
             train_batch += 1
 
     def measure(self):
-        total_time = self.sw.estimate_total_time(
-            self._train_dataset_size, self._val_dataset_size
-        )
+        total_time = self.sw.estimate_total_time(self._train_dataset_size, self._val_dataset_size)
         print(f"\n\nEstimated time for the whole analyze is {total_time}")
         inp = input(f"Do you want to shorten the amount of data to analyze? [y / n]\n")
         if inp == "y":

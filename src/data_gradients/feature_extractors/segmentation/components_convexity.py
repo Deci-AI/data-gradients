@@ -16,11 +16,7 @@ class ComponentsConvexity(FeatureExtractorAbstract):
 
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        keys = [
-            int(i)
-            for i in range(0, num_classes + len(ignore_labels))
-            if i not in ignore_labels
-        ]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": {k: [] for k in keys}, "val": {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
@@ -30,9 +26,7 @@ class ComponentsConvexity(FeatureExtractorAbstract):
                 for contour in cls_contours:
                     convex_hull = contours.get_convex_hull(contour)
                     convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
-                    convexity_measure = (
-                        contour.perimeter - convex_hull_perimeter
-                    ) / contour.perimeter
+                    convexity_measure = (contour.perimeter - convex_hull_perimeter) / contour.perimeter
                     self._hist[data.split][contour.class_id].append(convexity_measure)
 
     def _post_process(self, split: str):

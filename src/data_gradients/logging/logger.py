@@ -20,13 +20,9 @@ class Logger:
 
     def log_meta_data(self, preprocessor: PreprocessorAbstract):
         if preprocessor.images_route is not None:
-            self._json_logger.log(
-                "Get images out of dictionary", preprocessor.images_route
-            )
+            self._json_logger.log("Get images out of dictionary", preprocessor.images_route)
         if preprocessor.labels_route is not None:
-            self._json_logger.log(
-                "Get images out of dictionary", preprocessor.labels_route
-            )
+            self._json_logger.log("Get images out of dictionary", preprocessor.labels_route)
 
     def to_json(self):
         self._json_logger.write_to_json()

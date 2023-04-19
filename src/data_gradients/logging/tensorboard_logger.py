@@ -16,9 +16,7 @@ class TensorBoardLogger(ResultsLogger):
             return
         try:
             n_visualized = self._visualize(batch_data)
-            self.remaining_samples_to_visualize = (
-                self.remaining_samples_to_visualize - n_visualized
-            )
+            self.remaining_samples_to_visualize = self.remaining_samples_to_visualize - n_visualized
         except RuntimeError as e:
             print(f"\nCould not visualize images on tensorboard\n: {e}")
 

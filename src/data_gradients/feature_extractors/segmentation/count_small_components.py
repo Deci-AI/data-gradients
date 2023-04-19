@@ -22,14 +22,10 @@ class CountSmallComponents(FeatureExtractorAbstract):
     def _execute(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             _, labels_h, labels_w = data.labels[i].shape
-            self._total_objects[data.split] += sum(
-                [len(cls_contours) for cls_contours in image_contours]
-            )
+            self._total_objects[data.split] += sum([len(cls_contours) for cls_contours in image_contours])
             for class_contours in image_contours:
                 for contour in class_contours:
-                    self._hist[data.split][f"<{self._min_size}"] += (
-                        1 if contour.area < labels_w * labels_h * self._min_size else 0
-                    )
+                    self._hist[data.split][f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
 
     def _post_process(self, split: str):
         values, bins = self._process_data(split)
