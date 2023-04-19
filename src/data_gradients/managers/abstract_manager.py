@@ -18,7 +18,7 @@ from data_gradients.utils.common.stopwatch import Stopwatch
 logger = logging.getLogger(__name__)
 
 
-class AnalysisManagerAbstract:
+class AnalysisManagerAbstract(abc.ABC):
     """
     Main dataset analyzer manager abstract class.
     """
@@ -33,7 +33,15 @@ class AnalysisManagerAbstract:
         batches_early_stop: Optional[int],
         short_run: bool,
     ):
-
+        """
+        :param train_data:          Iterable object contains images and labels of the training dataset
+        :param val_data:            Iterable object contains images and labels of the validation dataset
+        :param logger:              Logger object for logging information during analysis
+        :param id_to_name:          Dictionary mapping class IDs to class names
+        :param batches_early_stop:  Maximum number of batches to run in training (early stop)
+        :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
+                                    before choosing the number of epochs.
+        """
         self._extractors: List[FeatureExtractorAbstract] = []
 
         self._threads = ThreadPoolExecutor()
