@@ -1,8 +1,6 @@
 import abc
-import concurrent
 import logging
 import os
-from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, List, Dict, Optional
 from itertools import zip_longest
 
@@ -13,6 +11,7 @@ from data_gradients.feature_extractors import FeatureExtractorAbstract
 from data_gradients.logging.logger import Logger
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
+from data_gradients.utils.thread_manager import ThreadManager
 
 from logging import getLogger
 
@@ -186,15 +185,3 @@ class AnalysisManagerAbstract(abc.ABC):
                 self.train_size or float("inf"),
                 self.val_size or float("inf"),
             )
-
-
-class ThreadManager:
-    def __init__(self):
-        self.thread = ThreadPoolExecutor()
-        self.futures = []
-
-    def submit(self, fn, *args):
-        self.futures.append(self.thread.submit(fn, *args))
-
-    def wait_complete(self):
-        concurrent.futures.wait(self.futures, return_when=concurrent.futures.ALL_COMPLETED)
