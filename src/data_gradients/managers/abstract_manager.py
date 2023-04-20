@@ -68,10 +68,6 @@ class AnalysisManagerAbstract(abc.ABC):
             short_run = False
         self.short_run = short_run
 
-    @abc.abstractmethod
-    def _create_logger(self) -> Logger:
-        raise NotImplementedError
-
     def build(self):
         """
         Build method for hydra configuration file initialized and composed in manager constructor.
