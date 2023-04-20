@@ -13,6 +13,7 @@ from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.thread_manager import ThreadManager
 
+
 logging.basicConfig(level=logging.WARNING)
 
 logger = getLogger(__name__)
