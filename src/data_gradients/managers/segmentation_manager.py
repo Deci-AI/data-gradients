@@ -3,12 +3,13 @@ from typing import Optional, Iterable, List, Dict, Callable
 import hydra
 from omegaconf import OmegaConf
 
-from data_gradients.logging.logger import Logger
+from data_gradients.logging.log_writer import LogWriter
 from data_gradients.logging.segmentation.tensorboard_logger import (
     SegmentationTensorBoardLogger,
 )
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.preprocess.segmentation_preprocess import SegmentationPreprocessor
+from data_gradients.feature_extractors import FeatureExtractorAbstract
 
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 
@@ -19,14 +20,13 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
     Definition of task name, task-related preprocessor and parsing related configuration file
     """
 
-    TASK = "semantic_segmentation"
-
     def __init__(
         self,
         *,
         num_classes: int,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
+        config_name: str = "semantic_segmentation",
         ignore_labels: List[int] = None,
         samples_to_visualize: int = 10,
         id_to_name: Optional[Dict] = None,
@@ -54,16 +54,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param short_run:               Flag indicating whether to run for a single epoch first to estimate total duration,
                                         before choosing the number of epochs.
         """
-        super().__init__(
-            train_data=train_data,
-            val_data=val_data,
-            log_writer=Logger(tb_logger=SegmentationTensorBoardLogger(samples_to_visualize)),
-            id_to_name=id_to_name,
-            batches_early_stop=batches_early_stop,
-            short_run=short_run,
-        )
 
-        self._preprocessor = SegmentationPreprocessor(
+        preprocessor = SegmentationPreprocessor(
             num_classes=num_classes,
             ignore_labels=ignore_labels,
             images_extractor=images_extractor,
@@ -72,14 +64,30 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             threshold_value=threshold_soft_labels,
         )
 
-        self._parse_cfg()
+        extractors = _build_segmentation_extractors(config_name=config_name, number_of_classes=num_classes, ignore_labels=ignore_labels)
 
-    def _parse_cfg(self) -> None:
-        """
-        Parsing semantic segmentation configuration file with number of classes and ignore labels
-        """
-        hydra.initialize(config_path="../config/", version_base="1.2")
-        self._cfg = hydra.compose(config_name=self.TASK)
-        # Could add those parameters with no defining them in if disabling strict mode
-        self._cfg.number_of_classes = self._preprocessor.number_of_classes
-        self._cfg.ignore_labels = self._preprocessor.ignore_labels
+        super().__init__(
+            train_data=train_data,
+            val_data=val_data,
+            preprocessor=preprocessor,
+            extractors=extractors,
+            log_writer=LogWriter(tb_logger=SegmentationTensorBoardLogger(samples_to_visualize)),
+            id_to_name=id_to_name,
+            batches_early_stop=batches_early_stop,
+            short_run=short_run,
+        )
+
+
+def _build_segmentation_extractors(config_name: str, number_of_classes: int, ignore_labels: List[int]) -> List[FeatureExtractorAbstract]:
+    """
+    Parsing semantic segmentation configuration file with number of classes and ignore labels
+    """
+    hydra.initialize(config_path="../config/", version_base="1.2")
+    cfg = hydra.compose(config_name=config_name, overrides=[])
+    cfg.number_of_classes = number_of_classes
+    cfg.ignore_labels = ignore_labels
+    cfg = hydra.utils.instantiate(cfg)
+
+    extractors = cfg.feature_extractors + cfg.common.feature_extractors
+
+    return extractors

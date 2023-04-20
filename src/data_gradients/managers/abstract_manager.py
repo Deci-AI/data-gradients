@@ -1,20 +1,17 @@
 import abc
-import concurrent
 import logging
 import os
-from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator, Iterable, List, Dict, Optional
 from itertools import zip_longest
+from logging import getLogger
 
-import hydra
 import tqdm
 
 from data_gradients.feature_extractors import FeatureExtractorAbstract
-from data_gradients.logging.logger import Logger
+from data_gradients.logging.log_writer import LogWriter
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
-
-from logging import getLogger
+from data_gradients.utils.thread_manager import ThreadManager
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -31,7 +28,9 @@ class AnalysisManagerAbstract(abc.ABC):
         *,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
-        log_writer: Logger,
+        preprocessor: PreprocessorAbstract,
+        extractors: List[FeatureExtractorAbstract],
+        log_writer: LogWriter,
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
@@ -39,7 +38,9 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
-        :param logger:              Logger object for logging information during analysis
+        :param preprocessor:        Preprocessor object to be used before extracting features
+        :param extractors:          List of feature extractors to be used
+        :param log_writer:          Logger object for logging information during analysis
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
@@ -58,9 +59,8 @@ class AnalysisManagerAbstract(abc.ABC):
         # Logger
         self._log_writer = log_writer
 
-        self._cfg = None
-        self._preprocessor: PreprocessorAbstract = Optional[None]
-        self._extractors: List[FeatureExtractorAbstract] = []
+        self.preprocessor = preprocessor
+        self.extractors = extractors
 
         self.id_to_name = id_to_name
 
@@ -69,22 +69,10 @@ class AnalysisManagerAbstract(abc.ABC):
             short_run = False
         self.short_run = short_run
 
-    @abc.abstractmethod
-    def _create_logger(self) -> Logger:
-        raise NotImplementedError
-
-    def build(self):
-        """
-        Build method for hydra configuration file initialized and composed in manager constructor.
-        Create lists of feature extractors, both to train and val iterables.
-        """
-        cfg = hydra.utils.instantiate(self._cfg)
-        self._extractors = cfg.feature_extractors + cfg.common.feature_extractors
-
     def _preprocess_batch(self, batch: Iterator, split: str) -> BatchData:
         batch = tuple(batch) if isinstance(batch, list) else batch
-        images, labels = self._preprocessor.validate(batch)
-        preprocessed_batch = self._preprocessor.preprocess(images, labels)
+        images, labels = self.preprocessor.validate(batch)
+        preprocessed_batch = self.preprocessor.preprocess(images, labels)
         preprocessed_batch.split = split
         return preprocessed_batch
 
@@ -107,13 +95,13 @@ class AnalysisManagerAbstract(abc.ABC):
 
             if train_batch is not None:
                 preprocessed_batch = self._preprocess_batch(train_batch, "train")
-                for extractor in self._extractors:
+                for extractor in self.extractors:
                     thread_manager.submit(extractor.execute, preprocessed_batch)
                 self._log_writer.visualize(preprocessed_batch)
 
             if val_batch is not None:
                 preprocessed_batch = self._preprocess_batch(val_batch, "val")
-                for extractor in self._extractors:
+                for extractor in self.extractors:
                     thread_manager.submit(extractor.execute, preprocessed_batch)
 
             if i == 0 and self.short_run:
@@ -145,11 +133,11 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         # Post process each feature executor to json / tensorboard
-        for extractor in self._extractors:
+        for extractor in self.extractors:
             extractor.process(self._log_writer, self.id_to_name)
 
         # Write meta data to json file
-        self._log_writer.log_meta_data(self._preprocessor)
+        self._log_writer.log_meta_data(self.preprocessor)
 
         # Write all text data to json file
         self._log_writer.to_json()
@@ -172,7 +160,6 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         Run method activating build, execute, post process and close the manager.
         """
-        self.build()
         self.execute()
         self.post_process()
         self.close()
@@ -186,15 +173,3 @@ class AnalysisManagerAbstract(abc.ABC):
                 self.train_size or float("inf"),
                 self.val_size or float("inf"),
             )
-
-
-class ThreadManager:
-    def __init__(self):
-        self.thread = ThreadPoolExecutor()
-        self.futures = []
-
-    def submit(self, fn, *args):
-        self.futures.append(self.thread.submit(fn, *args))
-
-    def wait_complete(self):
-        concurrent.futures.wait(self.futures, return_when=concurrent.futures.ALL_COMPLETED)

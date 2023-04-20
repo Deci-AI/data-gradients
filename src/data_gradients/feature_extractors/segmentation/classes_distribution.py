@@ -1,4 +1,4 @@
-from data_gradients.logging.logger_utils import class_id_to_name
+from data_gradients.logging.log_writer_utils import class_id_to_name
 from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,

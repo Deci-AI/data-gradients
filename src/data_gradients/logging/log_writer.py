@@ -4,7 +4,7 @@ from data_gradients.preprocess import PreprocessorAbstract
 from data_gradients.utils import BatchData
 
 
-class Logger:
+class LogWriter:
     def __init__(self, tb_logger: TensorBoardLogger):
         self._tb_logger = tb_logger
         self._json_logger = JsonLogger(output_file_name="raw_data")

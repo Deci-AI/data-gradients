@@ -5,8 +5,8 @@ from typing import Tuple, Dict, Optional, List, Union
 import numpy as np
 from matplotlib import pyplot as plt
 
-from data_gradients.logging.logger import Logger
-from data_gradients.logging.logger_utils import (
+from data_gradients.logging.log_writer import LogWriter
+from data_gradients.logging.log_writer_utils import (
     create_json_object,
     write_bar_plot,
     write_heatmap_plot,
@@ -47,7 +47,7 @@ class FeatureExtractorAbstract(ABC):
     def _execute(self, data: BatchData):
         raise NotImplementedError
 
-    def process(self, logger: Logger, id_to_name):
+    def process(self, logger: LogWriter, id_to_name):
         self.id_to_name = id_to_name
         self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
 
@@ -106,7 +106,7 @@ class MultiClassProcess(FeatureExtractorAbstract):
     def __init__(self):
         super().__init__()
 
-    def process(self, logger: Logger, id_to_name):
+    def process(self, logger: LogWriter, id_to_name):
         self.id_to_name = id_to_name
 
         results = dict.fromkeys(["train", "val"])
