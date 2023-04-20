@@ -7,7 +7,7 @@ from data_gradients.managers.segmentation_manager import SegmentationAnalysisMan
 
 if __name__ == "__main__":
     """
-    Main script for running the Deci-Dataset-Analyzer tool.
+    Example script for running the Deci-Dataset-Analyzer tool.
     Arguments required for SegmentationAnalysisManager() are:
         train_data  -> An Iterable (i.e., torch data loader) containing train data
         val_data    -> An Iterable (i.e., torch data loader) containing valid data

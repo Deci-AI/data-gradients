@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.WARNING)
 logger = getLogger(__name__)
 
 
-class AnalysisManagerAbstract:
+class AnalysisManagerAbstract(abc.ABC):
     """
     Main dataset analyzer manager abstract class.
     """
@@ -36,6 +36,15 @@ class AnalysisManagerAbstract:
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
     ):
+        """
+        :param train_data:          Iterable object contains images and labels of the training dataset
+        :param val_data:            Iterable object contains images and labels of the validation dataset
+        :param logger:              Logger object for logging information during analysis
+        :param id_to_name:          Dictionary mapping class IDs to class names
+        :param batches_early_stop:  Maximum number of batches to run in training (early stop)
+        :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
+                                    before choosing the number of epochs.
+        """
 
         if batches_early_stop:
             logger.info("Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
@@ -119,7 +128,7 @@ class AnalysisManagerAbstract:
         :param remaining_time: Time remaining for the whole analyze."""
 
         print(f"\nEstimated remaining time for the whole analyze is {remaining_time} (1/{self.n_batches} done)")
-        inp = input(f"Do you want to shorten the amount of data to analyze? (Yes/No) : ")
+        inp = input("Do you want to shorten the amount of data to analyze? (Yes/No) : ")
         if inp.lower() in ("y", "yes"):
             early_stop_ratio_100 = input("What percentage of the remaining data do you want to process? (0-100) : ")
             early_stop_ratio = float(early_stop_ratio_100) / 100
