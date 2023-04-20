@@ -35,7 +35,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         labels_extractor: Callable = None,
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
-        short_run: bool = False
+        short_run: bool = False,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
