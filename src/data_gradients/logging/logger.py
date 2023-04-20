@@ -7,7 +7,7 @@ from data_gradients.utils import BatchData
 class Logger:
     def __init__(self, tb_logger: TensorBoardLogger):
         self._tb_logger = tb_logger
-        self._json_logger = JsonLogger(output_file_name='raw_data')
+        self._json_logger = JsonLogger(output_file_name="raw_data")
 
     def visualize(self, samples: BatchData):
         self._tb_logger.visualize(samples)
@@ -20,9 +20,9 @@ class Logger:
 
     def log_meta_data(self, preprocessor: PreprocessorAbstract):
         if preprocessor.images_route is not None:
-            self._json_logger.log('Get images out of dictionary', preprocessor.images_route)
+            self._json_logger.log("Get images out of dictionary", preprocessor.images_route)
         if preprocessor.labels_route is not None:
-            self._json_logger.log('Get images out of dictionary', preprocessor.labels_route)
+            self._json_logger.log("Get images out of dictionary", preprocessor.labels_route)
 
     def to_json(self):
         self._json_logger.write_to_json()

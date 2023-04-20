@@ -3,7 +3,7 @@ import concurrent
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Iterator, Iterable, Optional, List, Dict
+from typing import Iterator, Iterable, Optional, List, Dict, Optional
 
 import hydra
 import tqdm
@@ -15,25 +15,31 @@ from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.common.stopwatch import Stopwatch
 
 
+logger = logging.getLogger(__name__)
+
+
 class AnalysisManagerAbstract:
     """
     Main dataset analyzer manager abstract class.
     """
 
-    def __init__(self, *,
-                 train_data: Iterable,
-                 val_data: Optional[Iterable],
-                 logger: Logger,
-                 id_to_name: Dict,
-                 batches_early_stop: int,
-                 short_run: bool):
+    def __init__(
+        self,
+        *,
+        train_data: Iterable,
+        val_data: Optional[Iterable],
+        logger: Logger,
+        id_to_name: Dict,
+        batches_early_stop: Optional[int],
+        short_run: bool,
+    ):
 
         self._extractors: List[FeatureExtractorAbstract] = []
 
         self._threads = ThreadPoolExecutor()
 
-        self._train_dataset_size = len(train_data) if hasattr(train_data, '__len__') else None
-        self._val_dataset_size = len(val_data) if hasattr(val_data, '__len__') else None
+        self._train_dataset_size = len(train_data) if hasattr(train_data, "__len__") else None
+        self._val_dataset_size = len(val_data) if hasattr(val_data, "__len__") else None
         # Users Data Iterator
         self._train_iter: Iterator = train_data if isinstance(train_data, Iterator) else iter(train_data)
         if val_data is not None:
@@ -87,7 +93,7 @@ class AnalysisManagerAbstract:
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
         """
-        pbar = tqdm.tqdm(desc='Analyzing...', total=self._train_dataset_size)
+        pbar = tqdm.tqdm(desc="Analyzing...", total=self._train_dataset_size)
         train_batch = 0
         val_batch_data = None
         self.sw = Stopwatch()
@@ -97,7 +103,7 @@ class AnalysisManagerAbstract:
                 break
             try:
                 train_batch_data = self._get_batch(self._train_iter)
-                train_batch_data.split = 'train'
+                train_batch_data.split = "train"
                 self._logger.visualize(train_batch_data)  # maybe there's a better place to put this?
                 self.sw.tick()
             except StopIteration:
@@ -106,18 +112,16 @@ class AnalysisManagerAbstract:
             if not self._train_only:
                 try:
                     val_batch_data = self._get_batch(self._val_iter)
-                    val_batch_data.split = 'val'
+                    val_batch_data.split = "val"
                     self.sw.tick()
                 except StopIteration:
                     self._train_only = True
 
             # Run threads
-            futures = [self._threads.submit(extractor.execute, train_batch_data) for extractor in
-                       self._extractors]
+            futures = [self._threads.submit(extractor.execute, train_batch_data) for extractor in self._extractors]
 
             if not self._train_only:
-                futures = [self._threads.submit(extractor.execute, val_batch_data) for extractor in
-                           self._extractors]
+                futures = [self._threads.submit(extractor.execute, val_batch_data) for extractor in self._extractors]
 
             concurrent.futures.wait(futures, return_when=concurrent.futures.ALL_COMPLETED)
             self.sw.tick()
@@ -130,12 +134,12 @@ class AnalysisManagerAbstract:
 
     def measure(self):
         total_time = self.sw.estimate_total_time(self._train_dataset_size, self._val_dataset_size)
-        print(f'\n\nEstimated time for the whole analyze is {total_time}')
-        inp = input(f'Do you want to shorten the amount of data to analyze? [y / n]\n')
-        if inp == 'y':
-            inp = input('Please provide amount of data to analyze [%]\n')
+        print(f"\n\nEstimated time for the whole analyze is {total_time}")
+        inp = input(f"Do you want to shorten the amount of data to analyze? [y / n]\n")
+        if inp == "y":
+            inp = input("Please provide amount of data to analyze [%]\n")
             self.batches_early_stop = int(self._train_dataset_size * (int(inp) / 100))
-            print(f'Running for {self.batches_early_stop} batches!')
+            print(f"Running for {self.batches_early_stop} batches!")
 
     def post_process(self):
         """
@@ -160,12 +164,14 @@ class AnalysisManagerAbstract:
         Safe logging closing
         """
         self._logger.close()
-        print(f'{"*" * 100}'
-              f'\nWe have finished evaluating your dataset!'
-              f'\nThe results can be seen in {self._logger.results_dir()}'
-              f'\n\nShow tensorboard by writing in terminal:'
-              f'\n\ttensorboard --logdir={os.path.join(os.getcwd(), self._logger.results_dir())} --bind_all'
-              f'\n')
+        print(
+            f'{"*" * 100}'
+            f"\nWe have finished evaluating your dataset!"
+            f"\nThe results can be seen in {self._logger.results_dir()}"
+            f"\n\nShow tensorboard by writing in terminal:"
+            f"\n\ttensorboard --logdir={os.path.join(os.getcwd(), self._logger.results_dir())} --bind_all"
+            f"\n"
+        )
 
     def run(self):
         """

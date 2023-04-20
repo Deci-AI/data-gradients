@@ -2,7 +2,9 @@ import numpy as np
 import torch
 
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import (
+    FeatureExtractorAbstract,
+)
 from data_gradients.utils.data_classes.extractor_results import HeatMapResults
 
 
@@ -12,10 +14,11 @@ class WidthHeight(FeatureExtractorAbstract):
     Get all Width, Height of bounding-box for every object in every image for every class.
     Plot those W, H values as a heat-map
     """
+
     def __init__(self):
         super().__init__()
-        self._width = {'train': [], 'val': []}
-        self._height = {'train': [], 'val': []}
+        self._width = {"train": [], "val": []}
+        self._height = {"train": [], "val": []}
         self.num_axis = (1, 2)
 
     def _execute(self, data: SegBatchData):
@@ -26,17 +29,19 @@ class WidthHeight(FeatureExtractorAbstract):
                     self._width[data.split].append(contour.w / width)
                     self._height[data.split].append(contour.h / height)
 
-    def _post_process(self, split):
+    def _post_process(self, split: str):
         x, y = self._process_data(split)
-        results = HeatMapResults(x=x,
-                                 y=y,
-                                 n_bins=16,
-                                 split=split,
-                                 plot='heat-map',
-                                 title=f'Bounding Boxes Width / Height',
-                                 x_label='Width [% of image]',
-                                 y_label='Height [% of image]',
-                                 keys=['Width', 'Height'])
+        results = HeatMapResults(
+            x=x,
+            y=y,
+            n_bins=16,
+            split=split,
+            plot="heat-map",
+            title=f"Bounding Boxes Width / Height",
+            x_label="Width [% of image]",
+            y_label="Height [% of image]",
+            keys=["Width", "Height"],
+        )
 
         quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
         results.json_values = quantized_heat_map.tolist()

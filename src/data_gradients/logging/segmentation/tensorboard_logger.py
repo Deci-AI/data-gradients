@@ -20,10 +20,10 @@ class SegmentationTensorBoardLogger(TensorBoardLogger):
             idxs = torch.arange(len(label)).view(len(label), 1, 1) + 1  # +1 to avoid 'killing' channel zero
             label = idxs * label
             label = torch.sum(label, dim=0)
-            label = (torch.ceil((label * 255) / torch.max(label) + 1))  # normalize such that max(label) goes to 255
+            label = torch.ceil((label * 255) / torch.max(label) + 1)  # normalize such that max(label) goes to 255
             label = label.repeat(3, 1, 1)  # to rgb (with same values -> grayscale)
             image_and_label = torch.cat((image.float(), label), dim=-1)
-            title = f'Data Visualization/{self.remaining_samples_to_visualize - i}'
+            title = f"Data Visualization/{self.remaining_samples_to_visualize - i}"
             self.writer.add_image(title, image_and_label)
 
         return num_samples_to_visualize

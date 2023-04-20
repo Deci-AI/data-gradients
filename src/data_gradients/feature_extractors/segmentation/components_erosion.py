@@ -5,7 +5,9 @@ import torch
 from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.preprocess import contours
 from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
+from data_gradients.feature_extractors.feature_extractor_abstract import (
+    FeatureExtractorAbstract,
+)
 from data_gradients.utils.data_classes.extractor_results import Results
 
 
@@ -17,8 +19,11 @@ class ErosionTest(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
-        self._hist = {'train': {k: 0. for k in keys}, 'val': {k: 0. for k in keys}}
-        self._hist_eroded = {'train': {k: 0. for k in keys}, 'val': {k: 0. for k in keys}}
+        self._hist = {"train": {k: 0.0 for k in keys}, "val": {k: 0.0 for k in keys}}
+        self._hist_eroded = {
+            "train": {k: 0.0 for k in keys},
+            "val": {k: 0.0 for k in keys},
+        }
         self._kernel = np.ones((3, 3), np.uint8)
         self.ignore_labels = ignore_labels
 
@@ -38,22 +43,24 @@ class ErosionTest(FeatureExtractorAbstract):
                     if eroded_contours:
                         self._hist_eroded[data.split][class_id] += len(eroded_contours)
 
-    def _post_process(self, split):
+    def _post_process(self, split: str):
         values, bins = self._process_data(split)
-        results = Results(values=values,
-                          bins=bins,
-                          title="Erosion & contours comparing",
-                          x_label="Class",
-                          y_label="% of disappearing contours after Erosion",
-                          split=split,
-                          color=self.colors[split],
-                          y_ticks=True,
-                          ax_grid=True,
-                          plot='bar-plot')
+        results = Results(
+            values=values,
+            bins=bins,
+            title="Erosion & contours comparing",
+            x_label="Class",
+            y_label="% of disappearing contours after Erosion",
+            split=split,
+            color=self.colors[split],
+            y_ticks=True,
+            ax_grid=True,
+            plot="bar-plot",
+        )
         return results
 
-    def _process_data(self, split):
-        hist = dict.fromkeys(self._hist[split].keys(), 0.)
+    def _process_data(self, split: str):
+        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:
             if (self._hist[split][cls]) > 0:
                 hist[cls] = np.round(100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3)

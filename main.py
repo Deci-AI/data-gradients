@@ -14,7 +14,7 @@ if __name__ == "__main__":
         num_classes -> Number of valid classes
     Also if there are ignore labels, please pass them as a List[int].
     Default ignore label will be [0] as for background only.
-    
+
     Example of use (CityScapes):
         train_dataset = CityScapesDataSet(root=dataset_root,
                                           image_set='train',
@@ -25,10 +25,18 @@ if __name__ == "__main__":
 
     """
     # Create torch DataSet
-    train_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='train',
-                               transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
-    val_dataset = BDDDataset(data_folder="src/data_gradients/example_dataset/bdd_example", split='val',
-                             transform=Compose([ToTensor()]), target_transform=Compose([ToTensor()]))
+    train_dataset = BDDDataset(
+        data_folder="src/data_gradients/example_dataset/bdd_example",
+        split="train",
+        transform=Compose([ToTensor()]),
+        target_transform=Compose([ToTensor()]),
+    )
+    val_dataset = BDDDataset(
+        data_folder="src/data_gradients/example_dataset/bdd_example",
+        split="val",
+        transform=Compose([ToTensor()]),
+        target_transform=Compose([ToTensor()]),
+    )
 
     # Create torch DataLoader
     train_loader = DataLoader(train_dataset, batch_size=8)
@@ -38,17 +46,19 @@ if __name__ == "__main__":
     ignore_labels = BDDDataset.IGNORE_LABELS
     class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
 
-    da = SegmentationAnalysisManager(train_data=train_loader,
-                                     val_data=val_loader,
-                                     num_classes=num_classes,
-                                     # Optionals
-                                     ignore_labels=ignore_labels,
-                                     id_to_name=class_id_to_name,
-                                     samples_to_visualize=3,
-                                     images_extractor=None,
-                                     labels_extractor=None,
-                                     threshold_soft_labels=0.5,
-                                     batches_early_stop=75,
-                                     short_run=False)
+    da = SegmentationAnalysisManager(
+        train_data=train_loader,
+        val_data=val_loader,
+        num_classes=num_classes,
+        # Optionals
+        ignore_labels=ignore_labels,
+        id_to_name=class_id_to_name,
+        samples_to_visualize=3,
+        images_extractor=None,
+        labels_extractor=None,
+        threshold_soft_labels=0.5,
+        batches_early_stop=75,
+        short_run=False,
+    )
 
     da.run()

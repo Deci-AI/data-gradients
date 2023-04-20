@@ -30,20 +30,21 @@ def get_version():
         return f.readline()
 
 
-setup(name="data-gradients",
-      description="DataGradients",
-      version=get_version(),
-      author="Deci AI",
-      author_email="rnd@deci.ai",
-      url="https://github.com/Deci-AI/data-gradients",
-      keywords=["Deci", "AI", "Data", "Deep Learning", "Computer Vision", "PyTorch"],
-      install_requires=get_requirements(),
-      packages=find_packages(where="./src"),
-      package_dir={"": "src"},
-      package_data={
-          "data_gradients.config": ["*.yaml", "**/*.yaml"],
-          "data_gradients": ["example.ipynb", "requirements.txt"],
-      },
-      long_description=readme(),
-      long_description_content_type="text/markdown",
-      )
+setup(
+    name="data-gradients",
+    description="DataGradients",
+    version=get_version(),
+    author="Deci AI",
+    author_email="rnd@deci.ai",
+    url="https://github.com/Deci-AI/data-gradients",
+    keywords=["Deci", "AI", "Data", "Deep Learning", "Computer Vision", "PyTorch"],
+    install_requires=get_requirements(),
+    packages=find_packages(where="./src"),
+    package_dir={"": "src"},
+    package_data={
+        "data_gradients.config": ["*.yaml", "**/*.yaml"],
+        "data_gradients": ["example.ipynb", "requirements.txt"],
+    },
+    long_description=readme(),
+    long_description_content_type="text/markdown",
+)

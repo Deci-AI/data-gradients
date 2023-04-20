@@ -15,6 +15,7 @@ class ContainerMapper:
     It analyzes the type of the container and create a "route" to the data with using user's input.
     Then, it will create a mapper method that will apply on the container in order to extract the data.
     """
+
     def __init__(self):
         self._mapper: Optional[Callable] = None
         self._route: List[str] = []
@@ -79,11 +80,11 @@ class ContainerMapper:
         res = container_mapping(objs, path="", targets=targets)
         map_for_printing = json.dumps(res, indent=4, ensure_ascii=False)
         colorful_json = highlight(map_for_printing, lexers.JsonLexer(), formatters.TerminalFormatter())
-        print(colorful_json.replace("\"", ""))
+        print(colorful_json.replace('"', ""))
         value = int(input(f"Please insert the circled number of the required {'images' if images else 'labels'} data:\n"))
-        print(f'Path for getting objects out of container: {targets[value]}')
-        print('*' * 50)
-        keys = [r.replace("'", "").replace('[', '').replace(']', '') for r in targets[value].split(']')][:-1]
+        print(f"Path for getting objects out of container: {targets[value]}")
+        print("*" * 50)
+        keys = [r.replace("'", "").replace("[", "").replace("]", "") for r in targets[value].split("]")][:-1]
         return keys
 
     @staticmethod
@@ -122,10 +123,10 @@ def container_mapping(obj: Any, path: str, targets: list):
                 types.append(str(type(o)))
         else:
             types.append(str(type(obj[0])))
-        printable_map = f' {numbers[len(targets) % len(numbers)]}: Tuple [{types}]'
+        printable_map = f" {numbers[len(targets) % len(numbers)]}: Tuple [{types}]"
         targets.append(path)
     elif isinstance(obj, list):
-        printable_map = f' {numbers[len(targets) % len(numbers)]}: List [{type(obj[0])}]'
+        printable_map = f" {numbers[len(targets) % len(numbers)]}: List [{type(obj[0])}]"
         targets.append(path)
     elif isinstance(obj, str):
         return "string"
@@ -140,8 +141,10 @@ def container_mapping(obj: Any, path: str, targets: list):
         printable_map = f" {numbers[len(targets) % len(numbers)]}: PIL Image"
         targets.append(path)
     else:
-        raise RuntimeError(f"unsupported object! Object found has a type of {type(obj)} which is not supported for now.\n"
-                           f"Supported types: [Mapping, Tuple, List, String, Tensor, Numpy array, PIL Image]")
+        raise RuntimeError(
+            f"unsupported object! Object found has a type of {type(obj)} which is not supported for now.\n"
+            f"Supported types: [Mapping, Tuple, List, String, Tensor, Numpy array, PIL Image]"
+        )
     return printable_map
 
 
