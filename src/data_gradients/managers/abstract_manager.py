@@ -19,9 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class AnalysisManagerAbstract(abc.ABC):
-    """
-    Main dataset analyzer manager abstract class.
-    """
 
     def __init__(
         self,
