@@ -26,8 +26,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         *,
         num_classes: int,
         train_data: Iterable,
-        ignore_labels: List[int] = None,
         val_data: Optional[Iterable] = None,
+        ignore_labels: List[int] = None,
         samples_to_visualize: int = 10,
         id_to_name: Optional[Dict] = None,
         batches_early_stop: int = 999,
@@ -35,16 +35,24 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         labels_extractor: Callable = None,
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
-        short_run: bool = False
+        short_run: bool = False,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
-        :param num_classes: Number of valid classes to analyze
-        :param train_data: Iterable object contains images and labels of the training dataset
-        :param ignore_labels: List of not-valid labeled classes such as background.
-        :param val_data: Iterable object contains images and labels of the validation dataset
-        :param samples_to_visualize: Number of samples to visualize at tensorboard [0-n]
-        :param id_to_name: Class ID to class names mapping (Dictionary)
+
+        :param num_classes:             Number of valid classes to analyze
+        :param train_data:              Iterable object contains images and labels of the training dataset
+        :param val_data:                Iterable object contains images and labels of the validation dataset
+        :param ignore_labels:           List of not-valid labeled classes such as background.
+        :param samples_to_visualize:    Number of samples to visualize at tensorboard [0-n]
+        :param id_to_name:              Class ID to class names mapping (Dictionary)
+        :param batches_early_stop:      Maximum number of batches to run in training (early stop)
+        :param images_extractor:
+        :param labels_extractor:
+        :param num_image_channels:      Number of channels for each image in the dataset
+        :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
+        :param short_run:               Flag indicating whether to run for a single epoch first to estimate total duration,
+                                        before choosing the number of epochs.
         """
         super().__init__(
             train_data=train_data,
