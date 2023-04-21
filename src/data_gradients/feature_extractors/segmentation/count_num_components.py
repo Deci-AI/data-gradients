@@ -4,7 +4,7 @@ from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils.data_classes.extractor_results import Results
+from data_gradients.utils.data_classes.extractor_results import HistoResults
 
 
 class CountNumComponents(FeatureExtractorAbstract):
@@ -20,7 +20,7 @@ class CountNumComponents(FeatureExtractorAbstract):
         self._hist = {"train": dict(), "val": dict()}
         self._total_objects = {"train": 0, "val": 0}
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegBatchData):
         for image_contours in data.contours:
             num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
             self._total_objects[data.split] += num_objects_in_image
@@ -30,9 +30,9 @@ class CountNumComponents(FeatureExtractorAbstract):
 
                 self._hist[data.split].update({num_objects_in_image: 1})
 
-    def _post_process(self, split: str):
-        values, bins = self._process_data(split)
-        results = Results(
+    def aggregate_to_result_dict(self, split: str):
+        values, bins = self.aggregate(split)
+        results = HistoResults(
             bins=bins,
             values=values,
             plot="bar-plot",
@@ -47,7 +47,7 @@ class CountNumComponents(FeatureExtractorAbstract):
 
         return results
 
-    def _process_data(self, split: str):
+    def aggregate(self, split: str):
         self.merge_dict_splits(self._hist)
         hist = self._into_buckets(self._hist[split])
         values = self.normalize(hist.values(), sum(list(hist.values())))

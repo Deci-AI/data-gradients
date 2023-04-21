@@ -1,6 +1,5 @@
 import abc
 import logging
-import os
 from typing import Iterator, Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
@@ -12,7 +11,7 @@ from data_gradients.logging.log_writer import LogWriter
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.thread_manager import ThreadManager
-
+from data_gradients.visualize.segmentation import ImageVisualizer
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -29,27 +28,29 @@ class AnalysisManagerAbstract(abc.ABC):
         *,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
+        log_dir: Optional[str] = None,
         preprocessor: PreprocessorAbstract,
         extractors: List[FeatureExtractorAbstract],
-        log_writer: LogWriter,
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
+        visualizer: ImageVisualizer,
     ):
         """
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
+        :param log_dir:             Directory where to save the logs. By default uses the current working directory
         :param preprocessor:        Preprocessor object to be used before extracting features
         :param extractors:          List of feature extractors to be used
-        :param log_writer:          Logger object for logging information during analysis
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
                                     before choosing the number of epochs.
+        :param visualizer:          Visualizer object to be used for visualizing images.
         """
 
         if batches_early_stop:
-            logger.info("Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
+            logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
         self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
         self.val_size = len(train_data) if hasattr(val_data, "__len__") else None
@@ -58,7 +59,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
         # Logger
-        self._log_writer = log_writer
+        self._log_writer = LogWriter(log_dir=log_dir)
 
         self.preprocessor = preprocessor
         self.extractors = extractors
@@ -69,6 +70,7 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.warning("`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`")
             short_run = False
         self.short_run = short_run
+        self.visualizer = visualizer
 
     def _preprocess_batch(self, batch: Iterator, split: str) -> BatchData:
         batch = tuple(batch) if isinstance(batch, list) else batch
@@ -97,13 +99,13 @@ class AnalysisManagerAbstract(abc.ABC):
             if train_batch is not None:
                 preprocessed_batch = self._preprocess_batch(train_batch, "train")
                 for extractor in self.extractors:
-                    thread_manager.submit(extractor.execute, preprocessed_batch)
-                self._log_writer.visualize(preprocessed_batch)
+                    thread_manager.submit(extractor.update, preprocessed_batch)
+                self.visualizer.update(preprocessed_batch)
 
             if val_batch is not None:
                 preprocessed_batch = self._preprocess_batch(val_batch, "val")
                 for extractor in self.extractors:
-                    thread_manager.submit(extractor.execute, preprocessed_batch)
+                    thread_manager.submit(extractor.update, preprocessed_batch)
 
             if i == 0 and self.short_run:
                 thread_manager.wait_complete()
@@ -135,10 +137,14 @@ class AnalysisManagerAbstract(abc.ABC):
 
         # Post process each feature executor to json / tensorboard
         for extractor in self.extractors:
-            extractor.process(self._log_writer, self.id_to_name)
+            extractor.aggregate_and_write(self._log_writer, self.id_to_name)
+
+        for i, sample_to_visualize in enumerate(self.visualizer.samples):
+            title = f"Data Visualization/{len(self.visualizer.samples) - i}"
+            self._log_writer.log_image(title=title, image=sample_to_visualize)
 
         # Write meta data to json file
-        self._log_writer.log_meta_data(self.preprocessor)
+        self._log_writer.log_meta_data(image_route=self.preprocessor.images_route, labels_route=self.preprocessor.labels_route)
 
         # Write all text data to json file
         self._log_writer.to_json()
@@ -148,14 +154,6 @@ class AnalysisManagerAbstract(abc.ABC):
         Safe logging closing
         """
         self._log_writer.close()
-        print(
-            f'{"*" * 100}'
-            f"\nWe have finished evaluating your dataset!"
-            f"\nThe results can be seen in {self._log_writer.results_dir()}"
-            f"\n\nShow tensorboard by writing in terminal:"
-            f"\n\ttensorboard --logdir={os.path.join(os.getcwd(), self._log_writer.results_dir())} --bind_all"
-            f"\n"
-        )
 
     def run(self):
         """

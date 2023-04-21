@@ -1,14 +1,14 @@
 import numpy as np
 
-from data_gradients.logging.log_writer_utils import class_id_to_name
+from data_gradients.utils.utils import class_id_to_name
 from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
-    MultiClassProcess,
+    MultiFeatureExtractorAbstract,
 )
 from data_gradients.utils.data_classes.extractor_results import HeatMapResults
 
 
-class ComponentsCenterOfMass(MultiClassProcess):
+class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     Get all X, Y positions of center of mass of every object in every image for every class.
@@ -25,7 +25,7 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
         self.num_axis = (1, 2)
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             label_shape = data.labels[0][0].shape
             for j, cls_contours in enumerate(image_contours):
@@ -33,9 +33,9 @@ class ComponentsCenterOfMass(MultiClassProcess):
                     self._hist[data.split][contour.class_id]["x"].append(round(contour.center[0] / label_shape[1], 2))
                     self._hist[data.split][contour.class_id]["y"].append(round(contour.center[1] / label_shape[0], 2))
 
-    def _post_process(self, split: str):
+    def aggregate_to_result_dict(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        x, y = self._process_data(split)
+        x, y = self.aggregate(split)
 
         results = dict.fromkeys(self._hist[split])
         for key in self._hist[split]:
@@ -59,7 +59,7 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
         return results
 
-    def _process_data(self, split: str):
+    def aggregate(self, split: str):
         # self._hist = self.merge_dict_splits(self._hist)
         x, y = {}, {}
         for key, val in self._hist[split].items():
