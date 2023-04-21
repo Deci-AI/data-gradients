@@ -5,8 +5,8 @@ import logging
 
 import torch
 
-from data_gradients.logging.json_logger import JsonLogger
-from data_gradients.logging.tensorboard_logger import TensorBoardLogger
+from data_gradients.logging.loggers.json_logger import JsonLogger
+from data_gradients.logging.loggers.tensorboard_logger import TensorBoardLogger
 
 
 logging.basicConfig(level=logging.INFO)

@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.preprocess.segmentation_preprocess import SegmentationPreprocessor
 from data_gradients.feature_extractors import FeatureExtractorAbstract
-from data_gradients.visualize.segmentation import SegmentationImageVisualizer
+from data_gradients.visualize.image_visualizer import SegmentationImageVisualizer
 
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 

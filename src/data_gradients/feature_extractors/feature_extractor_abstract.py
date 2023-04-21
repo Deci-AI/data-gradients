@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from data_gradients.logging.log_writer import LogWriter
-from data_gradients.logging.results_logger import ResultsLogger
+from data_gradients.logging.loggers.results_logger import ResultsLogger
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.data_classes.extractor_results import HistoResults, HeatMapResults
 
