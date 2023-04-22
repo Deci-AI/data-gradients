@@ -3,7 +3,7 @@ import concurrent
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Iterator, Iterable, Optional, List, Dict, Optional
+from typing import Iterator, Iterable, List, Dict, Optional
 
 import hydra
 import tqdm
@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 class AnalysisManagerAbstract(abc.ABC):
-
     def __init__(
         self,
         *,
@@ -66,10 +65,6 @@ class AnalysisManagerAbstract(abc.ABC):
         self.sw: Optional[Stopwatch] = None
         self.batches_early_stop = batches_early_stop
         self.short_run = short_run
-
-    @abc.abstractmethod
-    def _create_logger(self) -> Logger:
-        raise NotImplementedError
 
     def build(self):
         """
@@ -140,7 +135,7 @@ class AnalysisManagerAbstract(abc.ABC):
     def measure(self):
         total_time = self.sw.estimate_total_time(self._train_dataset_size, self._val_dataset_size)
         print(f"\n\nEstimated time for the whole analyze is {total_time}")
-        inp = input(f"Do you want to shorten the amount of data to analyze? [y / n]\n")
+        inp = input("Do you want to shorten the amount of data to analyze? [y / n]\n")
         if inp == "y":
             inp = input("Please provide amount of data to analyze [%]\n")
             self.batches_early_stop = int(self._train_dataset_size * (int(inp) / 100))
