@@ -46,10 +46,10 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         if batches_early_stop:
-            logger.info("Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
+            logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
         self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
-        self.val_size = len(train_data) if hasattr(val_data, "__len__") else None
+        self.val_size = len(val_data) if hasattr(val_data, "__len__") else None
 
         self.train_iter = iter(train_data)
         self.val_iter = iter(val_data) if val_data is not None else iter([])
