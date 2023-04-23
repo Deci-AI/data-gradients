@@ -11,9 +11,8 @@ from data_gradients.visualize.image_visualizer import SegmentationImageVisualize
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 
 
-class SegmentationAnalysisManager(AnalysisManagerAbstract):
-    """
-    Main semantic segmentation manager class.
+class DetectionAnalysisManager(AnalysisManagerAbstract):
+    """Main detection manager class.
     Definition of task name, task-related preprocessor and parsing related configuration file
     """
 
@@ -23,7 +22,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         num_classes: int,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
-        config_name: str = "semantic_segmentation",
+        config_name: str = "detection",
         log_dir: Optional[str] = None,
         ignore_labels: List[int] = None,
         id_to_name: Optional[Dict] = None,
@@ -36,7 +35,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         samples_to_visualize: int = 10,
     ):
         """
-        Constructor of semantic-segmentation manager which controls the analyzer
+        Constructor of detection manager which controls the analyzer
 
         :param num_classes:             Number of valid classes to analyze
         :param train_data:              Iterable object contains images and labels of the training dataset
@@ -64,7 +63,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             threshold_value=threshold_soft_labels,
         )
 
-        extractors = _build_segmentation_extractors(config_name=config_name, number_of_classes=num_classes, ignore_labels=ignore_labels)
+        extractors = _build_detection_extractors(config_name=config_name, number_of_classes=num_classes, ignore_labels=ignore_labels)
 
         visualizer = SegmentationImageVisualizer(n_samples=samples_to_visualize)
 
@@ -81,9 +80,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         )
 
 
-def _build_segmentation_extractors(config_name: str, number_of_classes: int, ignore_labels: List[int]) -> List[FeatureExtractorAbstract]:
-    """
-    Parsing semantic segmentation configuration file with number of classes and ignore labels
+def _build_detection_extractors(config_name: str, number_of_classes: int, ignore_labels: List[int]) -> List[FeatureExtractorAbstract]:
+    """Parse detection configuration file with number of classes and ignore labels
 
     :param config_name:         Config name
     :param number_of_classes:   Number of classes

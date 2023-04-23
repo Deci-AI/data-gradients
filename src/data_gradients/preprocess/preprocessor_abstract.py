@@ -10,9 +10,9 @@ from data_gradients.utils import SegBatchData
 
 
 class PreprocessorAbstract(ABC):
-    def __init__(self, num_classes, images_extractor, labels_extractor, num_image_channels):
-        self.number_of_classes: int = num_classes
-        self._num_image_channels: int = num_image_channels
+    def __init__(self, num_classes: int, images_extractor, labels_extractor, num_image_channels: int):
+        self.number_of_classes = num_classes
+        self._num_image_channels = num_image_channels
         self._container_mapper = {"first": None, "second": None}
         self._mappers = {"first": images_extractor, "second": labels_extractor}
 

@@ -1,11 +1,11 @@
-from typing import List, Optional, Tuple, Callable
+from typing import List, Optional, Tuple
 
 import torch
 from torch import Tensor
 
 from data_gradients.utils import SegBatchData
-from data_gradients.preprocess import PreprocessorAbstract, squeeze_by_class
-from data_gradients.preprocess import contours
+from data_gradients.preprocess import PreprocessorAbstract
+from data_gradients.preprocess.segmentation import contours
 
 
 class SegmentationPreprocessor(PreprocessorAbstract):

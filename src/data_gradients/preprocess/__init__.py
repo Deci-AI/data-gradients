@@ -1,5 +1,5 @@
-from data_gradients.preprocess.preprocessor_abstract import *
-from data_gradients.preprocess.segmentation_preprocess import *
-from data_gradients.preprocess.squeeze_by_class import *
-from data_gradients.preprocess.contours import *
-from data_gradients.preprocess.container_mapping import *
+from data_gradients.preprocess.preprocessor_abstract import *  # noqa
+from data_gradients.preprocess.segmentation.segmentation_preprocess import *  # noqa
+from data_gradients.preprocess.segmentation.squeeze_by_class import *  # noqa
+from data_gradients.preprocess.segmentation.contours import *  # noqa
+from data_gradients.preprocess.container_mapping import *  # noqa
