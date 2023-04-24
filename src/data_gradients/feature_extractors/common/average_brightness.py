@@ -7,7 +7,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils import BatchData
-from data_gradients.utils.data_classes.extractor_results import HistoResults
+from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
 class AverageBrightness(FeatureExtractorAbstract):
@@ -28,9 +28,9 @@ class AverageBrightness(FeatureExtractorAbstract):
                 n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))
 
-    def _aggregate_to_result(self, split: str) -> HistoResults:
+    def _aggregate_to_result(self, split: str) -> HistogramResults:
         values, bins = self._aggregate(split)
-        results = HistoResults(
+        results = HistogramResults(
             bins=bins,
             values=list(values),
             plot="bar-plot",

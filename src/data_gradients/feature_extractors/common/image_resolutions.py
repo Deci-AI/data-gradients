@@ -2,7 +2,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils import BatchData
-from data_gradients.utils.data_classes.extractor_results import HistoResults
+from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
 class ImagesResolutions(FeatureExtractorAbstract):
@@ -20,7 +20,7 @@ class ImagesResolutions(FeatureExtractorAbstract):
 
     def _aggregate_to_result(self, split: str):
         values, bins = self._aggregate(split)
-        results = HistoResults(
+        results = HistogramResults(
             bins=bins,
             values=values,
             plot="bar-plot",

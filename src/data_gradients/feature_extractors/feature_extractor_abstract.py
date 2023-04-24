@@ -13,7 +13,7 @@ from data_gradients.logging.logger_utils import (
 )
 from data_gradients.logging.results_logger import ResultsLogger
 from data_gradients.utils.data_classes.batch_data import BatchData
-from data_gradients.utils.data_classes.extractor_results import HistoResults, HeatMapResults
+from data_gradients.utils.data_classes.extractor_results import HistogramResults, HeatMapResults
 
 
 class FeatureExtractorAbstract(ABC):
@@ -57,14 +57,14 @@ class FeatureExtractorAbstract(ABC):
         logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod
-    def _aggregate_to_result(self, split: str) -> HistoResults:
+    def _aggregate_to_result(self, split: str) -> HistogramResults:
         raise NotImplementedError
 
     @abstractmethod
     def _aggregate(self, split: str) -> Tuple[List, List]:
         raise NotImplementedError
 
-    def update_json(self, results: Union[HistoResults, HeatMapResults], ax):
+    def update_json(self, results: Union[HistogramResults, HeatMapResults], ax):
         if results.plot == "bar-plot":
             write_bar_plot(ax=ax, results=results)
         elif results.plot == "heat-map":

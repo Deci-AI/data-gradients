@@ -9,7 +9,7 @@ class VisualizationResults(ABC):
 
 
 @dataclass
-class HistoResults(VisualizationResults):
+class HistogramResults(VisualizationResults):
     bins: List = field(default_factory=list)
     values: List = field(default_factory=list)
 
@@ -30,7 +30,7 @@ class HistoResults(VisualizationResults):
 
 
 @dataclass
-class HeatMapResults(HistoResults):
+class HeatMapResults(HistogramResults):
     x: List = field(default_factory=list)
     y: List = field(default_factory=list)
     keys: List = field(default_factory=list)
