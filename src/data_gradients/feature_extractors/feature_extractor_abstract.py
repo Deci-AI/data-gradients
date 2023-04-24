@@ -13,7 +13,7 @@ from data_gradients.logging.logger_utils import (
 )
 from data_gradients.logging.results_logger import ResultsLogger
 from data_gradients.utils.data_classes.batch_data import BatchData
-from data_gradients.utils.data_classes.extractor_results import HistogramResults, HeatMapResults
+from data_gradients.utils.data_classes.extractor_results import VisualizationResults, HistogramResults, HeatMapResults
 
 
 class FeatureExtractorAbstract(ABC):
@@ -45,7 +45,7 @@ class FeatureExtractorAbstract(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _aggregate_to_result(self, split: str) -> HistogramResults:
+    def _aggregate_to_result(self, split: str) -> VisualizationResults:
         raise NotImplementedError
 
     def aggregate_and_write(self, logger: Logger, id_to_name):
