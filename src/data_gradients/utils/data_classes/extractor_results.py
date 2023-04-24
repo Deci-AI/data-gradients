@@ -1,9 +1,15 @@
 from dataclasses import dataclass, field
 from typing import List
+from abc import ABC
 
 
-@dataclass()
-class Results:
+@dataclass
+class VisualizationResults(ABC):
+    pass
+
+
+@dataclass
+class HistoResults(VisualizationResults):
     bins: List = field(default_factory=list)
     values: List = field(default_factory=list)
 
@@ -23,8 +29,8 @@ class Results:
     ticks_rotation: int = 45
 
 
-@dataclass()
-class HeatMapResults(Results):
+@dataclass
+class HeatMapResults(HistoResults):
     x: List = field(default_factory=list)
     y: List = field(default_factory=list)
     keys: List = field(default_factory=list)

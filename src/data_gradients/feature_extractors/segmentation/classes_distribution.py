@@ -3,7 +3,7 @@ from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils.data_classes.extractor_results import Results
+from data_gradients.utils.data_classes.extractor_results import HistoResults
 
 
 class GetClassDistribution(FeatureExtractorAbstract):
@@ -14,16 +14,16 @@ class GetClassDistribution(FeatureExtractorAbstract):
         self._total_objects = {"train": 0, "val": 0}
         self.ignore_labels = ignore_labels
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, cls_contours in enumerate(image_contours):
                 if cls_contours:
                     self._hist[data.split][cls_contours[0].class_id] += len(cls_contours)
                     self._total_objects[data.split] += len(cls_contours)
 
-    def _post_process(self, split: str):
-        values, bins = self._process_data(split)
-        results = Results(
+    def aggregate_to_result(self, split: str):
+        values, bins = self.aggregate(split)
+        results = HistoResults(
             bins=bins,
             values=values,
             plot="bar-plot",
@@ -38,7 +38,7 @@ class GetClassDistribution(FeatureExtractorAbstract):
         )
         return results
 
-    def _process_data(self, split: str):
+    def aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
         values = self.normalize(self._hist[split].values(), self._total_objects[split])
         bins = self._hist[split].keys()
