@@ -63,7 +63,13 @@ class SegmentationBatchValidator(BatchValidator):
 
 
 def ensure_hard_labels(labels: Tensor, n_classes_used: int, ignore_labels: List[int], threshold_value: float) -> Tensor:
-    if not check_all_integers(values=torch.unique(labels)):
+    unique_values = torch.unique(labels)
+
+    if check_all_integers(unique_values):
+        return labels
+    elif 0 <= min(unique_values) and max(unique_values) <= 1 and check_all_integers(unique_values * 255):
+        return labels * 255
+    else:
         if n_classes_used > 1:
             raise NotImplementedError(
                 f"Not supporting soft-labeling for number of classes > 1!\nGot {n_classes_used} classes, while ignore labels are {ignore_labels}."

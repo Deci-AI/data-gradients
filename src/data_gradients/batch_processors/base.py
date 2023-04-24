@@ -18,3 +18,11 @@ class BatchProcessor(ABC):
         images, labels = self.batch_validator(images, labels)
         batch = self.batch_preprocessor(images, labels)
         return batch
+
+    @property
+    def images_route(self) -> List[str]:
+        return self.batch_extractor.images_route
+
+    @property
+    def labels_route(self) -> List[str]:
+        return self.batch_extractor.labels_route
