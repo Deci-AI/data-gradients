@@ -1,4 +1,4 @@
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -19,7 +19,7 @@ class CountSmallComponents(FeatureExtractorAbstract):
         }
         self._total_objects = {"train": 0, "val": 0}
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for i, image_contours in enumerate(data.contours):
             _, labels_h, labels_w = data.labels[i].shape
             self._total_objects[data.split] += sum([len(cls_contours) for cls_contours in image_contours])

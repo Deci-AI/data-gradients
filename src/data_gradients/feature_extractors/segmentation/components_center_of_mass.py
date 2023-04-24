@@ -1,7 +1,7 @@
 import numpy as np
 
 from data_gradients.logging.logger_utils import class_id_to_name
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     MultiClassProcess,
 )
@@ -25,7 +25,7 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
         self.num_axis = (1, 2)
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for i, image_contours in enumerate(data.contours):
             label_shape = data.labels[0][0].shape
             for j, cls_contours in enumerate(image_contours):

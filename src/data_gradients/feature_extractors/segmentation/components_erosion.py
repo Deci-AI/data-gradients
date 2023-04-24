@@ -4,7 +4,7 @@ import torch
 
 from data_gradients.logging.logger_utils import class_id_to_name
 from data_gradients.preprocess import contours
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -27,7 +27,7 @@ class ErosionTest(FeatureExtractorAbstract):
         self._kernel = np.ones((3, 3), np.uint8)
         self.ignore_labels = ignore_labels
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
 
         for i, image_contours in enumerate(data.contours):
             label = data.labels[i].numpy().transpose(1, 2, 0).astype(np.uint8)

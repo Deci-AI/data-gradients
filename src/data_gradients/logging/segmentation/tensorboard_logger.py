@@ -2,11 +2,11 @@ import torch
 import torchvision
 
 from data_gradients.logging.tensorboard_logger import TensorBoardLogger
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 
 
 class SegmentationTensorBoardLogger(TensorBoardLogger):
-    def _visualize(self, batch_data: SegBatchData):
+    def _visualize(self, batch_data: SegmentationBatchData):
         images = list(batch_data.images)
         labels = list(batch_data.labels)
         num_samples_to_visualize = min(len(images), self.remaining_samples_to_visualize)

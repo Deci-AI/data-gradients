@@ -1,7 +1,7 @@
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
@@ -10,7 +10,7 @@ class LabelsResolutions(FeatureExtractorAbstract):
         super().__init__()
         self._hist = {"train": dict(), "val": dict()}
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for label in data.labels:
             res = str(tuple((label.shape[2], label.shape[1])))
             if res not in self._hist[data.split]:

@@ -3,7 +3,7 @@ import numpy as np
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
@@ -13,7 +13,7 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
         self._hist = {"train": dict(), "val": dict()}
         self._channels_last = False
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for label in data.labels:
             ar = np.round(label.shape[2] / label.shape[1], 2)
             if ar not in self._hist[data.split]:

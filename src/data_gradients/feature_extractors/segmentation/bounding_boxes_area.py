@@ -1,7 +1,7 @@
 import numpy as np
 
 from data_gradients.logging.logger_utils import class_id_to_name
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -21,7 +21,7 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
         self._hist = {"train": {k: [] for k in keys}, "val": {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for i, image_contours in enumerate(data.contours):
             img_dim = data.labels[i].shape[1] * data.labels[i].shape[2]
             for class_channel in image_contours:
