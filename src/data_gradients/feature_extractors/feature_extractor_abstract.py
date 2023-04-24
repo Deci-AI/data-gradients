@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Tuple, Dict, Optional, List, Union
+from typing import Tuple, Dict, Optional, Union
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -44,6 +44,10 @@ class FeatureExtractorAbstract(ABC):
         """Accumulate information about samples"""
         raise NotImplementedError
 
+    @abstractmethod
+    def _aggregate_to_result(self, split: str) -> HistogramResults:
+        raise NotImplementedError
+
     def aggregate_and_write(self, logger: Logger, id_to_name):
         self.id_to_name = id_to_name
         self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
@@ -55,14 +59,6 @@ class FeatureExtractorAbstract(ABC):
         self.fig.tight_layout()
         title_name = logger.get_title_name(self.__class__.__name__) + "/fig"
         logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
-
-    @abstractmethod
-    def _aggregate_to_result(self, split: str) -> HistogramResults:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _aggregate(self, split: str) -> Tuple[List, List]:
-        raise NotImplementedError
 
     def update_json(self, results: Union[HistogramResults, HeatMapResults], ax):
         if results.plot == "bar-plot":
@@ -125,8 +121,4 @@ class MultiClassProcess(FeatureExtractorAbstract):
 
     @abstractmethod
     def _aggregate_to_result(self, split: str) -> Dict[str, HeatMapResults]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _aggregate(self, split: str) -> Tuple[List, List]:
         raise NotImplementedError

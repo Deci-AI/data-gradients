@@ -30,7 +30,14 @@ class ComponentsConvexity(FeatureExtractorAbstract):
                     self._hist[data.split][contour.class_id].append(convexity_measure)
 
     def _aggregate_to_result(self, split: str):
-        values, bins = self._aggregate(split)
+        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
+        for cls in self._hist[split]:
+            if len(self._hist[split][cls]):
+                hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
+        hist = class_id_to_name(self.id_to_name, hist)
+        values = np.array(list(hist.values()))
+        bins = hist.keys()
+
         results = HistogramResults(
             values=values,
             bins=bins,
@@ -44,13 +51,3 @@ class ComponentsConvexity(FeatureExtractorAbstract):
             plot="bar-plot",
         )
         return results
-
-    def _aggregate(self, split: str):
-        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
-        for cls in self._hist[split]:
-            if len(self._hist[split][cls]):
-                hist[cls] = float(np.round(np.mean(self._hist[split][cls]), 3))
-        hist = class_id_to_name(self.id_to_name, hist)
-        values = np.array(list(hist.values()))
-        bins = hist.keys()
-        return values, bins

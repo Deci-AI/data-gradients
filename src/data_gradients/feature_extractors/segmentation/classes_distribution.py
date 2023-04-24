@@ -22,7 +22,10 @@ class GetClassDistribution(FeatureExtractorAbstract):
                     self._total_objects[data.split] += len(cls_contours)
 
     def _aggregate_to_result(self, split: str):
-        values, bins = self._aggregate(split)
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+        values = self.normalize(self._hist[split].values(), self._total_objects[split])
+        bins = self._hist[split].keys()
+
         results = HistogramResults(
             bins=bins,
             values=values,
@@ -37,9 +40,3 @@ class GetClassDistribution(FeatureExtractorAbstract):
             json_values=self._hist[split].values(),
         )
         return results
-
-    def _aggregate(self, split: str):
-        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        values = self.normalize(self._hist[split].values(), self._total_objects[split])
-        bins = self._hist[split].keys()
-        return values, bins

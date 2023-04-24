@@ -31,7 +31,11 @@ class CountNumComponents(FeatureExtractorAbstract):
                 self._hist[data.split].update({num_objects_in_image: 1})
 
     def _aggregate_to_result(self, split: str):
-        values, bins = self._aggregate(split)
+        self.merge_dict_splits(self._hist)
+        hist = self._into_buckets(self._hist[split])
+        values = self.normalize(hist.values(), sum(list(hist.values())))
+        bins = list(hist.keys())
+
         results = HistogramResults(
             bins=bins,
             values=values,
@@ -46,13 +50,6 @@ class CountNumComponents(FeatureExtractorAbstract):
         )
 
         return results
-
-    def _aggregate(self, split: str):
-        self.merge_dict_splits(self._hist)
-        hist = self._into_buckets(self._hist[split])
-        values = self.normalize(hist.values(), sum(list(hist.values())))
-        bins = hist.keys()
-        return values, bins
 
     @staticmethod
     def _into_buckets(number_of_objects_per_image):

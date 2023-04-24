@@ -29,7 +29,9 @@ class AverageBrightness(FeatureExtractorAbstract):
             self._brightness[data.split].append(np.mean(n_lightness))
 
     def _aggregate_to_result(self, split: str) -> HistogramResults:
-        values, bins = self._aggregate(split)
+        values, bins = np.histogram(self._brightness[split], bins=self._num_bins)
+        values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
+        bins = self._create_keys(bins)
         results = HistogramResults(
             bins=bins,
             values=list(values),
@@ -41,12 +43,6 @@ class AverageBrightness(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
-
-    def _aggregate(self, split: str):
-        values, bins = np.histogram(self._brightness[split], bins=self._num_bins)
-        values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
-        bins = self._create_keys(bins)
-        return values, bins
 
     @staticmethod
     def _create_keys(bins):

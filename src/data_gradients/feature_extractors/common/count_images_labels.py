@@ -25,7 +25,13 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
                 self._num_bg_images[data.split] += 1
 
     def _aggregate_to_result(self, split: str) -> HistogramResults:
-        values, bins = self._aggregate(split)
+        values = [
+            self._num_images[split],
+            self._num_labels[split],
+            self._num_bg_images[split],
+        ]
+        bins = ["images", "labels", "background images"]
+
         results = HistogramResults(
             bins=bins,
             values=values,
@@ -38,12 +44,3 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
-
-    def _aggregate(self, split: str):
-        values = [
-            self._num_images[split],
-            self._num_labels[split],
-            self._num_bg_images[split],
-        ]
-        bins = ["images", "labels", "background images"]
-        return values, bins

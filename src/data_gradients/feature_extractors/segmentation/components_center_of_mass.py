@@ -35,7 +35,12 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
     def _aggregate_to_result(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        x, y = self._aggregate(split)
+
+        # self._hist = self.merge_dict_splits(self._hist)
+        x, y = {}, {}
+        for key, val in self._hist[split].items():
+            x[key] = val["x"]
+            y[key] = val["y"]
 
         results = dict.fromkeys(self._hist[split])
         for key in self._hist[split]:
@@ -58,11 +63,3 @@ class ComponentsCenterOfMass(MultiClassProcess):
         # results.json_values = quantized_heat_map.tolist()
 
         return results
-
-    def _aggregate(self, split: str):
-        # self._hist = self.merge_dict_splits(self._hist)
-        x, y = {}, {}
-        for key, val in self._hist[split].items():
-            x[key] = val["x"]
-            y[key] = val["y"]
-        return x, y

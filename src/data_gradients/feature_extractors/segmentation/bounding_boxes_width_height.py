@@ -29,10 +29,12 @@ class WidthHeight(FeatureExtractorAbstract):
                     self._height[data.split].append(contour.h / height)
 
     def _aggregate_to_result(self, split: str):
-        x, y = self._aggregate(split)
+        width = [w for w in self._width[split] if w > 0]
+        height = [h for h in self._height[split] if h > 0]
+
         results = HeatMapResults(
-            x=x,
-            y=y,
+            x=width,
+            y=height,
             n_bins=16,
             split=split,
             plot="heat-map",
@@ -42,12 +44,7 @@ class WidthHeight(FeatureExtractorAbstract):
             keys=["Width", "Height"],
         )
 
-        quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
+        quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
         results.json_values = quantized_heat_map.tolist()
         results.keys = ["Width", "Height"]
         return results
-
-    def _aggregate(self, split: str):
-        width = [w for w in self._width[split] if w > 0]
-        height = [h for h in self._height[split] if h > 0]
-        return width, height

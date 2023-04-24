@@ -29,7 +29,10 @@ class AppearancesInImages(FeatureExtractorAbstract):
                     self._hist[data.split][j] += 1
 
     def _aggregate_to_result(self, split: str):
-        values, bins = self._aggregate(split)
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+        values = self.normalize(self._hist[split].values(), self._number_of_images[split])
+        bins = self._hist[split].keys()
+
         results = HistogramResults(
             bins=bins,
             values=values,
@@ -43,9 +46,3 @@ class AppearancesInImages(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
-
-    def _aggregate(self, split: str):
-        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        values = self.normalize(self._hist[split].values(), self._number_of_images[split])
-        bins = self._hist[split].keys()
-        return values, bins

@@ -22,7 +22,10 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
                 self._hist[data.split][ar] += 1
 
     def _aggregate_to_result(self, split: str):
-        values, bins = self._aggregate(split)
+        self.merge_dict_splits(self._hist)
+        values = list(self._hist[split].values())
+        bins = list(self._hist[split].keys())
+
         results = HistogramResults(
             bins=bins,
             values=values,
@@ -36,9 +39,3 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
-
-    def _aggregate(self, split: str):
-        self.merge_dict_splits(self._hist)
-        values = list(self._hist[split].values())
-        bins = list(self._hist[split].keys())
-        return values, bins

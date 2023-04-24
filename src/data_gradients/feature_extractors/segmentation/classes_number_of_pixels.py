@@ -30,7 +30,15 @@ class PixelsPerClass(FeatureExtractorAbstract):
                     self._hist[data.split][contour.class_id].append(size)
 
     def _aggregate_to_result(self, split: str):
-        values, bins = self._aggregate(split)
+
+        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
+        for cls in self._hist[split]:
+            if len(self._hist[split][cls]):
+                hist[cls] = float(np.round((np.mean(self._hist[split][cls])), 3))
+        values = np.array(list(hist.values()))
+        bins = self._hist[split].keys()
+
         results = HistogramResults(
             bins=bins,
             values=values,
@@ -44,13 +52,3 @@ class PixelsPerClass(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
-
-    def _aggregate(self, split: str):
-        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
-        for cls in self._hist[split]:
-            if len(self._hist[split][cls]):
-                hist[cls] = float(np.round((np.mean(self._hist[split][cls])), 3))
-        values = np.array(list(hist.values()))
-        bins = self._hist[split].keys()
-        return values, bins

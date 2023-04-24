@@ -44,7 +44,17 @@ class ErosionTest(FeatureExtractorAbstract):
                         self._hist_eroded[data.split][class_id] += len(eroded_contours)
 
     def _aggregate_to_result(self, split: str):
-        values, bins = self._aggregate(split)
+        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
+        for cls in self._hist[split]:
+            if (self._hist[split][cls]) > 0:
+                hist[cls] = np.round(100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3)
+            else:
+                hist[cls] = 0
+
+        hist = class_id_to_name(self.id_to_name, hist)
+        values = np.array(list(hist.values()))
+        bins = hist.keys()
+
         results = HistogramResults(
             values=values,
             bins=bins,
@@ -58,16 +68,3 @@ class ErosionTest(FeatureExtractorAbstract):
             plot="bar-plot",
         )
         return results
-
-    def _aggregate(self, split: str):
-        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
-        for cls in self._hist[split]:
-            if (self._hist[split][cls]) > 0:
-                hist[cls] = np.round(100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3)
-            else:
-                hist[cls] = 0
-
-        hist = class_id_to_name(self.id_to_name, hist)
-        values = np.array(list(hist.values()))
-        bins = hist.keys()
-        return values, bins
