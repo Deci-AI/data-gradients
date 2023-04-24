@@ -26,13 +26,13 @@ if __name__ == "__main__":
     """
     # Create torch DataSet
     train_dataset = BDDDataset(
-        data_folder="src/data_gradients/example_dataset/bdd_example",
+        data_folder="../src/data_gradients/example_dataset/bdd_example",
         split="train",
         transform=Compose([ToTensor()]),
         target_transform=Compose([ToTensor()]),
     )
     val_dataset = BDDDataset(
-        data_folder="src/data_gradients/example_dataset/bdd_example",
+        data_folder="../src/data_gradients/example_dataset/bdd_example",
         split="val",
         transform=Compose([ToTensor()]),
         target_transform=Compose([ToTensor()]),
