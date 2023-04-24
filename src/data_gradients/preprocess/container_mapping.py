@@ -1,4 +1,4 @@
-from typing import Mapping, Callable, Optional, Any, List, Dict, Union
+from typing import Mapping, Optional, Any, List
 import json
 
 from PIL import Image
@@ -8,7 +8,7 @@ from pygments import lexers, formatters, highlight
 from torch import Tensor
 
 
-class DataPathFinder:
+class TensorFinder:
     """
     DataPathFinder analyzes, tracks, and extracts image/label data from a Python container,
     such as a dictionary or JSON objects. It determines the container type and creates a "data_path" to the
@@ -16,76 +16,57 @@ class DataPathFinder:
     in order to extract the data.
     """
 
-    def __init__(self):
-        self.mapper: Optional[Callable] = None
-        self._data_path: List[str] = []
-        self.search_for_images: bool = True
+    def __init__(self, search_for_images: bool, objs: Any):
+        self.path_to_object: Optional[List[str]] = prompt_user_for_data_keys(objs=objs, search_for_images=search_for_images)
 
-    @property
-    def data_path(self) -> List[str]:
-        return self._data_path
-
-    def determine_mapping(self, objs: Any):
-        """
-        Check the type of the input object. Raise a NotImplementedError exception if the specific type is not handled.
-
-        :param objs: any type of object, supposed to be a Python container
-        """
-        if isinstance(objs, dict) or self.is_json(objs):
-            self._find_dict_path(objs)
-        else:
-            raise NotImplementedError
-
-    def _find_dict_path(self, objs: Union[Dict, str]):
-        """
-        Process either a JSON serialized object or a dictionary object and find the "data_path" using its keys.
-
-        :param objs: a Mapping type of object
-        """
-        self._data_path = self._get_user_input(objs, self.search_for_images)
-        self.mapper = traverse_nested_data_structure
-
-    def container_to_tensor(self, objs: Any) -> Tensor:
-        return self.mapper(objs)
-
-    @staticmethod
-    def _get_user_input(objs: Any, search_for_images: bool) -> List[str]:
-        """
-        Auxiliary method for the container_mapping recursive method. It holds the keys sequence target and asks the
-        user to input which of the above keys mapping is the right one in order to retrieve the correct data
-        (either images or labels).
-
-        :return: List of keys that if you iterate with the Get Operation (d[k]) through all of them, you will get
-                 the data you intended.
-        """
-        targets = []
-        res = container_mapping(objs, path="", targets=targets)
-        map_for_printing = json.dumps(res, indent=4, ensure_ascii=False)
-        colorful_json = highlight(map_for_printing, lexers.JsonLexer(), formatters.TerminalFormatter())
-        print(colorful_json.replace('"', ""))
-        value = int(input(f"Please insert the circled number of the required {'images' if search_for_images else 'labels'} data:\n"))
-        print(f"Path for getting objects out of container: {targets[value]}")
-        print("*" * 50)
-        keys = [r.replace("'", "").replace("[", "").replace("]", "") for r in targets[value].split("]")][:-1]
-        return keys
-
-    @staticmethod
-    def is_json(myjson) -> bool:
-        """
-        Method returns if an object is a JSON serialized object or not.
-
-        :param myjson: any object
-        :return: boolean if myjson is a JSON object
-        """
-        try:
-            json.loads(myjson)
-        except ValueError:
-            return False
-        else:
-            return True
+    def __call__(self, objs: Any) -> Tensor:
+        return traverse_nested_data_structure(data=objs, keys=self.path_to_object)
 
 
-def container_mapping(obj: Any, path: str, targets: List[str]) -> Any:
+def prompt_user_for_data_keys(objs: Any, search_for_images: bool) -> List[str]:
+    """
+    Auxiliary method for the container_mapping recursive method. It holds the keys sequence target and asks the
+    user to input which of the above keys mapping is the right one in order to retrieve the correct data
+    (either images or labels).
+
+    :return: List of keys that if you iterate with the Get Operation (d[k]) through all of them, you will get
+             the data you intended.
+    """
+
+    if not (isinstance(objs, dict) or is_valid_json(objs)):
+        raise NotImplementedError("type{type(objs)} not currently supported")  # TODO raise custom exception and catch it later on
+
+    targets = []
+    mapping = objects_mapping(objs, path="", targets=targets)
+
+    mapping_str = json.dumps(mapping, indent=4, ensure_ascii=False)
+    mapping_str = highlight(mapping_str, lexers.JsonLexer(), formatters.TerminalFormatter())
+    mapping_str = mapping_str.replace('"', "")
+    print(mapping_str)
+
+    value = int(input(f"Please insert the circled number of the required {'images' if search_for_images else 'labels'} data:\n"))
+    print(f"Path for getting objects out of container: {targets[value]}")
+    print("************************************************************")
+
+    keys = [r.replace("'", "").replace("[", "").replace("]", "") for r in targets[value].split("]")][:-1]
+    return keys
+
+
+def is_valid_json(myjson: str) -> bool:
+    """Check if an object is a JSON serialized object or not.
+
+    :param myjson: any object
+    :return: boolean if myjson is a JSON object
+    """
+    try:
+        json.loads(myjson)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def objects_mapping(obj: Any, path: str, targets: List[str]) -> Any:
     """
     Recursive function for "digging" into the mapping object it received and save a "path" to the target.
     Target is defined as one of [torch.Tensor, np.ndarray, PIL.Image],
@@ -98,7 +79,7 @@ def container_mapping(obj: Any, path: str, targets: List[str]) -> Any:
     if isinstance(obj, Mapping):
         printable_map = {}
         for k, v in obj.items():
-            printable_map[k] = container_mapping(v, path + f"['{k}']", targets)
+            printable_map[k] = objects_mapping(v, path + f"['{k}']", targets)
     elif isinstance(obj, tuple):
         types = []
         if len(obj) < 5:

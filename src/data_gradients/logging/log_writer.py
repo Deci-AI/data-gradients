@@ -27,17 +27,11 @@ class LogWriter:
         self._tb_logger = TensorBoardLogger(log_dir=log_dir)
         self._json_logger = JsonLogger(log_dir=log_dir, output_file_name="raw_data")
 
-    def log(self, title_name: str, tb_data=None, json_data=None):
+    def log(self, title: str, tb_data=None, json_data=None):
         if tb_data is not None:
-            self._tb_logger.log(title_name, tb_data)
+            self._tb_logger.log(title, tb_data)
         if json_data is not None:
-            self._json_logger.log(title_name, json_data)
-
-    def log_meta_data(self, image_route: str, labels_route: str):  # TODO: pass route directly
-        if image_route is not None:
-            self._json_logger.log("Get images out of dictionary", image_route)
-        if labels_route is not None:
-            self._json_logger.log("Get images out of dictionary", labels_route)
+            self._json_logger.log(title, json_data)
 
     def log_image(self, title: str, image: torch.Tensor) -> None:
         self._tb_logger.log_image(title=title, image=image)

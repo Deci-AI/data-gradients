@@ -144,7 +144,8 @@ class AnalysisManagerAbstract(abc.ABC):
             self._log_writer.log_image(title=title, image=sample_to_visualize)
 
         # Write meta data to json file
-        self._log_writer.log_meta_data(image_route=self.preprocessor.images_route, labels_route=self.preprocessor.labels_route)
+        self._log_writer.log(title="Get images out of dictionary", json_data=self.preprocessor.images_route)
+        self._log_writer.log(title="Get labels out of dictionary", json_data=self.preprocessor.labels_route)
 
         # Write all text data to json file
         self._log_writer.to_json()

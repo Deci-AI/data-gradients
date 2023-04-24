@@ -1,87 +1,108 @@
 from abc import ABC, abstractmethod
+from typing import Mapping, Optional, Union, Callable, Any, List
 
-from PIL.Image import Image
+import PIL
 import numpy as np
 import torch
 from torchvision.transforms import transforms
 
-from data_gradients import preprocess
-from data_gradients.utils import SegBatchData
+from data_gradients.preprocess import TensorFinder
+from data_gradients.utils import BatchData
 
 
 class PreprocessorAbstract(ABC):
-    def __init__(self, num_classes: int, images_extractor, labels_extractor, num_image_channels: int):
+    def __init__(
+        self,
+        num_classes: int,
+        num_image_channels: int,
+        images_extractor: Optional[Callable] = None,  # TODO: add more typing
+        labels_extractor: Optional[Callable] = None,
+    ):
         self.number_of_classes = num_classes
         self._num_image_channels = num_image_channels
-        self._container_mapper = {"first": None, "second": None}
-        self._mappers = {"first": images_extractor, "second": labels_extractor}
+        self._tensor_finders = {0: images_extractor, 1: labels_extractor}
 
     @abstractmethod
     def validate(self, objects):
         pass
 
     @abstractmethod
-    def preprocess(self, images, labels) -> SegBatchData:
+    def preprocess(self, images: torch.Tensor, labels) -> BatchData:
         pass
 
     @property
-    def images_route(self):
-        if self._container_mapper["first"] is not None:
-            return {"get images": self._container_mapper["first"].route}
-        else:
-            return None
+    def images_route(self) -> List[str]:
+        tensor_finder = self._tensor_finders[0]
+        # TODO: Check removing the previous dict structure will not lead to backward compatibility
+        return tensor_finder.path_to_object if isinstance(tensor_finder, TensorFinder) else []
 
     @property
-    def labels_route(self):
-        if self._container_mapper["second"] is not None:
-            return {"get labels": self._container_mapper["second"].route}
-        else:
-            return None
+    def labels_route(self) -> List[str]:
+        tensor_finder = self._tensor_finders[1]
+        return tensor_finder.path_to_object if isinstance(tensor_finder, TensorFinder) else []
 
-    @staticmethod
-    def channels_last_to_first(tensors: torch.Tensor):
-        """
-        Permute BS, W, H, C -> BS, C, W, H
-                0   1  2  3 -> 0   3  1  2
-        :param tensors: Tensor[BS, W, H, C]
-        :return: Tensor[BS, C, W, H]
-        """
-        return tensors.permute(0, 3, 1, 2)
-
-    def _to_tensor(self, objs, tuple_place: str = "") -> torch.Tensor:
-        """
-
-        :param objs:
-        :param tuple_place:
-        :return:
-        """
+    def _to_tensor(self, objs: Union[np.ndarray, PIL.Image.Image, Mapping], tuple_idx: int) -> torch.Tensor:
         if isinstance(objs, np.ndarray):
             return torch.from_numpy(objs)
-        elif isinstance(objs, Image):
+        elif isinstance(objs, PIL.Image.Image):
             return transforms.ToTensor()(objs)
         else:
-            return self._handle_dict(objs, tuple_place)
+            return self.extract_tensor_from_complex_data(objs=objs, tuple_idx=tuple_idx)
 
-    def _handle_dict(self, objs, tuple_place):
-        """
+    def extract_tensor_from_complex_data(self, objs: Any, tuple_idx: int) -> torch.Tensor:
+        mapping_fn = self.get_tensor_finder(tuple_idx=tuple_idx, objs=objs)
+        return mapping_fn(objs)
 
-        :param objs:
-        :param tuple_place:
-        :return:
-        """
-        if self._container_mapper[tuple_place] is not None:
-            return self._container_mapper[tuple_place].container_to_tensor(objs)
+    def get_tensor_finder(self, objs: Any, tuple_idx: int) -> Union[Callable, TensorFinder]:
+        if self._tensor_finders[tuple_idx] is None:
+            self._tensor_finders[tuple_idx] = TensorFinder(search_for_images=(tuple_idx == 0), objs=objs)
+        return self._tensor_finders[tuple_idx]
+
+
+class BatchValidatorAbstract(ABC):
+    def __init__(
+        self,
+        num_classes: int,
+        num_image_channels: int,
+        images_extractor: Optional[Callable] = None,  # TODO: add more typing
+        labels_extractor: Optional[Callable] = None,
+    ):
+        self.number_of_classes = num_classes
+        self._num_image_channels = num_image_channels
+        self._tensor_finders = {0: images_extractor, 1: labels_extractor}
+
+    @abstractmethod
+    def validate(self, objects):
+        pass
+
+    @abstractmethod
+    def preprocess(self, images: torch.Tensor, labels) -> BatchData:
+        pass
+
+    @property
+    def images_route(self) -> List[str]:
+        tensor_finder = self._tensor_finders[0]
+        # TODO: Check removing the previous dict structure will not lead to backward compatibility
+        return tensor_finder.path_to_object if isinstance(tensor_finder, TensorFinder) else []
+
+    @property
+    def labels_route(self) -> List[str]:
+        tensor_finder = self._tensor_finders[1]
+        return tensor_finder.path_to_object if isinstance(tensor_finder, TensorFinder) else []
+
+    def _to_tensor(self, objs: Union[np.ndarray, PIL.Image.Image, Mapping], tuple_idx: int) -> torch.Tensor:
+        if isinstance(objs, np.ndarray):
+            return torch.from_numpy(objs)
+        elif isinstance(objs, PIL.Image.Image):
+            return transforms.ToTensor()(objs)
         else:
-            self._container_mapper[tuple_place] = preprocess.ContainerMapper()
-            self._container_mapper[tuple_place].images = tuple_place == "first"
+            return self.extract_tensor_from_complex_data(objs=objs, tuple_idx=tuple_idx)
 
-            if self._mappers[tuple_place] is not None:
-                self._container_mapper[tuple_place].mapper = self._mappers[tuple_place]
-            else:
-                self._container_mapper[tuple_place].get_mapping(objs)
+    def extract_tensor_from_complex_data(self, objs: Any, tuple_idx: int) -> torch.Tensor:
+        mapping_fn = self.get_tensor_finder(tuple_idx=tuple_idx, objs=objs)
+        return mapping_fn(objs)
 
-            return self._container_mapper[tuple_place].container_to_tensor(objs)
-
-    @staticmethod
-    def _check_all_integers(values):
-        return all(v - int(v) == 0 for v in values)
+    def get_tensor_finder(self, objs: Any, tuple_idx: int) -> Union[Callable, TensorFinder]:
+        if self._tensor_finders[tuple_idx] is None:
+            self._tensor_finders[tuple_idx] = TensorFinder(search_for_images=(tuple_idx == 0), objs=objs)
+        return self._tensor_finders[tuple_idx]

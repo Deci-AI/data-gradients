@@ -49,7 +49,7 @@ class FeatureExtractorAbstract(ABC):
             self.update_json(results=results)
 
         fig.tight_layout()
-        logger.log(title_name=f"{self.name}/fig", tb_data=fig, json_data=self.json_object)
+        logger.log(title=f"{self.name}/fig", tb_data=fig, json_data=self.json_object)
 
     @abstractmethod
     def aggregate_to_result_dict(self, split: str) -> HistoResults:
@@ -102,7 +102,7 @@ class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
                 self.update_json(results=result)
 
             fig.tight_layout()
-            logger.log(title_name=f"{self.name}/{key}_{split}/fig", tb_data=fig, json_data=self.json_object)
+            logger.log(title=f"{self.name}/{key}_{split}/fig", tb_data=fig, json_data=self.json_object)
 
     @abstractmethod
     def update(self, data: BatchData):
