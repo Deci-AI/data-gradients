@@ -24,7 +24,7 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
             if label.max() == 0:
                 self._num_bg_images[data.split] += 1
 
-    def aggregate_to_result_dict(self, split: str):
+    def aggregate_to_result(self, split: str):
         values, bins = self.aggregate(split)
         results = HistoResults(
             bins=bins,

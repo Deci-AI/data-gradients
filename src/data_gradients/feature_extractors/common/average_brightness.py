@@ -28,7 +28,7 @@ class AverageBrightness(FeatureExtractorAbstract):
                 n_lightness = lightness / np.max(lightness)
             self._brightness[data.split].append(np.mean(n_lightness))
 
-    def aggregate_to_result_dict(self, split: str) -> HistoResults:
+    def aggregate_to_result(self, split: str) -> HistoResults:
         values, bins = self.aggregate(split)
         results = HistoResults(
             bins=bins,

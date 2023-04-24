@@ -44,7 +44,7 @@ class FeatureExtractorAbstract(ABC):
         fig, ax = plt.subplots(nrows=self.num_axis[0], ncols=self.num_axis[1], figsize=(10, 5))
 
         for split in ["train", "val"]:
-            results = self.aggregate_to_result_dict(split)
+            results = self.aggregate_to_result(split)
             results.write_plot(ax=ax, fig=fig)
             self.update_json(results=results)
 
@@ -52,7 +52,7 @@ class FeatureExtractorAbstract(ABC):
         logger.log(title=f"{self.name}/fig", tb_data=fig, json_data=self.json_object)
 
     @abstractmethod
-    def aggregate_to_result_dict(self, split: str) -> HistoResults:
+    def aggregate_to_result(self, split: str) -> HistoResults:
         raise NotImplementedError
 
     @abstractmethod
@@ -90,7 +90,7 @@ class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
     def aggregate_and_write(self, logger: LogWriter, id_to_name):
         self.id_to_name = id_to_name
 
-        results_dict = {"train": self.aggregate_to_result_dict("train"), "val": self.aggregate_to_result_dict("val")}
+        results_dict = {"train": self.aggregate_to_result("train"), "val": self.aggregate_to_result("val")}
 
         for key in results_dict["train"].keys():
 
@@ -109,7 +109,7 @@ class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def aggregate_to_result_dict(self, split: str) -> Dict[str, HeatMapResults]:
+    def aggregate_to_result(self, split: str) -> Dict[str, HeatMapResults]:
         raise NotImplementedError
 
     @abstractmethod
