@@ -21,7 +21,7 @@ class GetClassDistribution(FeatureExtractorAbstract):
                     self._hist[data.split][cls_contours[0].class_id] += len(cls_contours)
                     self._total_objects[data.split] += len(cls_contours)
 
-    def aggregate_to_result_dict(self, split: str):
+    def aggregate_to_result(self, split: str):
         values, bins = self.aggregate(split)
         results = HistoResults(
             bins=bins,

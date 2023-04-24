@@ -19,7 +19,7 @@ class MeanAndSTD(FeatureExtractorAbstract):
             self._hist[data.split]["mean"].append(torch.mean(image, [1, 2]))
             self._hist[data.split]["std"].append(torch.std(image, [1, 2]))
 
-    def aggregate_to_result_dict(self, split: str):
+    def aggregate_to_result(self, split: str):
         values, bins = self.aggregate(split)
         results = HistoResults(
             bins=bins,

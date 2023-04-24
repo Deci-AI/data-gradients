@@ -29,7 +29,7 @@ class ComponentsConvexity(FeatureExtractorAbstract):
                     convexity_measure = (contour.perimeter - convex_hull_perimeter) / contour.perimeter
                     self._hist[data.split][contour.class_id].append(convexity_measure)
 
-    def aggregate_to_result_dict(self, split: str):
+    def aggregate_to_result(self, split: str):
         values, bins = self.aggregate(split)
         results = HistoResults(
             values=values,
