@@ -3,14 +3,14 @@ from typing import Dict
 import numpy as np
 from matplotlib import pyplot as plt
 
-from data_gradients.utils.data_classes.extractor_results import HeatMapResults, Results
+from data_gradients.utils.data_classes.extractor_results import HeatMapResults, HistoResults
 
 
 def create_json_object(values, keys):
     return dict(zip(keys, list(values)))
 
 
-def write_bar_plot(ax, results: Results):
+def write_bar_plot(ax, results: HistoResults):
     if results.ax_grid:
         ax.grid(visible=True, axis="y")
 
@@ -87,6 +87,6 @@ def class_id_to_name(mapping, hist: Dict):
     for key in list(hist.keys()):
         try:
             new_hist.update({mapping[key]: hist[key]})
-        except KeyError as e:
+        except KeyError:
             new_hist.update({key: hist[key]})
     return new_hist

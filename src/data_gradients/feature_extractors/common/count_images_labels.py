@@ -2,7 +2,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils import BatchData
-from data_gradients.utils.data_classes.extractor_results import Results
+from data_gradients.utils.data_classes.extractor_results import HistoResults
 
 
 class NumberOfImagesLabels(FeatureExtractorAbstract):
@@ -17,16 +17,16 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
         self._num_labels = {"train": 0, "val": 0}
         self._num_bg_images = {"train": 0, "val": 0}
 
-    def _execute(self, data: BatchData):
+    def update(self, data: BatchData):
         self._num_images[data.split] += len(data.images)
         self._num_labels[data.split] += len(data.labels)
         for i, label in enumerate(data.labels):
             if label.max() == 0:
                 self._num_bg_images[data.split] += 1
 
-    def _post_process(self, split: str):
-        values, bins = self._process_data(split)
-        results = Results(
+    def aggregate_to_result_dict(self, split: str):
+        values, bins = self.aggregate(split)
+        results = HistoResults(
             bins=bins,
             values=values,
             plot="bar-plot",
@@ -39,7 +39,7 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
         )
         return results
 
-    def _process_data(self, split: str):
+    def aggregate(self, split: str):
         values = [
             self._num_images[split],
             self._num_labels[split],

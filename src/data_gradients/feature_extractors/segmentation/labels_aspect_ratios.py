@@ -4,7 +4,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils import SegBatchData
-from data_gradients.utils.data_classes.extractor_results import Results
+from data_gradients.utils.data_classes.extractor_results import HistoResults
 
 
 class LabelsAspectRatios(FeatureExtractorAbstract):
@@ -13,7 +13,7 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
         self._hist = {"train": dict(), "val": dict()}
         self._channels_last = False
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegBatchData):
         for label in data.labels:
             ar = np.round(label.shape[2] / label.shape[1], 2)
             if ar not in self._hist[data.split]:
@@ -21,9 +21,9 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
             else:
                 self._hist[data.split][ar] += 1
 
-    def _post_process(self, split: str):
-        values, bins = self._process_data(split)
-        results = Results(
+    def aggregate_to_result_dict(self, split: str):
+        values, bins = self.aggregate(split)
+        results = HistoResults(
             bins=bins,
             values=values,
             plot="bar-plot",
@@ -37,7 +37,7 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
         )
         return results
 
-    def _process_data(self, split: str):
+    def aggregate(self, split: str):
         self.merge_dict_splits(self._hist)
         values = list(self._hist[split].values())
         bins = list(self._hist[split].keys())

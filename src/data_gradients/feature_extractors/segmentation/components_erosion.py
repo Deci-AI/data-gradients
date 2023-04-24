@@ -8,7 +8,7 @@ from data_gradients.utils import SegBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils.data_classes.extractor_results import Results
+from data_gradients.utils.data_classes.extractor_results import HistoResults
 
 
 class ErosionTest(FeatureExtractorAbstract):
@@ -27,7 +27,7 @@ class ErosionTest(FeatureExtractorAbstract):
         self._kernel = np.ones((3, 3), np.uint8)
         self.ignore_labels = ignore_labels
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegBatchData):
 
         for i, image_contours in enumerate(data.contours):
             label = data.labels[i].numpy().transpose(1, 2, 0).astype(np.uint8)
@@ -43,9 +43,9 @@ class ErosionTest(FeatureExtractorAbstract):
                     if eroded_contours:
                         self._hist_eroded[data.split][class_id] += len(eroded_contours)
 
-    def _post_process(self, split: str):
-        values, bins = self._process_data(split)
-        results = Results(
+    def aggregate_to_result_dict(self, split: str):
+        values, bins = self.aggregate(split)
+        results = HistoResults(
             values=values,
             bins=bins,
             title="Erosion & contours comparing",
@@ -59,7 +59,7 @@ class ErosionTest(FeatureExtractorAbstract):
         )
         return results
 
-    def _process_data(self, split: str):
+    def aggregate(self, split: str):
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:
             if (self._hist[split][cls]) > 0:
