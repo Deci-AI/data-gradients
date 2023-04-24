@@ -33,7 +33,7 @@ class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
                     self._hist[data.split][contour.class_id]["x"].append(round(contour.center[0] / label_shape[1], 2))
                     self._hist[data.split][contour.class_id]["y"].append(round(contour.center[1] / label_shape[0], 2))
 
-    def aggregate_to_result_dict(self, split: str):
+    def aggregate_to_result(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
         x, y = self.aggregate(split)
 

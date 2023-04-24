@@ -28,7 +28,7 @@ class AppearancesInImages(FeatureExtractorAbstract):
                 if torch.max(class_channel) > 0:
                     self._hist[data.split][j] += 1
 
-    def aggregate_to_result_dict(self, split: str):
+    def aggregate_to_result(self, split: str):
         values, bins = self.aggregate(split)
         results = HistoResults(
             bins=bins,
