@@ -1,12 +1,11 @@
-from abc import ABC, abstractmethod
-from typing import Mapping, Optional, Union, Callable, Any, List, Tuple
+from typing import Optional, Callable, Union, Tuple, List, Mapping, Any
 
 import PIL
 import numpy as np
 import torch
 from torchvision.transforms import transforms
 
-from data_gradients.preprocess import TensorExtractor
+from data_gradients.batch_processors.tensor_extractor import TensorExtractor
 
 
 class BatchExtractor:
@@ -54,9 +53,3 @@ class BatchExtractor:
     def labels_route(self) -> List[str]:
         tensor_finder = self._tensor_extractor[1]
         return tensor_finder.path_to_tensor if isinstance(tensor_finder, TensorExtractor) else []
-
-
-class BatchValidatorAbstract(ABC):
-    @abstractmethod
-    def __call__(self, image: torch.Tensor, label: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        pass

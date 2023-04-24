@@ -14,7 +14,7 @@ class BDDDataset(Dataset):
     The BDD100K data and annotations can be obtained at https://bdd-data.berkeley.edu/.
     """
 
-    NUM_CLASSES = 19
+    n_classes = 19
     IGNORE_LABELS = [19]
     CLASS_ID_TO_NAMES = {
         0: "road",

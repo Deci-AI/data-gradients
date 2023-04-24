@@ -8,7 +8,7 @@ import tqdm
 
 from data_gradients.feature_extractors import FeatureExtractorAbstract
 from data_gradients.logging.log_writer import LogWriter
-from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
+from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.thread_manager import ThreadManager
 from data_gradients.visualize.image_visualizer import ImageVisualizer
@@ -29,7 +29,7 @@ class AnalysisManagerAbstract(abc.ABC):
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         log_dir: Optional[str] = None,
-        preprocessor: PreprocessorAbstract,
+        preprocessor: BatchProcessor,
         extractors: List[FeatureExtractorAbstract],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
@@ -74,8 +74,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
     def _preprocess_batch(self, batch: Iterator, split: str) -> BatchData:
         batch = tuple(batch) if isinstance(batch, list) else batch
-        images, labels = self.preprocessor.validate(batch)
-        preprocessed_batch = self.preprocessor.preprocess(images, labels)
+        preprocessed_batch = self.preprocessor(batch)
         preprocessed_batch.split = split
         return preprocessed_batch
 

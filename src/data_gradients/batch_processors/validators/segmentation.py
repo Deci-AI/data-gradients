@@ -1,47 +1,37 @@
-from typing import List, Optional, Tuple
+from typing import Optional, List, Tuple
 
 import torch
 from torch import Tensor
 
-from data_gradients.utils import SegBatchData
-from data_gradients.preprocess import BatchValidatorAbstract
-from data_gradients.preprocess.segmentation.contours import get_contours
-from data_gradients.preprocess.utils import channels_last_to_first, check_all_integers
+from data_gradients.batch_processors.validators.base import BatchValidator
+from data_gradients.batch_processors.utils import check_all_integers, channels_last_to_first
 
 
-class SegmentationPreprocessor:
-    def __call__(self, images: Tensor, labels: Tensor, require_onehot: bool) -> SegBatchData:
-
-        contours = [get_contours(onehot_label) for onehot_label in labels]
-
-        return SegBatchData(images=images, labels=labels, contours=contours, split="")
-
-
-class SegmentationBatchValidator(BatchValidatorAbstract):
+class SegmentationBatchValidator(BatchValidator):
     """
     Segmentation validator class
     """
 
     def __init__(
         self,
-        num_classes: int,
-        num_image_channels: int,
+        n_classes: int,
+        n_image_channels: int,
         threshold_value: float,
         ignore_labels: Optional[List[int]] = None,
     ):
         """
         Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
-        :param num_classes: number of valid classes
+        :param n_classes: number of valid classes
         :param ignore_labels: list of numbers that we should avoid from analyzing as valid classes, such as background
         """
-        self.n_classes_used = num_classes
-        self.n_image_channels = num_image_channels
+        self.n_classes_used = n_classes
+        self.n_image_channels = n_image_channels
         self.ignore_labels = ignore_labels or []
 
         self.threshold_value = threshold_value
         self.is_input_soft_label = None
 
-    def validate(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
+    def __call__(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """
         Validating object came out of next() method activated on the iterator.
         Check & Fix length, type, dimensions, channels-first, pixel values and checks if onehot
@@ -127,7 +117,7 @@ def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]
         input_n_classes = labels.shape[1]
         if input_n_classes not in valid_n_classes and labels.shape[-1] not in valid_n_classes:
             raise ValueError(
-                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes + len(ignore_labels)"
+                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or n_classes + len(ignore_labels)"
                 f" ({total_n_classes}). Got: {input_n_classes}"
             )
         return labels
@@ -137,7 +127,7 @@ def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]
 
 def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
     """
-    Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
+    Method gets label with the shape of [BS, N, W, H] where N is either 1 or n_classes, if is_one_hot=True.
     param label: Tensor
     param is_one_hot: Determine if labels are one-hot shaped
     :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.

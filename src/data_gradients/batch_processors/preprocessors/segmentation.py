@@ -1,11 +1,23 @@
 from typing import List
 
 import torch
+from torch import Tensor
+
+
+from data_gradients.utils import SegBatchData
+from data_gradients.batch_processors.preprocessors.base import Preprocessor
+from data_gradients.batch_processors.preprocessors.contours import get_contours
+
+
+class SegmentationPreprocessor(Preprocessor):
+    def __call__(self, images: Tensor, labels: Tensor) -> SegBatchData:
+        contours = [get_contours(onehot_label) for onehot_label in labels]
+        return SegBatchData(images=images, labels=labels, contours=contours, split="")
 
 
 def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool, ignore_labels: List) -> torch.Tensor:
     """
-    Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
+    Method gets label with the shape of [BS, N, W, H] where N is either 1 or n_classes, if is_one_hot=True.
     param label: Tensor
     param is_one_hot: Determine if labels are one-hot shaped
     :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
