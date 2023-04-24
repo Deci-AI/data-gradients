@@ -28,7 +28,7 @@ class WidthHeight(FeatureExtractorAbstract):
                     self._width[data.split].append(contour.w / width)
                     self._height[data.split].append(contour.h / height)
 
-    def _aggregate_to_result(self, split: str):
+    def _aggregate(self, split: str):
         width = [w for w in self._width[split] if w > 0]
         height = [h for h in self._height[split] if h > 0]
 

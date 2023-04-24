@@ -43,7 +43,7 @@ class ErosionTest(FeatureExtractorAbstract):
                     if eroded_contours:
                         self._hist_eroded[data.split][class_id] += len(eroded_contours)
 
-    def _aggregate_to_result(self, split: str):
+    def _aggregate(self, split: str):
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:
             if (self._hist[split][cls]) > 0:

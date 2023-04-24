@@ -19,7 +19,7 @@ class MeanAndSTD(FeatureExtractorAbstract):
             self._hist[data.split]["mean"].append(torch.mean(image, [1, 2]))
             self._hist[data.split]["std"].append(torch.std(image, [1, 2]))
 
-    def _aggregate_to_result(self, split: str):
+    def _aggregate(self, split: str):
 
         self.merge_dict_splits(self._hist)
         bgr_means = np.zeros(3)

@@ -18,7 +18,7 @@ class ImagesResolutions(FeatureExtractorAbstract):
             else:
                 self._hist[data.split][res] += 1
 
-    def _aggregate_to_result(self, split: str):
+    def _aggregate(self, split: str):
         self.merge_dict_splits(self._hist)
         values = list(self._hist[split].values())
         bins = list(self._hist[split].keys())

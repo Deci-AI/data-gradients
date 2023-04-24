@@ -24,7 +24,7 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
             if label.max() == 0:
                 self._num_bg_images[data.split] += 1
 
-    def _aggregate_to_result(self, split: str) -> HistogramResults:
+    def _aggregate(self, split: str) -> HistogramResults:
         values = [
             self._num_images[split],
             self._num_labels[split],

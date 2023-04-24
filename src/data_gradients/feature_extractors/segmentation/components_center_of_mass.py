@@ -33,7 +33,7 @@ class ComponentsCenterOfMass(MultiClassProcess):
                     self._hist[data.split][contour.class_id]["x"].append(round(contour.center[0] / label_shape[1], 2))
                     self._hist[data.split][contour.class_id]["y"].append(round(contour.center[1] / label_shape[0], 2))
 
-    def _aggregate_to_result(self, split: str):
+    def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
 
         # self._hist = self.merge_dict_splits(self._hist)

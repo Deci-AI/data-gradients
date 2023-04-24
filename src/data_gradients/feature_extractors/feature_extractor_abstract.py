@@ -45,7 +45,7 @@ class FeatureExtractorAbstract(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _aggregate_to_result(self, split: str) -> VisualizationResults:
+    def _aggregate(self, split: str) -> VisualizationResults:
         raise NotImplementedError
 
     def aggregate_and_write(self, logger: Logger, id_to_name):
@@ -53,7 +53,7 @@ class FeatureExtractorAbstract(ABC):
         self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
 
         for split in ["train", "val"]:
-            results = self._aggregate_to_result(split)
+            results = self._aggregate(split)
             self.update_json(results, ax)
 
         self.fig.tight_layout()
@@ -101,7 +101,7 @@ class MultiClassProcess(FeatureExtractorAbstract):
 
         results = dict.fromkeys(["train", "val"])
         for split in results:
-            results[split] = self._aggregate_to_result(split)
+            results[split] = self._aggregate(split)
 
         for key in results["train"].keys():
 
@@ -120,5 +120,5 @@ class MultiClassProcess(FeatureExtractorAbstract):
         raise NotImplementedError
 
     @abstractmethod
-    def _aggregate_to_result(self, split: str) -> Dict[str, HeatMapResults]:
+    def _aggregate(self, split: str) -> Dict[str, HeatMapResults]:
         raise NotImplementedError
