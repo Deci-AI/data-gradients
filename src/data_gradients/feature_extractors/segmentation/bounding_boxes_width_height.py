@@ -45,6 +45,6 @@ class WidthHeight(FeatureExtractorAbstract):
         )
 
         quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
-        results.json_values = quantized_heat_map.tolist()
+        results.values_to_log = quantized_heat_map.tolist()
         results.keys = ["Width", "Height"]
         return results

@@ -56,8 +56,8 @@ class ErosionTest(FeatureExtractorAbstract):
         bins = hist.keys()
 
         results = HistogramResults(
-            values=values,
-            bins=bins,
+            bin_values=values,
+            bin_names=bins,
             title="Erosion & contours comparing",
             x_label="Class",
             y_label="% of disappearing contours after Erosion",

@@ -27,8 +27,8 @@ class GetClassDistribution(FeatureExtractorAbstract):
         bins = self._hist[split].keys()
 
         results = HistogramResults(
-            bins=bins,
-            values=values,
+            bin_names=bins,
+            bin_values=values,
             plot="bar-plot",
             split=split,
             title="Classes distribution across dataset",
@@ -37,6 +37,6 @@ class GetClassDistribution(FeatureExtractorAbstract):
             y_label="# Class instances [%]",
             y_ticks=True,
             ax_grid=True,
-            json_values=self._hist[split].values(),
+            values_to_log=list(self._hist[split].values()),
         )
         return results

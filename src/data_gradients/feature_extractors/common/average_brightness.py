@@ -33,8 +33,8 @@ class AverageBrightness(FeatureExtractorAbstract):
         values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
         bins = self._create_keys(bins)
         results = HistogramResults(
-            bins=bins,
-            values=list(values),
+            bin_names=bins,
+            bin_values=list(values),
             plot="bar-plot",
             split=split,
             title="Average brightness of images",

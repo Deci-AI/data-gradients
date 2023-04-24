@@ -33,8 +33,8 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
         bins = ["images", "labels", "background images"]
 
         results = HistogramResults(
-            bins=bins,
-            values=values,
+            bin_names=bins,
+            bin_values=values,
             plot="bar-plot",
             split=split,
             title="# Images & Labels",

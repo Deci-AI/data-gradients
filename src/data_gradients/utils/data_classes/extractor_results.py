@@ -1,19 +1,24 @@
 from dataclasses import dataclass, field
-from typing import List
-from abc import ABC
+from typing import List, Dict
+from abc import ABC, abstractmethod
 
 
 @dataclass
 class VisualizationResults(ABC):
     pass
 
+    @property
+    @abstractmethod
+    def json_values(self) -> dict:
+        pass
+
 
 @dataclass
 class HistogramResults(VisualizationResults):
-    bins: List = field(default_factory=list)
-    values: List = field(default_factory=list)
+    bin_names: List = field(default_factory=list)
+    bin_values: List = field(default_factory=list)
 
-    json_values: List = field(default_factory=list)
+    values_to_log: List = field(default_factory=list)
 
     plot: str = ""
     split: str = ""
@@ -28,6 +33,15 @@ class HistogramResults(VisualizationResults):
 
     ticks_rotation: int = 45
 
+    @property
+    def json_values(self) -> Dict[str, float]:
+        return dict(
+            zip(
+                self.bin_names,
+                self.values_to_log if self.values_to_log else self.bin_values,
+            )
+        )
+
 
 @dataclass
 class HeatMapResults(HistogramResults):
@@ -38,3 +52,12 @@ class HeatMapResults(HistogramResults):
     n_bins: int = 50
     range: List = field(default_factory=list)
     invert: bool = False
+
+    @property
+    def json_values(self) -> Dict[str, float]:
+        return dict(
+            zip(
+                self.bin_names if self.bin_names else self.keys,
+                self.values_to_log if self.values_to_log else self.bin_values,
+            )
+        )

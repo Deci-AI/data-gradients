@@ -26,8 +26,8 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
         bins = list(self._hist[split].keys())
 
         results = HistogramResults(
-            bins=bins,
-            values=values,
+            bin_names=bins,
+            bin_values=values,
             plot="bar-plot",
             split=split,
             color=self.colors[split],

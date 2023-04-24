@@ -7,7 +7,6 @@ from matplotlib import pyplot as plt
 
 from data_gradients.logging.logger import Logger
 from data_gradients.logging.logger_utils import (
-    create_json_object,
     write_bar_plot,
     write_heatmap_plot,
 )
@@ -71,11 +70,7 @@ class FeatureExtractorAbstract(ABC):
              while only supported plots are ['bar-plot', 'heat-map']"
             )
 
-        json_obj = create_json_object(
-            results.json_values if results.json_values else results.values,
-            results.bins if results.bins else results.keys,
-        )
-        self.json_object.update({results.split: json_obj})
+        self.json_object.update({results.split: results.json_values})
 
     @staticmethod
     def merge_dict_splits(hist: Dict):

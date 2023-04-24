@@ -39,8 +39,8 @@ class ComponentsConvexity(FeatureExtractorAbstract):
         bins = hist.keys()
 
         results = HistogramResults(
-            values=values,
-            bins=bins,
+            bin_values=values,
+            bin_names=bins,
             x_label="Class",
             y_label="Convexity measure",
             title="Convexity of components",
