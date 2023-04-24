@@ -28,8 +28,8 @@ class WidthHeight(FeatureExtractorAbstract):
                     self._width[data.split].append(contour.w / width)
                     self._height[data.split].append(contour.h / height)
 
-    def aggregate_to_result(self, split: str):
-        x, y = self.aggregate(split)
+    def _aggregate_to_result(self, split: str):
+        x, y = self._aggregate(split)
         results = HeatMapResults(
             x=x,
             y=y,
@@ -47,7 +47,7 @@ class WidthHeight(FeatureExtractorAbstract):
         results.keys = ["Width", "Height"]
         return results
 
-    def aggregate(self, split: str):
+    def _aggregate(self, split: str):
         width = [w for w in self._width[split] if w > 0]
         height = [h for h in self._height[split] if h > 0]
         return width, height

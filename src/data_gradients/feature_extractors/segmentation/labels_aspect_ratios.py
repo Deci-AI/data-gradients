@@ -21,8 +21,8 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
             else:
                 self._hist[data.split][ar] += 1
 
-    def aggregate_to_result(self, split: str):
-        values, bins = self.aggregate(split)
+    def _aggregate_to_result(self, split: str):
+        values, bins = self._aggregate(split)
         results = HistoResults(
             bins=bins,
             values=values,
@@ -37,7 +37,7 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
         )
         return results
 
-    def aggregate(self, split: str):
+    def _aggregate(self, split: str):
         self.merge_dict_splits(self._hist)
         values = list(self._hist[split].values())
         bins = list(self._hist[split].keys())

@@ -29,8 +29,8 @@ class PixelsPerClass(FeatureExtractorAbstract):
                     size = np.round(100 * contour.area / img_dim, 3)
                     self._hist[data.split][contour.class_id].append(size)
 
-    def aggregate_to_result(self, split: str):
-        values, bins = self.aggregate(split)
+    def _aggregate_to_result(self, split: str):
+        values, bins = self._aggregate(split)
         results = HistoResults(
             bins=bins,
             values=values,
@@ -45,7 +45,7 @@ class PixelsPerClass(FeatureExtractorAbstract):
         )
         return results
 
-    def aggregate(self, split: str):
+    def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:

@@ -30,8 +30,8 @@ class CountNumComponents(FeatureExtractorAbstract):
 
                 self._hist[data.split].update({num_objects_in_image: 1})
 
-    def aggregate_to_result(self, split: str):
-        values, bins = self.aggregate(split)
+    def _aggregate_to_result(self, split: str):
+        values, bins = self._aggregate(split)
         results = HistoResults(
             bins=bins,
             values=values,
@@ -47,7 +47,7 @@ class CountNumComponents(FeatureExtractorAbstract):
 
         return results
 
-    def aggregate(self, split: str):
+    def _aggregate(self, split: str):
         self.merge_dict_splits(self._hist)
         hist = self._into_buckets(self._hist[split])
         values = self.normalize(hist.values(), sum(list(hist.values())))

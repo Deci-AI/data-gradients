@@ -27,8 +27,8 @@ class CountSmallComponents(FeatureExtractorAbstract):
                 for contour in class_contours:
                     self._hist[data.split][f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
 
-    def aggregate_to_result(self, split: str):
-        values, bins = self.aggregate(split)
+    def _aggregate_to_result(self, split: str):
+        values, bins = self._aggregate(split)
         results = HistoResults(
             bins=bins,
             values=values,
@@ -43,7 +43,7 @@ class CountSmallComponents(FeatureExtractorAbstract):
         )
         return results
 
-    def aggregate(self, split: str):
+    def _aggregate(self, split: str):
         values = self.normalize(self._hist[split].values(), self._total_objects[split])
         bins = list(self._hist[split].keys())
         return values, bins

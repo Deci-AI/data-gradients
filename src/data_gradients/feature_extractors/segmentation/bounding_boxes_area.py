@@ -28,8 +28,8 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
                 for contour in class_channel:
                     self._hist[data.split][contour.class_id].append(100 * int(contour.bbox_area) / img_dim)
 
-    def aggregate_to_result(self, split: str):
-        values, bins = self.aggregate(split)
+    def _aggregate_to_result(self, split: str):
+        values, bins = self._aggregate(split)
         results = HistoResults(
             bins=bins,
             values=values,
@@ -44,7 +44,7 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
         )
         return results
 
-    def aggregate(self, split: str):
+    def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:
