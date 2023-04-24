@@ -4,201 +4,17 @@ import torch
 from torch import Tensor
 
 from data_gradients.utils import SegBatchData
-from data_gradients.preprocess import PreprocessorAbstract, BatchValidatorAbstract
-from data_gradients.preprocess.segmentation import contours
+from data_gradients.preprocess import BatchValidatorAbstract
+from data_gradients.preprocess.segmentation.contours import get_contours
 from data_gradients.preprocess.utils import channels_last_to_first, check_all_integers
 
 
-class SegmentationPreprocessor(PreprocessorAbstract):
-    """
-    Segmentation preprocessor class
-    """
+class SegmentationPreprocessor:
+    def __call__(self, images: Tensor, labels: Tensor, require_onehot: bool) -> SegBatchData:
 
-    def __init__(
-        self,
-        num_classes,
-        ignore_labels,
-        images_extractor,
-        labels_extractor,
-        num_image_channels,
-        threshold_value,
-    ):
-        """
-        Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
-        :param num_classes: number of valid classes
-        :param ignore_labels: list of numbers that we should avoid from analyzing as valid classes, such as background
-        """
-        super().__init__(num_classes, num_image_channels, images_extractor, labels_extractor)
-        self._onehot: bool = False
+        contours = [get_contours(onehot_label) for onehot_label in labels]
 
-        self._ignore_labels: List[int] = ignore_labels
-        self.threshold_value = threshold_value
-        self._soft_labels = False
-        self._binary = False
-
-    @property
-    def ignore_labels(self) -> List[int]:
-        return self._ignore_labels if self._ignore_labels is not None else []
-
-    def _type_validate(self, objs):
-        """
-        Required: A Tuple (Sequence) with length 2, representing (images, labels).
-        If any of (images, labels) are not Tensors, convert them.
-        :param objs: output of next(iterator)
-        :return: (images, labels) as Tuple[Tensor, Tensor]
-        """
-        if isinstance(objs, Tuple) or isinstance(objs, List):
-            if len(objs) == 2:
-                images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], tuple_idx=0)
-                labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], tuple_idx=1)
-            else:
-                raise NotImplementedError(f"Got tuple/list object with length {len(objs)}! Supporting only len == 2")
-        elif isinstance(objs, dict):
-            images = self.extract_tensor_from_complex_data(objs, 0)
-            labels = self.extract_tensor_from_complex_data(objs, 1)
-        else:
-            raise NotImplementedError(f"Got object {type(objs)} from Iterator - supporting dict, tuples and lists Only!")
-        return images, labels
-
-    def _dim_validate_labels(self, labels: Tensor):
-        """
-        Validating labels dimensions are (BS, N, W, H) where N is either 1 or number of valid classes
-        :param labels: Tensor [BS, N, W, H]
-        :return: labels: Tensor [BS, N, W, H]
-        """
-        if labels.dim() == 3:
-            # Probably (B, W, H)
-            labels = labels.unsqueeze(1)
-            return labels
-
-        if labels.dim() != 4:
-            raise ValueError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
-
-        valid = [self.number_of_classes + len(self.ignore_labels), 1]
-        if labels.shape[1] not in valid and labels.shape[-1] not in valid:
-            raise ValueError(
-                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes + len(ignore_labels)"
-                f" ({self.number_of_classes + len(self.ignore_labels)}). Got: {labels.shape[1]}"
-            )
-
-        return labels
-
-    def _normalize_validate(self, labels: Tensor):
-        """
-        Pixel values for labels are representing class id's, hence they are in the range of [0, 255] or normalized
-        in [0, 1] representing (1/255, 2/255, ...).
-        :param labels: Tensor [BS, N, W, H]
-        :return: labels: Tensor [BS, N, W, H]
-        """
-        unique_values = torch.unique(labels)
-
-        if check_all_integers(unique_values):
-            pass
-        elif 0 <= min(unique_values) and max(unique_values) <= 1 and check_all_integers(unique_values * 255):
-            labels = labels * 255
-        else:
-            print(f"\nFound Soft labels! There are {len(unique_values)} unique values! max is: {max(unique_values)}," f" min is {min(unique_values)}")
-            print(f"Thresholding to [0, 1] with threshold value {self.threshold_value}")
-            if self.number_of_classes > 1:
-                raise NotImplementedError(
-                    "Not supporting soft-labeling for number of classes > 1! "
-                    f"Got {self.number_of_classes} # classes,"
-                    f" while ignore labels are {self.ignore_labels}."
-                )
-            self._soft_labels = True
-            labels = binary_mask_above_threshold(labels)
-        return labels
-
-    def _channels_first_validate_labels(self, labels: Tensor):
-        """
-        Labels should be [BS, N, W, H]. If [BS, W, H, N], permute
-        :param labels: Tensor
-        :return: labels: Tensor [BS, N, W, H]
-        """
-        # B, W, H, C-> B, C, W, H
-        if labels.shape[1] not in [self.number_of_classes + len(self.ignore_labels), 1]:
-            labels = channels_last_to_first(labels)
-        return labels
-
-    @staticmethod
-    def _nan_validate(objects):
-        nans = torch.isnan(objects)
-        if nans.any():
-            nan_indices = set(nans.nonzero()[:, 0].tolist())
-            all_indices = set(i for i in range(objects.shape[0]))
-            valid_indices = all_indices - nan_indices
-            return objects[valid_indices]
-        return objects
-
-    def validate(self, objects: Optional[Tuple]) -> Tuple[Tensor, Tensor]:
-        """
-        Validating object came out of next() method activated on the iterator.
-        Check & Fix length, type, dimensions, channels-first, pixel values and checks if onehot
-        :param objects: Tuple from next(Iterator)
-        :return: images, labels as Tuple[Tensor, Tensor] with shape [[BS, C, W, H], [BS, N, W, H]]
-        """
-        images, labels = self._type_validate(objects)
-
-        images = self._nan_validate(images)
-        labels = self._nan_validate(labels)
-
-        images = self._dim_validate_images(images)
-        labels = self._dim_validate_labels(labels)
-
-        images = self._channels_first_validate_images(images)
-        labels = self._channels_first_validate_labels(labels)
-
-        if self._soft_labels:
-            labels = binary_mask_above_threshold(labels)
-
-        labels = self._normalize_validate(labels)
-
-        self._binary = self.number_of_classes == 1
-        self._onehot = labels.shape[1] == (self.number_of_classes + len(self.ignore_labels)) and not self._binary
-
-        return images, labels
-
-    def preprocess(self, images: Tensor, labels: Tensor) -> SegBatchData:
-        """
-        Preprocess method gets images and labels tensors and returns a segmentation dedicated data class.
-        Images are tensor with [BS, C, W, H], Labels are without ignore labels representation and with the
-        squeeze-by-class format, which means every VALID class gets a designated channel, with the unique values of
-        <class-num> and 0.
-        <class-num> pixel says "this is object of class <class-num>", 0 says "no object of class <class-num>".
-        :param images: Tensor
-        :param labels: Tensor
-        :return: SegBatchData
-        """
-        # To One Hot
-        if not self._binary and not self._onehot:
-            labels = self._to_one_hot(labels)
-
-        # Remove ignore label
-        for ignore_label in self.ignore_labels:
-            labels[:, ignore_label, ...] = torch.zeros_like(labels[:, ignore_label, ...])
-
-        all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
-
-        sbd = SegBatchData(images=images, labels=labels, contours=all_contours, split="")
-
-        return sbd
-
-    def _to_one_hot(self, labels: torch.Tensor) -> torch.Tensor:
-        """
-        Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
-        param label: Tensor
-        param is_one_hot: Determine if labels are one-hot shaped
-        :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
-        """
-        masks = []
-        labels = labels.to(torch.int64)
-
-        for label in labels:
-            label = torch.nn.functional.one_hot(label, self.number_of_classes + len(self.ignore_labels))
-            masks.append(label)
-        labels = torch.concat(masks, dim=0).permute(0, -1, 1, 2)
-
-        return labels
+        return SegBatchData(images=images, labels=labels, contours=contours, split="")
 
 
 class SegmentationBatchValidator(BatchValidatorAbstract):
@@ -208,164 +24,80 @@ class SegmentationBatchValidator(BatchValidatorAbstract):
 
     def __init__(
         self,
-        num_classes,
-        ignore_labels,
-        images_extractor,
-        labels_extractor,
-        num_image_channels,
-        threshold_value,
+        num_classes: int,
+        num_image_channels: int,
+        threshold_value: float,
+        ignore_labels: Optional[List[int]] = None,
     ):
         """
         Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
         :param num_classes: number of valid classes
         :param ignore_labels: list of numbers that we should avoid from analyzing as valid classes, such as background
         """
-        super().__init__(num_classes, num_image_channels, images_extractor, labels_extractor)
-        self._onehot: bool = False
+        self.n_classes_used = num_classes
+        self.n_image_channels = num_image_channels
+        self.ignore_labels = ignore_labels or []
 
-        self._ignore_labels: List[int] = ignore_labels
         self.threshold_value = threshold_value
-        self._soft_labels = False
-        self._binary = False
+        self.is_input_soft_label = None
 
-    @property
-    def ignore_labels(self) -> List[int]:
-        return self._ignore_labels if self._ignore_labels is not None else []
-
-    def extract_image_labels(self, objs):
-        """
-        Required: A Tuple (Sequence) with length 2, representing (images, labels).
-        If any of (images, labels) are not Tensors, convert them.
-        :param objs: output of next(iterator)
-        :return: (images, labels) as Tuple[Tensor, Tensor]
-        """
-        if isinstance(objs, Tuple) or isinstance(objs, List):
-            if len(objs) == 2:
-                images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], tuple_idx=0)
-                labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], tuple_idx=1)
-            else:
-                raise NotImplementedError(f"Got tuple/list object with length {len(objs)}! Supporting only len == 2")
-        elif isinstance(objs, dict):
-            images = self.extract_tensor_from_complex_data(objs, 0)
-            labels = self.extract_tensor_from_complex_data(objs, 1)
-        else:
-            raise NotImplementedError(f"Got object {type(objs)} from Iterator - supporting dict, tuples and lists Only!")
-        return images, labels
-
-    def _dim_validate_images(self, images: Tensor):
-        """
-        Validating images dimensions are (BS, Channels, W, H)
-        :param images: Tensor [BS, C, W, H]
-        :return: images: Tensor [BS, C, W, H]
-        """
-        if images.dim() != 4:
-            raise ValueError(f"Images batch shape should be (BatchSize x Channels x Width x Height). Got {images.shape}")
-
-        if images.shape[1] != self._num_image_channels and images.shape[-1] != self._num_image_channels:
-            raise ValueError(f"Images should have {self._num_image_channels} number of channels. Got {min(images[0].shape)}")
-        return images
-
-    def _dim_validate_labels(self, labels: Tensor):
-        """
-        Validating labels dimensions are (BS, N, W, H) where N is either 1 or number of valid classes
-        :param labels: Tensor [BS, N, W, H]
-        :return: labels: Tensor [BS, N, W, H]
-        """
-        if labels.dim() == 3:
-            # Probably (B, W, H)
-            labels = labels.unsqueeze(1)
-            return labels
-
-        if labels.dim() != 4:
-            raise ValueError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
-
-        valid = [self.number_of_classes + len(self.ignore_labels), 1]
-        if labels.shape[1] not in valid and labels.shape[-1] not in valid:
-            raise ValueError(
-                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes + len(ignore_labels)"
-                f" ({self.number_of_classes + len(self.ignore_labels)}). Got: {labels.shape[1]}"
-            )
-
-        return labels
-
-    def _normalize_validate(self, labels: Tensor):
-        """
-        Pixel values for labels are representing class id's, hence they are in the range of [0, 255] or normalized
-        in [0, 1] representing (1/255, 2/255, ...).
-        :param labels: Tensor [BS, N, W, H]
-        :return: labels: Tensor [BS, N, W, H]
-        """
-        unique_values = torch.unique(labels)
-
-        if check_all_integers(unique_values):
-            pass
-        elif 0 <= min(unique_values) and max(unique_values) <= 1 and check_all_integers(unique_values * 255):
-            labels = labels * 255
-        else:
-            print(f"\nFound Soft labels! There are {len(unique_values)} unique values! max is: {max(unique_values)}," f" min is {min(unique_values)}")
-            print(f"Thresholding to [0, 1] with threshold value {self.threshold_value}")
-            if self.number_of_classes > 1:
-                raise NotImplementedError(
-                    "Not supporting soft-labeling for number of classes > 1! "
-                    f"Got {self.number_of_classes} # classes,"
-                    f" while ignore labels are {self.ignore_labels}."
-                )
-            self._soft_labels = True
-            labels = binary_mask_above_threshold(labels=labels, threshold_value=self.threshold_value)
-        return labels
-
-    def _channels_first_validate_images(self, images: Tensor):
-        """
-        Images should be [BS, C, W, H]. If [BS, W, H, C], permute
-        :param images: Tensor
-        :return: images: Tensor [BS, C, W, H]
-        """
-        if images.shape[1] != self._num_image_channels and images.shape[-1] == self._num_image_channels:
-            images = channels_last_to_first(images)
-        return images
-
-    def _channels_first_validate_labels(self, labels: Tensor):
-        """
-        Labels should be [BS, N, W, H]. If [BS, W, H, N], permute
-        :param labels: Tensor
-        :return: labels: Tensor [BS, N, W, H]
-        """
-        # B, W, H, C-> B, C, W, H
-        if labels.shape[1] not in [self.number_of_classes + len(self.ignore_labels), 1]:
-            labels = channels_last_to_first(labels)
-        return labels
-
-    @staticmethod
-    def validate(self, objects: Optional[Tuple]) -> Tuple[Tensor, Tensor]:
+    def validate(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """
         Validating object came out of next() method activated on the iterator.
         Check & Fix length, type, dimensions, channels-first, pixel values and checks if onehot
         :param objects: Tuple from next(Iterator)
         :return: images, labels as Tuple[Tensor, Tensor] with shape [[BS, C, W, H], [BS, N, W, H]]
         """
-        images, labels = self.extract_image_labels(objects)
-
         images = drop_nan(images)
         labels = drop_nan(labels)
 
-        check_n_image_channels_validity(images, n_image_channels=self._num_image_channels)
-        check_n_image_channels_validity(labels, n_image_channels=self._num_image_channels)
+        images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
+        labels = ensure_labels_shape(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
 
-        images = ensure_channel_first(images, n_image_channels=self._num_image_channels)
-        labels = ensure_channel_first(labels, n_image_channels=self._num_image_channels)
+        images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
+        labels = ensure_channel_first(labels, n_image_channels=self.n_image_channels)
 
-        if self._soft_labels:
-            labels = binary_mask_above_threshold(labels=labels, threshold_value=self.threshold_value)
+        labels = ensure_hard_labels(labels, n_classes_used=self.n_classes_used, ignore_labels=self.ignore_labels, threshold_value=self.threshold_value)
 
-        labels = self._normalize_validate(labels)
+        if require_onehot(labels, n_classes_used=self.n_classes_used, total_n_classes=self.total_n_classes):
+            labels = to_one_hot(labels, n_classes=self.total_n_classes)
 
-        self._binary = self.number_of_classes == 1
-        self._onehot = labels.shape[1] == (self.number_of_classes + len(self.ignore_labels)) and not self._binary
+        for ignore_label in self.ignore_labels:
+            labels[:, ignore_label, ...] = torch.zeros_like(labels[:, ignore_label, ...])
 
         return images, labels
 
+    @property
+    def total_n_classes(self) -> int:
+        return self.n_classes_used + len(self.ignore_labels)
 
-def check_n_image_channels_validity(images: Tensor, n_image_channels: int):
+
+def ensure_hard_labels(labels: Tensor, n_classes_used: int, ignore_labels: List[int], threshold_value: float) -> Tensor:
+    if not check_all_integers(values=torch.unique(labels)):
+        if n_classes_used > 1:
+            raise NotImplementedError(
+                f"Not supporting soft-labeling for number of classes > 1!\nGot {n_classes_used} classes, while ignore labels are {ignore_labels}."
+            )
+        labels = binary_mask_above_threshold(labels=labels, threshold_value=threshold_value)
+    return labels
+
+
+def is_soft_labels(labels: Tensor) -> bool:
+    unique_values = torch.unique(labels)
+    if check_all_integers(unique_values):
+        return False
+    elif 0 <= min(unique_values) and max(unique_values) <= 1 and check_all_integers(unique_values * 255):
+        return False
+    return True
+
+
+def require_onehot(labels: Tensor, n_classes_used: int, total_n_classes: int) -> bool:
+    is_binary = n_classes_used == 1
+    is_onehot = labels.shape[1] == total_n_classes
+    return not (is_binary or is_onehot)
+
+
+def ensure_images_shape(images: Tensor, n_image_channels: int) -> Tensor:
     """
     Validating images dimensions are (BS, Channels, W, H)
     :param images: Tensor [BS, C, W, H]
@@ -377,10 +109,53 @@ def check_n_image_channels_validity(images: Tensor, n_image_channels: int):
     if images.shape[1] != n_image_channels and images.shape[-1] != n_image_channels:
         raise ValueError(f"Images should have {n_image_channels} number of channels. Got {min(images[0].shape)}")
 
+    return images
 
-def ensure_channel_first(images: Tensor, n_image_channels: int):
+
+def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
     """
-    Images should be [BS, C, W, H]. If [BS, W, H, C], permute
+    Validating labels dimensions are (BS, N, W, H) where N is either 1 or number of valid classes
+    :param labels: Tensor [BS, N, W, H]
+    :return: labels: Tensor [BS, N, W, H]
+    """
+    if labels.dim() == 3:
+        labels = labels.unsqueeze(1)  # Probably (B, W, H)
+        return labels
+    elif labels.dim() == 4:
+        total_n_classes = n_classes + len(ignore_labels)
+        valid_n_classes = (total_n_classes, 1)
+        input_n_classes = labels.shape[1]
+        if input_n_classes not in valid_n_classes and labels.shape[-1] not in valid_n_classes:
+            raise ValueError(
+                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes + len(ignore_labels)"
+                f" ({total_n_classes}). Got: {input_n_classes}"
+            )
+        return labels
+    else:
+        raise ValueError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
+
+
+def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
+    """
+    Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
+    param label: Tensor
+    param is_one_hot: Determine if labels are one-hot shaped
+    :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
+    """
+    masks = []
+    labels = labels.to(torch.int64)
+
+    for label in labels:
+        label = torch.nn.functional.one_hot(label, n_classes)
+        masks.append(label)
+    labels = torch.concat(masks, dim=0).permute(0, -1, 1, 2)
+
+    return labels
+
+
+def ensure_channel_first(images: Tensor, n_image_channels: int) -> Tensor:
+    """Images should be [BS, C, W, H]. If [BS, W, H, C], permute
+
     :param images: Tensor
     :return: images: Tensor [BS, C, W, H]
     """

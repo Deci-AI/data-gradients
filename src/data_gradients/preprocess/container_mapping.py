@@ -8,7 +8,7 @@ from pygments import lexers, formatters, highlight
 from torch import Tensor
 
 
-class TensorFinder:
+class TensorExtractor:
     """
     DataPathFinder analyzes, tracks, and extracts image/label data from a Python container,
     such as a dictionary or JSON objects. It determines the container type and creates a "data_path" to the
@@ -17,10 +17,10 @@ class TensorFinder:
     """
 
     def __init__(self, search_for_images: bool, objs: Any):
-        self.path_to_object: Optional[List[str]] = prompt_user_for_data_keys(objs=objs, search_for_images=search_for_images)
+        self.path_to_tensor: Optional[List[str]] = prompt_user_for_data_keys(objs=objs, search_for_images=search_for_images)
 
     def __call__(self, objs: Any) -> Tensor:
-        return traverse_nested_data_structure(data=objs, keys=self.path_to_object)
+        return traverse_nested_data_structure(data=objs, keys=self.path_to_tensor)
 
 
 def prompt_user_for_data_keys(objs: Any, search_for_images: bool) -> List[str]:
@@ -34,7 +34,7 @@ def prompt_user_for_data_keys(objs: Any, search_for_images: bool) -> List[str]:
     """
 
     if not (isinstance(objs, dict) or is_valid_json(objs)):
-        raise NotImplementedError("type{type(objs)} not currently supported")  # TODO raise custom exception and catch it later on
+        raise NotImplementedError(f"type{type(objs)} not currently supported")  # TODO raise custom exception and catch it later on
 
     targets = []
     mapping = objects_mapping(objs, path="", targets=targets)
