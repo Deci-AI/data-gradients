@@ -20,7 +20,7 @@ class BatchData:
 
 
 @dataclass
-class SegBatchData(BatchData):
+class SegmentationBatchData(BatchData):
     """
     contours - [BS, N, C, P, 1, 2] where (P, 1, 2) is a contour representation, C is number of contours and N
                                    is number of classes

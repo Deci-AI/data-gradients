@@ -1,7 +1,7 @@
 import numpy as np
 
 from data_gradients.logging.logger_utils import class_id_to_name
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     MultiClassProcess,
 )
@@ -25,7 +25,7 @@ class ComponentsCenterOfMass(MultiClassProcess):
 
         self.num_axis = (1, 2)
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for i, image_contours in enumerate(data.contours):
             label_shape = data.labels[0][0].shape
             for j, cls_contours in enumerate(image_contours):
@@ -33,9 +33,14 @@ class ComponentsCenterOfMass(MultiClassProcess):
                     self._hist[data.split][contour.class_id]["x"].append(round(contour.center[0] / label_shape[1], 2))
                     self._hist[data.split][contour.class_id]["y"].append(round(contour.center[1] / label_shape[0], 2))
 
-    def aggregate_to_result(self, split: str):
+    def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        x, y = self.aggregate(split)
+
+        # self._hist = self.merge_dict_splits(self._hist)
+        x, y = {}, {}
+        for key, val in self._hist[split].items():
+            x[key] = val["x"]
+            y[key] = val["y"]
 
         results = dict.fromkeys(self._hist[split])
         for key in self._hist[split]:
@@ -58,11 +63,3 @@ class ComponentsCenterOfMass(MultiClassProcess):
         # results.json_values = quantized_heat_map.tolist()
 
         return results
-
-    def aggregate(self, split: str):
-        # self._hist = self.merge_dict_splits(self._hist)
-        x, y = {}, {}
-        for key, val in self._hist[split].items():
-            x[key] = val["x"]
-            y[key] = val["y"]
-        return x, y

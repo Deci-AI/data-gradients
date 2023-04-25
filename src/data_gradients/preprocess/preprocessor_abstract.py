@@ -6,7 +6,7 @@ import torch
 from torchvision.transforms import transforms
 
 from data_gradients import preprocess
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 
 
 class PreprocessorAbstract(ABC):
@@ -21,7 +21,7 @@ class PreprocessorAbstract(ABC):
         pass
 
     @abstractmethod
-    def preprocess(self, images, labels) -> SegBatchData:
+    def preprocess(self, images, labels) -> SegmentationBatchData:
         pass
 
     @property
