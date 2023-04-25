@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Mapping, Union, List, Tuple
 
 from data_gradients.utils import BatchData
-from data_gradients.batch_processors.batch_extractor import BatchExtractor
+from data_gradients.batch_processors.extractors.batch_extractor import BatchExtractor
 from data_gradients.batch_processors.preprocessors.base import Preprocessor
 from data_gradients.batch_processors.validators.base import BatchValidator
 

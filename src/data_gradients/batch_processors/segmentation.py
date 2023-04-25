@@ -1,7 +1,7 @@
 from typing import List, Optional, Callable
 
 from data_gradients.batch_processors.base import BatchProcessor
-from data_gradients.batch_processors.batch_extractor import BatchExtractor
+from data_gradients.batch_processors.extractors.batch_extractor import BatchExtractor
 from data_gradients.batch_processors.preprocessors.segmentation import SegmentationPreprocessor
 from data_gradients.batch_processors.validators.segmentation import SegmentationBatchValidator
 

@@ -27,3 +27,8 @@ class SegBatchData(BatchData):
     """
 
     contours: List[List[List[Contour]]]
+
+
+@dataclass
+class DetectionBatchData(BatchData):
+    pass

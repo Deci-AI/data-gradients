@@ -4,7 +4,8 @@ import torch
 from torch import Tensor
 
 from data_gradients.batch_processors.validators.base import BatchValidator
-from data_gradients.batch_processors.utils import check_all_integers, channels_last_to_first
+from data_gradients.batch_processors.utils import check_all_integers, to_one_hot
+from data_gradients.batch_processors.validators.utils import ensure_images_shape, ensure_channel_first, drop_nan
 
 
 class SegmentationBatchValidator(BatchValidator):
@@ -93,21 +94,6 @@ def require_onehot(labels: Tensor, n_classes_used: int, total_n_classes: int) ->
     return not (is_binary or is_onehot)
 
 
-def ensure_images_shape(images: Tensor, n_image_channels: int) -> Tensor:
-    """
-    Validating images dimensions are (BS, Channels, W, H)
-    :param images: Tensor [BS, C, W, H]
-    :return: images: Tensor [BS, C, W, H]
-    """
-    if images.dim() != 4:
-        raise ValueError(f"Images batch shape should be (BatchSize x Channels x Width x Height). Got {images.shape}")
-
-    if images.shape[1] != n_image_channels and images.shape[-1] != n_image_channels:
-        raise ValueError(f"Images should have {n_image_channels} number of channels. Got {min(images[0].shape)}")
-
-    return images
-
-
 def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
     """
     Validating labels dimensions are (BS, N, W, H) where N is either 1 or number of valid classes
@@ -129,45 +115,6 @@ def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]
         return labels
     else:
         raise ValueError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
-
-
-def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
-    """
-    Method gets label with the shape of [BS, N, W, H] where N is either 1 or n_classes, if is_one_hot=True.
-    param label: Tensor
-    param is_one_hot: Determine if labels are one-hot shaped
-    :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
-    """
-    masks = []
-    labels = labels.to(torch.int64)
-
-    for label in labels:
-        label = torch.nn.functional.one_hot(label, n_classes)
-        masks.append(label)
-    labels = torch.concat(masks, dim=0).permute(0, -1, 1, 2)
-
-    return labels
-
-
-def ensure_channel_first(images: Tensor, n_image_channels: int) -> Tensor:
-    """Images should be [BS, C, W, H]. If [BS, W, H, C], permute
-
-    :param images: Tensor
-    :return: images: Tensor [BS, C, W, H]
-    """
-    if images.shape[1] != n_image_channels and images.shape[-1] == n_image_channels:
-        images = channels_last_to_first(images)
-    return images
-
-
-def drop_nan(tensor: Tensor) -> Tensor:
-    nans = torch.isnan(tensor)
-    if nans.any():
-        nan_indices = set(nans.nonzero()[:, 0].tolist())
-        all_indices = set(i for i in range(tensor.shape[0]))
-        valid_indices = all_indices - nan_indices
-        return tensor[valid_indices]
-    return tensor
 
 
 def binary_mask_above_threshold(labels: Tensor, threshold_value: float) -> Tensor:

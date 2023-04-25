@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torchvision.transforms import transforms
 
-from data_gradients.batch_processors.tensor_extractor import TensorExtractor
+from data_gradients.batch_processors.extractors.tensor_extractor import TensorExtractor
 
 
 class BatchExtractor:
