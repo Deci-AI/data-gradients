@@ -1,10 +1,10 @@
-from typing import List, Optional, Tuple, Callable
+from typing import List, Optional, Tuple
 
 import torch
 from torch import Tensor
 
-from data_gradients.utils import SegBatchData
-from data_gradients.preprocess import PreprocessorAbstract, squeeze_by_class
+from data_gradients.utils import SegmentationBatchData
+from data_gradients.preprocess import PreprocessorAbstract
 from data_gradients.preprocess import contours
 
 
@@ -189,7 +189,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         return images, labels
 
-    def preprocess(self, images: Tensor, labels: Tensor) -> SegBatchData:
+    def preprocess(self, images: Tensor, labels: Tensor) -> SegmentationBatchData:
         """
         Preprocess method gets images and labels tensors and returns a segmentation dedicated data class.
         Images are tensor with [BS, C, W, H], Labels are without ignore labels representation and with the
@@ -210,7 +210,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
         all_contours = [contours.get_contours(onehot_label) for onehot_label in labels]
 
-        sbd = SegBatchData(images=images, labels=labels, contours=all_contours, split="")
+        sbd = SegmentationBatchData(images=images, labels=labels, contours=all_contours, split="")
 
         return sbd
 

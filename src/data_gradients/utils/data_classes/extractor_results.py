@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
-from typing import List
-from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
 import numpy as np
+
+from typing import List, Dict
+from abc import ABC, abstractmethod
 
 
 @dataclass
@@ -11,13 +12,18 @@ class VisualizationResults(ABC):
     def write_plot(self, ax, fig):
         pass
 
+    @property
+    @abstractmethod
+    def json_values(self) -> dict:
+        pass
+
 
 @dataclass
-class HistoResults(VisualizationResults):
-    bins: List = field(default_factory=list)
-    values: List = field(default_factory=list)
+class HistogramResults(VisualizationResults):
+    bin_names: List = field(default_factory=list)
+    bin_values: List = field(default_factory=list)
 
-    json_values: List = field(default_factory=list)
+    values_to_log: List = field(default_factory=list)
 
     plot: str = ""
     split: str = ""
@@ -35,9 +41,18 @@ class HistoResults(VisualizationResults):
     def write_plot(self, ax, fig):
         write_bar_plot(ax, self)
 
+    @property
+    def json_values(self) -> Dict[str, float]:
+        return dict(
+            zip(
+                self.bin_names,
+                self.values_to_log if self.values_to_log else self.bin_values,
+            )
+        )
+
 
 @dataclass
-class HeatMapResults(HistoResults):
+class HeatMapResults(HistogramResults):
     x: List = field(default_factory=list)
     y: List = field(default_factory=list)
     keys: List = field(default_factory=list)
@@ -49,8 +64,17 @@ class HeatMapResults(HistoResults):
     def write_plot(self, ax, fig):
         write_heatmap_plot(ax=ax[int(self.split != "train")], results=self, fig=fig)
 
+    @property
+    def json_values(self) -> Dict[str, float]:
+        return dict(
+            zip(
+                self.bin_names if self.bin_names else self.keys,
+                self.values_to_log if self.values_to_log else self.bin_values,
+            )
+        )
 
-def write_bar_plot(ax, results: HistoResults):
+
+def write_bar_plot(ax, results: HistogramResults):
     if results.ax_grid:
         ax.grid(visible=True, axis="y")
 
