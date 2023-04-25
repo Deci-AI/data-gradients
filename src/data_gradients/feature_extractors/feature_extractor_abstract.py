@@ -1,19 +1,18 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Tuple, Dict, Optional, List, Union
+from typing import Tuple, Dict, Optional, Union
 
 import numpy as np
 from matplotlib import pyplot as plt
 
 from data_gradients.logging.logger import Logger
 from data_gradients.logging.logger_utils import (
-    create_json_object,
     write_bar_plot,
     write_heatmap_plot,
 )
 from data_gradients.logging.results_logger import ResultsLogger
 from data_gradients.utils.data_classes.batch_data import BatchData
-from data_gradients.utils.data_classes.extractor_results import Results, HeatMapResults
+from data_gradients.utils.data_classes.extractor_results import VisualizationResults, HistogramResults, HeatMapResults
 
 
 class FeatureExtractorAbstract(ABC):
@@ -33,41 +32,34 @@ class FeatureExtractorAbstract(ABC):
         self.colors: Dict[str, str] = {"train": "green", "val": "red"}
 
         # Logger data
-        self.fig = None
         self.json_object: Dict[str, Optional[ResultsLogger]] = {
             "train": None,
             "val": None,
         }
         self.id_to_name = None
 
-    def execute(self, data: BatchData):
-        self._execute(data)
-
     @abstractmethod
-    def _execute(self, data: BatchData):
+    def update(self, data: BatchData):
+        """Accumulate information about samples"""
         raise NotImplementedError
 
-    def process(self, logger: Logger, id_to_name):
+    @abstractmethod
+    def _aggregate(self, split: str) -> VisualizationResults:
+        raise NotImplementedError
+
+    def aggregate_and_write(self, logger: Logger, id_to_name):
         self.id_to_name = id_to_name
         self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
 
         for split in ["train", "val"]:
-            results = self._post_process(split)
-            self.write_results(results, ax)
+            results = self._aggregate(split)
+            self.update_json(results, ax)
 
         self.fig.tight_layout()
         title_name = logger.get_title_name(self.__class__.__name__) + "/fig"
         logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
-    @abstractmethod
-    def _post_process(self, split: str) -> Results:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _process_data(self, split: str) -> Tuple[List, List]:
-        raise NotImplementedError
-
-    def write_results(self, results: Union[Results, HeatMapResults], ax):
+    def update_json(self, results: Union[HistogramResults, HeatMapResults], ax):
         if results.plot == "bar-plot":
             write_bar_plot(ax=ax, results=results)
         elif results.plot == "heat-map":
@@ -78,11 +70,7 @@ class FeatureExtractorAbstract(ABC):
              while only supported plots are ['bar-plot', 'heat-map']"
             )
 
-        json_obj = create_json_object(
-            results.json_values if results.json_values else results.values,
-            results.bins if results.bins else results.keys,
-        )
-        self.json_object.update({results.split: json_obj})
+        self.json_object.update({results.split: results.json_values})
 
     @staticmethod
     def merge_dict_splits(hist: Dict):
@@ -103,22 +91,19 @@ class FeatureExtractorAbstract(ABC):
 
 
 class MultiClassProcess(FeatureExtractorAbstract):
-    def __init__(self):
-        super().__init__()
-
-    def process(self, logger: Logger, id_to_name):
+    def aggregate_and_write(self, logger: Logger, id_to_name):
         self.id_to_name = id_to_name
 
         results = dict.fromkeys(["train", "val"])
         for split in results:
-            results[split] = self._post_process(split)
+            results[split] = self._aggregate(split)
 
         for key in results["train"].keys():
 
             self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
 
             for split in ["train", "val"]:
-                self.write_results(results[split][key], ax)
+                self.update_json(results[split][key], ax)
 
             self.fig.tight_layout()
 
@@ -126,13 +111,9 @@ class MultiClassProcess(FeatureExtractorAbstract):
             logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
 
     @abstractmethod
-    def _execute(self, data: BatchData):
+    def update(self, data: BatchData):
         raise NotImplementedError
 
     @abstractmethod
-    def _post_process(self, split: str) -> Dict[str, HeatMapResults]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _process_data(self, split: str) -> Tuple[List, List]:
+    def _aggregate(self, split: str) -> Dict[str, HeatMapResults]:
         raise NotImplementedError

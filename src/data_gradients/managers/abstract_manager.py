@@ -103,13 +103,13 @@ class AnalysisManagerAbstract(abc.ABC):
             if train_batch is not None:
                 preprocessed_batch = self._preprocess_batch(train_batch, "train")
                 for extractor in self._extractors:
-                    thread_manager.submit(extractor.execute, preprocessed_batch)
+                    thread_manager.submit(extractor.update, preprocessed_batch)
                 self._log_writer.visualize(preprocessed_batch)
 
             if val_batch is not None:
                 preprocessed_batch = self._preprocess_batch(val_batch, "val")
                 for extractor in self._extractors:
-                    thread_manager.submit(extractor.execute, preprocessed_batch)
+                    thread_manager.submit(extractor.update, preprocessed_batch)
 
             if i == 0 and self.short_run:
                 thread_manager.wait_complete()
@@ -141,7 +141,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         # Post process each feature executor to json / tensorboard
         for extractor in self._extractors:
-            extractor.process(self._log_writer, self.id_to_name)
+            extractor.aggregate_and_write(self._log_writer, self.id_to_name)
 
         # Write meta data to json file
         self._log_writer.log_meta_data(self._preprocessor)

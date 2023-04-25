@@ -18,16 +18,16 @@ class AverageBrightnessTest(unittest.TestCase):
     def test_black_image(self):
         batch = BatchData(images=torch.zeros((1, 3, 100, 100)), labels=[], split=self.split)
         target_value = 0
-        self.feature_extractor.execute(batch)
-        results = self.feature_extractor._post_process(self.split)
-        self._check_value_in_right_bin(results.values, results.bins, target_value)
+        self.feature_extractor.update(batch)
+        results = self.feature_extractor._aggregate(self.split)
+        self._check_value_in_right_bin(results.bin_values, results.bin_names, target_value)
 
     def test_white_image(self):
         target_value = 1
         batch = BatchData(images=torch.ones((1, 3, 100, 100)), labels=[], split=self.split)
-        self.feature_extractor.execute(batch)
-        results = self.feature_extractor._post_process(self.split)
-        self._check_value_in_right_bin(results.values, results.bins, target_value)
+        self.feature_extractor.update(batch)
+        results = self.feature_extractor._aggregate(self.split)
+        self._check_value_in_right_bin(results.bin_values, results.bin_names, target_value)
 
     def test_noise_image(self):
         images = torch.ones((1, 3, 100, 100))
@@ -45,9 +45,9 @@ class AverageBrightnessTest(unittest.TestCase):
 
         # Move it to be outside its bucket (bucket for 1 value will have this value inside it
         target_value += 0.02
-        self.feature_extractor.execute(batch)
-        results = self.feature_extractor._post_process(self.split)
-        self._check_value_in_right_bin(results.values, results.bins, target_value)
+        self.feature_extractor.update(batch)
+        results = self.feature_extractor._aggregate(self.split)
+        self._check_value_in_right_bin(results.bin_values, results.bin_names, target_value)
 
     def _check_value_in_right_bin(self, values, bins, target_value):
         bin_index = -1

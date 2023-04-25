@@ -1,7 +1,6 @@
 import numpy as np
-import torch
 
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -21,7 +20,7 @@ class WidthHeight(FeatureExtractorAbstract):
         self._height = {"train": [], "val": []}
         self.num_axis = (1, 2)
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, class_channel in enumerate(image_contours):
                 height, width = data.labels[i][j].shape
@@ -29,26 +28,23 @@ class WidthHeight(FeatureExtractorAbstract):
                     self._width[data.split].append(contour.w / width)
                     self._height[data.split].append(contour.h / height)
 
-    def _post_process(self, split: str):
-        x, y = self._process_data(split)
+    def _aggregate(self, split: str):
+        width = [w for w in self._width[split] if w > 0]
+        height = [h for h in self._height[split] if h > 0]
+
         results = HeatMapResults(
-            x=x,
-            y=y,
+            x=width,
+            y=height,
             n_bins=16,
             split=split,
             plot="heat-map",
-            title=f"Bounding Boxes Width / Height",
+            title="Bounding Boxes Width / Height",
             x_label="Width [% of image]",
             y_label="Height [% of image]",
             keys=["Width", "Height"],
         )
 
-        quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-        results.json_values = quantized_heat_map.tolist()
+        quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
+        results.values_to_log = quantized_heat_map.tolist()
         results.keys = ["Width", "Height"]
         return results
-
-    def _process_data(self, split: str):
-        width = [w for w in self._width[split] if w > 0]
-        height = [h for h in self._height[split] if h > 0]
-        return width, height
