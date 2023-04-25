@@ -5,6 +5,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
 )
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import merge_dict_splits
 
 
 class LabelsAspectRatios(FeatureExtractorAbstract):
@@ -22,7 +23,7 @@ class LabelsAspectRatios(FeatureExtractorAbstract):
                 self._hist[data.split][ar] += 1
 
     def _aggregate(self, split: str):
-        self.merge_dict_splits(self._hist)
+        merge_dict_splits(self._hist)
         values = list(self._hist[split].values())
         bins = list(self._hist[split].keys())
 

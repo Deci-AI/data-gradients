@@ -5,6 +5,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import merge_dict_splits, normalize_values_to_percentages
 
 
 class CountNumComponents(FeatureExtractorAbstract):
@@ -31,9 +32,9 @@ class CountNumComponents(FeatureExtractorAbstract):
                 self._hist[data.split].update({num_objects_in_image: 1})
 
     def _aggregate(self, split: str):
-        self.merge_dict_splits(self._hist)
+        merge_dict_splits(self._hist)
         hist = self._into_buckets(self._hist[split])
-        values = self.normalize(hist.values(), sum(list(hist.values())))
+        values = normalize_values_to_percentages(hist.values(), sum(list(hist.values())))
         bins = list(hist.keys())
 
         results = HistogramResults(

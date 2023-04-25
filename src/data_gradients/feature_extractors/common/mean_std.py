@@ -6,6 +6,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
 )
 from data_gradients.utils import BatchData
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import merge_dict_splits
 
 
 class MeanAndSTD(FeatureExtractorAbstract):
@@ -21,7 +22,7 @@ class MeanAndSTD(FeatureExtractorAbstract):
 
     def _aggregate(self, split: str):
 
-        self.merge_dict_splits(self._hist)
+        merge_dict_splits(self._hist)
         bgr_means = np.zeros(3)
         bgr_std = np.zeros(3)
         for channel in range(3):
