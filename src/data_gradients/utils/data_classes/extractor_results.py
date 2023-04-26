@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 @dataclass
 class VisualizationResults(ABC):
     @abstractmethod
-    def write_plot(self, ax, fig):
+    def write_plot(self, ax, fig) -> None:
         pass
 
     @property
@@ -38,8 +38,8 @@ class HistogramResults(VisualizationResults):
 
     ticks_rotation: int = 45
 
-    def write_plot(self, ax, fig):
-        write_bar_plot(ax, self)
+    def write_plot(self, ax, fig) -> None:
+        write_bar_plot(ax=ax, results=self)
 
     @property
     def json_values(self) -> Dict[str, float]:
@@ -62,7 +62,7 @@ class HeatMapResults(HistogramResults):
     range: List = field(default_factory=list)
     invert: bool = False
 
-    def write_plot(self, ax, fig):
+    def write_plot(self, ax, fig) -> None:
         write_heatmap_plot(ax=ax[int(self.split != "train")], results=self, fig=fig)
 
     @property
@@ -76,7 +76,7 @@ class HeatMapResults(HistogramResults):
         return {self.split: data}
 
 
-def write_bar_plot(ax, results: HistogramResults):
+def write_bar_plot(ax, results: HistogramResults) -> None:
     if results.ax_grid:
         ax.grid(visible=True, axis="y")
 
@@ -112,7 +112,7 @@ def write_bar_plot(ax, results: HistogramResults):
     ax.legend()
 
 
-def write_heatmap_plot(ax, results: HeatMapResults, fig=None):
+def write_heatmap_plot(ax, results: HeatMapResults, fig=None) -> None:
     if results.n_bins == 0:
         # Set to default
         results.n_bins = 10
