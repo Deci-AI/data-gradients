@@ -2,7 +2,7 @@ from typing import List, Optional, Callable
 
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.batch_processors.extractors.batch_extractor import BatchExtractor
-from data_gradients.batch_processors.preprocessors.segmentation import SegmentationPreprocessor
+from data_gradients.batch_processors.preprocessors.segmentation import SegmentationBatchPreprocessor
 from data_gradients.batch_processors.validators.segmentation import SegmentationBatchValidator
 
 
@@ -27,6 +27,6 @@ class SegmentationBatchProcessor(BatchProcessor):
             threshold_value=threshold_value,
             ignore_labels=ignore_labels,
         )
-        preprocessor = SegmentationPreprocessor()
+        preprocessor = SegmentationBatchPreprocessor()
 
         super().__init__(batch_extractor=extractor, batch_validator=validator, batch_preprocessor=preprocessor)

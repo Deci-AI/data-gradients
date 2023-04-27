@@ -21,9 +21,10 @@ class SegmentationBatchValidator(BatchValidator):
         ignore_labels: Optional[List[int]] = None,
     ):
         """
-        Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
-        :param n_classes: number of valid classes
-        :param ignore_labels: list of numbers that we should avoid from analyzing as valid classes, such as background
+        :param n_classes:           Number of valid classes
+        :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
+        :param threshold_value:     Threshold
+        :param ignore_labels:       Numbers that we should avoid from analyzing as valid classes, such as background
         """
         self.n_classes_used = n_classes
         self.n_image_channels = n_image_channels
@@ -33,11 +34,13 @@ class SegmentationBatchValidator(BatchValidator):
         self.is_input_soft_label = None
 
     def __call__(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
-        """
-        Validating object came out of next() method activated on the iterator.
-        Check & Fix length, type, dimensions, channels-first, pixel values and checks if onehot
-        :param objects: Tuple from next(Iterator)
-        :return: images, labels as Tuple[Tensor, Tensor] with shape [[BS, C, W, H], [BS, N, W, H]]
+        """Validate batch images and labels format, and ensure that they are in the relevant format for segmentation.
+
+        :param images: Batch of images, in (BS, ...) format
+        :param labels: Batch of labels, in (BS, ...) format
+        :return:
+            - images: Batch of images already formatted into (BS, N, W, H)
+            - labels: Batch of labels already formatted into (BS, N, W, H)
         """
         images = drop_nan(images)
         labels = drop_nan(labels)

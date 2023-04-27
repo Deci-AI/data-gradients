@@ -1,9 +1,9 @@
 from torch import Tensor
 
 from data_gradients.utils import DetectionBatchData
-from data_gradients.batch_processors.preprocessors.base import Preprocessor
+from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
 
 
-class DetectionBatchPreprocessor(Preprocessor):
+class DetectionBatchPreprocessor(BatchPreprocessor):
     def __call__(self, images: Tensor, labels: Tensor) -> DetectionBatchData:
         return DetectionBatchData(images=images, labels=labels, split="")

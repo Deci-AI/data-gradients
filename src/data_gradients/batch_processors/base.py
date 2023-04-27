@@ -3,12 +3,12 @@ from typing import Mapping, Union, List, Tuple
 
 from data_gradients.utils import BatchData
 from data_gradients.batch_processors.extractors.batch_extractor import BatchExtractor
-from data_gradients.batch_processors.preprocessors.base import Preprocessor
+from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
 from data_gradients.batch_processors.validators.base import BatchValidator
 
 
 class BatchProcessor(ABC):
-    def __init__(self, batch_extractor: BatchExtractor, batch_validator: BatchValidator, batch_preprocessor: Preprocessor):
+    def __init__(self, batch_extractor: BatchExtractor, batch_validator: BatchValidator, batch_preprocessor: BatchPreprocessor):
         self.batch_extractor = batch_extractor
         self.batch_validator = batch_validator
         self.batch_preprocessor = batch_preprocessor

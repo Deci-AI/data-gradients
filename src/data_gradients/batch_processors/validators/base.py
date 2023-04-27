@@ -6,5 +6,13 @@ import torch
 
 class BatchValidator(ABC):
     @abstractmethod
-    def __call__(self, image: torch.Tensor, label: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __call__(self, images: torch.Tensor, labels: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Validate batch images and labels format, and ensure that they are in the relevant format for a given task.
+
+        :param images: Batch of images, in (BS, ...) format
+        :param labels: Batch of labels, in task-dependant format
+        :return:
+            - images: Batch of images already formatted into (BS, N, W, H)
+            - labels: Batch of labels already formatted into format relevant for current task (detection, segmentation, classification).
+        """
         pass

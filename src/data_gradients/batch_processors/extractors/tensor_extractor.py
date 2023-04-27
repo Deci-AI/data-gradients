@@ -9,32 +9,28 @@ from torch import Tensor
 
 
 class TensorExtractor:
-    """
-    DataPathFinder analyzes, tracks, and extracts image/label data from a Python container,
-    such as a dictionary or JSON objects. It determines the container type and creates a "data_path" to the
-    data using user input. Then, it generates a mapping method that will be applied to the container
-    in order to extract the data.
+    """Extract the tensor of interest (could be image, label, ..) out of a batch raw output (coming from dataloader output).
+    This is done by asking the user what field is the relevant one.
     """
 
-    def __init__(self, search_for_images: bool, objs: Any):
-        self.path_to_tensor: Optional[List[str]] = prompt_user_for_data_keys(objs=objs, search_for_images=search_for_images)
+    def __init__(self, objs: Any, name: str):
+        self.path_to_tensor: Optional[List[str]] = prompt_user_for_data_keys(objs=objs, name=name)
 
     def __call__(self, objs: Any) -> Tensor:
         return traverse_nested_data_structure(data=objs, keys=self.path_to_tensor)
 
 
-def prompt_user_for_data_keys(objs: Any, search_for_images: bool) -> List[str]:
-    """
-    Auxiliary method for the container_mapping recursive method. It holds the keys sequence target and asks the
-    user to input which of the above keys mapping is the right one in order to retrieve the correct data
-    (either images or labels).
+def prompt_user_for_data_keys(objs: Any, name: str) -> List[str]:
+    """Extract out of objs all the potential fields of type [torch.Tensor, np.ndarray, PIL.Image], and then
+    asks the user to input which of the above keys mapping is the right one in order to retrieve the correct data (either images or labels).
 
-    :return: List of keys that if you iterate with the Get Operation (d[k]) through all of them, you will get
-             the data you intended.
+    :param objs:        Dictionary of json-like structure.
+    :param name: The type of your targeted field ('image', 'label', ...). This is only for display purpose.
+    :return:            List of keys that if you iterate with the Get Operation (d[k]) through all of them, you will get the data you intended.
     """
 
     if not (isinstance(objs, dict) or is_valid_json(objs)):
-        raise NotImplementedError(f"type{type(objs)} not currently supported")  # TODO raise custom exception and catch it later on
+        raise NotImplementedError(f"type{type(objs)} not currently supported")
 
     targets = []
     mapping = objects_mapping(objs, path="", targets=targets)
@@ -44,7 +40,7 @@ def prompt_user_for_data_keys(objs: Any, search_for_images: bool) -> List[str]:
     mapping_str = mapping_str.replace('"', "")
     print(mapping_str)
 
-    value = int(input(f"Please insert the circled number of the required {'images' if search_for_images else 'labels'} data:\n"))
+    value = int(input(f"Please insert the circled number of the required {name} data:\n"))
     print(f"Path for getting objects out of container: {targets[value]}")
     print("************************************************************")
 
@@ -67,14 +63,12 @@ def is_valid_json(myjson: str) -> bool:
 
 
 def objects_mapping(obj: Any, path: str, targets: List[str]) -> Any:
-    """
-    Recursive function for "digging" into the mapping object it received and save a "path" to the target.
-    Target is defined as one of [torch.Tensor, np.ndarray, PIL.Image],
-    and if got Mapping / Sequence -> continue recursion.
+    """Recursive function for "digging" into the mapping object it received and save a "path" to the target.
+    Target is defined as one of [torch.Tensor, np.ndarray, PIL.Image]. If got Mapping / Sequence -> continue recursion.
 
-    :param obj: recursively returned object
-    :param path: current path - not achieved a target yet
-    :param targets: current target's total path
+    :param obj:     Recursively returned object
+    :param path:    Current path - not achieved a target yet
+    :param targets: Current target's total path
     """
     if isinstance(obj, Mapping):
         printable_map = {}
