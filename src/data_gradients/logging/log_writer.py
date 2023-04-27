@@ -16,7 +16,15 @@ logger = logging.getLogger(__name__)
 
 
 class LogWriter:
+    """Class for logging data in TensorBoard and JSON formats."""
+
     def __init__(self, log_dir: Optional[str] = None):
+        """
+        Initialize the LogWriter object.
+
+        :param log_dir: Optional, Directory to save the log files.
+                        If None, the logs will be saved in a 'logs' directory in the current working directory.
+        """
         if log_dir is None:
             log_dir = os.path.join(os.getcwd(), "logs")
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
@@ -29,24 +37,36 @@ class LogWriter:
         self._json_logger = JsonLogger(log_dir=log_dir, output_file_name="raw_data")
 
     def log_json(self, title: str, data: JSONValue) -> None:
+        """Log data in JSON format.
+
+        :param title:   Title of the data to be logged.
+        :param data:    Data to be logged in JSON format.
+        """
         self._json_logger.log(title=title, data=data)
 
-    def log_tb(self, title: str, data: Figure) -> None:
-        self._tb_logger.log(title=title, data=data)
+    def log_figure(self, title: str, figure: Figure) -> None:
+        """Log a figure to TensorBoard.
 
-    def log(self, title: str, figure: Optional[Figure] = None, json_data: Optional[JSONValue] = None):
-        if figure is not None:
-            self._tb_logger.log(title=title, data=figure)
-        if json_data is not None:
-            self._json_logger.log(title=title, data=json_data)
+        :param title:   Title of the data to be logged.
+        :param figure:  Figure to be logged to the TensorBoard.
+        """
+        self._tb_logger.log(title=title, data=figure)
 
     def log_image(self, title: str, image: torch.Tensor) -> None:
+        """
+        Log an image in TensorBoard format.
+
+        :param title:   Title of the data to be logged.
+        :param image:   Image to be logged to TensorBoard.
+        """
         self._tb_logger.log_image(title=title, image=image)
 
-    def save_as_json(self):
+    def save_as_json(self) -> None:
+        """Save the logged data in JSON format."""
         self._json_logger.save_as_json()
 
-    def close(self):
+    def close(self) -> None:
+        """Close the TensorBoard and JSON loggers and print a message to notify that the evaluation is finished."""
         self._json_logger.close()
         self._tb_logger.close()
         print(

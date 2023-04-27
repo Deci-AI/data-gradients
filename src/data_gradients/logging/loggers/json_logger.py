@@ -14,9 +14,15 @@ class JsonLogger(ResultsLogger):
         self.output_path = os.path.join(log_dir, output_file_name + ".json")
 
     def log(self, title: str, data: JSONValue) -> None:
+        """Log data in JSON format.
+
+        :param title:   Title of the data to be logged.
+        :param data:    Data to be logged in JSON format.
+        """
         self._logging_data.update({title: data})
 
     def save_as_json(self) -> None:
+        """Save the gathered data in JSON format."""
         with open(self.output_path, "a") as output:
             try:
                 json.dump(self._logging_data, output, indent=4)
@@ -24,4 +30,5 @@ class JsonLogger(ResultsLogger):
                 print(e)
 
     def close(self) -> None:
-        pass
+        """Close the logger."""
+        self.save_as_json()

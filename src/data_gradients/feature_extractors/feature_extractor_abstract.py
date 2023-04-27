@@ -37,7 +37,8 @@ class FeatureExtractorAbstract(ABC):
             results_json[split] = results.json_values
 
         fig.tight_layout()
-        logger.log(title=f"{self.name}/fig", tb_data=fig, json_data=results_json)
+        logger.log_json(title=f"{self.name}/fig", data=results_json)
+        logger.log_figure(title=f"{self.name}/fig", figure=fig)
 
     @abstractmethod
     def update(self, data: BatchData):
@@ -76,7 +77,9 @@ class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
                 results_json[split] = result.json_values
 
             fig.tight_layout()
-            logger.log(title=f"{self.name}/{key}_{split}/fig", tb_data=fig, json_data=results_json)
+
+            logger.log_json(title=f"{self.name}/{key}_{split}/fig", data=results_json)
+            logger.log_figure(title=f"{self.name}/{key}_{split}/fig", figure=fig)
 
     @abstractmethod
     def update(self, data: BatchData):
