@@ -52,10 +52,13 @@ def dict_to_dotlist(dict_params: Dict[str, Any]) -> List[Tuple[str, Any]]:
     dot-separated string representing a nested dictionary key, and the value is the corresponding value in the
     dictionary.
 
+    >>> dict_to_dotlist({'experiment_name': 'adam', 'model': {'type': 'resnet', 'depth': 18, 'num_classes': 10}})
+    [('experiment_name', 'adam'), ('model.type','resnet'), ('model.depth', 18), ('model.num_classes', 10)]
+
     :param dict_params: The dictionary to convert.
-    :return: A list of key-value pairs, where each key is a dot-separated string and each value is a value from the
-             input dictionary.
+    :return: A list of key-value pairs, where each key is a dot-separated string and each value is a value from the input dictionary.
     """
+
     dotlist_params = []
     for key, value in dict_params.items():
         if isinstance(value, dict):

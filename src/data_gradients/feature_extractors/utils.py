@@ -1,18 +1,30 @@
-from collections import OrderedDict
-from typing import Dict, List
+from typing import Dict, List, Any, Tuple
 
 import numpy as np
 
 
-def merge_dict_splits(hist: Dict):
-    for key in [*hist["train"], *hist["val"]]:
-        if key not in hist["train"]:
-            hist["train"][key] = type(hist["val"][key])()
-        if key not in hist["val"]:
-            hist["val"][key] = type(hist["train"][key])()
+def align_histogram_keys(train_histogram: Dict[str, Any], val_histogram: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Enforces the keys of training and validation histograms to be the same.
+    If one of the keys is missing, the histogram will filled with defaults value (0, 0.0, "") depending on the situation
 
-    hist["train"] = OrderedDict(sorted(hist["train"].items()))
-    hist["val"] = OrderedDict(sorted(hist["val"].items()))
+    :param train_histogram:  Histogram representing metrics from training split.
+    :param val_histogram:  Histogram representing metrics from validation split.
+    :return: A merged dictionary containing key-value pairs from both "train" and "val" splits.
+    """
+    keys = set(train_histogram.keys()) | set(val_histogram.keys())
+
+    aligned_train_histogram, aligned_val_histogram = {}, {}
+    for key in keys:
+        train_value = train_histogram.get(key)
+        val_value = val_histogram.get(key)
+
+        value_type = type(train_value) if train_value is not None else type(val_value)
+        default_value = value_type()
+
+        aligned_train_histogram[key] = train_value or default_value
+        aligned_val_histogram[key] = val_value or default_value
+
+    return aligned_train_histogram, aligned_val_histogram
 
 
 def normalize_values_to_percentages(counters: List[float], total_count: float) -> List[float]:
