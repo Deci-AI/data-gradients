@@ -3,9 +3,10 @@ import datetime
 from typing import Optional
 import logging
 
+from matplotlib.figure import Figure
 import torch
 
-from data_gradients.logging.loggers.json_logger import JsonLogger
+from data_gradients.logging.loggers.json_logger import JsonLogger, JSONValue
 from data_gradients.logging.loggers.tensorboard_logger import TensorBoardLogger
 
 
@@ -27,23 +28,23 @@ class LogWriter:
         self._tb_logger = TensorBoardLogger(log_dir=log_dir)
         self._json_logger = JsonLogger(log_dir=log_dir, output_file_name="raw_data")
 
-    def log(self, title_name: str, tb_data=None, json_data=None):
-        if tb_data is not None:
-            self._tb_logger.log(title_name, tb_data)
-        if json_data is not None:
-            self._json_logger.log(title_name, json_data)
+    def log_json(self, title: str, data: JSONValue) -> None:
+        self._json_logger.log(title=title, data=data)
 
-    def log_meta_data(self, image_route: str, labels_route: str):  # TODO: pass route directly
-        if image_route is not None:
-            self._json_logger.log("Get images out of dictionary", image_route)
-        if labels_route is not None:
-            self._json_logger.log("Get images out of dictionary", labels_route)
+    def log_tb(self, title: str, data: Figure) -> None:
+        self._tb_logger.log(title=title, data=data)
+
+    def log(self, title: str, figure: Optional[Figure] = None, json_data: Optional[JSONValue] = None):
+        if figure is not None:
+            self._tb_logger.log(title=title, data=figure)
+        if json_data is not None:
+            self._json_logger.log(title=title, data=json_data)
 
     def log_image(self, title: str, image: torch.Tensor) -> None:
         self._tb_logger.log_image(title=title, image=image)
 
-    def to_json(self):
-        self._json_logger.write_to_json()
+    def save_as_json(self):
+        self._json_logger.save_as_json()
 
     def close(self):
         self._json_logger.close()

@@ -143,11 +143,13 @@ class AnalysisManagerAbstract(abc.ABC):
             title = f"Data Visualization/{len(self.visualizer.samples) - i}"
             self._log_writer.log_image(title=title, image=sample_to_visualize)
 
-        # Write meta data to json file
-        self._log_writer.log_meta_data(image_route=self.preprocessor.images_route, labels_route=self.preprocessor.labels_route)
+        if self.preprocessor.images_route is not None:
+            self._log_writer.log_json(title="Get images out of dictionary", data=self.preprocessor.images_route)
+        if self.preprocessor.labels_route is not None:
+            self._log_writer.log_json(title="Get labels out of dictionary", data=self.preprocessor.labels_route)
 
         # Write all text data to json file
-        self._log_writer.to_json()
+        self._log_writer.save_as_json()
 
     def close(self):
         """
