@@ -30,7 +30,7 @@ class AnalysisManagerAbstract(abc.ABC):
         val_data: Optional[Iterable] = None,
         log_dir: Optional[str] = None,
         preprocessor: BatchProcessor,
-        extractors: List[FeatureExtractorAbstract],
+        feature_extractors: List[FeatureExtractorAbstract],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
@@ -41,7 +41,7 @@ class AnalysisManagerAbstract(abc.ABC):
         :param val_data:            Iterable object contains images and labels of the validation dataset
         :param log_dir:             Directory where to save the logs. By default uses the current working directory
         :param preprocessor:        Preprocessor object to be used before extracting features
-        :param extractors:          List of feature extractors to be used
+        :param feature_extractors:  List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
@@ -62,7 +62,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self._log_writer = LogWriter(log_dir=log_dir)
 
         self.preprocessor = preprocessor
-        self.extractors = extractors
+        self.feature_extractors = feature_extractors
 
         self.id_to_name = id_to_name
 
@@ -97,13 +97,13 @@ class AnalysisManagerAbstract(abc.ABC):
 
             if train_batch is not None:
                 preprocessed_batch = self._preprocess_batch(train_batch, "train")
-                for extractor in self.extractors:
+                for extractor in self.feature_extractors:
                     thread_manager.submit(extractor.update, preprocessed_batch)
                 self.visualizer.update(preprocessed_batch)
 
             if val_batch is not None:
                 preprocessed_batch = self._preprocess_batch(val_batch, "val")
-                for extractor in self.extractors:
+                for extractor in self.feature_extractors:
                     thread_manager.submit(extractor.update, preprocessed_batch)
 
             if i == 0 and self.short_run:
@@ -135,7 +135,7 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         # Post process each feature executor to json / tensorboard
-        for extractor in self.extractors:
+        for extractor in self.feature_extractors:
             extractor.aggregate_and_write(self._log_writer, self.id_to_name)
 
         for i, sample_to_visualize in enumerate(self.visualizer.samples):

@@ -71,7 +71,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             train_data=train_data,
             val_data=val_data,
             preprocessor=preprocessor,
-            extractors=extractors,
+            feature_extractors=extractors,
             log_dir=log_dir,
             id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
