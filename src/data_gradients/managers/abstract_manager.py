@@ -152,10 +152,16 @@ class AnalysisManagerAbstract(abc.ABC):
         self._log_writer.save_as_json()
 
     def close(self):
-        """
-        Safe logging closing
-        """
+        """Safe logging closing"""
         self._log_writer.close()
+        print(
+            f'{"*" * 100}'
+            f"\nWe have finished evaluating your dataset!"
+            f"\nThe results can be seen in {self._log_writer.log_dir}"
+            f"\n\nShow tensorboard by writing in terminal:"
+            f"\n\ttensorboard --logdir={self._log_writer.log_dir} --bind_all"
+            f"\n"
+        )
 
     def run(self):
         """

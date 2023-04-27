@@ -66,14 +66,6 @@ class LogWriter:
         self._json_logger.save_as_json()
 
     def close(self) -> None:
-        """Close the TensorBoard and JSON loggers and print a message to notify that the evaluation is finished."""
+        """Close the TensorBoard and JSON loggers."""
         self._json_logger.close()
         self._tb_logger.close()
-        print(
-            f'{"*" * 100}'
-            f"\nWe have finished evaluating your dataset!"
-            f"\nThe results can be seen in {self.log_dir}"
-            f"\n\nShow tensorboard by writing in terminal:"
-            f"\n\ttensorboard --logdir={self.log_dir} --bind_all"
-            f"\n"
-        )
