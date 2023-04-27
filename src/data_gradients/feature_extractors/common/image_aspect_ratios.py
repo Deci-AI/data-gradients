@@ -5,7 +5,7 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
 )
 from data_gradients.utils import BatchData
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
-from data_gradients.feature_extractors.utils import merge_dict_splits
+from data_gradients.feature_extractors.utils import align_histogram_keys
 
 
 class ImagesAspectRatios(FeatureExtractorAbstract):
@@ -22,7 +22,8 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
                 self._hist[data.split][ar] += 1
 
     def _aggregate(self, split: str):
-        merge_dict_splits(self._hist)
+        self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])
+
         values = list(self._hist[split].values())
         bins = list(self._hist[split].keys())
 

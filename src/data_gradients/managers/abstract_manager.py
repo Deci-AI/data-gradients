@@ -142,18 +142,25 @@ class AnalysisManagerAbstract(abc.ABC):
             title = f"Data Visualization/{len(self.visualizer.samples) - i}"
             self._log_writer.log_image(title=title, image=sample_to_visualize)
 
-        # Write meta data to json file
-        self._log_writer.log(title="Get images out of dictionary", json_data=self.preprocessor.images_route)
-        self._log_writer.log(title="Get labels out of dictionary", json_data=self.preprocessor.labels_route)
+        if self.preprocessor.images_route is not None:
+            self._log_writer.log_json(title="Get images out of dictionary", data=self.preprocessor.images_route)
+        if self.preprocessor.labels_route is not None:
+            self._log_writer.log_json(title="Get labels out of dictionary", data=self.preprocessor.labels_route)
 
         # Write all text data to json file
-        self._log_writer.to_json()
+        self._log_writer.save_as_json()
 
     def close(self):
-        """
-        Safe logging closing
-        """
+        """Safe logging closing"""
         self._log_writer.close()
+        print(
+            f'{"*" * 100}'
+            f"\nWe have finished evaluating your dataset!"
+            f"\nThe results can be seen in {self._log_writer.log_dir}"
+            f"\n\nShow tensorboard by writing in terminal:"
+            f"\n\ttensorboard --logdir={self._log_writer.log_dir} --bind_all"
+            f"\n"
+        )
 
     def run(self):
         """

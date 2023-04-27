@@ -1,14 +1,9 @@
 from typing import Optional, Iterable, List, Dict, Callable
 
-import hydra
-from omegaconf import OmegaConf
-
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
+from data_gradients.config.utils import load_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
-from data_gradients.feature_extractors import FeatureExtractorAbstract
 from data_gradients.visualize.image_visualizer import SegmentationImageVisualizer
-
-OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -64,7 +59,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             threshold_value=threshold_soft_labels,
         )
 
-        extractors = _build_segmentation_extractors(config_name=config_name, number_of_classes=n_classes, ignore_labels=ignore_labels)
+        extractors = load_extractors(config_name=config_name, overrides={"number_of_classes": n_classes, "ignore_labels": ignore_labels})
 
         visualizer = SegmentationImageVisualizer(n_samples=samples_to_visualize)
 
@@ -79,22 +74,3 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             short_run=short_run,
             visualizer=visualizer,
         )
-
-
-def _build_segmentation_extractors(config_name: str, number_of_classes: int, ignore_labels: List[int]) -> List[FeatureExtractorAbstract]:
-    """
-    Parsing semantic segmentation configuration file with number of classes and ignore labels
-
-    :param config_name:         Config name
-    :param number_of_classes:   Number of classes
-    :param ignore_labels:       List of not-valid labeled classes such as background
-    """
-    hydra.initialize(config_path="../config/", version_base="1.2")
-    cfg = hydra.compose(config_name=config_name, overrides=[])
-    cfg.number_of_classes = number_of_classes
-    cfg.ignore_labels = ignore_labels
-    cfg = hydra.utils.instantiate(cfg)
-
-    extractors = cfg.feature_extractors + cfg.common.feature_extractors
-
-    return extractors
