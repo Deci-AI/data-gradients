@@ -1,6 +1,6 @@
 import numpy as np
 
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -20,7 +20,7 @@ class WidthHeight(FeatureExtractorAbstract):
         self._height = {"train": [], "val": []}
         self.num_axis = (1, 2)
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for i, image_contours in enumerate(data.contours):
             for j, class_channel in enumerate(image_contours):
                 height, width = data.labels[i][j].shape
@@ -28,11 +28,13 @@ class WidthHeight(FeatureExtractorAbstract):
                     self._width[data.split].append(contour.w / width)
                     self._height[data.split].append(contour.h / height)
 
-    def aggregate_to_result(self, split: str):
-        x, y = self.aggregate(split)
+    def _aggregate(self, split: str):
+        width = [w for w in self._width[split] if w > 0]
+        height = [h for h in self._height[split] if h > 0]
+
         results = HeatMapResults(
-            x=x,
-            y=y,
+            x=width,
+            y=height,
             n_bins=16,
             split=split,
             plot="heat-map",
@@ -42,12 +44,7 @@ class WidthHeight(FeatureExtractorAbstract):
             keys=["Width", "Height"],
         )
 
-        quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-        results.json_values = quantized_heat_map.tolist()
+        quantized_heat_map, _, _ = np.histogram2d(width, height, bins=25)
+        results.values_to_log = quantized_heat_map.tolist()
         results.keys = ["Width", "Height"]
         return results
-
-    def aggregate(self, split: str):
-        width = [w for w in self._width[split] if w > 0]
-        height = [h for h in self._height[split] if h > 0]
-        return width, height

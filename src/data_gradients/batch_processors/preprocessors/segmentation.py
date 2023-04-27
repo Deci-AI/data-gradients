@@ -4,15 +4,15 @@ import torch
 from torch import Tensor
 
 
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.batch_processors.preprocessors.base import Preprocessor
 from data_gradients.batch_processors.preprocessors.contours import get_contours
 
 
 class SegmentationPreprocessor(Preprocessor):
-    def __call__(self, images: Tensor, labels: Tensor) -> SegBatchData:
+    def __call__(self, images: Tensor, labels: Tensor) -> SegmentationBatchData:
         contours = [get_contours(onehot_label) for onehot_label in labels]
-        return SegBatchData(images=images, labels=labels, contours=contours, split="")
+        return SegmentationBatchData(images=images, labels=labels, contours=contours, split="")
 
 
 def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool, ignore_labels: List) -> torch.Tensor:

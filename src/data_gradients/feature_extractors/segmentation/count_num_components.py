@@ -1,10 +1,11 @@
 import numpy as np
 
-from data_gradients.utils import SegBatchData
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils.data_classes.extractor_results import HistoResults
+from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import merge_dict_splits, normalize_values_to_percentages
 
 
 class CountNumComponents(FeatureExtractorAbstract):
@@ -20,7 +21,7 @@ class CountNumComponents(FeatureExtractorAbstract):
         self._hist = {"train": dict(), "val": dict()}
         self._total_objects = {"train": 0, "val": 0}
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for image_contours in data.contours:
             num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
             self._total_objects[data.split] += num_objects_in_image
@@ -30,11 +31,15 @@ class CountNumComponents(FeatureExtractorAbstract):
 
                 self._hist[data.split].update({num_objects_in_image: 1})
 
-    def aggregate_to_result(self, split: str):
-        values, bins = self.aggregate(split)
-        results = HistoResults(
-            bins=bins,
-            values=values,
+    def _aggregate(self, split: str):
+        merge_dict_splits(self._hist)
+        hist = self._into_buckets(self._hist[split])
+        values = normalize_values_to_percentages(hist.values(), sum(list(hist.values())))
+        bins = list(hist.keys())
+
+        results = HistogramResults(
+            bin_names=bins,
+            bin_values=values,
             plot="bar-plot",
             split=split,
             color=self.colors[split],
@@ -46,13 +51,6 @@ class CountNumComponents(FeatureExtractorAbstract):
         )
 
         return results
-
-    def aggregate(self, split: str):
-        self.merge_dict_splits(self._hist)
-        hist = self._into_buckets(self._hist[split])
-        values = self.normalize(hist.values(), sum(list(hist.values())))
-        bins = hist.keys()
-        return values, bins
 
     @staticmethod
     def _into_buckets(number_of_objects_per_image):

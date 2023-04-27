@@ -1,8 +1,9 @@
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils import SegBatchData
-from data_gradients.utils.data_classes.extractor_results import HistoResults
+from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import merge_dict_splits
 
 
 class LabelsResolutions(FeatureExtractorAbstract):
@@ -10,7 +11,7 @@ class LabelsResolutions(FeatureExtractorAbstract):
         super().__init__()
         self._hist = {"train": dict(), "val": dict()}
 
-    def update(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for label in data.labels:
             res = str(tuple((label.shape[2], label.shape[1])))
             if res not in self._hist[data.split]:
@@ -18,11 +19,14 @@ class LabelsResolutions(FeatureExtractorAbstract):
             else:
                 self._hist[data.split][res] += 1
 
-    def aggregate_to_result(self, split: str):
-        values, bins = self.aggregate(split)
-        results = HistoResults(
-            bins=bins,
-            values=values,
+    def _aggregate(self, split: str):
+        merge_dict_splits(self._hist)
+        values = list(self._hist[split].values())
+        bins = list(self._hist[split].keys())
+
+        results = HistogramResults(
+            bin_names=bins,
+            bin_values=values,
             plot="bar-plot",
             split=split,
             color=self.colors[split],
@@ -33,9 +37,3 @@ class LabelsResolutions(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
-
-    def aggregate(self, split: str):
-        self.merge_dict_splits(self._hist)
-        values = list(self._hist[split].values())
-        bins = list(self._hist[split].keys())
-        return values, bins
