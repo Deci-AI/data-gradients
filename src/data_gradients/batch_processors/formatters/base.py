@@ -4,7 +4,7 @@ from typing import Tuple
 import torch
 
 
-class BatchValidator(ABC):
+class BatchFormatter(ABC):
     @abstractmethod
     def __call__(self, images: torch.Tensor, labels: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for a given task.

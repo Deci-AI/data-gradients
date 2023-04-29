@@ -2,7 +2,7 @@ from typing import Optional, Callable
 
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.batch_processors.extractors.batch_extractor import BatchExtractor
-from data_gradients.batch_processors.validators.detection import DetectionBatchValidator
+from data_gradients.batch_processors.formatters.detection import DetectionBatchFormatter
 from data_gradients.batch_processors.preprocessors.detection import DetectionBatchPreprocessor
 
 
@@ -17,7 +17,7 @@ class SegmentationBatchProcessor(BatchProcessor):
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
         )
-        validator = DetectionBatchValidator()
+        formatter = DetectionBatchFormatter()
         preprocessor = DetectionBatchPreprocessor()
 
-        super().__init__(batch_extractor=extractor, batch_validator=validator, batch_preprocessor=preprocessor)
+        super().__init__(batch_extractor=extractor, batch_formatter=formatter, batch_preprocessor=preprocessor)

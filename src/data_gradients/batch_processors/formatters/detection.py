@@ -2,10 +2,10 @@ from typing import Tuple
 
 from torch import Tensor
 
-from data_gradients.batch_processors.validators.base import BatchValidator
+from data_gradients.batch_processors.formatters.base import BatchFormatter
 
 
-class DetectionBatchValidator(BatchValidator):
+class DetectionBatchFormatter(BatchFormatter):
     def __init__(self):
         pass
 
