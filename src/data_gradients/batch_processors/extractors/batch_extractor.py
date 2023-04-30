@@ -20,7 +20,7 @@ class BatchExtractor:
         """
         self._tensor_extractor = {0: images_extractor, 1: labels_extractor}
 
-    def __call__(self, objs: Union[Tuple, List, Mapping]) -> Tuple[torch.Tensor, torch.Tensor]:
+    def extract(self, objs: Union[Tuple, List, Mapping]) -> Tuple[torch.Tensor, torch.Tensor]:
         """Convert raw batch (coming from dataloader) into a batch of image and a batch of labels.
 
         :param objs: Raw batch (coming from dataloader without any modification).

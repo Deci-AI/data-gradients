@@ -70,7 +70,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         super().__init__(
             train_data=train_data,
             val_data=val_data,
-            preprocessor=preprocessor,
+            batch_processor=preprocessor,
             feature_extractors=extractors,
             log_dir=log_dir,
             id_to_name=id_to_name,

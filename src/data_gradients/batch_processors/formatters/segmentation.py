@@ -33,7 +33,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         self.threshold_value = threshold_value
         self.is_input_soft_label = None
 
-    def __call__(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
+    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for segmentation.
 
         :param images: Batch of images, in (BS, ...) format

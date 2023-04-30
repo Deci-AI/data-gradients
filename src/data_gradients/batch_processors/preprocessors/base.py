@@ -9,7 +9,7 @@ class BatchPreprocessor(ABC):
     """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing."""
 
     @abstractmethod
-    def __call__(self, images: torch.Tensor, labels: torch.Tensor) -> BatchData:
+    def preprocess(self, images: torch.Tensor, labels: torch.Tensor) -> BatchData:
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
         :param images:  Batch of images already formatted into (BS, N, W, H)

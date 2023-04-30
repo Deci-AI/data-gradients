@@ -23,10 +23,11 @@ class BatchProcessor(ABC):
         self.batch_formatter = batch_formatter
         self.batch_preprocessor = batch_preprocessor
 
-    def __call__(self, unprocessed_batch: Union[Tuple, List, Mapping]) -> BatchData:
-        images, labels = self.batch_extractor(unprocessed_batch)
-        images, labels = self.batch_formatter(images, labels)
-        batch = self.batch_preprocessor(images, labels)
+    def process(self, unprocessed_batch: Union[Tuple, List, Mapping], split: str) -> BatchData:
+        images, labels = self.batch_extractor.extract(unprocessed_batch)
+        images, labels = self.batch_formatter.format(images, labels)
+        batch = self.batch_preprocessor.preprocess(images, labels)
+        batch.split = split
         return batch
 
     @property

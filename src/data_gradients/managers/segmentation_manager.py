@@ -50,7 +50,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param samples_to_visualize:    Number of samples to visualize at tensorboard [0-n]
         """
 
-        preprocessor = SegmentationBatchProcessor(
+        batch_processor = SegmentationBatchProcessor(
             n_classes=n_classes,
             ignore_labels=ignore_labels,
             images_extractor=images_extractor,
@@ -66,7 +66,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         super().__init__(
             train_data=train_data,
             val_data=val_data,
-            preprocessor=preprocessor,
+            batch_processor=batch_processor,
             feature_extractors=feature_extractors,
             log_dir=log_dir,
             id_to_name=id_to_name,

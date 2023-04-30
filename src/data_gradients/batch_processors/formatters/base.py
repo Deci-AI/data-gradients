@@ -6,7 +6,7 @@ import torch
 
 class BatchFormatter(ABC):
     @abstractmethod
-    def __call__(self, images: torch.Tensor, labels: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def format(self, images: torch.Tensor, labels: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for a given task.
 
         :param images: Batch of images, in (BS, ...) format

@@ -9,5 +9,5 @@ class DetectionBatchFormatter(BatchFormatter):
     def __init__(self):
         pass
 
-    def __call__(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
+    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         return images, labels

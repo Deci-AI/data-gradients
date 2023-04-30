@@ -7,7 +7,7 @@ from data_gradients.batch_processors.preprocessors.contours import get_contours
 
 
 class SegmentationBatchPreprocessor(BatchPreprocessor):
-    def __call__(self, images: Tensor, labels: Tensor) -> SegmentationBatchData:
+    def preprocess(self, images: Tensor, labels: Tensor) -> SegmentationBatchData:
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
         :param images:  Batch of images already formatted into (BS, N, W, H)
