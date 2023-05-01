@@ -11,7 +11,7 @@ from data_gradients.logging.log_writer import LogWriter
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.thread_manager import ThreadManager
-from data_gradients.visualize.image_visualizer import ImageVisualizer
+from data_gradients.visualize.image_visualizer import ImageSampleManager
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -34,7 +34,7 @@ class AnalysisManagerAbstract(abc.ABC):
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
-        visualizer: ImageVisualizer,
+        image_sample_manager: ImageSampleManager,
     ):
         """
         :param train_data:          Iterable object contains images and labels of the training dataset
@@ -46,7 +46,7 @@ class AnalysisManagerAbstract(abc.ABC):
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
                                     before choosing the number of epochs.
-        :param visualizer:          Visualizer object to be used for visualizing images.
+        :param image_sample_manager:     Object responsible for collecting images
         """
 
         if batches_early_stop:
@@ -70,7 +70,7 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.warning("`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`")
             short_run = False
         self.short_run = short_run
-        self.visualizer = visualizer
+        self.image_sample_manager = image_sample_manager
 
     def _preprocess_batch(self, batch: Iterator, split: str) -> BatchData:
         batch = tuple(batch) if isinstance(batch, list) else batch
@@ -100,7 +100,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 preprocessed_batch = self._preprocess_batch(train_batch, "train")
                 for extractor in self.extractors:
                     thread_manager.submit(extractor.update, preprocessed_batch)
-                self.visualizer.update(preprocessed_batch)
+                self.image_sample_manager.update(preprocessed_batch)
 
             if val_batch is not None:
                 preprocessed_batch = self._preprocess_batch(val_batch, "val")
@@ -139,8 +139,8 @@ class AnalysisManagerAbstract(abc.ABC):
         for extractor in self.extractors:
             extractor.aggregate_and_write(self._log_writer, self.id_to_name)
 
-        for i, sample_to_visualize in enumerate(self.visualizer.samples):
-            title = f"Data Visualization/{len(self.visualizer.samples) - i}"
+        for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
+            title = f"Data Visualization/{len(self.image_sample_manager.samples) - i}"
             self._log_writer.log_image(title=title, image=sample_to_visualize)
 
         if self.preprocessor.images_route is not None:
