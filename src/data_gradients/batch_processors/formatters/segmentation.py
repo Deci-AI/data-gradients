@@ -45,11 +45,11 @@ class SegmentationBatchFormatter(BatchFormatter):
         images = drop_nan(images)
         labels = drop_nan(labels)
 
-        images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
-        labels = ensure_labels_shape(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
-
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         labels = ensure_channel_first(labels, n_image_channels=self.n_image_channels)
+
+        images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
+        labels = ensure_labels_shape(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
 
         labels = ensure_hard_labels(labels, n_classes_used=self.n_classes_used, ignore_labels=self.ignore_labels, threshold_value=self.threshold_value)
 
