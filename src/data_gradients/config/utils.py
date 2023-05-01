@@ -37,12 +37,24 @@ def load_config(config_name: str, config_dir: str, overrides: Optional[Dict[str,
     config_dir = config_dir or os.path.dirname(__file__)
     overrides = overrides or {}
 
-    dotlist_overrides = [f"{key}={value}" for key, value in dict_to_dotlist(overrides)]
+    dotlist_overrides = dict_to_dotlist_overrides(overrides)
 
     GlobalHydra.instance().clear()
     with initialize_config_dir(config_dir=config_dir, version_base="1.2"):
         cfg = compose(config_name=config_name, overrides=dotlist_overrides)
     return hydra.utils.instantiate(cfg)
+
+
+def dict_to_dotlist_overrides(dict_params: Dict[str, Any]) -> List[str]:
+    """Convert a dictionary to a list of strings in format 'path.to.key=value', similar the hydra command line overrides.
+
+    >>> dict_to_dotlist({'experiment_name': 'adam', 'model': {'type': 'resnet', 'depth': 18, 'num_classes': 10}})
+    ['experiment_name=adam','model.type=resnet','model.depth=18','model.num_classes=10']
+
+    :param dict_params: The dictionary to convert.
+    :return:            List of strings in format 'path.to.key=value', similar the hydra command line overrides.
+    """
+    return [f"{key}={value}" for key, value in dict_to_dotlist(dict_params)]
 
 
 def dict_to_dotlist(dict_params: Dict[str, Any]) -> List[Tuple[str, Any]]:
