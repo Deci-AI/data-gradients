@@ -10,7 +10,7 @@ class SegmentationBatchPreprocessor(BatchPreprocessor):
     def preprocess(self, images: Tensor, labels: Tensor) -> SegmentationBatchData:
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
-        :param images:  Batch of images already formatted into (BS, C, W, H)
+        :param images:  Batch of images already formatted into (BS, C, H, W)
         :param labels:  Batch of labels already formatted into (BS, N, W, H)
         :return:        Ready to analyse segmentation batch object.
         """

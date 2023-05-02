@@ -20,11 +20,11 @@ def drop_nan(tensor: Tensor) -> Tensor:
 
 
 def ensure_channel_first(images: Tensor, n_image_channels: int) -> Tensor:
-    """Images should be [BS, C, W, H]. If [BS, W, H, C], permute
+    """Images should be [BS, C, H, W]. If [BS, W, H, C], permute
 
     :param images:              Tensor
     :param n_image_channels:    Number of image channels (3 for RGB, 1 for grayscale)
-    :return: images:            Tensor [BS, C, W, H]
+    :return: images:            Tensor [BS, C, H, W]
     """
     if images.shape[1] != n_image_channels and images.shape[-1] == n_image_channels:
         images = channels_last_to_first(images)
@@ -32,11 +32,11 @@ def ensure_channel_first(images: Tensor, n_image_channels: int) -> Tensor:
 
 
 def ensure_images_shape(images: Tensor, n_image_channels: int) -> Tensor:
-    """Validate images dimensions are (BS, C, W, H)
+    """Validate images dimensions are (BS, C, H, W)
 
-    :param images:              Tensor [BS, C, W, H]
+    :param images:              Tensor [BS, C, H, W]
     :param n_image_channels:    Number of image channels (C = 3 for RGB, C = 1 for grayscale)
-    :return: images:            Tensor [BS, C, W, H]
+    :return: images:            Tensor [BS, C, H, W]
     """
     if images.dim() != 4:
         raise ValueError(f"Images batch shape should be (BatchSize x Channels x Width x Height). Got {images.shape}")

@@ -4,10 +4,10 @@ import torch
 
 def channels_last_to_first(tensors: torch.Tensor) -> torch.Tensor:
     """
-    Permute BS, W, H, C -> BS, C, W, H
+    Permute BS, W, H, C -> BS, C, H, W
             0   1  2  3 -> 0   3  1  2
     :param tensors: Tensor[BS, W, H, C]
-    :return: Tensor[BS, C, W, H]
+    :return: Tensor[BS, C, H, W]
     """
     return tensors.permute(0, 3, 1, 2)
 
@@ -21,7 +21,7 @@ def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
     Method gets label with the shape of [BS, N, W, H] where N is either 1 or n_classes, if is_one_hot=True.
     param label: Tensor
     param is_one_hot: Determine if labels are one-hot shaped
-    :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.
+    :return: Labels tensor shaped as [BS, VC, H, W] where VC is Valid Classes only - ignores are omitted.
     """
     masks = []
     labels = labels.to(torch.int64)

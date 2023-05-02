@@ -12,7 +12,7 @@ class BatchFormatter(ABC):
         :param images: Batch of images, in (BS, ...) format
         :param labels: Batch of labels, in task-dependant format
         :return:
-            - images: Batch of images already formatted into (BS, C, W, H)
+            - images: Batch of images already formatted into (BS, C, H, W)
             - labels: Batch of labels already formatted into format relevant for current task (detection, segmentation, classification).
         """
         pass
