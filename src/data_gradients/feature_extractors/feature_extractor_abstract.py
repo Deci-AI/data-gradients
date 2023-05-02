@@ -64,15 +64,15 @@ class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
     def aggregate_and_write(self, logger: LogWriter, id_to_name):
         self.id_to_name = id_to_name
 
-        results_dict = {"train": self._aggregate("train"), "val": self._aggregate("val")}
+        results_per_split = {"train": self._aggregate("train"), "val": self._aggregate("val")}
 
-        for key in results_dict["train"].keys():
+        for key in results_per_split["train"].keys():
 
             fig, ax = plt.subplots(nrows=self.num_axis[0], ncols=self.num_axis[1], figsize=(10, 5))
 
             results_json = {}
             for split in ["train", "val"]:
-                result = results_dict[split][key]
+                result = results_per_split[split][key]
                 result.write_plot(ax=ax, fig=fig)
                 results_json[split] = result.json_values
 
