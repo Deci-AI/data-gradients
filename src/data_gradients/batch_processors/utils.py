@@ -1,4 +1,3 @@
-from typing import Sequence
 import torch
 
 
@@ -12,8 +11,8 @@ def channels_last_to_first(tensors: torch.Tensor) -> torch.Tensor:
     return tensors.permute(0, 3, 1, 2)
 
 
-def check_all_integers(values: Sequence) -> bool:
-    return all(v - int(v) == 0 for v in values)
+def check_all_integers(tensor: torch.Tensor) -> bool:
+    return torch.all(torch.eq(tensor, tensor.to(torch.int))).item()
 
 
 def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:

@@ -71,9 +71,9 @@ def convert_to_label_xyxy(annotated_bboxes: Tensor, image_shape: Tuple[int, int]
     annotated_bboxes = annotated_bboxes[:]
 
     if label_first:
-        labels, bboxes = annotated_bboxes[0], annotated_bboxes[1:]
+        labels, bboxes = annotated_bboxes[..., :1], annotated_bboxes[..., 1:]
     else:
-        labels, bboxes = annotated_bboxes[-1], annotated_bboxes[:-1]
+        labels, bboxes = annotated_bboxes[..., -1:], annotated_bboxes[..., :-1]
 
     if not check_all_integers(labels):
         raise RuntimeError(f"Labels should all be integers, but got {labels}")
@@ -85,14 +85,14 @@ def convert_to_label_xyxy(annotated_bboxes: Tensor, image_shape: Tuple[int, int]
         bboxes[..., 0::2] *= w
         bboxes[..., 1::2] *= h
 
-    return torch.stack([labels, xyxy_bboxes], dim=-1)
+    return torch.cat([labels, xyxy_bboxes], dim=-1)
 
 
 def ask_user_xyxy_converter() -> Callable[[Tensor], Tensor]:
     xyxy_converter_descriptions = {
-        lambda x: x: "xyxy: x - left, y - top, x - right, y - bottom",
-        xywh_to_xyxy: "xywh: x - left, y - top, width, height",
-        cxcywh_to_xyxy: "cxcywh: x - center, y - center, width, height",
+        lambda x: x: "xyxy: x- left, y-top, x-right, y-bottom",
+        xywh_to_xyxy: "xywh: x-left, y-top, width, height",
+        cxcywh_to_xyxy: "cxcywh: x-center, y-center, width, height",
     }
     xyxy_converter = ask_user(main_question="What is the format of the bounding boxes?", options_described=xyxy_converter_descriptions)
     return xyxy_converter
@@ -114,18 +114,19 @@ def ask_user(main_question: str, options_described: Dict[Any, str]) -> Any:
     :param options_described:   Dictionary containing the options as keys and their descriptions as values.
     :return:                    The chosen option (key from the options_described dictionary).
     """
-    options, options_descriptions = zip(*options_described.items())
+    options, options_descriptions = list(options_described.keys()), list(options_described.values())
     numbers_to_chose_from = [str(i) for i in range(len(options))]
 
     options_formatted = "\n".join([f"\t {number} | {option_description}" for number, option_description in zip(numbers_to_chose_from, options_descriptions)])
 
     user_answer = None
     while user_answer not in numbers_to_chose_from:
+        print()
         if user_answer is not None:
             print(f'"{user_answer}" is not a valid option. Please chose a number between 0-{len(numbers_to_chose_from)}.')
         user_answer = input(f"{main_question}\n{options_formatted}\n (Write down the number) >>> ")
 
-    return options[user_answer]
+    return options[int(user_answer)]
 
 
 def cxcywh_to_xyxy(bboxes: Tensor) -> Tensor:
