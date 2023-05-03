@@ -11,8 +11,8 @@ from data_gradients.feature_extractors import FeatureExtractorAbstract
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 
 
-def load_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[FeatureExtractorAbstract]:
-    """Load and instantiate extractors from a Hydra configuration file.
+def load_feature_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[FeatureExtractorAbstract]:
+    """Load and instantiate feature extractors from a Hydra configuration file.
 
     :param config_name: Name of the Hydra configuration file to load.
     :param config_dir:  Directory where the Hydra configuration file is located.

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     Arguments required for SegmentationAnalysisManager() are:
         train_data  -> An Iterable (i.e., torch data loader) containing train data
         val_data    -> An Iterable (i.e., torch data loader) containing valid data
-        num_classes -> Number of valid classes
+        n_classes -> Number of valid classes
     Also if there are ignore labels, please pass them as a List[int].
     Default ignore label will be [0] as for background only.
 
@@ -42,14 +42,14 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=8)
     val_loader = DataLoader(val_dataset, batch_size=8)
 
-    num_classes = BDDDataset.NUM_CLASSES
+    n_classes = BDDDataset.NUM_CLASSES
     ignore_labels = BDDDataset.IGNORE_LABELS
     class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
 
     da = SegmentationAnalysisManager(
         train_data=train_loader,
         val_data=val_loader,
-        num_classes=num_classes,
+        n_classes=n_classes,
         # Optionals
         ignore_labels=ignore_labels,
         id_to_name=class_id_to_name,
