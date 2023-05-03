@@ -8,9 +8,9 @@ from data_gradients.feature_extractors.utils import normalize_values_to_percenta
 
 
 class GetClassDistribution(FeatureExtractorAbstract):
-    def __init__(self, num_classes, ignore_labels):
+    def __init__(self, n_classes, ignore_labels):
         super().__init__()
-        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
+        keys = [int(i) for i in range(0, n_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": dict.fromkeys(keys, 0), "val": dict.fromkeys(keys, 0)}
         self._total_objects = {"train": 0, "val": 0}
         self.ignore_labels = ignore_labels

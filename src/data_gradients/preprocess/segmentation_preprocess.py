@@ -15,19 +15,19 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
     def __init__(
         self,
-        num_classes,
+        n_classes,
         ignore_labels,
         images_extractor,
         labels_extractor,
-        num_image_channels,
+        n_image_channels,
         threshold_value,
     ):
         """
         Constructor gets number of classes and ignore labels in order to understand how to data labels should look like
-        :param num_classes: number of valid classes
+        :param n_classes: number of valid classes
         :param ignore_labels: list of numbers that we should avoid from analyzing as valid classes, such as background
         """
-        super().__init__(num_classes, images_extractor, labels_extractor, num_image_channels)
+        super().__init__(n_classes, images_extractor, labels_extractor, n_image_channels)
         self._onehot: bool = False
 
         self._ignore_labels: List[int] = ignore_labels
@@ -68,8 +68,8 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         if images.dim() != 4:
             raise ValueError(f"Images batch shape should be (BatchSize x Channels x Width x Height). Got {images.shape}")
 
-        if images.shape[1] != self._num_image_channels and images.shape[-1] != self._num_image_channels:
-            raise ValueError(f"Images should have {self._num_image_channels} number of channels. Got {min(images[0].shape)}")
+        if images.shape[1] != self._n_image_channels and images.shape[-1] != self._n_image_channels:
+            raise ValueError(f"Images should have {self._n_image_channels} number of channels. Got {min(images[0].shape)}")
         return images
 
     def _dim_validate_labels(self, labels: Tensor):
@@ -89,7 +89,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         valid = [self.number_of_classes + len(self.ignore_labels), 1]
         if labels.shape[1] not in valid and labels.shape[-1] not in valid:
             raise ValueError(
-                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or num_classes + len(ignore_labels)"
+                f"Labels batch shape should be [BS, N, W, H] where N is either 1 or n_classes + len(ignore_labels)"
                 f" ({self.number_of_classes + len(self.ignore_labels)}). Got: {labels.shape[1]}"
             )
 
@@ -136,7 +136,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
         :param images: Tensor
         :return: images: Tensor [BS, C, W, H]
         """
-        if images.shape[1] != self._num_image_channels and images.shape[-1] == self._num_image_channels:
+        if images.shape[1] != self._n_image_channels and images.shape[-1] == self._n_image_channels:
             images = self.channels_last_to_first(images)
         return images
 
@@ -216,7 +216,7 @@ class SegmentationPreprocessor(PreprocessorAbstract):
 
     def _to_one_hot(self, labels: torch.Tensor) -> torch.Tensor:
         """
-        Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
+        Method gets label with the shape of [BS, N, W, H] where N is either 1 or n_classes, if is_one_hot=True.
         param label: Tensor
         param is_one_hot: Determine if labels are one-hot shaped
         :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.

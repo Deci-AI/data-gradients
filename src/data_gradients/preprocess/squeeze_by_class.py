@@ -5,7 +5,7 @@ import torch
 
 def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool, ignore_labels: List) -> torch.Tensor:
     """
-    Method gets label with the shape of [BS, N, W, H] where N is either 1 or num_classes, if is_one_hot=True.
+    Method gets label with the shape of [BS, N, W, H] where N is either 1 or n_classes, if is_one_hot=True.
     param label: Tensor
     param is_one_hot: Determine if labels are one-hot shaped
     :return: Labels tensor shaped as [BS, VC, W, H] where VC is Valid Classes only - ignores are omitted.

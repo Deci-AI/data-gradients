@@ -11,7 +11,7 @@ from data_gradients.logging.log_writer import LogWriter
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.thread_manager import ThreadManager
-from data_gradients.visualize.image_visualizer import ImageSampleManager
+from data_gradients.visualize.image_sample_managers import ImageSampleManager
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -174,9 +174,9 @@ class AnalysisManagerAbstract(abc.ABC):
     @property
     def n_batches(self) -> Optional[int]:
         """Number of batches to analyze if available, None otherwise."""
-        if not (self.train_size is None and self.val_size is None and self.batches_early_stop is None):
-            return min(
-                self.batches_early_stop or float("inf"),
-                self.train_size or float("inf"),
-                self.val_size or float("inf"),
-            )
+        if self.train_size is None or self.val_size is None:
+            return self.batches_early_stop
+
+        n_batches_available = max(self.train_size, self.val_size)
+        n_batches_early_stop = self.batches_early_stop or float("inf")
+        return min(n_batches_early_stop, n_batches_available)

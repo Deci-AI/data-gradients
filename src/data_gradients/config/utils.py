@@ -11,8 +11,8 @@ from data_gradients.feature_extractors import FeatureExtractorAbstract
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 
 
-def load_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[FeatureExtractorAbstract]:
-    """Load and instantiate extractors from a Hydra configuration file.
+def load_feature_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[FeatureExtractorAbstract]:
+    """Load and instantiate feature extractors from a Hydra configuration file.
 
     :param config_name: Name of the Hydra configuration file to load.
     :param config_dir:  Directory where the Hydra configuration file is located.
@@ -48,8 +48,8 @@ def load_config(config_name: str, config_dir: str, overrides: Optional[Dict[str,
 def dict_to_dotlist_overrides(dict_params: Dict[str, Any]) -> List[str]:
     """Convert a dictionary to a list of strings in format 'path.to.key=value', similar the hydra command line overrides.
 
-    >>> dict_to_dotlist({'experiment_name': 'adam', 'model': {'type': 'resnet', 'depth': 18, 'num_classes': 10}})
-    ['experiment_name=adam','model.type=resnet','model.depth=18','model.num_classes=10']
+    >>> dict_to_dotlist({'experiment_name': 'adam', 'model': {'type': 'resnet', 'depth': 18, 'n_classes': 10}})
+    ['experiment_name=adam','model.type=resnet','model.depth=18','model.n_classes=10']
 
     :param dict_params: The dictionary to convert.
     :return:            List of strings in format 'path.to.key=value', similar the hydra command line overrides.
@@ -64,8 +64,8 @@ def dict_to_dotlist(dict_params: Dict[str, Any]) -> List[Tuple[str, Any]]:
     dot-separated string representing a nested dictionary key, and the value is the corresponding value in the
     dictionary.
 
-    >>> dict_to_dotlist({'experiment_name': 'adam', 'model': {'type': 'resnet', 'depth': 18, 'num_classes': 10}})
-    [('experiment_name', 'adam'), ('model.type','resnet'), ('model.depth', 18), ('model.num_classes', 10)]
+    >>> dict_to_dotlist({'experiment_name': 'adam', 'model': {'type': 'resnet', 'depth': 18, 'n_classes': 10}})
+    [('experiment_name', 'adam'), ('model.type','resnet'), ('model.depth', 18), ('model.n_classes', 10)]
 
     :param dict_params: The dictionary to convert.
     :return: A list of key-value pairs, where each key is a dot-separated string and each value is a value from the input dictionary.
