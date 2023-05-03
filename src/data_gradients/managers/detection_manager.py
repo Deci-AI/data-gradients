@@ -3,7 +3,7 @@ from typing import Optional, Iterable, List, Dict, Callable
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_feature_extractors
 from data_gradients.batch_processors.detection import DetectionBatchProcessor
-from data_gradients.visualize.image_visualizer import SegmentationImageVisualizer
+from data_gradients.visualize.image_samplers.detection import DetectionImageSampleManager
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -56,7 +56,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
 
         feature_extractors = load_feature_extractors(config_name=config_name, overrides={"number_of_classes": n_classes})
 
-        visualizer = SegmentationImageVisualizer(n_samples=samples_to_visualize)  # TO ADD
+        image_sample_manager = DetectionImageSampleManager(n_samples=samples_to_visualize)
 
         super().__init__(
             train_data=train_data,
@@ -67,5 +67,5 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
             short_run=short_run,
-            visualizer=visualizer,
+            image_sample_manager=image_sample_manager,
         )

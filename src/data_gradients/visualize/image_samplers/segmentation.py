@@ -1,36 +1,21 @@
-from abc import ABC, abstractmethod
 import torch
 import torchvision
 
-from data_gradients.utils import BatchData
+from data_gradients.visualize.image_samplers.base import ImageSampleManager
 
 
-class ImageVisualizer(ABC):
-    def __init__(self, n_samples: int):
-        self.n_samples = n_samples
-        self.samples = []
-
-    def update(self, data: BatchData) -> None:
-        for image, label in zip(data.images, data.labels):
-            if len(self.samples) < self.n_samples:
-                self.samples.append(self.prepare_image(image=image, label=label))
-
-    @abstractmethod
-    def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
-        pass
-
-
-class SegmentationImageVisualizer(ImageVisualizer):
-    """
-    Semantic Segmentation task feature extractor -
-    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
-    """
-
+class SegmentationImageSampleManager(ImageSampleManager):
     def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
         return prepare_segmentation_image(image=image, label=label)
 
 
 def prepare_segmentation_image(image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
+    """Combine image and label to a single image with the original image to the left and the mask to the right.
+
+    :param image:   Input image tensor.
+    :param label:   Input Label.
+    :return:        The preprocessed image tensor.
+    """
     # Just in case label is different from image
     if label.shape[2:] != image.shape[2:]:
         resize = torchvision.transforms.Resize(label.shape[-2:])

@@ -1,13 +1,15 @@
 import numpy as np
-from super_gradients.training.datasets import YoloDarknetFormatDetectionDataset
-
 from torch.utils.data import DataLoader
+
+from super_gradients.training.datasets import YoloDarknetFormatDetectionDataset
 
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
 
 class PadTarget:
-    def __init__(self, max_targets):
+    """Transform targets (Compatible with Sg DetectionDatasets)"""
+
+    def __init__(self, max_targets: int):
         self.max_targets = max_targets
 
     def __call__(self, sample):
@@ -48,7 +50,7 @@ if __name__ == "__main__":
         train_data=train_loader,
         val_data=val_loader,
         n_classes=len(classes),
-        samples_to_visualize=0,
+        samples_to_visualize=3,
     )
 
     analyzer.run()

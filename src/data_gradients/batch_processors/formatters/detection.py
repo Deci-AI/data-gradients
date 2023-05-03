@@ -36,6 +36,9 @@ class DetectionBatchFormatter(BatchFormatter):
         images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
         labels = ensure_labels_shape(annotated_bboxes=labels)
 
+        if self.label_first is None or self.xyxy_converter is None:
+            show_annotated_bboxes(annotated_bboxes=labels)
+
         if self.label_first is None:
             self.label_first = ask_user_is_label_first()
 
@@ -44,6 +47,13 @@ class DetectionBatchFormatter(BatchFormatter):
 
         labels = convert_to_label_xyxy(annotated_bboxes=labels, image_shape=images.shape[-2:], xyxy_converter=self.xyxy_converter, label_first=self.label_first)
         return images, labels
+
+
+def show_annotated_bboxes(annotated_bboxes: Tensor) -> None:
+    """Show an example of the annotated bounding boxes."""
+    print()
+    print("This is how your labels look like:")
+    print(annotated_bboxes[0, :3, :])
 
 
 def ensure_labels_shape(annotated_bboxes: Tensor) -> Tensor:
@@ -103,7 +113,7 @@ def ask_user_is_label_first() -> bool:
         True: "Start with label, followed with bboxes ([label, x1, y1, x2, y2] for instance)",
         False: "Start with bboxes, followed by labels ([x1, y1, x2, y2, label] for instance)",
     }
-    is_label_first = ask_user(main_question="How is your label organized?", options_described=is_label_first_descriptions)
+    is_label_first = ask_user(main_question='Are your Annotation "label first" or "label last"?', options_described=is_label_first_descriptions)
     return is_label_first
 
 
