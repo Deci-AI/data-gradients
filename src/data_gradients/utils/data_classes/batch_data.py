@@ -15,9 +15,8 @@ class BatchData(ABC):
     split  - train / val
     """
 
-    images: Tensor
-    labels: Tensor
     split: str
+    images: Tensor
 
 
 @dataclass
@@ -27,9 +26,11 @@ class SegmentationBatchData(BatchData):
                                    is number of classes
     """
 
+    labels: Tensor
     contours: List[List[List[Contour]]]
 
 
 @dataclass
 class DetectionBatchData(BatchData):
-    pass
+    labels: Tensor
+    bboxes: Tensor

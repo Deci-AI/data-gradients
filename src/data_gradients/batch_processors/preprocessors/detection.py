@@ -6,4 +6,4 @@ from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
 
 class DetectionBatchPreprocessor(BatchPreprocessor):
     def preprocess(self, images: Tensor, labels: Tensor) -> DetectionBatchData:
-        return DetectionBatchData(images=images, labels=labels, split="")
+        return DetectionBatchData(images=images, labels=labels[:, :, 0], bboxes=labels[:, :, 1:], split="")

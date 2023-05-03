@@ -1,6 +1,4 @@
-from abc import ABC, abstractmethod
-
-import torch
+from abc import ABC
 
 from data_gradients.utils import BatchData
 
@@ -19,17 +17,5 @@ class ImageSampleManager(ABC):
         """Update the internal collection of samples with new samples from the given batch data.
 
         :param data: The batch data containing images and labels.
-        """
-        for image, label in zip(data.images, data.labels):
-            if len(self.samples) < self.n_samples:
-                self.samples.append(self.prepare_image(image=image, label=label))
-
-    @abstractmethod
-    def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
-        """Prepare an individual image for visualization.
-
-        :param image:   Input image tensor.
-        :param label:   Input Label
-        :return:        The preprocessed image tensor.
         """
         pass

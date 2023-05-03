@@ -1,12 +1,15 @@
 import torch
 import torchvision
 
+from data_gradients.utils import SegmentationBatchData
 from data_gradients.visualize.image_samplers.base import ImageSampleManager
 
 
 class SegmentationImageSampleManager(ImageSampleManager):
-    def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
-        return prepare_segmentation_image(image=image, label=label)
+    def update(self, data: SegmentationBatchData) -> None:
+        for image, label in zip(data.images, data.labels):
+            if len(self.samples) < self.n_samples:
+                self.samples.append(prepare_segmentation_image(image=image, label=label))
 
 
 def prepare_segmentation_image(image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:

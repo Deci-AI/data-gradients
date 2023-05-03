@@ -5,28 +5,32 @@ import cv2
 import numpy as np
 import torch
 
+from data_gradients.utils import DetectionBatchData
 from data_gradients.visualize.image_samplers.base import ImageSampleManager
 
 
 class DetectionImageSampleManager(ImageSampleManager):
-    def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
-        return draw_bboxes(image=image, annotated_bboxes=label)
+    def update(self, data: DetectionBatchData) -> None:
+        for image, labels, bboxes in zip(data.images, data.labels, data.bboxes):
+            if len(self.samples) < self.n_samples:
+                self.samples.append(draw_bboxes(image=image, labels=labels, bboxes=bboxes))
 
 
-def draw_bboxes(image: torch.Tensor, annotated_bboxes: torch.Tensor) -> torch.Tensor:
+def draw_bboxes(image: torch.Tensor, labels: torch.Tensor, bboxes: torch.Tensor) -> torch.Tensor:
     """Draw annotated bboxes on an image.
 
-    :param image:               Input image tensor.
-    :param annotated_bboxes:    Annotated BBoxes, in [BS, N, 5 (label_xyxy)].
-    :return:                    Image with annotated bboxes.
+    :param image:       Input image tensor.
+    :param labels:      Labels in shape [N].
+    :param bboxes:      Labels in shape [N, 4].
+    :return:            Image with annotated bboxes.
     """
     image = image.cpu().numpy().copy().transpose(1, 2, 0)
-    annotated_bboxes = annotated_bboxes.cpu().numpy()
+    labels = labels.cpu().numpy()
+    bboxes = bboxes.cpu().numpy()
 
-    colors = generate_color_mapping(int(annotated_bboxes[:, 0].max()) + 1)
+    colors = generate_color_mapping(int(labels.max()) + 1)
 
-    for annotated_bbox in annotated_bboxes:
-        label, bbox = annotated_bbox[0], annotated_bbox[1:]
+    for label, bbox in zip(labels, bboxes):
 
         if (bbox == 0).all():
             pass

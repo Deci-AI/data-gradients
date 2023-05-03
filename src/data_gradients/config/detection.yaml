@@ -4,4 +4,5 @@ defaults:
   - common: common
   - _self_
 
-feature_extractors: []
+feature_extractors:
+  - _target_: data_gradients.feature_extractors.detection.bbox_width_height_ratio.BBoxWidthHeightRatio

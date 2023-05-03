@@ -91,13 +91,15 @@ class AnalysisManagerAbstract(abc.ABC):
             if train_batch is not None:
                 processed_batch = self.batch_processor.process(train_batch, split="train")
                 for extractor in self.feature_extractors:
-                    thread_manager.submit(extractor.update, processed_batch)
+                    extractor.update(processed_batch)
+                    # thread_manager.submit(extractor.update, processed_batch)
                 self.image_sample_manager.update(processed_batch)
 
             if val_batch is not None:
                 processed_batch = self.batch_processor.process(val_batch, split="val")
                 for extractor in self.feature_extractors:
-                    thread_manager.submit(extractor.update, processed_batch)
+                    extractor.update(processed_batch)
+                    # thread_manager.submit(extractor.update, processed_batch)
 
             if i == 0 and self.short_run:
                 thread_manager.wait_complete()
