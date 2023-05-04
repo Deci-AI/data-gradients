@@ -1,3 +1,4 @@
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
@@ -7,6 +8,7 @@ from data_gradients.utils.data_classes.extractor_results import HistogramResults
 from data_gradients.feature_extractors.utils import normalize_values_to_percentages
 
 
+@register_feature_extractor()
 class GetClassDistribution(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
