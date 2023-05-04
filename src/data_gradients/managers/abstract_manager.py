@@ -1,19 +1,17 @@
 import abc
 import logging
-import os
 from typing import Iterator, Iterable, List, Dict, Optional
 from itertools import zip_longest
+from logging import getLogger
 
-import hydra
 import tqdm
 
 from data_gradients.feature_extractors import FeatureExtractorAbstract
-from data_gradients.logging.logger import Logger
+from data_gradients.logging.log_writer import LogWriter
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.thread_manager import ThreadManager
-
-from logging import getLogger
+from data_gradients.visualize.image_visualizer import ImageSampleManager
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -30,19 +28,25 @@ class AnalysisManagerAbstract(abc.ABC):
         *,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
-        log_writer: Logger,
+        log_dir: Optional[str] = None,
+        preprocessor: PreprocessorAbstract,
+        extractors: List[FeatureExtractorAbstract],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
+        image_sample_manager: ImageSampleManager,
     ):
         """
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
-        :param logger:              Logger object for logging information during analysis
+        :param log_dir:             Directory where to save the logs. By default uses the current working directory
+        :param preprocessor:        Preprocessor object to be used before extracting features
+        :param extractors:          List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
                                     before choosing the number of epochs.
+        :param image_sample_manager:     Object responsible for collecting images
         """
 
         if batches_early_stop:
@@ -55,11 +59,10 @@ class AnalysisManagerAbstract(abc.ABC):
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
         # Logger
-        self._log_writer = log_writer
+        self._log_writer = LogWriter(log_dir=log_dir)
 
-        self._cfg = None
-        self._preprocessor: PreprocessorAbstract = Optional[None]
-        self._extractors: List[FeatureExtractorAbstract] = []
+        self.preprocessor = preprocessor
+        self.extractors = extractors
 
         self.id_to_name = id_to_name
 
@@ -67,19 +70,12 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.warning("`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`")
             short_run = False
         self.short_run = short_run
-
-    def build(self):
-        """
-        Build method for hydra configuration file initialized and composed in manager constructor.
-        Create lists of feature extractors, both to train and val iterables.
-        """
-        cfg = hydra.utils.instantiate(self._cfg)
-        self._extractors = cfg.feature_extractors + cfg.common.feature_extractors
+        self.image_sample_manager = image_sample_manager
 
     def _preprocess_batch(self, batch: Iterator, split: str) -> BatchData:
         batch = tuple(batch) if isinstance(batch, list) else batch
-        images, labels = self._preprocessor.validate(batch)
-        preprocessed_batch = self._preprocessor.preprocess(images, labels)
+        images, labels = self.preprocessor.validate(batch)
+        preprocessed_batch = self.preprocessor.preprocess(images, labels)
         preprocessed_batch.split = split
         return preprocessed_batch
 
@@ -102,13 +98,13 @@ class AnalysisManagerAbstract(abc.ABC):
 
             if train_batch is not None:
                 preprocessed_batch = self._preprocess_batch(train_batch, "train")
-                for extractor in self._extractors:
+                for extractor in self.extractors:
                     thread_manager.submit(extractor.update, preprocessed_batch)
-                self._log_writer.visualize(preprocessed_batch)
+                self.image_sample_manager.update(preprocessed_batch)
 
             if val_batch is not None:
                 preprocessed_batch = self._preprocess_batch(val_batch, "val")
-                for extractor in self._extractors:
+                for extractor in self.extractors:
                     thread_manager.submit(extractor.update, preprocessed_batch)
 
             if i == 0 and self.short_run:
@@ -140,26 +136,30 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         # Post process each feature executor to json / tensorboard
-        for extractor in self._extractors:
+        for extractor in self.extractors:
             extractor.aggregate_and_write(self._log_writer, self.id_to_name)
 
-        # Write meta data to json file
-        self._log_writer.log_meta_data(self._preprocessor)
+        for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
+            title = f"Data Visualization/{len(self.image_sample_manager.samples) - i}"
+            self._log_writer.log_image(title=title, image=sample_to_visualize)
+
+        if self.preprocessor.images_route is not None:
+            self._log_writer.log_json(title="Get images out of dictionary", data=self.preprocessor.images_route)
+        if self.preprocessor.labels_route is not None:
+            self._log_writer.log_json(title="Get labels out of dictionary", data=self.preprocessor.labels_route)
 
         # Write all text data to json file
-        self._log_writer.to_json()
+        self._log_writer.save_as_json()
 
     def close(self):
-        """
-        Safe logging closing
-        """
+        """Safe logging closing"""
         self._log_writer.close()
         print(
             f'{"*" * 100}'
             f"\nWe have finished evaluating your dataset!"
-            f"\nThe results can be seen in {self._log_writer.results_dir()}"
+            f"\nThe results can be seen in {self._log_writer.log_dir}"
             f"\n\nShow tensorboard by writing in terminal:"
-            f"\n\ttensorboard --logdir={os.path.join(os.getcwd(), self._log_writer.results_dir())} --bind_all"
+            f"\n\ttensorboard --logdir={self._log_writer.log_dir} --bind_all"
             f"\n"
         )
 
@@ -167,7 +167,6 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         Run method activating build, execute, post process and close the manager.
         """
-        self.build()
         self.execute()
         self.post_process()
         self.close()
