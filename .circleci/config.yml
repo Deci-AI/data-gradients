@@ -1,0 +1,239 @@
+version: 2.1
+
+parameters:
+  remote_docker_version:
+    type: string
+    description: remote docker version
+    default: "20.10.18"
+  orb_version:
+    type: string
+    description: Deci ai ORB version https://circleci.com/developer/orbs/orb/deci-ai/circleci-common-orb
+#    default: "10.5.0"
+    default: "dev:alpha"
+
+orbs:
+  deci-common: deci-ai/circleci-common-orb@<< pipeline.parameters.orb_version >>
+
+# This filter operates on SemVer2 tags only
+release_tag_filter: &release_tag_filter
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^\d+\.\d+\.\d+$/
+
+release_candidate_filter: &release_candidate_filter
+  filters:
+    branches:
+      only: master
+
+release_candidate_tag_filter: &release_candidate_tag_filter
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^\d+\.\d+\.\d+rc\d+/
+
+
+jobs:
+  build:
+    environment:
+      CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
+    parameters:
+      py_version:
+        type: string
+        default: latest
+      package_name:
+        type: string
+    docker:
+      - image: cimg/python:<< parameters.py_version >>
+    resource_class: large
+    steps:
+      - deci-common/checkout_and_skip_build:
+          check_version_file: true
+          skip_md_files: true
+      - deci-common/get_persisted_version_info
+      - unless:
+          condition:
+            equal: [ master, << pipeline.git.branch >> ]
+          steps:
+            - run:
+                name: install Black Flake8 python linter
+                command: |
+                  pip install --user -r requirements.txt
+      - run:
+          name: add requirements.txt
+          command: |
+            cp requirements.txt data_gradients/requirements.txt
+      - run:
+          name: install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            python3 -m pip install pip --upgrade
+            cat requirements.txt | cut -f1 -d"#" | xargs -n 1 -L 1 pip install --progress-bar off
+      - run:
+          name: edit package version
+          command: |
+            echo "${NEW_VERSION}" > version.txt
+            cat version.txt
+      - run:
+          name: setup custom environment variables
+          command: |
+            echo 'export PYTHONPATH=/home/circleci/data_gradients' >> $BASH_ENV
+            echo 'export UPLOAD_LOGS=FALSE' >> $BASH_ENV
+      - run:
+          name: install package
+          no_output_timeout: 30m
+          command: |
+            . venv/bin/activate
+            python3 -m pip install --extra-index-url https://pypi.ngc.nvidia.com .
+      - run:
+          name: run tests with coverage
+          no_output_timeout: 30m
+          command: |
+            . venv/bin/activate
+            coverage run --source=data_gradients -m unittest discover -s tests
+            coverage report
+            coverage html  # open htmlcov/index.html in a browser
+      - store_artifacts:
+          path: htmlcov
+
+      - store_artifacts:
+          path: ~/data_gradients_logs
+
+
+  release_candidate:
+    environment:
+      CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
+    parameters:
+      py_version:
+        type: string
+    docker:
+      - image: cimg/python:<< parameters.py_version >>
+    steps:
+      - deci-common/checkout_and_skip_build:
+          check_version_file: true
+          skip_md_files: true
+      - deci-common/get_persisted_version_info
+      - run:
+          name: edit package version
+          command: |
+            echo $NEW_VERSION > version.txt
+      - deci-common/pip_upload_package_artifactory:
+          pypi_repository: "data_gradients"
+          password: $ARTIFACTORY_UPLOAD_DEV
+#      - deci-common/pip_test_package_installation_artifactory_dev: #todo: implement some day
+#          package_name: "data_gradients"
+#          version: $NEW_VERSION
+      - deci-common/git_config_automation_user
+      - run:
+          name: "commit version file"
+          command: |
+            git commit version.txt -m "Deci Services - Changed version to $NEW_VERSION"
+      - deci-common/git_commit_and_tag:
+          version: $NEW_VERSION
+
+  release_version:
+    environment:
+      CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
+    parameters:
+      py_version:
+        type: string
+      dev_venv_name:
+        type: string
+        default: "dev-data_gradients-${CIRCLE_BUILD_NUM}"
+    docker:
+      - image: cimg/python:<< parameters.py_version >>
+    steps:
+      - deci-common/checkout_and_skip_build:
+          check_version_file: true
+          skip_md_files: false
+      - run:
+          name: add requirements.txt a to source code
+          command: |
+            cp requirements.txt data_gradients/requirements.txt
+      - run:
+          name: edit package version
+          command: |
+            echo $CIRCLE_TAG > version.txt
+
+      - deci-common/pip_upload_package_artifactory:
+          pypi_repository: "data_gradients"
+          password: $ARTIFACTORY_UPLOAD_DEV
+
+#      - deci-common/pip_test_package_installation_codeartifact_dev:  #todo
+#          package_name: "super-gradients"
+#          version: $CIRCLE_TAG
+#          venv_name: << parameters.dev_venv_name >>
+#      - run:  #todo
+#          name: verify that the output of __version__ is what we expect
+#          command: |
+#            . << parameters.dev_venv_name >>-super-gradients-$CIRCLE_TAG/bin/activate
+#            python3 tests/verify_version.py $CIRCLE_TAG
+
+#      - deci-common/pip_test_package_installation_codeartifact_prod: #todo
+#          package_name: "super-gradients"
+#          version: $CIRCLE_TAG
+
+
+      - deci-common/git_commit_and_tag:
+          version: $CIRCLE_TAG
+          delete_remote_tag_before_tagging: true
+
+      - deci-common/tag_as:
+          tag_name: "stable"
+          delete_remote: true
+
+      - deci-common/github_create_release:
+          github_cli_token: $GITHUB_CLI_TOKEN
+          directory_to_cd_into: "."
+          tag: $CIRCLE_TAG
+          notes: "This GitHub Release was done automatically by CircleCI"
+
+
+workflows:
+  release:
+    jobs:
+      - deci-common/persist_version_info:
+          version_override: 0.0.2 #$CIRCLE_TAG
+#          <<: *release_tag_filter
+#      - build: #todo: fix build
+#          name: "build3.9"
+#          py_version: "3.9"
+#          package_name: "data_gradients"
+#          requires:
+#            - deci-common/persist_version_info
+#          <<: *release_tag_filter
+
+      - release_version:
+          py_version: "3.9"
+#          <<: *release_tag_filter
+          context:
+            - data_gradients
+          requires:
+            - deci-common/persist_version_info
+  #            - "build3.9" #todo: fix build
+
+
+#  build_and_deploy:
+#    jobs:
+#      - deci-common/persist_version_info:
+#          use_rc: true
+#          use_beta: false
+#          version_override: ""
+##      - build: #todo: fix build
+##          name: "build3.9"
+##          py_version: "3.9"
+##          package_name: "data_gradients"
+##          requires:
+##            - deci-common/persist_version_info
+#
+#      - release_candidate: # happens on merge
+#          py_version: "3.9"
+#          context:
+#            - data_gradients
+#          <<: *release_candidate_filter
+#          requires:
+#            - deci-common/persist_version_info
+##            - "build3.9"#todo: fix build
