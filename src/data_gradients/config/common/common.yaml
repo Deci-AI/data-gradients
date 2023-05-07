@@ -4,3 +4,5 @@ feature_extractors:
   - ImagesAspectRatios
   - AverageBrightness
   - mean_std.MeanAndSTD
+
+_convert_: all

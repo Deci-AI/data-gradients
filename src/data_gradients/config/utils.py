@@ -23,7 +23,9 @@ def load_extractors(config_name: str, config_dir: Optional[str] = None, override
     :return:            A list of instantiated feature extractors.
     """
     cfg = load_config(config_name=config_name, config_dir=config_dir, overrides=overrides)
-    return cfg.feature_extractors + cfg.common.feature_extractors
+    extractors = cfg["feature_extractors"] + cfg["common"]["feature_extractors"]
+    extractors = ListFactory(FeatureExtractorsFactory()).get(extractors)
+    return extractors
 
 
 def load_config(config_name: str, config_dir: str, overrides: Optional[Dict[str, Any]] = None) -> DictConfig:
@@ -55,7 +57,13 @@ def dict_to_dotlist_overrides(dict_params: Dict[str, Any]) -> List[str]:
     :param dict_params: The dictionary to convert.
     :return:            List of strings in format 'path.to.key=value', similar the hydra command line overrides.
     """
-    return [f"{key}={value}" for key, value in dict_to_dotlist(dict_params)]
+    out = []
+    for key, value in dict_to_dotlist(dict_params):
+        if value is None:
+            out.append(f"{key}=null")
+        else:
+            out.append(f"{key}={value}")
+    return out
 
 
 def dict_to_dotlist(dict_params: Dict[str, Any]) -> List[Tuple[str, Any]]:
