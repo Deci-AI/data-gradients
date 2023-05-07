@@ -1,11 +1,13 @@
 import numpy as np
 
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import MultiFeatureExtractorAbstract
 from data_gradients.utils.data_classes.extractor_results import HeatMapResults
 
 
+@register_feature_extractor()
 class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -

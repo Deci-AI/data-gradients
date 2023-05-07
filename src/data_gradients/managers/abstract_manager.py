@@ -11,7 +11,7 @@ from data_gradients.logging.log_writer import LogWriter
 from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
 from data_gradients.utils.data_classes.batch_data import BatchData
 from data_gradients.utils.thread_manager import ThreadManager
-from data_gradients.visualize.image_visualizer import ImageSampleManager
+from data_gradients.visualize.image_sample_managers import ImageSampleManager
 
 logging.basicConfig(level=logging.WARNING)
 

@@ -1,3 +1,4 @@
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -5,6 +6,7 @@ from data_gradients.utils import BatchData
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
+@register_feature_extractor()
 class NumberOfImagesLabels(FeatureExtractorAbstract):
     """
     Common task feature extractor -
