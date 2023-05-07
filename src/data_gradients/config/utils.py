@@ -9,6 +9,7 @@ from omegaconf import DictConfig, OmegaConf
 from data_gradients.feature_extractors import FeatureExtractorAbstract
 
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
+from data_gradients.common.factories import FeatureExtractorsFactory, ListFactory
 
 
 def load_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[FeatureExtractorAbstract]:
