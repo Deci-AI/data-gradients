@@ -52,7 +52,7 @@ class DetectionBatchFormatter(BatchFormatter):
 def show_annotated_bboxes(annotated_bboxes: Tensor) -> None:
     """Show an example of the annotated bounding boxes."""
     print()
-    print("This is how your labels look like:")
+    print("This is how your bbox annotations look like:")
     print(annotated_bboxes[0, :3, :])
 
 
@@ -113,7 +113,7 @@ def ask_user_is_label_first() -> bool:
         True: "Start with label, followed with bboxes ([label, x1, y1, x2, y2] for instance)",
         False: "Start with bboxes, followed by labels ([x1, y1, x2, y2, label] for instance)",
     }
-    is_label_first = ask_user(main_question='Are your Annotation "label first" or "label last"?', options_described=is_label_first_descriptions)
+    is_label_first = ask_user(main_question='Are your annotations "label first" or "label last"?', options_described=is_label_first_descriptions)
     return is_label_first
 
 
