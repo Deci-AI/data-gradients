@@ -46,3 +46,7 @@ class NumberOfImagesLabels(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
+
+    @property
+    def description(self):
+        return "The distribution of the number of images, labels and background images as a discrete histogram."

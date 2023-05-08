@@ -49,3 +49,7 @@ class AppearancesInImages(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
+
+    @property
+    def description(self):
+        return "Percentage of images containing an appearance from VS class."

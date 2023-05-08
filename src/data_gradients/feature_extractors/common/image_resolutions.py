@@ -9,6 +9,9 @@ from data_gradients.feature_extractors.utils import align_histogram_keys
 
 @register_feature_extractor()
 class ImagesResolutions(FeatureExtractorAbstract):
+    """
+    Extracts the distribution of the image resolutions as a discrete histogram.
+    """
     def __init__(self):
         super().__init__()
         self._hist = {"train": dict(), "val": dict()}
@@ -39,3 +42,6 @@ class ImagesResolutions(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
+
+    def description(self):
+        print("The distribution of the image resolutions as a discrete histogram.")

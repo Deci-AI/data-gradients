@@ -50,3 +50,8 @@ class WidthHeight(FeatureExtractorAbstract):
         results.values_to_log = quantized_heat_map.tolist()
         results.keys = ["Width", "Height"]
         return results
+
+    @property
+    def description(self):
+        return "Width, Height of the bounding-boxes sorounding every object across all images. Plotted per-class on a " \
+               "heat-map. "

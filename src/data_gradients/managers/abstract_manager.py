@@ -24,17 +24,17 @@ class AnalysisManagerAbstract(abc.ABC):
     """
 
     def __init__(
-        self,
-        *,
-        train_data: Iterable,
-        val_data: Optional[Iterable] = None,
-        log_dir: Optional[str] = None,
-        preprocessor: PreprocessorAbstract,
-        extractors: List[FeatureExtractorAbstract],
-        id_to_name: Dict,
-        batches_early_stop: Optional[int] = None,
-        short_run: bool = False,
-        image_sample_manager: ImageSampleManager,
+            self,
+            *,
+            train_data: Iterable,
+            val_data: Optional[Iterable] = None,
+            log_dir: Optional[str] = None,
+            preprocessor: PreprocessorAbstract,
+            extractors: List[FeatureExtractorAbstract],
+            id_to_name: Dict,
+            batches_early_stop: Optional[int] = None,
+            short_run: bool = False,
+            image_sample_manager: ImageSampleManager,
     ):
         """
         :param train_data:          Iterable object contains images and labels of the training dataset
@@ -50,7 +50,8 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         if batches_early_stop:
-            logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
+            logger.info(
+                f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
         self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
         self.val_size = len(val_data) if hasattr(val_data, "__len__") else None
@@ -67,7 +68,8 @@ class AnalysisManagerAbstract(abc.ABC):
         self.id_to_name = id_to_name
 
         if short_run and self.n_batches is None:
-            logger.warning("`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`")
+            logger.warning(
+                "`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`")
             short_run = False
         self.short_run = short_run
         self.image_sample_manager = image_sample_manager

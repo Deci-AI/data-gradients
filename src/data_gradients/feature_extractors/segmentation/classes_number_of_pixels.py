@@ -54,3 +54,7 @@ class PixelsPerClass(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
+
+    @property
+    def description(self):
+        return

@@ -42,3 +42,7 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
+
+    @property
+    def description(self):
+        return "The distribution of the aspect ratios of the images as a discrete histogram."

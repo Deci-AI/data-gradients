@@ -59,6 +59,10 @@ class FeatureExtractorAbstract(ABC):
             title_name += char
         return title_name
 
+    @abstractmethod
+    def description(self):
+        raise NotImplementedError
+
 
 class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
     def aggregate_and_write(self, logger: LogWriter, id_to_name):

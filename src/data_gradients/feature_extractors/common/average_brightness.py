@@ -13,6 +13,12 @@ from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 @register_feature_extractor()
 class AverageBrightness(FeatureExtractorAbstract):
+    """
+    Average brightness feature extractor.
+    Extracts the distribution of the image 'lightness' (as L channel pixel value distribution in CIELAB
+    color space, as a discrete histogram (divided into 10 bins).
+
+    """
     def __init__(self):
         super().__init__()
         self._num_bins: int = 10
@@ -55,3 +61,9 @@ class AverageBrightness(FeatureExtractorAbstract):
             new_keys.append("{:.2f}<{:.2f}".format(bins[i], bins[i + 1]))
 
         return new_keys
+
+    @property
+    def description(self):
+        return "The distribution of the image 'lightness' (as L channel pixel value distribution in CIELAB color " \
+               "space, as a discrete histogram (divided into 10 bins). "
+

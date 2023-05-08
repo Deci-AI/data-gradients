@@ -12,6 +12,10 @@ from data_gradients.feature_extractors.utils import align_histogram_keys
 
 @register_feature_extractor()
 class MeanAndSTD(FeatureExtractorAbstract):
+    """
+    Extracts the mean and std of the pixel values for each channel across all images (Blue-Mean, Blue-STD,
+    Green-Mean, Green-STD, Red-Mean, Red-STD). Assumes BGR Channel ordering"
+    """
     def __init__(self):
         super().__init__()
 
@@ -47,3 +51,7 @@ class MeanAndSTD(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
+
+    def description(self):
+        return "Thehe mean and std of the pixel values for each channel across all images (Blue-Mean, Blue-STD, "\
+              "Green-Mean, Green-STD, Red-Mean, Red-STD). Assumes BGR Channel ordering"

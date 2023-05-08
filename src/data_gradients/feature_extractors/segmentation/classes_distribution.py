@@ -44,3 +44,7 @@ class GetClassDistribution(FeatureExtractorAbstract):
             values_to_log=list(self._hist[split].values()),
         )
         return results
+
+    @property
+    def description(self):
+        return "Total # of connected components VS Class ID"

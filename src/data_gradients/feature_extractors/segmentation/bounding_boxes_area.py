@@ -52,3 +52,9 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
             y_ticks=True,
         )
         return results
+
+    @property
+    def description(self):
+        return "The distribution of the areas of the boxes that bound connected components of the different classes " \
+               "as a histogram. "
+
