@@ -99,6 +99,7 @@ jobs:
           no_output_timeout: 30m
           command: |
             . venv/bin/activate
+
             coverage run --source=data_gradients -m unittest discover -s tests
             coverage report
             coverage html  # open htmlcov/index.html in a browser
