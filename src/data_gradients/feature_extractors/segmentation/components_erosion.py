@@ -2,8 +2,9 @@ import cv2
 import numpy as np
 import torch
 
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
-from data_gradients.batch_processors.preprocessors import contours
+from data_gradients.preprocess import contours
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
@@ -11,14 +12,15 @@ from data_gradients.feature_extractors.feature_extractor_abstract import (
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
+@register_feature_extractor()
 class ErosionTest(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
     """
 
-    def __init__(self, n_classes, ignore_labels):
+    def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        keys = [int(i) for i in range(0, n_classes + len(ignore_labels)) if i not in ignore_labels]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": {k: 0.0 for k in keys}, "val": {k: 0.0 for k in keys}}
         self._hist_eroded = {
             "train": {k: 0.0 for k in keys},

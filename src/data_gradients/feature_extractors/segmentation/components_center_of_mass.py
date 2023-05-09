@@ -1,11 +1,13 @@
 import numpy as np
 
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import MultiFeatureExtractorAbstract
 from data_gradients.utils.data_classes.extractor_results import HeatMapResults
 
 
+@register_feature_extractor()
 class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
@@ -13,9 +15,9 @@ class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
     Plot those X, Y positions as a heat-map
     """
 
-    def __init__(self, n_classes, ignore_labels):
+    def __init__(self, num_classes, ignore_labels):
         super().__init__()
-        keys = [int(i) for i in range(0, n_classes + len(ignore_labels)) if i not in ignore_labels]
+        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {
             "train": {k: {"x": list(), "y": list()} for k in keys},
             "val": {k: {"x": list(), "y": list()} for k in keys},

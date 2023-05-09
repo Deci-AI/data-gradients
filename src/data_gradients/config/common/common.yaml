@@ -1,6 +1,8 @@
 feature_extractors:
-  - _target_: data_gradients.feature_extractors.common.count_images_labels.NumberOfImagesLabels
-  - _target_: data_gradients.feature_extractors.common.image_resolutions.ImagesResolutions
-  - _target_: data_gradients.feature_extractors.common.image_aspect_ratios.ImagesAspectRatios
-  - _target_: data_gradients.feature_extractors.common.average_brightness.AverageBrightness
-  - _target_: data_gradients.feature_extractors.common.mean_std.MeanAndSTD
+  - NumberOfImagesLabels
+  - ImagesResolutions
+  - ImagesAspectRatios
+  - AverageBrightness
+  - mean_std.MeanAndSTD
+
+_convert_: all
