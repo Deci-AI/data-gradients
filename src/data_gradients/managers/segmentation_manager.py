@@ -2,7 +2,7 @@ from typing import Optional, Iterable, List, Dict, Callable
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.preprocess.segmentation_preprocess import SegmentationPreprocessor
-from data_gradients.config.utils import load_feature_extractors
+from data_gradients.config.utils import load_extractors
 from data_gradients.visualize.image_sample_managers import SegmentationImageSampleManager
 
 
@@ -59,7 +59,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             threshold_value=threshold_soft_labels,
         )
 
-        extractors = load_feature_extractors(config_name=config_name, overrides={"number_of_classes": num_classes, "ignore_labels": ignore_labels})
+        extractors = load_extractors(config_name=config_name, overrides={"number_of_classes": num_classes, "ignore_labels": ignore_labels})
 
         visualizer = SegmentationImageSampleManager(n_samples=samples_to_visualize)
 
