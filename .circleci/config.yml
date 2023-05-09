@@ -162,8 +162,6 @@ jobs:
       - run:
           name: edit package version
           command: |
-            pwd
-            ls
             echo $CIRCLE_TAG > version.txt
 
       - deci-common/pip_upload_package_artifactory:
