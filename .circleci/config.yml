@@ -220,6 +220,11 @@ workflows:
             - deci-common/persist_version_info
             - login_to_codeartifact_release
           <<: *release_tag_filter
+      - release_version:
+          py_version: "3.8"
+          requires:
+            - "build3.8"
+          <<: *release_tag_filter
       - deci-common/pip_upload_package_from_codeartifact_to_global_pypi:
           package_name: "data-gradients"
           name: "upload_data_gradients_to_pypi"
