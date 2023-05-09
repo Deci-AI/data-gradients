@@ -1,14 +1,13 @@
 from dataclasses import dataclass
 from typing import List
-from abc import ABC
 
 from torch import Tensor
 
 from data_gradients.utils.data_classes.contour import Contour
 
 
-@dataclass
-class BatchData(ABC):
+@dataclass()
+class BatchData:
     """
     Images - [BS, 3, W, H]
     Labels - [BS, N, W, H] where N is number of classes in each image
@@ -28,8 +27,3 @@ class SegmentationBatchData(BatchData):
     """
 
     contours: List[List[List[Contour]]]
-
-
-@dataclass
-class DetectionBatchData(BatchData):
-    pass
