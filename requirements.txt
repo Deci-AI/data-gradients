@@ -11,4 +11,4 @@ numpy
 matplotlib
 scipy
 rapidfuzz
-re
+coverage~=5.3.1
