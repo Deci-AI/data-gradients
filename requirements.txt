@@ -11,4 +11,3 @@ numpy
 matplotlib
 scipy
 rapidfuzz
-re
