@@ -12,7 +12,7 @@ from data_gradients.common.factories import FeatureExtractorsFactory, ListFactor
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 
 
-def load_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[FeatureExtractorAbstract]:
+def load_feature_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[FeatureExtractorAbstract]:
     """Load and instantiate extractors from a Hydra configuration file.
 
     :param config_name: Name of the Hydra configuration file to load.
