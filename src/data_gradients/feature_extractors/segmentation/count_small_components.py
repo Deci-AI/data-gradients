@@ -1,10 +1,13 @@
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import normalize_values_to_percentages
 
 
+@register_feature_extractor()
 class CountSmallComponents(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
@@ -25,10 +28,11 @@ class CountSmallComponents(FeatureExtractorAbstract):
             self._total_objects[data.split] += sum([len(cls_contours) for cls_contours in image_contours])
             for class_contours in image_contours:
                 for contour in class_contours:
-                    self._hist[data.split][f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
+                    self._hist[data.split][
+                        f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
 
     def _aggregate(self, split: str):
-        values = self.normalize(self._hist[split].values(), self._total_objects[split])
+        values = normalize_values_to_percentages(self._hist[split].values(), self._total_objects[split])
         bins = list(self._hist[split].keys())
 
         results = HistogramResults(

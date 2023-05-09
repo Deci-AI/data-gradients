@@ -1,12 +1,15 @@
 import numpy as np
 
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import align_histogram_keys, normalize_values_to_percentages
 
 
+@register_feature_extractor()
 class CountNumComponents(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
@@ -31,9 +34,9 @@ class CountNumComponents(FeatureExtractorAbstract):
                 self._hist[data.split].update({num_objects_in_image: 1})
 
     def _aggregate(self, split: str):
-        self.merge_dict_splits(self._hist)
+        self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])
         hist = self._into_buckets(self._hist[split])
-        values = self.normalize(hist.values(), sum(list(hist.values())))
+        values = normalize_values_to_percentages(hist.values(), sum(list(hist.values())))
         bins = list(hist.keys())
 
         results = HistogramResults(
@@ -82,7 +85,7 @@ class CountNumComponents(FeatureExtractorAbstract):
                 hist[f"{bins[-2]}+"] = hist[999]
                 del hist[999]
             elif key > 10:
-                new_key = f"{key-bin_size}<{key}"
+                new_key = f"{key - bin_size}<{key}"
                 if key - bin_size > 0:
                     hist[new_key] = hist[key]
                     del hist[key]

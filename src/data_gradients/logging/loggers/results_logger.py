@@ -1,11 +1,8 @@
 from abc import ABC, abstractmethod
-import datetime as dt
-
-log_dir = "logs/" + dt.datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
 class ResultsLogger(ABC):
-    def __init__(self):
+    def __init__(self, log_dir: str):
         self.logdir = log_dir
 
     @abstractmethod

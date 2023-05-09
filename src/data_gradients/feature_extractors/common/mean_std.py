@@ -1,13 +1,16 @@
 import numpy as np
 import torch
 
+from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils import BatchData
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import align_histogram_keys
 
 
+@register_feature_extractor()
 class MeanAndSTD(FeatureExtractorAbstract):
     def __init__(self):
         super().__init__()
@@ -21,7 +24,7 @@ class MeanAndSTD(FeatureExtractorAbstract):
 
     def _aggregate(self, split: str):
 
-        self.merge_dict_splits(self._hist)
+        self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])
         bgr_means = np.zeros(3)
         bgr_std = np.zeros(3)
         for channel in range(3):

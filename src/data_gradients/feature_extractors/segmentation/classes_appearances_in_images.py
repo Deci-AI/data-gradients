@@ -1,13 +1,16 @@
 import torch
 
-from data_gradients.logging.logger_utils import class_id_to_name
+from data_gradients.common.registry.registry import register_feature_extractor
+from data_gradients.utils.utils import class_id_to_name
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import normalize_values_to_percentages
 
 
+@register_feature_extractor()
 class AppearancesInImages(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
@@ -30,7 +33,7 @@ class AppearancesInImages(FeatureExtractorAbstract):
 
     def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        values = self.normalize(self._hist[split].values(), self._number_of_images[split])
+        values = normalize_values_to_percentages(self._hist[split].values(), self._number_of_images[split])
         bins = self._hist[split].keys()
 
         results = HistogramResults(

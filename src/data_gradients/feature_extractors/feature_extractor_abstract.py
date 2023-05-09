@@ -1,18 +1,11 @@
 from abc import ABC, abstractmethod
-from collections import OrderedDict
-from typing import Tuple, Dict, Optional, Union
+from typing import Tuple, Dict
 
-import numpy as np
 from matplotlib import pyplot as plt
 
-from data_gradients.logging.logger import Logger
-from data_gradients.logging.logger_utils import (
-    write_bar_plot,
-    write_heatmap_plot,
-)
-from data_gradients.logging.results_logger import ResultsLogger
+from data_gradients.logging.log_writer import LogWriter
 from data_gradients.utils.data_classes.batch_data import BatchData
-from data_gradients.utils.data_classes.extractor_results import VisualizationResults, HistogramResults, HeatMapResults
+from data_gradients.utils.data_classes.extractor_results import HistogramResults, HeatMapResults
 
 
 class FeatureExtractorAbstract(ABC):
@@ -31,12 +24,21 @@ class FeatureExtractorAbstract(ABC):
         self.num_axis: Tuple[int, int] = (1, 1)
         self.colors: Dict[str, str] = {"train": "green", "val": "red"}
 
-        # Logger data
-        self.json_object: Dict[str, Optional[ResultsLogger]] = {
-            "train": None,
-            "val": None,
-        }
         self.id_to_name = None
+
+    def aggregate_and_write(self, logger: LogWriter, id_to_name):
+        self.id_to_name = id_to_name
+        fig, ax = plt.subplots(nrows=self.num_axis[0], ncols=self.num_axis[1], figsize=(10, 5))
+
+        results_json = {}
+        for split in ["train", "val"]:
+            results = self._aggregate(split)
+            results.write_plot(ax=ax, fig=fig)
+            results_json[split] = results.json_values
+
+        fig.tight_layout()
+        logger.log_json(title=f"{self.name}/fig", data=results_json)
+        logger.log_figure(title=f"{self.name}/fig", figure=fig)
 
     @abstractmethod
     def update(self, data: BatchData):
@@ -44,71 +46,40 @@ class FeatureExtractorAbstract(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _aggregate(self, split: str) -> VisualizationResults:
+    def _aggregate(self, split: str) -> HistogramResults:
         raise NotImplementedError
 
-    def aggregate_and_write(self, logger: Logger, id_to_name):
-        self.id_to_name = id_to_name
-        self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
-
-        for split in ["train", "val"]:
-            results = self._aggregate(split)
-            self.update_json(results, ax)
-
-        self.fig.tight_layout()
-        title_name = logger.get_title_name(self.__class__.__name__) + "/fig"
-        logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
-
-    def update_json(self, results: Union[HistogramResults, HeatMapResults], ax):
-        if results.plot == "bar-plot":
-            write_bar_plot(ax=ax, results=results)
-        elif results.plot == "heat-map":
-            write_heatmap_plot(ax=ax[int(results.split != "train")], results=results, fig=self.fig)
-        else:
-            raise NotImplementedError(
-                f"Got plot key {results.plot}\
-             while only supported plots are ['bar-plot', 'heat-map']"
-            )
-
-        self.json_object.update({results.split: results.json_values})
-
-    @staticmethod
-    def merge_dict_splits(hist: Dict):
-        for key in [*hist["train"], *hist["val"]]:
-            if key not in hist["train"]:
-                hist["train"][key] = type(hist["val"][key])()
-            if key not in hist["val"]:
-                hist["val"][key] = type(hist["train"][key])()
-
-        hist["train"] = OrderedDict(sorted(hist["train"].items()))
-        hist["val"] = OrderedDict(sorted(hist["val"].items()))
-
-    @staticmethod
-    def normalize(values, total):
-        if total == 0:
-            total = 1
-        return [np.round(((100 * value) / total), 3) for value in values]
+    @property
+    def name(self) -> str:
+        class_name = self.__class__.__name__
+        title_name = class_name[0]
+        for char in class_name[1:]:
+            if char.isupper():
+                title_name += " "
+            title_name += char
+        return title_name
 
 
-class MultiClassProcess(FeatureExtractorAbstract):
-    def aggregate_and_write(self, logger: Logger, id_to_name):
+class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
+    def aggregate_and_write(self, logger: LogWriter, id_to_name):
         self.id_to_name = id_to_name
 
-        results = dict.fromkeys(["train", "val"])
-        for split in results:
-            results[split] = self._aggregate(split)
+        results_per_split = {"train": self._aggregate("train"), "val": self._aggregate("val")}
 
-        for key in results["train"].keys():
+        for key in results_per_split["train"].keys():
 
-            self.fig, ax = plt.subplots(*self.num_axis, figsize=(10, 5))
+            fig, ax = plt.subplots(nrows=self.num_axis[0], ncols=self.num_axis[1], figsize=(10, 5))
 
+            results_json = {}
             for split in ["train", "val"]:
-                self.update_json(results[split][key], ax)
+                result = results_per_split[split][key]
+                result.write_plot(ax=ax, fig=fig)
+                results_json[split] = result.json_values
 
-            self.fig.tight_layout()
+            fig.tight_layout()
 
-            title_name = f"{logger.get_title_name(self.__class__.__name__)}/{key}_{split}/fig"
-            logger.log(title_name=title_name, tb_data=self.fig, json_data=self.json_object)
+            logger.log_json(title=f"{self.name}/{key}_{split}/fig", data=results_json)
+            logger.log_figure(title=f"{self.name}/{key}_{split}/fig", figure=fig)
 
     @abstractmethod
     def update(self, data: BatchData):

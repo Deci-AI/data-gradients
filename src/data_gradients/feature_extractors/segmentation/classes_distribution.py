@@ -1,14 +1,18 @@
-from data_gradients.logging.logger_utils import class_id_to_name
+from data_gradients.common.registry.registry import register_feature_extractor
+from data_gradients.utils.utils import class_id_to_name
 from data_gradients.utils import SegmentationBatchData
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import normalize_values_to_percentages
 
 
+@register_feature_extractor()
 class GetClassDistribution(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
+        ignore_labels = ignore_labels or []
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
         self._hist = {"train": dict.fromkeys(keys, 0), "val": dict.fromkeys(keys, 0)}
         self._total_objects = {"train": 0, "val": 0}
@@ -23,7 +27,7 @@ class GetClassDistribution(FeatureExtractorAbstract):
 
     def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
-        values = self.normalize(self._hist[split].values(), self._total_objects[split])
+        values = normalize_values_to_percentages(self._hist[split].values(), self._total_objects[split])
         bins = self._hist[split].keys()
 
         results = HistogramResults(
