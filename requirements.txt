@@ -12,3 +12,4 @@ matplotlib
 scipy
 rapidfuzz
 re
+seaborn
