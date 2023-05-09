@@ -58,7 +58,7 @@ class VisualizationTests(unittest.TestCase):
 
         self.fruits_df = pd.concat([train_df, valid_df], ignore_index=True)
 
-    def test_plot_image_size_hist_color_by_split(self):
+    def test_hist2d_plot_image_size_by_split(self):
         options = Hist2DPlotOptions(
             figsize=(10, 10),
             title="Image size distribution",
@@ -73,9 +73,11 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        sns.render_with_options(self.image_size_df, options).show()
+        f = sns.render_with_options(self.image_size_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
 
-    def test_plot_image_size_hist_individual_plots(self):
+    def test_hist2d_plot_image_size_individual_plots(self):
         options = Hist2DPlotOptions(
             figsize=(15, 5),
             title="Image size distribution",
@@ -91,7 +93,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        sns.render_with_options(self.image_size_df, options).show()
+        f = sns.render_with_options(self.image_size_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
+
 
     def test_barplot_visualization_class_distribution(self):
         options = BarPlotOptions(
@@ -106,7 +111,9 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        sns.render_with_options(self.fruits_df, options).show()
+        f = sns.render_with_options(self.fruits_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
 
     def test_barplot_visualization_split_distribution(self):
         options = BarPlotOptions(
@@ -121,7 +128,9 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        sns.render_with_options(self.fruits_df, options).show()
+        f = sns.render_with_options(self.fruits_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
 
     def test_barplot_visualization_weight_distribution(self):
         options = BarPlotOptions(
@@ -136,7 +145,9 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        sns.render_with_options(self.fruits_df, options).show()
+        f = sns.render_with_options(self.fruits_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
 
 
 if __name__ == "__main__":
