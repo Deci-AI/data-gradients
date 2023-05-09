@@ -13,22 +13,22 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
     """
 
     def __init__(
-            self,
-            *,
-            num_classes: int,
-            train_data: Iterable,
-            val_data: Optional[Iterable] = None,
-            config_name: str = "semantic_segmentation",
-            log_dir: Optional[str] = None,
-            ignore_labels: List[int] = None,
-            id_to_name: Optional[Dict] = None,
-            batches_early_stop: int = 999,
-            images_extractor: Callable = None,
-            labels_extractor: Callable = None,
-            num_image_channels: int = 3,
-            threshold_soft_labels: float = 0.5,
-            short_run: bool = False,
-            samples_to_visualize: int = 10,
+        self,
+        *,
+        num_classes: int,
+        train_data: Iterable,
+        val_data: Optional[Iterable] = None,
+        config_name: str = "semantic_segmentation",
+        log_dir: Optional[str] = None,
+        ignore_labels: List[int] = None,
+        id_to_name: Optional[Dict] = None,
+        batches_early_stop: int = 999,
+        images_extractor: Callable = None,
+        labels_extractor: Callable = None,
+        num_image_channels: int = 3,
+        threshold_soft_labels: float = 0.5,
+        short_run: bool = False,
+        samples_to_visualize: int = 10,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -59,8 +59,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             threshold_value=threshold_soft_labels,
         )
 
-        extractors = load_extractors(config_name=config_name,
-                                     overrides={"number_of_classes": num_classes, "ignore_labels": ignore_labels})
+        extractors = load_extractors(config_name=config_name, overrides={"number_of_classes": num_classes, "ignore_labels": ignore_labels})
 
         visualizer = SegmentationImageSampleManager(n_samples=samples_to_visualize)
 
@@ -75,4 +74,3 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             short_run=short_run,
             image_sample_manager=visualizer,
         )
-
