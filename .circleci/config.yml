@@ -68,6 +68,12 @@ jobs:
                 command: |
                   pip install --user -r requirements.txt
       - run:
+          name: add requirements.txt
+          command: |
+            pwd
+            ls
+            cp requirements.txt data_gradients/requirements.txt
+      - run:
           name: install python dependencies
           command: |
             python3 -m venv venv
@@ -158,6 +164,8 @@ jobs:
       - run:
           name: edit package version
           command: |
+            pwd
+            ls
             echo $CIRCLE_TAG > version.txt
 
       - deci-common/pip_upload_package_artifactory:
