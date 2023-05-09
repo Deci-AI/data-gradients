@@ -10,6 +10,12 @@ parameters:
     description: Deci ai ORB version https://circleci.com/developer/orbs/orb/deci-ai/circleci-common-orb
 #    default: "10.5.0"
     default: "dev:alpha"
+  ad_hoc_container_build:
+    type: boolean
+    default: false
+  ad_hoc_container_build_code_only:
+    type: boolean
+    default: false
 
 orbs:
   deci-common: deci-ai/circleci-common-orb@<< pipeline.parameters.orb_version >>
@@ -194,46 +200,32 @@ jobs:
 
 workflows:
   release:
+    unless:
+      or:
+        - << pipeline.parameters.ad_hoc_container_build >>
+        - << pipeline.parameters.ad_hoc_container_build_code_only >>
     jobs:
       - deci-common/persist_version_info:
-          version_override: 0.0.2 #$CIRCLE_TAG
-#          <<: *release_tag_filter
-#      - build: #todo: fix build
-#          name: "build3.9"
-#          py_version: "3.9"
-#          package_name: "data_gradients"
-#          requires:
-#            - deci-common/persist_version_info
-#          <<: *release_tag_filter
-
-      - release_version:
-          py_version: "3.9"
-#          <<: *release_tag_filter
-          context:
-            - data_gradients
+          version_override: $CIRCLE_TAG
+          <<: *release_tag_filter
+      - deci-common/codeartifact_login:
+          name: "login_to_codeartifact_release"
+          repo_name: "deci-packages"
+          <<: *release_tag_filter
+      - build:
+          name: "build3.8"
+          py_version: "3.8"
+          package_name: "data-gradients"
           requires:
             - deci-common/persist_version_info
-  #            - "build3.9" #todo: fix build
-
-
-#  build_and_deploy:
-#    jobs:
-#      - deci-common/persist_version_info:
-#          use_rc: true
-#          use_beta: false
-#          version_override: ""
-##      - build: #todo: fix build
-##          name: "build3.9"
-##          py_version: "3.9"
-##          package_name: "data_gradients"
-##          requires:
-##            - deci-common/persist_version_info
-#
-#      - release_candidate: # happens on merge
-#          py_version: "3.9"
-#          context:
-#            - data_gradients
-#          <<: *release_candidate_filter
-#          requires:
-#            - deci-common/persist_version_info
-##            - "build3.9"#todo: fix build
+            - login_to_codeartifact_release
+          <<: *release_tag_filter
+      - deci-common/pip_upload_package_from_codeartifact_to_global_pypi:
+          package_name: "data-gradients"
+          name: "upload_data_gradients_to_pypi"
+          version: $CIRCLE_TAG
+          requires:
+            - "release_version"
+          context:
+            - pypi-datagradients
+          <<: *release_tag_filter
