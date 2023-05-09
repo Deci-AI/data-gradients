@@ -70,9 +70,7 @@ jobs:
       - run:
           name: add requirements.txt
           command: |
-            pwd
-            ls
-            cp requirements.txt data_gradients/requirements.txt
+            cp requirements.txt src/data_gradients/requirements.txt
       - run:
           name: install python dependencies
           command: |
@@ -160,7 +158,7 @@ jobs:
       - run:
           name: add requirements.txt a to source code
           command: |
-            cp requirements.txt data_gradients/requirements.txt
+            cp requirements.txt src/data_gradients/requirements.txt
       - run:
           name: edit package version
           command: |
