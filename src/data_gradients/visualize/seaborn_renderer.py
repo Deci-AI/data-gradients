@@ -18,52 +18,77 @@ class CommonPlotOptions:
 class BarPlotOptions(CommonPlotOptions):
     """
     Contains a set of options for displaying a bar plot
+
+    Parameters:
+    - x_label_key: A key for x-axis values
+    - x_label_name: A title for x-axis
+    - y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
+    - y_label_name: A title for y-axis
+    - width: Width of the bars
+    - bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
+    - x_ticks_rotation: X-ticks rotation (Helps to make more compact plots)
+    - y_ticks_rotation: Y-ticks rotation
+    - labels_key: If you want to display multiple classes on same plot use this property to indicate column
+    - labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
+    - log_scale: If True, y-axis will be displayed in log scale
+    - tight_layout: If True enables more compact layout of the plot
+    - figsize: Size of the figure
+
     """
 
-    x_label_key: str  # A key for x-axis values
-    x_label_name: str  # A title for x-axis
-    y_label_key: Optional[str]  # An optional key for y-axis (If None, bar plot will use count of x-axis values)
-    y_label_name: str  # A title for y-axis
+    x_label_key: str
+    x_label_name: str
+    y_label_key: Optional[str]
+    y_label_name: str
 
     width: float = 0.8
-    bins: Optional[int] = None  # Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
+    bins: Optional[int] = None
 
-    x_ticks_rotation: Optional[int] = 45  # X-ticks rotation (Helps to make more compact plots)
-    y_ticks_rotation: Optional[int] = 0  # Y-ticks rotation
+    x_ticks_rotation: Optional[int] = 45
+    y_ticks_rotation: Optional[int] = 0
 
-    labels_key: Optional[str] = None  # If you want to display multiple classes on same plot use this property to indicate column
-    labels_palette: Optional[
-        Mapping
-    ] = None  # Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
-
-    log_scale: Union[bool, str] = "auto"  # If True, y-axis will be displayed in log scale
-    tight_layout: bool = False  # If True enables more compact layout of the plot
-    figsize: Optional[Tuple[int, int]] = (10, 6)  # Size of the figure
+    labels_key: Optional[str] = None
+    labels_palette: Optional[Mapping] = None
+    log_scale: Union[bool, str] = "auto"
+    tight_layout: bool = False
+    figsize: Optional[Tuple[int, int]] = (10, 6)
 
 
 @dataclasses.dataclass
 class Hist2DPlotOptions(CommonPlotOptions):
     """
-    Contains a set of options for displaying a bivariative histogram plot
+    Contains a set of options for displaying a bivariative histogram plot.
+
+    Parameters:
+    - x_label_key: A key for x-axis values
+    - x_label_name: A title for x-axis
+    - y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
+    - y_label_name: A title for y-axis
+    - bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
+    - kde: If True, will display a kernel density estimate
+    - individual_plots_key: If not None, will create a separate plot for each unique value of this column
+    - individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
+    - labels_key: If you want to display multiple classes on same plot use this property to indicate column
+    - labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
+    - tight_layout: If True enables more compact layout of the plot
+    - figsize: Size of the figure
+
     """
 
-    x_label_key: str  # A key for x-axis values
-    x_label_name: str  # A title for x-axis
+    x_label_key: str
+    x_label_name: str
 
-    y_label_key: str  # An optional key for y-axis
-    y_label_name: str  # A title for y-axis
+    y_label_key: str
+    y_label_name: str
 
-    bins: Optional[int] = None  # Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
+    bins: Optional[int] = None
     kde: bool = False
 
-    individual_plots_key: str = None  # If not None, will create a separate plot for each unique value of this column
-    individual_plots_max_cols: int = None  # Sets the maximum number of columns to plot in the individual plots
+    individual_plots_key: str = None
+    individual_plots_max_cols: int = None
 
-    labels_key: Optional[str] = None  # If you want to display multiple classes on same plot use this property to indicate column
-    labels_palette: Optional[
-        Mapping
-    ] = None  # Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
-
+    labels_key: Optional[str] = None
+    labels_palette: Optional[Mapping] = None
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
 
@@ -78,7 +103,7 @@ class SeabornRenderer:
         if isinstance(options, BarPlotOptions):
             return self.render_barplot(df, options)
 
-    def render_histplot(self, df, options: Hist2DPlotOptions):
+    def render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
         dfs = []
 
         if options.individual_plots_key is not None:
@@ -129,14 +154,15 @@ class SeabornRenderer:
 
             ax_i.set_xlabel(options.x_label_name)
             ax_i.set_ylabel(options.y_label_name)
-            # ax.set_title()
 
         return fig
 
-    def render_barplot(self, df, options: BarPlotOptions):
+    def render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
+        fig.suptitle(options.title)
+        fig.subplots_adjust(top=0.9)
 
         barplot_args = dict(
             data=df,
@@ -162,18 +188,17 @@ class SeabornRenderer:
         ax = plot_fn(**barplot_args)
         ax.set_title(options.title)
 
-        if options.x_ticks_rotation is not None:
+        if options.x_ticks_rotation == "auto":
+            n_unique = len(df[options.x_label_key].unique())
+            if n_unique > 50:
+                ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+            elif n_unique > 10:
+                ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
+        elif options.x_ticks_rotation is not None:
             ax.set_xticklabels(ax.get_xticklabels(), rotation=options.x_ticks_rotation)
 
         if options.y_ticks_rotation is not None:
             ax.set_yticklabels(ax.get_yticklabels(), rotation=options.y_ticks_rotation)
-
-        # else:
-        #     n_unique = len(items[options.x_label].unique())
-        #     if n_unique > 50:
-        #         ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
-        #     elif n_unique > 10:
-        #         ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
 
         ax.set_xlabel(options.x_label_name)
         ax.set_ylabel(options.y_label_name)
@@ -182,13 +207,5 @@ class SeabornRenderer:
         if options.log_scale:
             ax.set_yscale("log")
             ax.set_ylabel(options.y_label_name + " (log scale)")
-        # elif options.log_scale == "auto":
-        #     all_values = list(itertools.chain(*[hist.bin_values for hist in data.values()]))
-        #     if len(all_values):
-        #         min_value = np.min(all_values)
-        #         max_value = np.max(all_values)
-        #         if np.log10(max_value - min_value + 1) > 3:
-        #             ax.set_yscale("log")
-        #             ax.set_ylabel(options.y_label_name + " (log scale)")
 
         return fig
