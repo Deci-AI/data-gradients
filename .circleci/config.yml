@@ -68,10 +68,6 @@ jobs:
                 command: |
                   pip install --user -r requirements.txt
       - run:
-          name: add requirements.txt
-          command: |
-            cp requirements.txt data_gradients/requirements.txt
-      - run:
           name: install python dependencies
           command: |
             python3 -m venv venv
