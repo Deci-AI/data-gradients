@@ -11,3 +11,17 @@ from .count_small_components import CountSmallComponents
 from .labels_aspect_ratios import LabelsAspectRatios
 from .labels_resolutions import LabelsResolutions
 
+__all__ = [
+    "ComponentsSizeDistribution",
+    "WidthHeight",
+    "AppearancesInImages",
+    "GetClassDistribution",
+    "PixelsPerClass",
+    "ComponentsCenterOfMass",
+    "ComponentsConvexity",
+    "ErosionTest",
+    "CountNumComponents",
+    "CountSmallComponents",
+    "LabelsAspectRatios",
+    "LabelsResolutions",
+]
