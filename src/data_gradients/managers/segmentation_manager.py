@@ -1,7 +1,7 @@
 from typing import Optional, Iterable, List, Dict, Callable
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
-from data_gradients.config.utils import load_feature_extractors
+from data_gradients.config.utils import load_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
 from data_gradients.visualize.image_samplers.segmentation import SegmentationImageSampleManager
 
@@ -15,7 +15,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
     def __init__(
         self,
         *,
-        n_classes: int,
+        num_classes: int,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         config_name: str = "semantic_segmentation",
@@ -25,7 +25,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: int = 999,
         images_extractor: Callable = None,
         labels_extractor: Callable = None,
-        n_image_channels: int = 3,
+        num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
         short_run: bool = False,
         samples_to_visualize: int = 10,
@@ -33,7 +33,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
 
-        :param n_classes:             Number of valid classes to analyze
+        :param num_classes:             Number of valid classes to analyze
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_name:             Name of the hydra configuration file
@@ -43,7 +43,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
         :param images_extractor:
         :param labels_extractor:
-        :param n_image_channels:      Number of channels for each image in the dataset
+        :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
         :param short_run:               Flag indicating whether to run for a single epoch first to estimate total duration,
                                         before choosing the number of epochs.
@@ -51,15 +51,15 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         """
 
         batch_processor = SegmentationBatchProcessor(
-            n_classes=n_classes,
+            n_classes=num_classes,
             ignore_labels=ignore_labels,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
-            n_image_channels=n_image_channels,
+            n_image_channels=num_image_channels,
             threshold_value=threshold_soft_labels,
         )
 
-        feature_extractors = load_feature_extractors(config_name=config_name, overrides={"number_of_classes": n_classes, "ignore_labels": ignore_labels})
+        feature_extractors = load_extractors(config_name=config_name, overrides={"number_of_classes": num_classes, "ignore_labels": ignore_labels})
 
         image_sample_manager = SegmentationImageSampleManager(n_samples=samples_to_visualize)
 
