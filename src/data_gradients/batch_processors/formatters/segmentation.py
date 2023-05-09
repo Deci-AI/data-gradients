@@ -40,7 +40,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         :param labels: Batch of labels, in (BS, ...) format
         :return:
             - images: Batch of images already formatted into (BS, C, H, W)
-            - labels: Batch of labels already formatted into (BS, N, W, H)
+            - labels: Batch of labels already formatted into (BS, N, H, W)
         """
         images = drop_nan(images)
         labels = drop_nan(labels)
@@ -99,12 +99,12 @@ def require_onehot(labels: Tensor, n_classes_used: int, total_n_classes: int) ->
 
 def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
     """
-    Validating labels dimensions are (BS, N, W, H) where N is either 1 or number of valid classes
+    Validating labels dimensions are (BS, N, H, W) where N is either 1 or number of valid classes
     :param labels: Tensor [BS, N, W, H]
     :return: labels: Tensor [BS, N, W, H]
     """
     if labels.dim() == 3:
-        labels = labels.unsqueeze(1)  # Probably (B, W, H)
+        labels = labels.unsqueeze(1)  # Probably (B, H, W)
         return labels
     elif labels.dim() == 4:
         total_n_classes = n_classes + len(ignore_labels)

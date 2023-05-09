@@ -11,7 +11,7 @@ class SegmentationBatchPreprocessor(BatchPreprocessor):
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
         :param images:  Batch of images already formatted into (BS, C, H, W)
-        :param labels:  Batch of labels already formatted into (BS, N, W, H)
+        :param labels:  Batch of labels already formatted into (BS, N, H, W)
         :return:        Ready to analyse segmentation batch object.
         """
         contours = [get_contours(onehot_label) for onehot_label in labels]
