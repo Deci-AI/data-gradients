@@ -87,13 +87,12 @@ class SegmentationMaskFeatures(Enum):
     SegmentationMaskLabel = "SegmentationMaskLabel"
 
     SegmentationMaskArea = "SegmentationMaskArea"
-    SegmentationMaskBoundingBoxArea = "SegmentationMaskBoundingBoxArea"
     SegmentationMaskPerimeter = "SegmentationMaskPerimeter"
-
     SegmentationMaskCenterOfMassX = "SegmentationMaskCenterOfMassX"
     SegmentationMaskCenterOfMassY = "SegmentationMaskCenterOfMassY"
     SegmentationMaskSolidity = "SegmentationMaskSolidity"
     SegmentationMaskSparseness = "SegmentationMaskSparseness"
+    SegmentationMaskBoundingBoxArea = "SegmentationMaskBoundingBoxArea"
 
     SegmentationMaskWidth = "SegmentationMaskWidth"
     SegmentationMaskHeight = "SegmentationMaskHeight"
