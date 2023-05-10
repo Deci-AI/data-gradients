@@ -1,5 +1,4 @@
 import typing
-from collections import defaultdict
 from typing import Mapping, Any, Optional, Union, List
 
 import numpy as np
