@@ -34,11 +34,15 @@ class SemanticSegmentationFeaturesExtractor:
         if ignore_labels is not None:
             self.ignore_labels = tuple(ignore_labels) if isinstance(ignore_labels, typing.Iterable) else (ignore_labels,)
 
-    def __call__(self, segmentation_mask: np.ndarray) -> Mapping[str, Any]:
+    def __call__(self, segmentation_mask: np.ndarray, shared_keys: Optional[Mapping[str, Any]] = None) -> Mapping[str, Any]:
         """
         Extracts features from a single segmentation mask.
 
         :param segmentation_mask: An input segmentation mask of [H,W] shape.
+        :param shared_keys: A dictionary of shared keys that will be added to the each row of the output.
+                            For instance this may include image id or dataset split property that is shared
+                            for every instance.
+
         :return: A dictionary of features
         """
 
@@ -87,7 +91,9 @@ class SemanticSegmentationFeaturesExtractor:
             SegmentationMaskFeatures.SegmentationMaskMorphologyClosingAreaRatio: [],
         }
 
-        mask_height, mask_width = segmentation_mask.shape[:2]
+        if shared_keys is not None:
+            for key in shared_keys:
+                features[key] = []
 
         regions = regionprops(segmentation_mask)
         for region_id, region in enumerate(regions):
@@ -118,5 +124,9 @@ class SemanticSegmentationFeaturesExtractor:
 
             features[SegmentationMaskFeatures.SegmentationMaskMorphologyOpeningAreaRatio].append(area_ratio_open)
             features[SegmentationMaskFeatures.SegmentationMaskMorphologyClosingAreaRatio].append(area_ratio_close)
+
+            if shared_keys is not None:
+                for key, value in shared_keys.items():
+                    features[key].append(value)
 
         return features

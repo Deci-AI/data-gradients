@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -43,8 +44,6 @@ class BDDDataset(Dataset):
         data_folder,
         split: str,
         ignore_label=19,
-        transform=transforms.Compose([]).transforms,
-        target_transform=transforms.Compose([]),
     ):
         """
         :param data_folder: Folder where data files are stored
@@ -52,7 +51,8 @@ class BDDDataset(Dataset):
         :param ignore_label: label to ignore for certain metrics
         """
         data_location = os.path.join(data_folder, split)
-        files_list = os.listdir(data_location)
+        files_list = sorted(os.listdir(data_location))
+
         self.ignore_label = ignore_label
         self.samples_fn = []
         for f in files_list:
@@ -65,23 +65,11 @@ class BDDDataset(Dataset):
                     ]
                 )
 
-        self.transforms = transform
-        self.target_transforms = transform
-
-    def get_target(self, target):
-        # Mask as normalized tensor
-        mask = self.transforms(target)
-        mask[mask == 1.0] = self.ignore_label / 255.0
-        return mask
-
     def __getitem__(self, i):
         image = Image.open(self.samples_fn[i][0]).convert("RGB")
         label = Image.open(self.samples_fn[i][1])
-        if self.transforms:
-            image = self.transforms(image)
-            label = self.get_target(label)
 
-        return image, label
+        return np.array(image), np.array(label)
 
     def __len__(self):
         return len(self.samples_fn)

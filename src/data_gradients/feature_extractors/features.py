@@ -1,7 +1,8 @@
-from enum import Enum
+from enum import Enum, unique
 
 
-class ImageFeatures(Enum):
+@unique
+class ImageFeatures(str, Enum):
     """
     Define the features that are extracted from the image itself.
 
@@ -39,7 +40,8 @@ class ImageFeatures(Enum):
     ImageMaxBrightness = "ImageMaxBrightness"
 
 
-class BoundingBoxFeatures(Enum):
+@unique
+class BoundingBoxFeatures(str, Enum):
     """
     Define the features that are extracted from the bounding boxes.
 
@@ -78,8 +80,8 @@ class BoundingBoxFeatures(Enum):
 
     BoundingBoxMaxOverlap = "BoundingBoxMaxOverlap"
 
-
-class SegmentationMaskFeatures(Enum):
+@unique
+class SegmentationMaskFeatures(str, Enum):
     """
     Define the features that are extracted from the segmentation masks. Each row represents a single mask instance.
 
@@ -121,6 +123,7 @@ class SegmentationMaskFeatures(Enum):
 
     SegmentationMaskId = "SegmentationMaskId"
     SegmentationMaskLabel = "SegmentationMaskLabel"
+    SegmentationMaskLabelName = "SegmentationMaskLabelName"
 
     SegmentationMaskArea = "SegmentationMaskArea"
     SegmentationMaskPerimeter = "SegmentationMaskPerimeter"
