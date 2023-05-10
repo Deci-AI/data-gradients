@@ -97,11 +97,13 @@ class SeabornRenderer:
     def __init__(self, style="whitegrid", palette="pastel"):
         seaborn.set_theme(style=style, palette=palette)
 
-    def render_with_options(self, df: pd.DataFrame, options):
+    def render_with_options(self, df: pd.DataFrame, options:Union[Hist2DPlotOptions, BarPlotOptions]):
         if isinstance(options, Hist2DPlotOptions):
             return self.render_histplot(df, options)
         if isinstance(options, BarPlotOptions):
             return self.render_barplot(df, options)
+
+        raise ValueError(f"Unknown options type: {type(options)}")
 
     def render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
         dfs = []
