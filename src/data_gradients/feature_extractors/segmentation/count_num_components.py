@@ -1,10 +1,15 @@
 import numpy as np
 
-from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from data_gradients.utils.data_classes.extractor_results import Results
+from data_gradients.common.registry.registry import register_feature_extractor
+from data_gradients.utils import SegmentationBatchData
+from data_gradients.feature_extractors.feature_extractor_abstract import (
+    FeatureExtractorAbstract,
+)
+from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.utils import align_histogram_keys, normalize_values_to_percentages
 
 
+@register_feature_extractor()
 class CountNumComponents(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
@@ -12,12 +17,13 @@ class CountNumComponents(FeatureExtractorAbstract):
     For better display, show bins of 0-10 objects and then show bins with size of num_bins.
     Full histogram will be with X-axis of [0, 1, ... 10, 11-15, 16-20, ... 81-85, 85+]
     """
+
     def __init__(self):
         super().__init__()
-        self._hist = {'train': dict(), 'val': dict()}
-        self._total_objects = {'train': 0, 'val': 0}
+        self._hist = {"train": dict(), "val": dict()}
+        self._total_objects = {"train": 0, "val": 0}
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
         for image_contours in data.contours:
             num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
             self._total_objects[data.split] += num_objects_in_image
@@ -27,28 +33,26 @@ class CountNumComponents(FeatureExtractorAbstract):
 
                 self._hist[data.split].update({num_objects_in_image: 1})
 
-    def _post_process(self, split):
-        values, bins = self._process_data(split)
-        results = Results(bins=bins,
-                          values=values,
-                          plot='bar-plot',
-                          split=split,
-                          color=self.colors[split],
-                          title="# Components per image",
-                          x_label="# Components in image",
-                          y_label="% Of Images",
-                          y_ticks=True,
-                          ax_grid=True
-                          )
+    def _aggregate(self, split: str):
+        self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])
+        hist = self._into_buckets(self._hist[split])
+        values = normalize_values_to_percentages(hist.values(), sum(list(hist.values())))
+        bins = list(hist.keys())
+
+        results = HistogramResults(
+            bin_names=bins,
+            bin_values=values,
+            plot="bar-plot",
+            split=split,
+            color=self.colors[split],
+            title="# Components per image",
+            x_label="# Components in image",
+            y_label="% Of Images",
+            y_ticks=True,
+            ax_grid=True,
+        )
 
         return results
-
-    def _process_data(self, split):
-        self.merge_dict_splits(self._hist)
-        hist = self._into_buckets(self._hist[split])
-        values = self.normalize(hist.values(), sum(list(hist.values())))
-        bins = hist.keys()
-        return values, bins
 
     @staticmethod
     def _into_buckets(number_of_objects_per_image):
@@ -60,7 +64,10 @@ class CountNumComponents(FeatureExtractorAbstract):
 
         bin_size = int(5 + 5 * (int(max_bin / 50)))
 
-        bins = [*range(min_bin - 1, 10), *range(10, max(list(number_of_objects_per_image.keys())), bin_size)]
+        bins = [
+            *range(min_bin - 1, 10),
+            *range(10, max(list(number_of_objects_per_image.keys())), bin_size),
+        ]
 
         indexes = np.digitize(list(number_of_objects_per_image.keys()), bins)
 
@@ -75,11 +82,11 @@ class CountNumComponents(FeatureExtractorAbstract):
         keys = list(hist.keys())
         for key in keys:
             if key == 999:
-                hist[f'{bins[-2]}+'] = hist[999]
+                hist[f"{bins[-2]}+"] = hist[999]
                 del hist[999]
             elif key > 10:
-                new_key = f'{key-bin_size}<{key}'
-                if key-bin_size > 0:
+                new_key = f"{key - bin_size}<{key}"
+                if key - bin_size > 0:
                     hist[new_key] = hist[key]
                     del hist[key]
             else:

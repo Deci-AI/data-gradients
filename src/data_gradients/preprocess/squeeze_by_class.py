@@ -32,10 +32,11 @@ def squeeze_by_classes(label: torch.Tensor, is_one_hot: bool, ignore_labels: Lis
 
     else:
         for cls in all_classes:
-            mask = torch.where((label == cls) & (label > 0),
-                               torch.tensor(cls),
-                               torch.tensor(0, dtype=torch.tensor(cls).dtype)
-                               ).squeeze()
+            mask = torch.where(
+                (label == cls) & (label > 0),
+                torch.tensor(cls),
+                torch.tensor(0, dtype=torch.tensor(cls).dtype),
+            ).squeeze()
             masks.append(mask)
 
     classes_hot = torch.stack(masks, dim=0)

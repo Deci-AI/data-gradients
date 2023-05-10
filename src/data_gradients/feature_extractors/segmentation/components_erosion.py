@@ -2,13 +2,17 @@ import cv2
 import numpy as np
 import torch
 
-from data_gradients.logging.logger_utils import class_id_to_name
+from data_gradients.common.registry.registry import register_feature_extractor
+from data_gradients.utils.utils import class_id_to_name
 from data_gradients.preprocess import contours
-from data_gradients.utils import SegBatchData
-from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
-from data_gradients.utils.data_classes.extractor_results import Results
+from data_gradients.utils import SegmentationBatchData
+from data_gradients.feature_extractors.feature_extractor_abstract import (
+    FeatureExtractorAbstract,
+)
+from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
+@register_feature_extractor()
 class ErosionTest(FeatureExtractorAbstract):
     """
     Semantic Segmentation task feature extractor -
@@ -17,12 +21,15 @@ class ErosionTest(FeatureExtractorAbstract):
     def __init__(self, num_classes, ignore_labels):
         super().__init__()
         keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
-        self._hist = {'train': {k: 0. for k in keys}, 'val': {k: 0. for k in keys}}
-        self._hist_eroded = {'train': {k: 0. for k in keys}, 'val': {k: 0. for k in keys}}
+        self._hist = {"train": {k: 0.0 for k in keys}, "val": {k: 0.0 for k in keys}}
+        self._hist_eroded = {
+            "train": {k: 0.0 for k in keys},
+            "val": {k: 0.0 for k in keys},
+        }
         self._kernel = np.ones((3, 3), np.uint8)
         self.ignore_labels = ignore_labels
 
-    def _execute(self, data: SegBatchData):
+    def update(self, data: SegmentationBatchData):
 
         for i, image_contours in enumerate(data.contours):
             label = data.labels[i].numpy().transpose(1, 2, 0).astype(np.uint8)
@@ -38,22 +45,8 @@ class ErosionTest(FeatureExtractorAbstract):
                     if eroded_contours:
                         self._hist_eroded[data.split][class_id] += len(eroded_contours)
 
-    def _post_process(self, split):
-        values, bins = self._process_data(split)
-        results = Results(values=values,
-                          bins=bins,
-                          title="Erosion & contours comparing",
-                          x_label="Class",
-                          y_label="% of disappearing contours after Erosion",
-                          split=split,
-                          color=self.colors[split],
-                          y_ticks=True,
-                          ax_grid=True,
-                          plot='bar-plot')
-        return results
-
-    def _process_data(self, split):
-        hist = dict.fromkeys(self._hist[split].keys(), 0.)
+    def _aggregate(self, split: str):
+        hist = dict.fromkeys(self._hist[split].keys(), 0.0)
         for cls in self._hist[split]:
             if (self._hist[split][cls]) > 0:
                 hist[cls] = np.round(100 * (self._hist_eroded[split][cls] / self._hist[split][cls]), 3)
@@ -63,4 +56,17 @@ class ErosionTest(FeatureExtractorAbstract):
         hist = class_id_to_name(self.id_to_name, hist)
         values = np.array(list(hist.values()))
         bins = hist.keys()
-        return values, bins
+
+        results = HistogramResults(
+            bin_values=values,
+            bin_names=bins,
+            title="Erosion & contours comparing",
+            x_label="Class",
+            y_label="% of disappearing contours after Erosion",
+            split=split,
+            color=self.colors[split],
+            y_ticks=True,
+            ax_grid=True,
+            plot="bar-plot",
+        )
+        return results
