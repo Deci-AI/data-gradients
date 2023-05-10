@@ -130,7 +130,7 @@ jobs:
       - deci-common/pip_upload_package_codeartifact_dev:
           codeartifact_repository: "deci-packages"
       - deci-common/pip_test_package_installation_codeartifact_dev:
-          package_name: "super-gradients"
+          package_name: "data-gradients"
           version: $NEW_VERSION
       - deci-common/git_config_automation_user
       - run:
