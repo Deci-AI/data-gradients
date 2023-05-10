@@ -80,6 +80,42 @@ class BoundingBoxFeatures(Enum):
 
 
 class SegmentationMaskFeatures(Enum):
+    """
+    Define the features that are extracted from the segmentation masks. Each row represents a single mask instance.
+
+    DatasetSplit: str - The name of the dataset split. Could be "train", "val", "test", etc.
+    ImageId: str - The unique identifier of the image. Could be the image path or the image name.
+
+    SegmentationMaskId: str - The unique identifier of the segmentation mask within the image.
+    SegmentationMaskLabel: str - The class label of the instance.
+
+    SegmentationMaskArea: int - The area of the segmentation mask in pixels.
+    SegmentationMaskPerimeter: int - The perimeter of the segmentation mask in pixels.
+    SegmentationMaskCenterOfMassX: float - The x coordinate of the center of mass of the segmentation mask in pixels.
+    SegmentationMaskCenterOfMassY: float - The y coordinate of the center of mass of the segmentation mask in pixels.
+    SegmentationMaskSolidity: float - The solidity of the segmentation mask. Calculated as area/convex_area.
+    SegmentationMaskSparseness: float - The sparseness of the segmentation mask. Calculated as area/area filled.
+    SegmentationMaskBoundingBoxArea: int - The area of the bounding box of the segmentation mask in pixels.
+
+    SegmentationMaskBoundingBoxWidth: int - The width of the corresponding bounding box for given instance mask in pixels.
+    SegmentationMaskBoundingBoxHeight: int - The height of the corresponding bounding box for given instance mask in pixels.
+
+    SegmentationMaskMorphologyOpeningArea: int - The area of the segmentation mask after applying a morphological
+                                                 opening operation in pixels.
+
+    SegmentationMaskMorphologyOpeningAreaRatio: float - The ratio of the area of the segmentation mask after
+                                                        applying a morphological opening operation to the original
+                                                        area of the segmentation mask.
+
+    SegmentationMaskMorphologyClosingArea: int - The area of the segmentation mask after applying a morphological
+                                                 closing operation in pixels.
+
+    SegmentationMaskMorphologyClosingAreaRatio: float - The ratio of the area of the segmentation mask after
+                                                        applying a morphological closing operation to the original
+                                                        area of the segmentation mask.
+
+    """
+
     DatasetSplit = "DatasetSplit"
     ImageId = "ImageId"
 
@@ -94,8 +130,8 @@ class SegmentationMaskFeatures(Enum):
     SegmentationMaskSparseness = "SegmentationMaskSparseness"
     SegmentationMaskBoundingBoxArea = "SegmentationMaskBoundingBoxArea"
 
-    SegmentationMaskWidth = "SegmentationMaskWidth"
-    SegmentationMaskHeight = "SegmentationMaskHeight"
+    SegmentationMaskBoundingBoxWidth = "SegmentationMaskBoundingBoxWidth"
+    SegmentationMaskBoundingBoxHeight = "SegmentationMaskBoundingBoxHeight"
 
     SegmentationMaskMorphologyOpeningArea = "SegmentationMaskMorphologyOpeningArea"
     SegmentationMaskMorphologyOpeningAreaRatio = "SegmentationMaskMorphologyOpeningAreaRatio"

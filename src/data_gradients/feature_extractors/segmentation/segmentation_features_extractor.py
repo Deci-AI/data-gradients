@@ -63,7 +63,7 @@ class SemanticSegmentationFeaturesExtractor:
                 # So next label will be 256, which is out of range for uint8. Therefore we must promote the type to uint16
                 # But if the mask is already uint16, then we don't want to promote it to uint32
                 # So min_scalar_type comes to the rescue of finding the minimal type that can hold the value of a new label.
-                promote_type = np.promote_types(segmentation_mask.dtype,  np.min_scalar_type(new_label))
+                promote_type = np.promote_types(segmentation_mask.dtype, np.min_scalar_type(new_label))
                 segmentation_mask = segmentation_mask.astype(promote_type, copy=False)
                 segmentation_mask[zeros_mask] = new_label
                 # We also have to update the relabel_dict to reflect the change of classes
@@ -79,13 +79,15 @@ class SemanticSegmentationFeaturesExtractor:
             SegmentationMaskFeatures.SegmentationMaskCenterOfMassY: [],
             SegmentationMaskFeatures.SegmentationMaskSolidity: [],
             SegmentationMaskFeatures.SegmentationMaskSparseness: [],
-            SegmentationMaskFeatures.SegmentationMaskWidth: [],
-            SegmentationMaskFeatures.SegmentationMaskHeight: [],
+            SegmentationMaskFeatures.SegmentationMaskBoundingBoxWidth: [],
+            SegmentationMaskFeatures.SegmentationMaskBoundingBoxHeight: [],
             SegmentationMaskFeatures.SegmentationMaskMorphologyOpeningArea: [],
             SegmentationMaskFeatures.SegmentationMaskMorphologyClosingArea: [],
             SegmentationMaskFeatures.SegmentationMaskMorphologyOpeningAreaRatio: [],
             SegmentationMaskFeatures.SegmentationMaskMorphologyClosingAreaRatio: [],
         }
+
+        mask_height, mask_width = segmentation_mask.shape[:2]
 
         regions = regionprops(segmentation_mask)
         for region_id, region in enumerate(regions):
@@ -99,8 +101,8 @@ class SemanticSegmentationFeaturesExtractor:
             features[SegmentationMaskFeatures.SegmentationMaskSolidity].append(region.solidity)
             features[SegmentationMaskFeatures.SegmentationMaskSparseness].append(region.area / region.area_filled)
 
-            features[SegmentationMaskFeatures.SegmentationMaskWidth].append(region.bbox[2] - region.bbox[0])
-            features[SegmentationMaskFeatures.SegmentationMaskHeight].append(region.bbox[3] - region.bbox[1])
+            features[SegmentationMaskFeatures.SegmentationMaskBoundingBoxWidth].append(region.bbox[2] - region.bbox[0])
+            features[SegmentationMaskFeatures.SegmentationMaskBoundingBoxHeight].append(region.bbox[3] - region.bbox[1])
 
             img_after_opening = binary_dilation(binary_erosion(region.image))
             img_after_closing = binary_erosion(binary_dilation(region.image))
