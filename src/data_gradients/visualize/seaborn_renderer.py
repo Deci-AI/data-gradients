@@ -75,6 +75,18 @@ class SeabornRenderer(PlotRenderer):
             if options.labels_name is not None:
                 ax_i.legend(title=options.labels_name)
 
+            if options.x_ticks_rotation == "auto":
+                n_unique = len(df[options.x_label_key].unique())
+                if n_unique > 50:
+                    ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=90)
+                elif n_unique > 10:
+                    ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=45)
+            elif options.x_ticks_rotation is not None:
+                ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=options.x_ticks_rotation)
+
+            if options.y_ticks_rotation is not None:
+                ax_i.set_yticklabels(ax_i.get_yticklabels(), rotation=options.y_ticks_rotation)
+
         return fig
 
     def render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:

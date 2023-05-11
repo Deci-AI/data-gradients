@@ -134,6 +134,9 @@ class ScatterPlotOptions(CommonPlotOptions):
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
 
+    x_ticks_rotation: Optional[int] = 45
+    y_ticks_rotation: Optional[int] = 0
+
 
 class PlotRenderer:
     def render_with_options(self, df: pd.DataFrame, options):

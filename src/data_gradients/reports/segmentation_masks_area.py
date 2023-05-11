@@ -1,7 +1,7 @@
 from data_gradients.feature_extractors.features import ImageFeatures, SegmentationMaskFeatures
 from data_gradients.feature_extractors.result import FeaturesResult
 from data_gradients.reports.report_interface import AbstractReportWidget
-from data_gradients.visualize.plot_renderer import PlotRenderer, Hist2DPlotOptions
+from data_gradients.visualize.plot_renderer import PlotRenderer, Hist2DPlotOptions, ScatterPlotOptions
 
 
 class SegmentationMasksArea(AbstractReportWidget):
@@ -9,7 +9,7 @@ class SegmentationMasksArea(AbstractReportWidget):
         pass
 
     def to_figure(self, results: FeaturesResult, renderer: PlotRenderer):
-        options = Hist2DPlotOptions(
+        options = ScatterPlotOptions(
             x_label_key=SegmentationMaskFeatures.SegmentationMaskLabelName,
             x_label_name="Class name",
             y_label_key=SegmentationMaskFeatures.SegmentationMaskArea,
@@ -17,7 +17,8 @@ class SegmentationMasksArea(AbstractReportWidget):
             title="Segmentation masks area distribution",
             labels_key=ImageFeatures.DatasetSplit,
             labels_name="Split",
-            x_ticks_rotation=45,
+            # x_ticks_rotation=45,
+            # bins=16,
         )
         return renderer.render_with_options(results.mask_features, options)
 
