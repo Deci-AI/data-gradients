@@ -1,5 +1,6 @@
 import collections
 import unittest
+from typing import Mapping
 
 import cv2
 import numpy as np
@@ -7,8 +8,11 @@ import pandas as pd
 
 from data_gradients.example_dataset.bdd_dataset import BDDDataset
 from data_gradients.feature_extractors.features import SegmentationMaskFeatures
-from data_gradients.feature_extractors.segmentation.segmentation_features_extractor import \
-    SemanticSegmentationFeaturesExtractor
+from data_gradients.feature_extractors.image_features_extractor import ImageFeaturesExtractor
+from data_gradients.feature_extractors.result import FeaturesResult
+from data_gradients.feature_extractors.segmentation.segmentation_features_extractor import SemanticSegmentationFeaturesExtractor
+from data_gradients.reports import DatasetSplitDistribution, ImageSizeDistribution, AbstractReportWidget, AverageImageBrightness, SegmentationClassDistribution
+from data_gradients.reports.segmentation_masks_area import SegmentationMasksArea
 from data_gradients.visualize.seaborn_renderer import BarPlotOptions, SeabornRenderer, ScatterPlotOptions
 
 
@@ -45,7 +49,10 @@ class SemanticSegmentationFeaturesExtractorTest(unittest.TestCase):
         print(df)
 
     def test_bdd(self):
-        extractor = SemanticSegmentationFeaturesExtractor(ignore_labels=[255])
+        mask_features_extractor = SemanticSegmentationFeaturesExtractor(ignore_labels=[255])
+        image_features_extractor = ImageFeaturesExtractor()
+
+        extractors = {"image": image_features_extractor, "mask": mask_features_extractor}
 
         train_dataset = BDDDataset(
             data_folder="../../src/data_gradients/example_dataset/bdd_example",
@@ -56,82 +63,60 @@ class SemanticSegmentationFeaturesExtractorTest(unittest.TestCase):
             split="val",
         )
 
-        train_df = []
+        results = collections.defaultdict(list)
+
         for image_id, (image, mask_image) in enumerate(train_dataset):
-            shared_keys = {
-                SegmentationMaskFeatures.DatasetSplit: "train",
-                SegmentationMaskFeatures.ImageId: image_id
-            }
-            dict_df = extractor(mask_image, shared_keys=shared_keys)
-            df = pd.DataFrame.from_dict(dict_df)
-            train_df.append(df)
+            shared_keys = {SegmentationMaskFeatures.DatasetSplit: "train", SegmentationMaskFeatures.ImageId: image_id}
 
-        valid_df = []
+            # TODO: Unpacking of dataset sample to specific feature extractor should be done in a more elegant way
+            for extractor_name, extractor in extractors.items():
+                dict_df = extractor(mask_image if extractor_name == "mask" else image, shared_keys=shared_keys)
+                df = pd.DataFrame.from_dict(dict_df)
+                results[extractor_name].append(df)
+
         for image_id, (image, mask_image) in enumerate(val_dataset):
-            shared_keys = {
-                SegmentationMaskFeatures.DatasetSplit: "val",
-                SegmentationMaskFeatures.ImageId: image_id
-            }
-            dict_df = extractor(mask_image, shared_keys=shared_keys)
-            df = pd.DataFrame.from_dict(dict_df)
-            valid_df.append(df)
+            shared_keys = {SegmentationMaskFeatures.DatasetSplit: "val", SegmentationMaskFeatures.ImageId: image_id}
 
-        df = pd.concat(train_df + valid_df)
-        df[SegmentationMaskFeatures.SegmentationMaskLabelName] = df[SegmentationMaskFeatures.SegmentationMaskLabel].apply(lambda x: train_dataset.CLASS_ID_TO_NAMES[x])
+            for extractor_name, extractor in extractors.items():
+                dict_df = extractor(mask_image if extractor_name == "mask" else image, shared_keys=shared_keys)
+                df = pd.DataFrame.from_dict(dict_df)
+                results[extractor_name].append(df)
 
-        report = collections.OrderedDict([
-            ("bdd_class_distribution", BarPlotOptions(
-                x_label_key=SegmentationMaskFeatures.SegmentationMaskLabelName,
-                x_label_name="Class",
-                y_label_key=None,
-                y_label_name="Count",
-                title="Class distribution on BDD dataset",
-                x_ticks_rotation=90,
-                labels_key=SegmentationMaskFeatures.DatasetSplit,
-                labels_name="Split",
-                log_scale=False,
-            )),
-            ("bdd_class_area_distribution", BarPlotOptions(
-                x_label_key=SegmentationMaskFeatures.SegmentationMaskLabel,
-                x_label_name="Class",
-                y_label_key=SegmentationMaskFeatures.SegmentationMaskArea,
-                y_label_name="Area",
-                title="Class / Area on BDD dataset",
-                x_ticks_rotation=None,
-                labels_key=SegmentationMaskFeatures.DatasetSplit,
-                labels_name="Split",
-                log_scale=False,
-            )),
-            ("bdd_center_of_mass", ScatterPlotOptions(
-                x_label_key=SegmentationMaskFeatures.SegmentationMaskCenterOfMassX,
-                x_label_name="Center of mass X",
-                y_label_key=SegmentationMaskFeatures.SegmentationMaskCenterOfMassY,
-                y_label_name="Center of mass Y",
-                title="Class label",
-                labels_key=SegmentationMaskFeatures.SegmentationMaskLabelName,
-                labels_name="Class",
-            )),
-            ("bdd_solidity_sparsity", ScatterPlotOptions(
-                x_label_key=SegmentationMaskFeatures.SegmentationMaskSolidity,
-                x_label_name="Solidity",
-                y_label_key=SegmentationMaskFeatures.SegmentationMaskSparseness,
-                y_label_name="Sparseness",
-                title="Solidity / Sparseness",
-                labels_key=SegmentationMaskFeatures.SegmentationMaskLabelName,
-                labels_name="Class",
-            ))
-        ])
+        results = FeaturesResult(
+            image_features=pd.concat(results["image"]),
+            mask_features=pd.concat(results["mask"]),
+            bbox_features=None,
+        )
+
+        # This is a bit ugly - after we assembled all the features, we enrich our dataframes with additional columns
+        # like class name. The class name helps with plotting to make the plots more readable (E.g. instead of 0,1,2,3 user would see car,plane,truck, etc.)
+        results.mask_features[SegmentationMaskFeatures.SegmentationMaskLabelName] = results.mask_features[SegmentationMaskFeatures.SegmentationMaskLabel].apply(
+            lambda x: train_dataset.CLASS_ID_TO_NAMES[x]
+        )
+
+        # This is the report definition. It is hardcoded right now, but can come from config file as well.
+        # Each item represents a single report widget.
+        report_items: Mapping[str, AbstractReportWidget] = collections.OrderedDict(
+            [
+                ("image_size", ImageSizeDistribution()),
+                ("dataset_split", DatasetSplitDistribution()),
+                ("average_brightness", AverageImageBrightness()),
+                ("segmentation_mask_area", SegmentationMasksArea()),
+                ("segmentation_class_distribution", SegmentationClassDistribution()),
+            ]
+        )
 
         sns = SeabornRenderer()
 
+        # Report generation
         with open("bdd_report.md", "w") as f:
             f.write("# BDD Report\n")
 
-            for report_id, plot_options in report.items():
-                plot = sns.render_with_options(df, plot_options)
+            for report_id, report in report_items.items():
+                plot = report.to_figure(results, sns)
                 plot.savefig(f"{report_id}.png")
                 plot.show()
 
                 f.write("\n\n")
-                f.write(f"![{plot_options.title}]({report_id}.png)")
+                f.write(f"![]({report_id}.png)")
                 f.write("\n\n")
