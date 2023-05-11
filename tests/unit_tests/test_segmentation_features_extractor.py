@@ -11,7 +11,9 @@ from data_gradients.feature_extractors.features import SegmentationMaskFeatures
 from data_gradients.feature_extractors.image_features_extractor import ImageFeaturesExtractor
 from data_gradients.feature_extractors.result import FeaturesResult
 from data_gradients.feature_extractors.segmentation.segmentation_features_extractor import SemanticSegmentationFeaturesExtractor
+from data_gradients.logging.markdown_writer import MarkdownWriter, HTMLWriter, PDFWriter
 from data_gradients.reports import DatasetSplitDistribution, ImageSizeDistribution, AbstractReportWidget, AverageImageBrightness, SegmentationClassDistribution
+from data_gradients.reports.report_template import ReportTemplate
 from data_gradients.reports.segmentation_masks_area import SegmentationMasksArea
 from data_gradients.visualize.seaborn_renderer import BarPlotOptions, SeabornRenderer, ScatterPlotOptions
 
@@ -96,27 +98,8 @@ class SemanticSegmentationFeaturesExtractorTest(unittest.TestCase):
 
         # This is the report definition. It is hardcoded right now, but can come from config file as well.
         # Each item represents a single report widget.
-        report_items: Mapping[str, AbstractReportWidget] = collections.OrderedDict(
-            [
-                ("image_size", ImageSizeDistribution()),
-                ("dataset_split", DatasetSplitDistribution()),
-                ("average_brightness", AverageImageBrightness()),
-                ("segmentation_mask_area", SegmentationMasksArea()),
-                ("segmentation_class_distribution", SegmentationClassDistribution()),
-            ]
-        )
+        report = ReportTemplate.get_report_template_with_valid_widgets(results)
 
-        sns = SeabornRenderer()
-
-        # Report generation
-        with open("bdd_report.md", "w") as f:
-            f.write("# BDD Report\n")
-
-            for report_id, report in report_items.items():
-                plot = report.to_figure(results, sns)
-                plot.savefig(f"{report_id}.png")
-                plot.show()
-
-                f.write("\n\n")
-                f.write(f"![]({report_id}.png)")
-                f.write("\n\n")
+        MarkdownWriter(output_file="markdown/bdd_report.md", images_subfolder="img").write_report(results, report)
+        HTMLWriter(output_file="html/bdd_report.html", images_subfolder="img").write_report(results, report)
+        PDFWriter(output_file="pdf/bdd_report.pdf").write_report(results, report)

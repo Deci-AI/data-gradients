@@ -13,3 +13,4 @@ scipy
 rapidfuzz
 coverage~=5.3.1
 seaborn
+pdfkit
