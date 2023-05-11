@@ -1,6 +1,5 @@
 import collections
 import unittest
-from typing import Mapping
 
 import cv2
 import numpy as np
@@ -10,12 +9,10 @@ from data_gradients.example_dataset.bdd_dataset import BDDDataset
 from data_gradients.feature_extractors.features import SegmentationMaskFeatures
 from data_gradients.feature_extractors.image_features_extractor import ImageFeaturesExtractor
 from data_gradients.feature_extractors.result import FeaturesResult
-from data_gradients.feature_extractors.segmentation.segmentation_features_extractor import SemanticSegmentationFeaturesExtractor
-from data_gradients.logging.markdown_writer import MarkdownWriter, HTMLWriter, PDFWriter
-from data_gradients.reports import DatasetSplitDistribution, ImageSizeDistribution, AbstractReportWidget, AverageImageBrightness, SegmentationClassDistribution
+from data_gradients.feature_extractors.segmentation.segmentation_features_extractor import \
+    SemanticSegmentationFeaturesExtractor
+from data_gradients.logging import MarkdownWriter, HTMLWriter, PDFWriter
 from data_gradients.reports.report_template import ReportTemplate
-from data_gradients.reports.segmentation_masks_area import SegmentationMasksArea
-from data_gradients.visualize.seaborn_renderer import BarPlotOptions, SeabornRenderer, ScatterPlotOptions
 
 
 class SemanticSegmentationFeaturesExtractorTest(unittest.TestCase):

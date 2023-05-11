@@ -6,10 +6,11 @@ from data_gradients.reports.report_template import ReportTemplate
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
-class MarkdownWriter:
+class HTMLWriter:
     """
-    A writer that writes a report to a markdown file.
+    A writer that writes a report to an HTML file.
     """
+
     def __init__(self, output_file: str, images_subfolder: Optional[str] = None):
         """
         :param output_file: The output file to which the report should be written.
@@ -29,11 +30,14 @@ class MarkdownWriter:
 
         # Report generation
         with open(self.output_file, "w") as f:
-            f.write("# Dataset result\n")
+            f.write("<html>\n")
+            f.write("<head>\n")
+            f.write("<title>Dataset result</title>\n")
+            f.write("</head>\n")
+            f.write("<body>\n")
 
             for widget in template.widgets:
                 plot = widget.to_figure(results, sns)
-
 
                 widget_image_name = f"{widget.__class__.__name__}.png"
                 relative_image_output_path = (
@@ -41,8 +45,12 @@ class MarkdownWriter:
                 )
 
                 plot.savefig(os.path.join(output_dir, relative_image_output_path))
-                #plot.show()
+                # plot.show()
 
-                f.write("\n\n")
-                f.write(f"![]({relative_image_output_path})")
-                f.write("\n\n")
+                f.write(f"<h1>{widget.__class__.__name__}</h1>\n")
+                f.write("<br>\n")
+                f.write(f'<img src="{relative_image_output_path}" >\n')
+                f.write("<br>\n")
+
+            f.write("</body>\n")
+            f.write("</html>\n")
