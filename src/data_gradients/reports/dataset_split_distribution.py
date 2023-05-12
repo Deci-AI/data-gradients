@@ -16,7 +16,8 @@ class DatasetSplitDistribution(AbstractReportWidget):
             x_label_name="Split",
             y_label_key=None,
             y_label_name="Images",
-            title="Image size distribution",
+            title="Samples count per split",
+            show_values=True,
         )
         return renderer.render_with_options(results.image_features, options)
 

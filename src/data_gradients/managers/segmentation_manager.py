@@ -1,9 +1,11 @@
+import itertools
+from multiprocessing import Pool
 from typing import Mapping
 
 import pandas as pd
 from tqdm import tqdm
 
-from data_gradients.dataset_adapters import SegmentationDatasetAdapter
+from data_gradients.dataset_adapters import SegmentationDatasetAdapter, SegmentationSample
 from data_gradients.feature_extractors import (
     SemanticSegmentationFeaturesExtractor,
     FeaturesResult,
@@ -11,29 +13,51 @@ from data_gradients.feature_extractors import (
     ImageFeatures,
     ImageFeaturesExtractor,
 )
+from data_gradients.logging import NotebookWriter
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
+from data_gradients.reports.report_template import ReportTemplate
 
+
+class DummyPool:
+    def __init__(self, num_workers):
+        if num_workers > 0:
+            raise ValueError("DummyPool can't have workers")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def starmap(self, func, iterable):
+        return [func(*args) for args in iterable]
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
+    @classmethod
+    def process_sample(cls, sample: SegmentationSample, image_features_extractor, mask_features_extractor):
+        image_features = image_features_extractor(sample.image, shared_keys={ImageFeatures.ImageId: sample.sample_id, ImageFeatures.DatasetSplit: "N/A"})
 
+        mask_features = mask_features_extractor(
+            sample.mask, shared_keys={SegmentationMaskFeatures.ImageId: sample.sample_id, SegmentationMaskFeatures.DatasetSplit: "N/A"}
+        )
+        return image_features, mask_features
 
     @classmethod
-    def extract_features(self, dataset: SegmentationDatasetAdapter) -> FeaturesResult:
+    def extract_features(cls, dataset: SegmentationDatasetAdapter, num_workers: int) -> FeaturesResult:
         image_features_extractor = ImageFeaturesExtractor()
         mask_features_extractor = SemanticSegmentationFeaturesExtractor(ignore_labels=dataset.get_ignored_classes())
 
         image_features = []
         mask_features = []
 
-        for sample in tqdm(dataset.get_iterator(), desc=f"Extracting features"):
-            image_features.append(
-                image_features_extractor(sample.image, shared_keys={ImageFeatures.ImageId: sample.sample_id, ImageFeatures.DatasetSplit: "all"})
-            )
-            mask_features.append(
-                mask_features_extractor(
-                    sample.mask, shared_keys={SegmentationMaskFeatures.ImageId: sample.sample_id, SegmentationMaskFeatures.DatasetSplit: "all"}
-                )
-            )
+        pool_cls = Pool if num_workers > 0 else DummyPool
+        with pool_cls(num_workers) as p:
+            samples_iterator = tqdm(dataset.get_iterator(), total=len(dataset), desc=f"Extracting features")
+            for features in p.starmap(
+                cls.process_sample, zip(samples_iterator, itertools.repeat(image_features_extractor), itertools.repeat(mask_features_extractor))
+            ):
+                image_features.append(features[0])
+                mask_features.append(features[1])
 
         results = FeaturesResult(
             image_features=pd.concat(map(pd.DataFrame.from_dict, image_features)),
@@ -51,12 +75,12 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         return results
 
     @classmethod
-    def extract_features_from_splits(self, datasets: Mapping[str, SegmentationDatasetAdapter]) -> FeaturesResult:
+    def extract_features_from_splits(self, datasets: Mapping[str, SegmentationDatasetAdapter], num_workers: int = 0) -> FeaturesResult:
         image_features = []
         mask_features = []
 
         for split_name, dataset in datasets.items():
-            results = self.extract_features(dataset)
+            results = self.extract_features(dataset, num_workers=num_workers)
             results.image_features[ImageFeatures.DatasetSplit] = split_name
             results.mask_features[SegmentationMaskFeatures.DatasetSplit] = split_name
 
@@ -70,3 +94,9 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         )
 
         return results
+
+    @classmethod
+    def plot_analysis(cls, datasets: Mapping[str, SegmentationDatasetAdapter], num_workers: int = 0):
+        results = cls.extract_features_from_splits(datasets, num_workers=num_workers)
+        report = ReportTemplate.get_report_template_with_valid_widgets(results)
+        NotebookWriter().write_report(results, report)

@@ -78,14 +78,11 @@ class SeabornRenderer(PlotRenderer):
             if options.x_ticks_rotation == "auto":
                 n_unique = len(df[options.x_label_key].unique())
                 if n_unique > 50:
-                    ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=90)
+                    options.x_ticks_rotation = 90
                 elif n_unique > 10:
-                    ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=45)
-            elif options.x_ticks_rotation is not None:
-                ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=options.x_ticks_rotation)
+                    options.x_ticks_rotation = 45
 
-            if options.y_ticks_rotation is not None:
-                ax_i.set_yticklabels(ax_i.get_yticklabels(), rotation=options.y_ticks_rotation)
+            self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
         return fig
 
@@ -138,22 +135,19 @@ class SeabornRenderer(PlotRenderer):
 
             seaborn.histplot(**histplot_args)
 
-            if options.x_ticks_rotation == "auto":
-                n_unique = len(df[options.x_label_key].unique())
-                if n_unique > 50:
-                    ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=90)
-                elif n_unique > 10:
-                    ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=45)
-            elif options.x_ticks_rotation is not None:
-                ax_i.set_xticklabels(ax_i.get_xticklabels(), rotation=options.x_ticks_rotation)
-
-            if options.y_ticks_rotation is not None:
-                ax_i.set_yticklabels(ax_i.get_yticklabels(), rotation=options.y_ticks_rotation)
-
             ax_i.set_xlabel(options.x_label_name)
             ax_i.set_ylabel(options.y_label_name)
             if options.labels_name is not None:
                 ax_i.legend(title=options.labels_name)
+
+            if options.x_ticks_rotation == "auto":
+                n_unique = len(df[options.x_label_key].unique())
+                if n_unique > 50:
+                    options.x_ticks_rotation = 90
+                elif n_unique > 10:
+                    options.x_ticks_rotation = 45
+
+            self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
         return fig
 
@@ -187,18 +181,6 @@ class SeabornRenderer(PlotRenderer):
 
         ax = plot_fn(**barplot_args)
 
-        if options.x_ticks_rotation == "auto":
-            n_unique = len(df[options.x_label_key].unique())
-            if n_unique > 50:
-                ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
-            elif n_unique > 10:
-                ax.set_xticklabels(ax.get_xticklabels(), rotation=45)
-        elif options.x_ticks_rotation is not None:
-            ax.set_xticklabels(ax.get_xticklabels(), rotation=options.x_ticks_rotation)
-
-        if options.y_ticks_rotation is not None:
-            ax.set_yticklabels(ax.get_yticklabels(), rotation=options.y_ticks_rotation)
-
         ax.set_xlabel(options.x_label_name)
         ax.set_ylabel(options.y_label_name)
         if options.labels_name is not None:
@@ -208,4 +190,49 @@ class SeabornRenderer(PlotRenderer):
             ax.set_yscale("log")
             ax.set_ylabel(options.y_label_name + " (log scale)")
 
+        if options.x_ticks_rotation == "auto":
+            n_unique = len(df[options.x_label_key].unique())
+            if n_unique > 50:
+                options.x_ticks_rotation = 90
+            elif n_unique > 10:
+                options.x_ticks_rotation = 45
+
+        if options.show_values:
+            self._show_values(ax)
+
+        self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
+
         return fig
+
+    def _set_ticks_rotation(self, ax, x_ticks_rotation, y_ticks_rotation):
+        # Call to set_xticks is needed to avoid warning
+        # https://stackoverflow.com/questions/63723514/userwarning-fixedformatter-should-only-be-used-together-with-fixedlocator
+
+        if x_ticks_rotation is not None:
+            ax.set_xticks(list(ax.get_xticks()))
+            ax.set_xticklabels(ax.get_xticklabels(), rotation=x_ticks_rotation)
+
+        if y_ticks_rotation is not None:
+            ax.set_yticks(list(ax.get_yticks()))
+            ax.set_yticklabels(ax.get_yticklabels(), rotation=y_ticks_rotation)
+
+    def _show_values(self, axs, orient="v", space=0.01):
+        def _single(ax):
+            if orient == "v":
+                for p in ax.patches:
+                    _x = p.get_x() + p.get_width() / 2
+                    _y = p.get_y() + p.get_height() + (p.get_height() * 0.01)
+                    value = "{:.1f}".format(p.get_height())
+                    ax.text(_x, _y, value, ha="center")
+            elif orient == "h":
+                for p in ax.patches:
+                    _x = p.get_x() + p.get_width() + float(space)
+                    _y = p.get_y() + p.get_height() - (p.get_height() * 0.5)
+                    value = "{:.1f}".format(p.get_width())
+                    ax.text(_x, _y, value, ha="left")
+
+        if isinstance(axs, np.ndarray):
+            for idx, ax in np.ndenumerate(axs):
+                _single(ax)
+        else:
+            _single(axs)

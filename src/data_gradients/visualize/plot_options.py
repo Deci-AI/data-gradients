@@ -30,6 +30,7 @@ class BarPlotOptions(CommonPlotOptions):
     - log_scale: If True, y-axis will be displayed in log scale
     - tight_layout: If True enables more compact layout of the plot
     - figsize: Size of the figure
+    - show_values: If True, will display the values of the bars above them
 
     """
 
@@ -42,11 +43,13 @@ class BarPlotOptions(CommonPlotOptions):
     bins: Optional[int] = None
 
     x_ticks_rotation: Optional[int] = 45
-    y_ticks_rotation: Optional[int] = 0
+    y_ticks_rotation: Optional[int] = None
 
     labels_key: Optional[str] = None
     labels_name: Optional[str] = None
     labels_palette: Optional[Mapping] = None
+
+    show_values: bool = False
 
     log_scale: Union[bool, str] = "auto"
     tight_layout: bool = False
@@ -94,7 +97,7 @@ class Hist2DPlotOptions(CommonPlotOptions):
     figsize: Optional[Tuple[int, int]] = (10, 6)
 
     x_ticks_rotation: Optional[int] = 45
-    y_ticks_rotation: Optional[int] = 0
+    y_ticks_rotation: Optional[int] = None
 
 
 @dataclasses.dataclass
@@ -135,7 +138,7 @@ class ScatterPlotOptions(CommonPlotOptions):
     figsize: Optional[Tuple[int, int]] = (10, 6)
 
     x_ticks_rotation: Optional[int] = 45
-    y_ticks_rotation: Optional[int] = 0
+    y_ticks_rotation: Optional[int] = None
 
 
 class PlotRenderer:

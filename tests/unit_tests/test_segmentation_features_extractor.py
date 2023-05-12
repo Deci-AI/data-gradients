@@ -83,8 +83,7 @@ class SemanticSegmentationFeaturesExtractorTest(unittest.TestCase):
             "val": val_dataset,
         }
 
-        results = SegmentationAnalysisManager.extract_features_from_splits(data)
-
+        results = SegmentationAnalysisManager.extract_features_from_splits(data, num_workers=4)
         report = ReportTemplate.get_report_template_with_valid_widgets(results)
 
         MarkdownWriter(output_file="cityscapes/report.md", images_subfolder="markdown_images").write_report(results, report)
