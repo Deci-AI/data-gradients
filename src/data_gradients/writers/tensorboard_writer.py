@@ -3,7 +3,7 @@ from typing import Optional
 
 from torch.utils.tensorboard import SummaryWriter
 
-from data_gradients.feature_extractors.result import FeaturesResult
+from data_gradients.feature_extractors.result import FeaturesCollection
 from data_gradients.reports.report_template import ReportTemplate
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
@@ -21,7 +21,7 @@ class TensorboardWriter:
         """
         self.output_directory = os.path.abspath(output_directory)
 
-    def write_report(self, results: FeaturesResult, template: ReportTemplate) -> None:
+    def write_report(self, results: FeaturesCollection, template: ReportTemplate) -> None:
         sns = SeabornRenderer()
 
         with SummaryWriter(self.output_directory) as tb_writer:

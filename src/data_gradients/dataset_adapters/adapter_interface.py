@@ -13,8 +13,8 @@ class SegmentationSample:
 
     Properties:
         sample_id: str
-        image: np.ndarray
-        mask: np.ndarray
+        image: np.ndarray of shape [H,W,C]
+        mask: np.ndarray of shape [H,W] with integer values representing class labels
     """
 
     sample_id: str

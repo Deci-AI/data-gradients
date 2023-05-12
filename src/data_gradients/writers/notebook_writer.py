@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from data_gradients.feature_extractors.result import FeaturesResult
+from data_gradients.feature_extractors.result import FeaturesCollection
 from data_gradients.reports.report_template import ReportTemplate
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
@@ -13,7 +13,7 @@ class NotebookWriter:
     def __init__(self):
         pass
 
-    def write_report(self, results: FeaturesResult, template: ReportTemplate) -> None:
+    def write_report(self, results: FeaturesCollection, template: ReportTemplate) -> None:
         sns = SeabornRenderer()
         for widget in template.widgets:
             fig = widget.to_figure(results, sns)

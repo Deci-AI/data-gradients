@@ -4,8 +4,8 @@ from logging import getLogger
 import pdfkit
 import tempfile
 
-from data_gradients.feature_extractors.result import FeaturesResult
-from data_gradients.logging.html_writer import HTMLWriter
+from data_gradients.feature_extractors.result import FeaturesCollection
+from data_gradients.writers.html_writer import HTMLWriter
 from data_gradients.reports.report_template import ReportTemplate
 
 logger = getLogger(__name__)
@@ -24,7 +24,7 @@ class PDFWriter:
         """
         self.output_file = os.path.abspath(output_file)
 
-    def write_report(self, results: FeaturesResult, template: ReportTemplate) -> None:
+    def write_report(self, results: FeaturesCollection, template: ReportTemplate) -> None:
 
         output_dir = os.path.dirname(self.output_file)
         os.makedirs(output_dir, exist_ok=True)

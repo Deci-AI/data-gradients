@@ -5,7 +5,7 @@ import pandas as pd
 
 
 @dataclasses.dataclass
-class FeaturesResult:
+class FeaturesCollection:
     """
     Holds all the extracted features from the dataset
     """

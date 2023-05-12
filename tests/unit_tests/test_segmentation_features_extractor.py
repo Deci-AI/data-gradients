@@ -8,7 +8,7 @@ import torchvision
 
 from data_gradients.dataset_adapters import TorchvisionCityscapesSegmentationAdapter, BDD100KSegmentationDatasetAdapter
 from data_gradients.feature_extractors import SemanticSegmentationFeaturesExtractor
-from data_gradients.logging import MarkdownWriter, HTMLWriter, PDFWriter, TensorboardWriter
+from data_gradients.writers import MarkdownWriter, HTMLWriter, PDFWriter, TensorboardWriter
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 from data_gradients.reports.report_template import ReportTemplate
 

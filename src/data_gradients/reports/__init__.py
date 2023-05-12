@@ -1,4 +1,5 @@
 from .report_interface import AbstractReportWidget
+from .report_template import ReportTemplate
 
 from .image_size import ImageSizeDistribution
 from .dataset_split_distribution import DatasetSplitDistribution

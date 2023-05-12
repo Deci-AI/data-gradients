@@ -1,6 +1,6 @@
 from typing import List
 
-from data_gradients.feature_extractors.result import FeaturesResult
+from data_gradients.feature_extractors.result import FeaturesCollection
 from data_gradients.reports import AbstractReportWidget
 
 
@@ -15,7 +15,7 @@ class ReportTemplate:
         self.widgets = widgets
 
     @classmethod
-    def get_report_template_with_valid_widgets(cls, result: FeaturesResult) -> "ReportTemplate":
+    def get_report_template_with_valid_widgets(cls, result: FeaturesCollection) -> "ReportTemplate":
         """
         Returns a default report template that includes all widgets that are available for the given result.
         If the result contains segmentation features, segmentation widgets are included.

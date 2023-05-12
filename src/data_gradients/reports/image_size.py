@@ -1,5 +1,5 @@
 from data_gradients.feature_extractors.features import ImageFeatures
-from data_gradients.feature_extractors.result import FeaturesResult
+from data_gradients.feature_extractors.result import FeaturesCollection
 from data_gradients.reports.report_interface import AbstractReportWidget
 from data_gradients.visualize.plot_options import PlotRenderer, ScatterPlotOptions
 
@@ -8,7 +8,7 @@ class ImageSizeDistribution(AbstractReportWidget):
     def __init__(self):
         pass
 
-    def to_figure(self, results: FeaturesResult, renderer: PlotRenderer):
+    def to_figure(self, results: FeaturesCollection, renderer: PlotRenderer):
         options = ScatterPlotOptions(
             x_label_key=ImageFeatures.ImageWidth,
             x_label_name="Image width",
@@ -20,7 +20,7 @@ class ImageSizeDistribution(AbstractReportWidget):
         )
         return renderer.render_with_options(results.image_features, options)
 
-    def to_json(self, results: FeaturesResult):
+    def to_json(self, results: FeaturesCollection):
         return {
             "average_width": results.image_features[ImageFeatures.ImageWidth].mean(),
             "average_height": results.image_features[ImageFeatures.ImageHeight].mean(),

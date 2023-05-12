@@ -1,0 +1,2 @@
+from .abstract_manager import AnalysisManagerAbstract
+from .segmentation_manager import SegmentationAnalysisManager
