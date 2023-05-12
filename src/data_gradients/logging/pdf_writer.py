@@ -1,10 +1,14 @@
 import os
+from logging import getLogger
+
 import pdfkit
 import tempfile
 
 from data_gradients.feature_extractors.result import FeaturesResult
 from data_gradients.logging.html_writer import HTMLWriter
 from data_gradients.reports.report_template import ReportTemplate
+
+logger = getLogger(__name__)
 
 
 class PDFWriter:
@@ -30,3 +34,4 @@ class PDFWriter:
             HTMLWriter(output_html_file).write_report(results, template)
 
             pdfkit.from_file(output_html_file, self.output_file, options={"enable-local-file-access": None}, verbose=True)
+            logger.debug(f"PDF Report written to {self.output_file}")

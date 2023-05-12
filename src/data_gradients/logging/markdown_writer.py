@@ -1,6 +1,8 @@
 import os
 from typing import Optional
 
+from matplotlib import pyplot as plt
+
 from data_gradients.feature_extractors.result import FeaturesResult
 from data_gradients.reports.report_template import ReportTemplate
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
@@ -32,7 +34,7 @@ class MarkdownWriter:
             f.write("# Dataset result\n")
 
             for widget in template.widgets:
-                plot = widget.to_figure(results, sns)
+                fig = widget.to_figure(results, sns)
 
 
                 widget_image_name = f"{widget.__class__.__name__}.png"
@@ -40,8 +42,8 @@ class MarkdownWriter:
                     os.path.join(self.images_subfolder, widget_image_name).replace("\\", "/") if self.images_subfolder is not None else widget_image_name
                 )
 
-                plot.savefig(os.path.join(output_dir, relative_image_output_path))
-                #plot.show()
+                fig.savefig(os.path.join(output_dir, relative_image_output_path))
+                plt.close(fig)
 
                 f.write("\n\n")
                 f.write(f"![]({relative_image_output_path})")

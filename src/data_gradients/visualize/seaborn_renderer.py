@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 __all__ = ["SeabornRenderer"]
 
-from data_gradients.visualize.plot_renderer import PlotRenderer, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
+from data_gradients.visualize.plot_options import PlotRenderer, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
 
 
 class SeabornRenderer(PlotRenderer):

@@ -1,37 +1,6 @@
-from data_gradients.feature_extractors.segmentation import (
-    ComponentsSizeDistribution,
-    WidthHeight,
-    AppearancesInImages,
-    GetClassDistribution,
-    PixelsPerClass,
-    ComponentsCenterOfMass,
-    ComponentsConvexity,
-    ErosionTest,
-    CountNumComponents,
-    CountSmallComponents,
-    LabelsAspectRatios,
-    LabelsResolutions,
-)
-from data_gradients.feature_extractors.common import AverageBrightness, NumberOfImagesLabels, ImagesResolutions, ImagesAspectRatios, MeanAndSTD
-from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
+from .features import SegmentationMaskFeatures, ImageFeatures
+from .image_features_extractor import ImageFeaturesExtractor
+from .segmentation_features_extractor import SemanticSegmentationFeaturesExtractor
+from .result import FeaturesResult
 
-__all__ = [
-    "ComponentsSizeDistribution",
-    "WidthHeight",
-    "AppearancesInImages",
-    "GetClassDistribution",
-    "PixelsPerClass",
-    "ComponentsCenterOfMass",
-    "ComponentsConvexity",
-    "ErosionTest",
-    "CountNumComponents",
-    "CountSmallComponents",
-    "LabelsAspectRatios",
-    "LabelsResolutions",
-    "AverageBrightness",
-    "NumberOfImagesLabels",
-    "ImagesResolutions",
-    "ImagesAspectRatios",
-    "MeanAndSTD",
-    "FeatureExtractorAbstract",
-]
+__all__ = ["ImageFeaturesExtractor", "SemanticSegmentationFeaturesExtractor", "SegmentationMaskFeatures", "ImageFeatures", "FeaturesResult"]

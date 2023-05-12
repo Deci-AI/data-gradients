@@ -1,7 +1,7 @@
 from data_gradients.feature_extractors.features import ImageFeatures, SegmentationMaskFeatures
 from data_gradients.feature_extractors.result import FeaturesResult
 from data_gradients.reports.report_interface import AbstractReportWidget
-from data_gradients.visualize.plot_renderer import PlotRenderer, BarPlotOptions
+from data_gradients.visualize.plot_options import PlotRenderer, BarPlotOptions
 
 
 class SegmentationClassDistribution(AbstractReportWidget):

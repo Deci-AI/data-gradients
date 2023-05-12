@@ -1,6 +1,6 @@
 from data_gradients.feature_extractors.features import ImageFeatures
 from data_gradients.feature_extractors.result import FeaturesResult
-from data_gradients.visualize.plot_renderer import PlotRenderer, BarPlotOptions
+from data_gradients.visualize.plot_options import PlotRenderer, BarPlotOptions
 
 
 class AverageImageBrightness:

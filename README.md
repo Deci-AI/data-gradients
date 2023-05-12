@@ -156,8 +156,9 @@ There are advantages to both options, but as this tool is designed to optimize a
 ### 1. Install data-gradients
 
 ```bash
-pip install data_gradients-X.Y.Z-py3-none-any.whl
+pip install data_gradients
 ```
+
 ### 2. Run analysis manager
 
 ```python
