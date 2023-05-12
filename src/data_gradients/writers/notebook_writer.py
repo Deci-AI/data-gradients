@@ -3,9 +3,10 @@ from matplotlib import pyplot as plt
 from data_gradients.feature_extractors.result import FeaturesCollection
 from data_gradients.reports.report_template import ReportTemplate
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
+from data_gradients.writers.abstract_writer import AbstractWriter
 
 
-class NotebookWriter:
+class NotebookWriter(AbstractWriter):
     """
     A writer that plot all matplotlib figures via plt.show() call.
     This makes them appear in the notebook.

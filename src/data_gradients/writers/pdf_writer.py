@@ -5,13 +5,14 @@ import pdfkit
 import tempfile
 
 from data_gradients.feature_extractors.result import FeaturesCollection
+from data_gradients.writers.abstract_writer import AbstractWriter
 from data_gradients.writers.html_writer import HTMLWriter
 from data_gradients.reports.report_template import ReportTemplate
 
 logger = getLogger(__name__)
 
 
-class PDFWriter:
+class PDFWriter(AbstractWriter):
     """
     A writer that writes a report to a PDF file.
 

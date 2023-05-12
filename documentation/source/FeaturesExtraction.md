@@ -5,13 +5,14 @@ Depending on the sample type, different features are computed. However, there is
 
 Here's a non-exhaustive list of features that are computed for each sample type. This should give you an idea of what kind of information we extract from the dataset:
 
-## Common Features
+## Image Features
 
 - Image size, area and aspect ratio
 - Min, Average and max brightness
 - Per-channel mean and standard deviation
 
 Full list of image features can be found in `data_gradients.feature_extractors.features.ImageFeatures` enum.
+The implementation of the image features extraction can be found in `data_gradients.feature_extractors.image_features_extractor.ImageFeaturesExtractor` class.
 
 ## Segmentation Features
 
@@ -21,7 +22,7 @@ Full list of image features can be found in `data_gradients.feature_extractors.f
 - Where it is located in the image
 
 Full list of segmentation features can be found in `data_gradients.feature_extractors.features.SegmentationMaskFeatures` enum.
-
+The implementation of the image features extraction can be found in `data_gradients.feature_extractors.segmentation_features_extractor.SemanticSegmentationFeaturesExtractor` class.
 
 All computed features are stored in a `data_gradients.feature_extractors.FeaturesCollection`. 
 This object becomes a final result of the feature extraction step and is passed to the next step - [report generation](Reporting.md).

@@ -6,9 +6,10 @@ from matplotlib import pyplot as plt
 from data_gradients.feature_extractors.result import FeaturesCollection
 from data_gradients.reports.report_template import ReportTemplate
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
+from data_gradients.writers.abstract_writer import AbstractWriter
 
 
-class HTMLWriter:
+class HTMLWriter(AbstractWriter):
     """
     A writer that writes a report to an HTML file.
     """
