@@ -1,6 +1,6 @@
 import abc
 import logging
-from typing import Iterator, Iterable, List, Dict, Optional
+from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 
@@ -8,10 +8,9 @@ import tqdm
 
 from data_gradients.feature_extractors import FeatureExtractorAbstract
 from data_gradients.logging.log_writer import LogWriter
-from data_gradients.preprocess.preprocessor_abstract import PreprocessorAbstract
-from data_gradients.utils.data_classes.batch_data import BatchData
+from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.utils.thread_manager import ThreadManager
-from data_gradients.visualize.image_sample_managers import ImageSampleManager
+from data_gradients.visualize.image_samplers.base import ImageSampleManager
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -29,8 +28,8 @@ class AnalysisManagerAbstract(abc.ABC):
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         log_dir: Optional[str] = None,
-        preprocessor: PreprocessorAbstract,
-        extractors: List[FeatureExtractorAbstract],
+        batch_processor: BatchProcessor,
+        feature_extractors: List[FeatureExtractorAbstract],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
@@ -40,8 +39,8 @@ class AnalysisManagerAbstract(abc.ABC):
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
         :param log_dir:             Directory where to save the logs. By default uses the current working directory
-        :param preprocessor:        Preprocessor object to be used before extracting features
-        :param extractors:          List of feature extractors to be used
+        :param batch_processor:     Batch processor object to be used before extracting features
+        :param feature_extractors:  List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
@@ -61,8 +60,8 @@ class AnalysisManagerAbstract(abc.ABC):
         # Logger
         self._log_writer = LogWriter(log_dir=log_dir)
 
-        self.preprocessor = preprocessor
-        self.extractors = extractors
+        self.batch_processor = batch_processor
+        self.feature_extractors = feature_extractors
 
         self.id_to_name = id_to_name
 
@@ -71,13 +70,6 @@ class AnalysisManagerAbstract(abc.ABC):
             short_run = False
         self.short_run = short_run
         self.image_sample_manager = image_sample_manager
-
-    def _preprocess_batch(self, batch: Iterator, split: str) -> BatchData:
-        batch = tuple(batch) if isinstance(batch, list) else batch
-        images, labels = self.preprocessor.validate(batch)
-        preprocessed_batch = self.preprocessor.preprocess(images, labels)
-        preprocessed_batch.split = split
-        return preprocessed_batch
 
     def execute(self):
         """
@@ -97,15 +89,15 @@ class AnalysisManagerAbstract(abc.ABC):
                 break
 
             if train_batch is not None:
-                preprocessed_batch = self._preprocess_batch(train_batch, "train")
-                for extractor in self.extractors:
-                    thread_manager.submit(extractor.update, preprocessed_batch)
-                self.image_sample_manager.update(preprocessed_batch)
+                processed_batch = self.batch_processor.process(train_batch, split="train")
+                for extractor in self.feature_extractors:
+                    thread_manager.submit(extractor.update, processed_batch)
+                self.image_sample_manager.update(processed_batch)
 
             if val_batch is not None:
-                preprocessed_batch = self._preprocess_batch(val_batch, "val")
-                for extractor in self.extractors:
-                    thread_manager.submit(extractor.update, preprocessed_batch)
+                processed_batch = self.batch_processor.process(val_batch, split="val")
+                for extractor in self.feature_extractors:
+                    thread_manager.submit(extractor.update, processed_batch)
 
             if i == 0 and self.short_run:
                 thread_manager.wait_complete()
@@ -136,17 +128,17 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         # Post process each feature executor to json / tensorboard
-        for extractor in self.extractors:
+        for extractor in self.feature_extractors:
             extractor.aggregate_and_write(self._log_writer, self.id_to_name)
 
         for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
             title = f"Data Visualization/{len(self.image_sample_manager.samples) - i}"
             self._log_writer.log_image(title=title, image=sample_to_visualize)
 
-        if self.preprocessor.images_route is not None:
-            self._log_writer.log_json(title="Get images out of dictionary", data=self.preprocessor.images_route)
-        if self.preprocessor.labels_route is not None:
-            self._log_writer.log_json(title="Get labels out of dictionary", data=self.preprocessor.labels_route)
+        if self.batch_processor.images_route is not None:
+            self._log_writer.log_json(title="Get images out of dictionary", data=self.batch_processor.images_route)
+        if self.batch_processor.labels_route is not None:
+            self._log_writer.log_json(title="Get labels out of dictionary", data=self.batch_processor.labels_route)
 
         # Write all text data to json file
         self._log_writer.save_as_json()
@@ -174,9 +166,9 @@ class AnalysisManagerAbstract(abc.ABC):
     @property
     def n_batches(self) -> Optional[int]:
         """Number of batches to analyze if available, None otherwise."""
-        if not (self.train_size is None and self.val_size is None and self.batches_early_stop is None):
-            return min(
-                self.batches_early_stop or float("inf"),
-                self.train_size or float("inf"),
-                self.val_size or float("inf"),
-            )
+        if self.train_size is None or self.val_size is None:
+            return self.batches_early_stop
+
+        n_batches_available = max(self.train_size, self.val_size)
+        n_batches_early_stop = self.batches_early_stop or float("inf")
+        return min(n_batches_early_stop, n_batches_available)
