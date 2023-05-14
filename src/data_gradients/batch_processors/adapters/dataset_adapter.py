@@ -5,10 +5,10 @@ import numpy as np
 import torch
 from torchvision.transforms import transforms
 
-from data_gradients.batch_processors.extractors.tensor_extractor import TensorExtractor
+from data_gradients.batch_processors.adapters.tensor_extractor import TensorExtractor
 
 
-class BatchExtractor:
+class DatasetAdapter:
     """Class responsible to convert raw batch (coming from dataloader) into a batch of image and a batch of labels."""
 
     def __init__(self, images_extractor: Optional[Callable] = None, labels_extractor: Optional[Callable] = None):
