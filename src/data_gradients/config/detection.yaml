@@ -1,0 +1,7 @@
+number_of_classes:
+
+defaults:
+  - common: common
+  - _self_
+
+feature_extractors: []
