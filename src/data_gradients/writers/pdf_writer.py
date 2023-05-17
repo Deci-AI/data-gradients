@@ -1,7 +1,7 @@
 import os
 from logging import getLogger
 
-import pdfkit
+from xhtml2pdf import pisa
 import tempfile
 
 from data_gradients.feature_extractors.result import FeaturesCollection
@@ -15,8 +15,7 @@ logger = getLogger(__name__)
 class PDFWriter(AbstractWriter):
     """
     A writer that writes a report to a PDF file.
-
-    In uses HTMLWriter internally to generated temporary HTML file and then converts it to PDF using pdfkit.
+    In uses HTMLWriter internally to generated temporary HTML file and then converts it to PDF.
     """
 
     def __init__(self, output_file: str):
@@ -34,5 +33,12 @@ class PDFWriter(AbstractWriter):
             output_html_file = os.path.join(td, "report.html")
             HTMLWriter(output_html_file).write_report(results, template)
 
-            pdfkit.from_file(output_html_file, self.output_file, options={"enable-local-file-access": None}, verbose=True)
-            logger.debug(f"PDF Report written to {self.output_file}")
+            with open(output_html_file, "r") as html_source:
+                with open(self.output_file, "w+b") as pdf_dst:
+                    status = pisa.CreatePDF(src=html_source,
+                                            dest=pdf_dst,
+                                            path=os.path.dirname(output_html_file),
+                                            options={"enable-local-file-access": None}, verbose=True)
+
+            # pdfkit.from_file(output_html_file, self.output_file, options={"enable-local-file-access": None}, verbose=True)
+            logger.debug(f"PDF Report written to {self.output_file}. Status {status}")

@@ -20,10 +20,10 @@ NotebookWriter().write_report(results, report_template)
 
 ## Output writers
 
-| Writer Class      | Description                         | Notes                                                               |
-|-------------------|-------------------------------------|---------------------------------------------------------------------|
-| MarkdownWriter    | Writes report to a Markdown file    |                                                                     |
-| HTMLWriter        | Writes report to a HTML  file       |                                                                     |
-| PDFWriter         | Writes report to a PDF file         | Requires `wkhtmltopdf` package installed                            |
-| TensorboardWriter | Writes report to a Tensorboard log  |                                                                     |
-| NotebookWriter    | Writes report to a Jupyter Notebook | Just plots figures in Notebook, not saving them physically anywhere |
+| Writer Class      | Description                         |
+|-------------------|-------------------------------------|
+| MarkdownWriter    | Writes report to a Markdown file    |
+| HTMLWriter        | Writes report to a HTML  file       |
+| PDFWriter         | Writes report to a PDF file         |
+| TensorboardWriter | Writes report to a Tensorboard log  |
+| NotebookWriter    | Writes report to a Jupyter Notebook |

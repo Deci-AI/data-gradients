@@ -200,14 +200,3 @@ Output Example
 ![Example output 3](data/example_outputs/output_example3.png)
 
 </details>
-
-
-## Requirements
-
-### PDF Export
-
-In order to allow PDF export, you must install additional 3rd-party software `wkhtmltopdf`:
-
-MacOS: `brew install Caskroom/cask/wkhtmltopdf`
-Debian/Ubuntu: `apt-get install wkhtmltopdf`
-Windows: `choco install wkhtmltopdf`
