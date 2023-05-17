@@ -21,6 +21,9 @@ class SegmentationSample:
     image: np.ndarray
     mask: np.ndarray
 
+    def __repr__(self):
+        return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
+
 
 class SegmentationDatasetAdapter(abc.ABC):
     """

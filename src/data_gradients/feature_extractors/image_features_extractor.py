@@ -26,6 +26,8 @@ class ImageFeaturesExtractor:
 
         :return: A dictionary of features
         """
+        if not isinstance(image, np.ndarray):
+            raise ValueError("image must be a numpy array. Got: {}".format(type(image)))
 
         image = image.reshape((image.shape[0], image.shape[1], -1))
 

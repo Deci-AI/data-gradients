@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 import torchvision
 
-from data_gradients.dataset_adapters import SegmentationDatasetAdapter
+from data_gradients.dataset_adapters import SegmentationDatasetAdapter, SegmentationSample
 
 
 class TorchvisionCityscapesSegmentationAdapter(SegmentationDatasetAdapter):
@@ -21,11 +21,6 @@ class TorchvisionCityscapesSegmentationAdapter(SegmentationDatasetAdapter):
         self.dataset = dataset
         self.class_names = [c.name for c in dataset.classes]
 
-    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
-        sample = self.dataset[index]
-        image, mask = sample
-        return np.array(image), np.array(mask)
-
     def get_num_classes(self) -> int:
         return len(self.dataset.classes)
 
@@ -34,3 +29,27 @@ class TorchvisionCityscapesSegmentationAdapter(SegmentationDatasetAdapter):
 
     def __len__(self) -> int:
         return len(self.dataset)
+
+    def get_ignored_classes(self):
+        return []
+
+    def __getitem__(self, index):
+        sample = self.dataset[index]
+        image, mask = sample[:2]
+
+        image = np.array(image)
+        mask = np.array(mask)
+
+        return SegmentationSample(sample_id=self.dataset.images[index], image=image, mask=mask)
+
+    def get_iterator(self):
+        num_samples = len(self.dataset)
+        for i in range(num_samples):
+            sample = self.dataset[i]
+
+            image, mask = sample[:2]
+
+            image = np.array(image)
+            mask = np.array(mask)
+
+            yield SegmentationSample(sample_id=self.dataset.images[i], image=image, mask=mask)

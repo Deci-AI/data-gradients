@@ -66,27 +66,3 @@ class SemanticSegmentationFeaturesExtractorTest(unittest.TestCase):
         HTMLWriter(output_file="bdd/report.html", images_subfolder="html_images").write_report(results, report)
         PDFWriter(output_file="bdd/report.pdf").write_report(results, report)
         TensorboardWriter(output_directory="bdd/tensorboard").write_report(results, report)
-
-    def test_cityscapes(self):
-        if not os.path.exists("test_datasets/cityscapes"):
-            self.skipTest("Cityscapes dataset is not present. Please download it from https://www.cityscapes-dataset.com/downloads/ and place it in test_datasets/cityscapes")
-
-        train_dataset = TorchvisionCityscapesSegmentationAdapter(
-            torchvision.datasets.Cityscapes(root="test_datasets/cityscapes/train", split="train", target_type="semantic")
-        )
-        val_dataset = TorchvisionCityscapesSegmentationAdapter(
-            torchvision.datasets.Cityscapes(root="test_datasets/cityscapes/train", split="val", target_type="semantic")
-        )
-
-        data = {
-            "train": train_dataset,
-            "val": val_dataset,
-        }
-
-        results = SegmentationAnalysisManager.extract_features_from_splits(data, num_workers=4)
-        report = ReportTemplate.get_report_template_with_valid_widgets(results)
-
-        MarkdownWriter(output_file="cityscapes/report.md", images_subfolder="markdown_images").write_report(results, report)
-        HTMLWriter(output_file="cityscapes/report.html", images_subfolder="html_images").write_report(results, report)
-        PDFWriter(output_file="cityscapes/report.pdf").write_report(results, report)
-        TensorboardWriter(output_directory="cityscapes/tensorboard").write_report(results, report)

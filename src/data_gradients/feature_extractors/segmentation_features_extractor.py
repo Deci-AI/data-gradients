@@ -45,6 +45,9 @@ class SemanticSegmentationFeaturesExtractor:
 
         :return: A dictionary of features
         """
+        if not isinstance(segmentation_mask, np.ndarray):
+            raise ValueError("segmentation_mask must be a numpy array. Got: {}".format(type(segmentation_mask)))
+
 
         segmentation_mask = segmentation_mask.copy()
 
@@ -95,7 +98,7 @@ class SemanticSegmentationFeaturesExtractor:
             for key in shared_keys:
                 features[key] = []
 
-        regions = regionprops(segmentation_mask)
+        regions = regionprops(segmentation_mask, cache=False)
         for region_id, region in enumerate(regions):
             features[SegmentationMaskFeatures.SegmentationMaskId].append(region_id)
             features[SegmentationMaskFeatures.SegmentationMaskLabel].append(relabel_dict[region.label])

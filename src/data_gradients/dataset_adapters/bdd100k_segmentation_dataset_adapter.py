@@ -92,3 +92,19 @@ class BDD100KSegmentationDatasetAdapter(SegmentationDatasetAdapter):
 
     def __len__(self):
         return len(self.samples_fn)
+
+    def __getitem__(self, item):
+        image_path, mask_path = self.samples_fn[item]
+
+        image = Image.open(image_path).convert("RGB")
+        mask = Image.open(mask_path)
+
+        image = np.array(image)
+        mask = np.array(mask)
+
+        if not np.isin(mask, self.known_labels).all():
+            unexpected_labels = set(np.unique(mask)) - set(self.known_labels)
+            raise ValueError(
+                f"Unknown labels found in the mask. Unexpected labels: {unexpected_labels}"
+            )
+        return SegmentationSample(image=image, mask=mask, sample_id=image_path)
