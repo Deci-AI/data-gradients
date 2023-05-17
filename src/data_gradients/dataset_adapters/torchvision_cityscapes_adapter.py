@@ -25,7 +25,7 @@ class TorchvisionCityscapesSegmentationAdapter(SegmentationDatasetAdapter):
         return len(self.dataset.classes)
 
     def get_class_names(self) -> List[str]:
-        return self.dataset.classes
+        return [c.name for c in self.dataset.classes]
 
     def __len__(self) -> int:
         return len(self.dataset)

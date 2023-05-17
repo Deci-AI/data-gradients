@@ -38,13 +38,21 @@ class ImageFeaturesExtractor:
         else:
             image_grayscale = image
 
+        if image.shape[2] <= 4:
+            mean, std = cv2.meanStdDev(image)
+            mean = mean[:image.shape[2]].reshape(-1)
+            std = std[:image.shape[2]].reshape(-1)
+        else:
+            mean = image.mean(axis=(0, 1), keepdims=False)
+            std = image.std(axis=(0, 1), keepdims=False)
+
         features = {
             ImageFeatures.ImageWidth: [image.shape[1]],
             ImageFeatures.ImageHeight: [image.shape[0]],
             ImageFeatures.ImageArea: [image.shape[0] * image.shape[1]],
             ImageFeatures.ImageAspectRatio: [image.shape[1] / image.shape[0]],
-            ImageFeatures.ImageMean: [image.mean(axis=2)],
-            ImageFeatures.ImageStd: [image.std(axis=2)],
+            ImageFeatures.ImageMean: [mean],
+            ImageFeatures.ImageStd: [std],
             ImageFeatures.ImageNumChannels: [image.shape[2]],
             ImageFeatures.ImageMinBrightness: [image_grayscale.min()],
             ImageFeatures.ImageAvgBrightness: [image_grayscale.mean()],

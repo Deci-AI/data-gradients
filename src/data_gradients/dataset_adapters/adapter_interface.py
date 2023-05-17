@@ -6,7 +6,15 @@ import numpy as np
 
 
 @dataclasses.dataclass
-class SegmentationSample:
+class ImageSample:
+    sample_id: str
+    image: np.ndarray
+
+    def __repr__(self):
+        return f"ImageSample(sample_id={self.sample_id}, image={self.image.shape})"
+
+@dataclasses.dataclass
+class SegmentationSample(ImageSample):
     """
     This is a dataclass that represents a single sample of the dataset.
     Support of different types of dataset formats is achieved by using adapters that should return SegmentationSample.
@@ -17,8 +25,6 @@ class SegmentationSample:
         mask: np.ndarray of shape [H,W] with integer values representing class labels
     """
 
-    sample_id: str
-    image: np.ndarray
     mask: np.ndarray
 
     def __repr__(self):
