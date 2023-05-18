@@ -2,7 +2,7 @@ import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -23,13 +23,12 @@ class PixelsPerClass(FeatureExtractorAbstract):
         self._hist = {"train": {k: [] for k in keys}, "val": {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
-    def update(self, data: SegmentationBatchData):
-        for i, image_contours in enumerate(data.contours):
-            img_dim = data.labels[i].shape[1] * data.labels[i].shape[2]
-            for cls_contours in image_contours:
-                for contour in cls_contours:
-                    size = np.round(100 * contour.area / img_dim, 3)
-                    self._hist[data.split][contour.class_id].append(size)
+    def update(self, sample: SegmentationSample):
+        image_area = sample.mask.shape[0] * sample.mask.shape[1]
+        for cls_contours in sample.contours:
+            for contour in cls_contours:
+                size = np.round(100 * contour.area / image_area, 3)
+                self._hist[sample.split][contour.class_id].append(size)
 
     def _aggregate(self, split: str):
 

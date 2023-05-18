@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 from data_gradients.feature_extractors import AverageBrightness
-from data_gradients.utils import BatchData
+from data_gradients.utils.data_classes import ImageSample
 
 
 class AverageBrightnessTest(unittest.TestCase):

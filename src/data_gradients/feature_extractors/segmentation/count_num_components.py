@@ -1,7 +1,7 @@
 import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -23,15 +23,14 @@ class CountNumComponents(FeatureExtractorAbstract):
         self._hist = {"train": dict(), "val": dict()}
         self._total_objects = {"train": 0, "val": 0}
 
-    def update(self, data: SegmentationBatchData):
-        for image_contours in data.contours:
-            num_objects_in_image = sum([len(cls_contours) for cls_contours in image_contours])
-            self._total_objects[data.split] += num_objects_in_image
-            if num_objects_in_image in self._hist[data.split]:
-                self._hist[data.split][num_objects_in_image] += 1
-            else:
+    def update(self, sample: SegmentationSample):
+        num_objects_in_image = sum([len(cls_contours) for cls_contours in sample.contours])
+        self._total_objects[sample.split] += num_objects_in_image
+        if num_objects_in_image in self._hist[sample.split]:
+            self._hist[sample.split][num_objects_in_image] += 1
+        else:
 
-                self._hist[data.split].update({num_objects_in_image: 1})
+            self._hist[sample.split].update({num_objects_in_image: 1})
 
     def _aggregate(self, split: str):
         self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])

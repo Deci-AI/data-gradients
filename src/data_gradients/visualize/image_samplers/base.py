@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import torch
 
-from data_gradients.utils import BatchData
+from data_gradients.utils.data_classes import ImageSample
 
 
 class ImageSampleManager(ABC):
@@ -15,14 +15,13 @@ class ImageSampleManager(ABC):
         self.n_samples = n_samples
         self.samples = []
 
-    def update(self, data: BatchData) -> None:
+    def update(self, sample: ImageSample) -> None:
         """Update the internal collection of samples with new samples from the given batch data.
 
         :param data: The batch data containing images and labels.
         """
-        for image, label in zip(data.images, data.labels):
-            if len(self.samples) < self.n_samples:
-                self.samples.append(self.prepare_image(image=image, label=label))
+        if len(self.samples) < self.n_samples:
+            self.samples.append(self.prepare_image(sample))
 
     @abstractmethod
     def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:

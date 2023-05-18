@@ -4,7 +4,7 @@ from typing import Tuple, Dict
 from matplotlib import pyplot as plt
 
 from data_gradients.logging.log_writer import LogWriter
-from data_gradients.utils.data_classes.batch_data import BatchData
+from data_gradients.utils.data_classes.data_samples import ImageSample
 from data_gradients.utils.data_classes.extractor_results import HistogramResults, HeatMapResults
 
 
@@ -41,7 +41,7 @@ class FeatureExtractorAbstract(ABC):
         logger.log_figure(title=f"{self.name}/fig", figure=fig)
 
     @abstractmethod
-    def update(self, data: BatchData):
+    def update(self, sample: ImageSample):
         """Accumulate information about samples"""
         raise NotImplementedError
 
@@ -82,7 +82,7 @@ class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
             logger.log_figure(title=f"{self.name}/{key}_{split}/fig", figure=fig)
 
     @abstractmethod
-    def update(self, data: BatchData):
+    def update(self, sample: ImageSample):
         raise NotImplementedError
 
     @abstractmethod

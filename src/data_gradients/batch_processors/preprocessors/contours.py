@@ -4,20 +4,21 @@ import cv2
 import numpy as np
 import torch
 
-from data_gradients.utils import Contour
+from data_gradients.utils.data_classes.contour import Contour
 
 
-def get_contours(label: torch.Tensor) -> np.array:
+def get_contours(label: np.ndarray) -> np.ndarray:
     """
     Find contours in each class-channel individually, using opencv findContours method
     :param label: Tensor [N, W, H] where N is number of valid classes
     :return: List with the shape [N, Nc, P, 1, 2] where N is number of valid classes, Nc are number of contours
     per class, P are number of points for each contour and (1, 2) are set of points.
     """
-    # Tensor to numpy (for opencv usage)
-    label = label.numpy()
+    if not isinstance(label, np.ndarray):
+        raise TypeError(f"Expected numpy.ndarray, got {type(label)}")
+
     # Type to INT8 as for Index array
-    label = label.astype(np.uint8)
+    label = label.astype(np.uint8,copy=False)
 
     all_onehot_contour = []
     # For each class
