@@ -32,7 +32,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
         # maxtasksperchild=1 is necessary to avoid growing memory usage when using multiprocessing
         # I'm not sure
-        pool_cls = partial(Pool, maxtasksperchild=1) if num_workers > 0 else DummyPool
+        pool_cls = Pool if num_workers > 0 else DummyPool
 
         _process_sample_fn = partial(
             cls.process_sample,
@@ -47,7 +47,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
         with pool_cls(num_workers) as p:
             for features in tqdm(
-                p.imap_unordered(_process_sample_fn, indexes, chunksize=1),
+                p.imap_unordered(_process_sample_fn, indexes),
                 total=len(indexes),
                 desc=f"Extracting features",
             ):
