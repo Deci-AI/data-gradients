@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 import torch
 
@@ -18,4 +19,4 @@ def prepare_segmentation_image(image: np.ndarray, label: np.ndarray) -> torch.Te
     :return:        The preprocessed image tensor.
     """
     # TODO: Add overlay of contours
-    return image
+    return cv2.normalize(image, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U)

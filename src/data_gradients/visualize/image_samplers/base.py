@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import List
 
+import numpy as np
 import torch
 
 from data_gradients.utils.data_classes import ImageSample
@@ -13,7 +15,7 @@ class ImageSampleManager(ABC):
         :param n_samples: The maximum number of samples to be collected.
         """
         self.n_samples = n_samples
-        self.samples = []
+        self.samples: List[np.ndarray] = []
 
     def update(self, sample: ImageSample) -> None:
         """Update the internal collection of samples with new samples from the given batch data.

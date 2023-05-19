@@ -3,6 +3,7 @@ import datetime
 from typing import Optional
 import logging
 
+import numpy as np
 from matplotlib.figure import Figure
 import torch
 
@@ -52,7 +53,7 @@ class LogWriter:
         """
         self._tb_logger.log(title=title, data=figure)
 
-    def log_image(self, title: str, image: torch.Tensor) -> None:
+    def log_image(self, title: str, image: np.ndarray) -> None:
         """
         Log an image in TensorBoard format.
 
