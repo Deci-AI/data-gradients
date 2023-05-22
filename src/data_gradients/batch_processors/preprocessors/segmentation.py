@@ -22,6 +22,6 @@ class SegmentationBatchPreprocessor(BatchPreprocessor):
         labels = labels.cpu().numpy()
 
         for image, mask in zip(images, labels):
-            contours = [get_contours(onehot_label) for onehot_label in mask]
+            contours = get_contours(mask)
             # TODO: image_format is hard-coded here, but it should be refactored afterwards
             yield SegmentationSample(image=image, mask=mask, contours=contours, split=None, image_format=ImageChannelFormat.RGB, sample_id=None)

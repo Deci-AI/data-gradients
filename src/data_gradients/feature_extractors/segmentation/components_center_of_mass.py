@@ -26,11 +26,11 @@ class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
         self.num_axis = (1, 2)
 
     def update(self, sample: SegmentationSample):
-        rows, cols = sample.mask.shape[:2]
+        label_shape = sample.mask[0].shape
         for j, cls_contours in enumerate(sample.contours):
             for contour in cls_contours:
-                self._hist[sample.split][contour.class_id]["x"].append(round(contour.center[0] / cols, 2))
-                self._hist[sample.split][contour.class_id]["y"].append(round(contour.center[1] / rows, 2))
+                self._hist[sample.split][contour.class_id]["x"].append(round(contour.center[0] / label_shape[1], 2))
+                self._hist[sample.split][contour.class_id]["y"].append(round(contour.center[1] / label_shape[0], 2))
 
     def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])

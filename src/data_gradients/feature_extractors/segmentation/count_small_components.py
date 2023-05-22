@@ -23,14 +23,11 @@ class CountSmallComponents(FeatureExtractorAbstract):
         self._total_objects = {"train": 0, "val": 0}
 
     def update(self, sample: SegmentationSample):
-        rows, cols = sample.mask.shape[:2]
-        image_area = rows * cols
-
+        labels_h, labels_w = sample.mask[0].shape
         self._total_objects[sample.split] += sum([len(cls_contours) for cls_contours in sample.contours])
         for class_contours in sample.contours:
             for contour in class_contours:
-                self._hist[sample.split][
-                    f"<{self._min_size}"] += 1 if contour.area < image_area * self._min_size else 0
+                self._hist[sample.split][f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
 
     def _aggregate(self, split: str):
         values = normalize_values_to_percentages(self._hist[split].values(), self._total_objects[split])

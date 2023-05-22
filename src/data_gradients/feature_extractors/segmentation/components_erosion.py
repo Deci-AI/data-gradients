@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import torch
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
@@ -30,15 +29,18 @@ class ErosionTest(FeatureExtractorAbstract):
         self.ignore_labels = ignore_labels
 
     def update(self, sample: SegmentationSample):
-        for i, image_contours in enumerate(sample.contours):
-            eroded_label_tensor = cv2.morphologyEx(sample.mask[i], cv2.MORPH_OPEN, self._kernel)
-            eroded_contours = contours.get_contours(eroded_label_tensor)
-            for j, cls_contours in enumerate(image_contours):
-                if cls_contours:
-                    class_id = cls_contours[0].class_id
-                    self._hist[sample.split][class_id] += len(cls_contours)
-                    if eroded_contours:
-                        self._hist_eroded[sample.split][class_id] += len(eroded_contours)
+        label = sample.mask.transpose(1, 2, 0).astype(np.uint8)
+        label = cv2.morphologyEx(label, cv2.MORPH_OPEN, self._kernel)
+        if len(label.shape) == 2:
+            label = label[..., np.newaxis]
+        eroded_contours = contours.get_contours(label.transpose(2, 0, 1))
+
+        for j, cls_contours in enumerate(sample.contours):
+            if cls_contours:
+                class_id = cls_contours[0].class_id
+                self._hist[sample.split][class_id] += len(cls_contours)
+                if eroded_contours:
+                    self._hist_eroded[sample.split][class_id] += len(eroded_contours)
 
     def _aggregate(self, split: str):
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)
