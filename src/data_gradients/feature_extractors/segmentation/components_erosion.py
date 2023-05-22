@@ -1,11 +1,10 @@
 import cv2
 import numpy as np
-import torch
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
 from data_gradients.batch_processors.preprocessors import contours
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -29,21 +28,19 @@ class ErosionTest(FeatureExtractorAbstract):
         self._kernel = np.ones((3, 3), np.uint8)
         self.ignore_labels = ignore_labels
 
-    def update(self, data: SegmentationBatchData):
+    def update(self, sample: SegmentationSample):
+        label = sample.mask.transpose(1, 2, 0).astype(np.uint8)
+        label = cv2.morphologyEx(label, cv2.MORPH_OPEN, self._kernel)
+        if len(label.shape) == 2:
+            label = label[..., np.newaxis]
+        eroded_contours = contours.get_contours(label.transpose(2, 0, 1))
 
-        for i, image_contours in enumerate(data.contours):
-            label = data.labels[i].numpy().transpose(1, 2, 0).astype(np.uint8)
-            label = cv2.morphologyEx(label, cv2.MORPH_OPEN, self._kernel)
-            eroded_label_tensor = torch.tensor(label)
-            if len(eroded_label_tensor.shape) == 2:
-                eroded_label_tensor = eroded_label_tensor.unsqueeze(-1)
-            eroded_contours = contours.get_contours(eroded_label_tensor.permute(2, 0, 1))
-            for j, cls_contours in enumerate(image_contours):
-                if cls_contours:
-                    class_id = cls_contours[0].class_id
-                    self._hist[data.split][class_id] += len(cls_contours)
-                    if eroded_contours:
-                        self._hist_eroded[data.split][class_id] += len(eroded_contours)
+        for j, cls_contours in enumerate(sample.contours):
+            if cls_contours:
+                class_id = cls_contours[0].class_id
+                self._hist[sample.split][class_id] += len(cls_contours)
+                if eroded_contours:
+                    self._hist_eroded[sample.split][class_id] += len(eroded_contours)
 
     def _aggregate(self, split: str):
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)

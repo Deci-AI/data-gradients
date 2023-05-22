@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List
 
 import cv2
@@ -7,7 +8,7 @@ from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils import BatchData
+from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
 
 
@@ -16,22 +17,24 @@ class AverageBrightness(FeatureExtractorAbstract):
     def __init__(self):
         super().__init__()
         self._num_bins: int = 10
-        self._brightness = {"train": [], "val": []}
+        self._brightness_per_split = defaultdict(list)
 
-    def update(self, data: BatchData):
-        for image in data.images:
-            np_image = image.numpy().transpose(1, 2, 0)
-            lightness, _, _ = cv2.split(cv2.cvtColor(np_image, cv2.COLOR_BGR2LAB))
-            if lightness is None:
-                continue
-            if np.all(lightness == 0) or np.max(lightness) == 0:
-                n_lightness = 0
-            else:
-                n_lightness = lightness / np.max(lightness)
-            self._brightness[data.split].append(np.mean(n_lightness))
+    def update(self, sample: ImageSample):
+        if sample.image_format == ImageChannelFormat.RGB:
+            brightness = np.mean(cv2.cvtColor(sample.image, cv2.COLOR_RGB2LAB)[0])
+        elif sample.image_format == ImageChannelFormat.BGR:
+            brightness = np.mean(cv2.cvtColor(sample.image, cv2.COLOR_BGR2LAB)[0])
+        elif sample.image_format == ImageChannelFormat.GRAYSCALE:
+            brightness = np.mean(sample.image)
+        elif sample.image_format == ImageChannelFormat.UNKNOWN:
+            brightness = np.mean(sample.image)
+        else:
+            raise ValueError(f"Unknown image format {sample.image_format}")
+
+        self._brightness_per_split[sample.split].append(brightness)
 
     def _aggregate(self, split: str) -> HistogramResults:
-        values, bins = np.histogram(self._brightness[split], bins=self._num_bins)
+        values, bins = np.histogram(self._brightness_per_split[split], bins=self._num_bins)
         values = [np.round(((100 * value) / sum(list(values))), 3) for value in values]
         bins = self._create_keys(bins)
         results = HistogramResults(

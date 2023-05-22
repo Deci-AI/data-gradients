@@ -1,8 +1,9 @@
+import numpy as np
 import torch
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -24,12 +25,11 @@ class AppearancesInImages(FeatureExtractorAbstract):
         self._hist = {"train": dict.fromkeys(keys, 0), "val": dict.fromkeys(keys, 0)}
         self._number_of_images = {"train": 0, "val": 0}
 
-    def update(self, data: SegmentationBatchData):
-        self._number_of_images[data.split] += len(data.labels)
-        for i, label in enumerate(data.labels):
-            for j, class_channel in enumerate(label):
-                if torch.max(class_channel) > 0:
-                    self._hist[data.split][j] += 1
+    def update(self, sample: SegmentationSample):
+        self._number_of_images[sample.split] += 1
+        for j, class_channel in enumerate(sample.mask):
+            if np.any(class_channel) > 0:
+                self._hist[sample.split][j] += 1
 
     def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])

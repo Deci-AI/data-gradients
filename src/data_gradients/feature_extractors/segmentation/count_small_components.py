@@ -1,5 +1,5 @@
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -22,14 +22,12 @@ class CountSmallComponents(FeatureExtractorAbstract):
         }
         self._total_objects = {"train": 0, "val": 0}
 
-    def update(self, data: SegmentationBatchData):
-        for i, image_contours in enumerate(data.contours):
-            _, labels_h, labels_w = data.labels[i].shape
-            self._total_objects[data.split] += sum([len(cls_contours) for cls_contours in image_contours])
-            for class_contours in image_contours:
-                for contour in class_contours:
-                    self._hist[data.split][
-                        f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
+    def update(self, sample: SegmentationSample):
+        labels_h, labels_w = sample.mask[0].shape
+        self._total_objects[sample.split] += sum([len(cls_contours) for cls_contours in sample.contours])
+        for class_contours in sample.contours:
+            for contour in class_contours:
+                self._hist[sample.split][f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
 
     def _aggregate(self, split: str):
         values = normalize_values_to_percentages(self._hist[split].values(), self._total_objects[split])

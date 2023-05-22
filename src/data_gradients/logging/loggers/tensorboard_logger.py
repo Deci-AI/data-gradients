@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from matplotlib.figure import Figure
 from torch.utils.tensorboard import SummaryWriter
@@ -10,13 +11,13 @@ class TensorBoardLogger(ResultsLogger):
         super().__init__(log_dir=log_dir)
         self.writer = SummaryWriter(log_dir=log_dir)
 
-    def log_image(self, title: str, image: torch.Tensor) -> None:
+    def log_image(self, title: str, image: np.ndarray) -> None:
         """Log an image to TensorBoard.
 
         :param title:   Title of the data to be logged.
         :param image:   Image to be logged to the TensorBoard.
         """
-        self.writer.add_image(tag=title, img_tensor=image)
+        self.writer.add_image(tag=title, img_tensor=image, dataformats="HWC")
 
     def log(self, title: str, data: Figure) -> None:
         """Log a figure to TensorBoard.

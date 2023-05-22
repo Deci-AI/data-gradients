@@ -26,7 +26,7 @@ def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
     labels = labels.to(torch.int64)
 
     for label in labels:
-        label = torch.nn.functional.one_hot(label, n_classes)
+        label = torch.nn.functional.one_hot(label, n_classes).byte()
         masks.append(label)
     labels = torch.concat(masks, dim=0).permute(0, -1, 1, 2)
 
