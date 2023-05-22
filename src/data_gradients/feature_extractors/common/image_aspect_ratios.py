@@ -4,7 +4,7 @@ from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils import BatchData
+from data_gradients.utils.data_classes.data_samples import ImageSample
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
 from data_gradients.feature_extractors.utils import align_histogram_keys
 
@@ -15,13 +15,12 @@ class ImagesAspectRatios(FeatureExtractorAbstract):
         super().__init__()
         self._hist = {"train": dict(), "val": dict()}
 
-    def update(self, data: BatchData):
-        for image in data.images:
-            ar = np.round(image.shape[2] / image.shape[1], 2)
-            if ar not in self._hist[data.split]:
-                self._hist[data.split][ar] = 1
-            else:
-                self._hist[data.split][ar] += 1
+    def update(self, sample: ImageSample):
+        ar = np.round(sample.image.shape[1] / sample.image.shape[0], 2)
+        if ar not in self._hist[sample.split]:
+            self._hist[sample.split][ar] = 1
+        else:
+            self._hist[sample.split][ar] += 1
 
     def _aggregate(self, split: str):
         self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])

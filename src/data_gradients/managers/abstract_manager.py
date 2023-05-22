@@ -9,7 +9,6 @@ import tqdm
 from data_gradients.feature_extractors import FeatureExtractorAbstract
 from data_gradients.logging.log_writer import LogWriter
 from data_gradients.batch_processors.base import BatchProcessor
-from data_gradients.utils.thread_manager import ThreadManager
 from data_gradients.visualize.image_samplers.base import ImageSampleManager
 
 logging.basicConfig(level=logging.WARNING)
@@ -76,7 +75,6 @@ class AnalysisManagerAbstract(abc.ABC):
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
         """
-        thread_manager = ThreadManager()
         datasets_tqdm = tqdm.tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
             desc="Analyzing... ",
@@ -89,18 +87,17 @@ class AnalysisManagerAbstract(abc.ABC):
                 break
 
             if train_batch is not None:
-                processed_batch = self.batch_processor.process(train_batch, split="train")
-                for extractor in self.feature_extractors:
-                    thread_manager.submit(extractor.update, processed_batch)
-                self.image_sample_manager.update(processed_batch)
+                for sample in self.batch_processor.process(train_batch, split="train"):
+                    self.image_sample_manager.update(sample)
+                    for extractor in self.feature_extractors:
+                        extractor.update(sample)
 
             if val_batch is not None:
-                processed_batch = self.batch_processor.process(val_batch, split="val")
-                for extractor in self.feature_extractors:
-                    thread_manager.submit(extractor.update, processed_batch)
+                for sample in self.batch_processor.process(val_batch, split="val"):
+                    for extractor in self.feature_extractors:
+                        extractor.update(sample)
 
             if i == 0 and self.short_run:
-                thread_manager.wait_complete()
                 datasets_tqdm.refresh()
                 single_batch_duration = datasets_tqdm.format_dict["elapsed"]
                 self.reevaluate_early_stop(remaining_time=(self.n_batches - 1) * single_batch_duration)

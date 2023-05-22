@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from tests.unit_tests.common_feature_extractors.average_brightness_test import AverageBrightnessTest
+from tests.unit_tests.average_brightness_test import AverageBrightnessTest
 
 
 class CoreUnitTestSuiteRunner:

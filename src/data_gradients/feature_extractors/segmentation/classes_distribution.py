@@ -1,6 +1,6 @@
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -18,12 +18,11 @@ class GetClassDistribution(FeatureExtractorAbstract):
         self._total_objects = {"train": 0, "val": 0}
         self.ignore_labels = ignore_labels
 
-    def update(self, data: SegmentationBatchData):
-        for i, image_contours in enumerate(data.contours):
-            for j, cls_contours in enumerate(image_contours):
-                if cls_contours:
-                    self._hist[data.split][cls_contours[0].class_id] += len(cls_contours)
-                    self._total_objects[data.split] += len(cls_contours)
+    def update(self, sample: SegmentationSample):
+        for j, cls_contours in enumerate(sample.contours):
+            if cls_contours:
+                self._hist[sample.split][cls_contours[0].class_id] += len(cls_contours)
+                self._total_objects[sample.split] += len(cls_contours)
 
     def _aggregate(self, split: str):
         self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])

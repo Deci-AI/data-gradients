@@ -8,8 +8,6 @@ from .components_convexity import ComponentsConvexity
 from .components_erosion import ErosionTest
 from .count_num_components import CountNumComponents
 from .count_small_components import CountSmallComponents
-from .labels_aspect_ratios import LabelsAspectRatios
-from .labels_resolutions import LabelsResolutions
 
 __all__ = [
     "ComponentsSizeDistribution",
@@ -22,6 +20,4 @@ __all__ = [
     "ErosionTest",
     "CountNumComponents",
     "CountSmallComponents",
-    "LabelsAspectRatios",
-    "LabelsResolutions",
 ]

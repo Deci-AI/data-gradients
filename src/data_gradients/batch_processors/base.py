@@ -1,7 +1,7 @@
 from abc import ABC
-from typing import Mapping, Union, List, Tuple
+from typing import Mapping, Union, List, Tuple, Iterable
 
-from data_gradients.utils import BatchData
+from data_gradients.utils.data_classes import ImageSample
 from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
 from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
 from data_gradients.batch_processors.formatters.base import BatchFormatter
@@ -23,12 +23,12 @@ class BatchProcessor(ABC):
         self.batch_formatter = batch_formatter
         self.batch_preprocessor = batch_preprocessor
 
-    def process(self, unprocessed_batch: Union[Tuple, List, Mapping], split: str) -> BatchData:
+    def process(self, unprocessed_batch: Union[Tuple, List, Mapping], split: str) -> Iterable[ImageSample]:
         images, labels = self.dataset_adapter.extract(unprocessed_batch)
         images, labels = self.batch_formatter.format(images, labels)
-        batch = self.batch_preprocessor.preprocess(images, labels)
-        batch.split = split
-        return batch
+        for sample in self.batch_preprocessor.preprocess(images, labels):
+            sample.split = split
+            yield sample
 
     @property
     def images_route(self) -> List[str]:
