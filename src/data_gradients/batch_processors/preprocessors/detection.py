@@ -12,5 +12,10 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         labels = labels.cpu().numpy()
 
         for image, target in zip(images, labels):
+            if target.sum() == 0:
+                pass
+
+            target = target.astype(np.int)
+            labels, bboxes_xyxy = target[:, 0], target[:, 1:]
             # TODO: image_format is hard-coded here, but it should be refactored afterwards
-            yield DetectionSample(image=image, target=target, split=None, image_format=ImageChannelFormat.RGB, sample_id=None)
+            yield DetectionSample(image=image, labels=labels, bboxes_xyxy=bboxes_xyxy, split=None, image_format=ImageChannelFormat.RGB, sample_id=None)
