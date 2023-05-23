@@ -2,8 +2,8 @@ import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.utils import class_id_to_name
-from data_gradients.preprocess import contours
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.batch_processors.preprocessors import contours
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -22,14 +22,13 @@ class ComponentsConvexity(FeatureExtractorAbstract):
         self._hist = {"train": {k: [] for k in keys}, "val": {k: [] for k in keys}}
         self.ignore_labels = ignore_labels
 
-    def update(self, data: SegmentationBatchData):
-        for i, image_contours in enumerate(data.contours):
-            for j, cls_contours in enumerate(image_contours):
-                for contour in cls_contours:
-                    convex_hull = contours.get_convex_hull(contour)
-                    convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
-                    convexity_measure = (contour.perimeter - convex_hull_perimeter) / contour.perimeter
-                    self._hist[data.split][contour.class_id].append(convexity_measure)
+    def update(self, sample: SegmentationSample):
+        for j, cls_contours in enumerate(sample.contours):
+            for contour in cls_contours:
+                convex_hull = contours.get_convex_hull(contour)
+                convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
+                convexity_measure = (contour.perimeter - convex_hull_perimeter) / contour.perimeter
+                self._hist[sample.split][contour.class_id].append(convexity_measure)
 
     def _aggregate(self, split: str):
         hist = dict.fromkeys(self._hist[split].keys(), 0.0)

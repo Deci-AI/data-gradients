@@ -119,9 +119,10 @@ def write_heatmap_plot(ax, results: HeatMapResults, fig=None) -> None:
 
     if not results.range:
         results.range = [
-            [0, min(max(results.x) + 0.1, 1)],
-            [0, min(max(results.y) + 0.1, 1)],
+            [0, min(np.max(results.x, initial=0) + 0.1, 1)],
+            [0, min(np.max(results.y, initial=0) + 0.1, 1)],
         ]
+
     if results.invert:
         # Bug occurs only in center of mass feature extractor!
         # BUG - All results are inverted

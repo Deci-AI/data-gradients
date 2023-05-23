@@ -1,5 +1,4 @@
 feature_extractors:
-  - NumberOfImagesLabels
   - ImagesResolutions
   - ImagesAspectRatios
   - AverageBrightness
