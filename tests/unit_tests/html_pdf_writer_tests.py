@@ -5,7 +5,7 @@ from data_gradients.utils.common.assets_container import assets
 from data_gradients.utils.html_writer import ResultsContainer, Section, Feature, HtmlWriter
 
 
-class HTML_PDF_Writer(unittest.TestCase):
+class HTML_PDF_Writer_Test(unittest.TestCase):
     """ """
 
     def setUp(self):
