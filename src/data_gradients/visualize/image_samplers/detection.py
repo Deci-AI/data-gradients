@@ -21,6 +21,9 @@ def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, labels: np.ndarray) 
     :param labels:      Labels [N].
     :return:            Image with annotated bboxes.
     """
+    if len(labels) == 0:
+        return image
+
     colors = generate_color_mapping(labels.max() + 1)
 
     for (x1, y1, x2, y2), label in zip(bboxes_xyxy, labels):

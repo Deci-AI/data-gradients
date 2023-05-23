@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Any, Optional, Callable
+from typing import Tuple, List, Optional, Callable
 
 import torch
 from torch import Tensor
@@ -49,13 +49,6 @@ class DetectionBatchFormatter(BatchFormatter):
         return images, labels
 
 
-def show_annotated_bboxes(annotated_bboxes: Tensor) -> None:
-    """Show an example of the annotated bounding boxes."""
-    print()
-    print("This is how your labels look like:")
-    print(annotated_bboxes[0, :3, :])
-
-
 def ensure_labels_shape(annotated_bboxes: Tensor) -> Tensor:
     """Make sure that the labels have the correct shape, i.e. (BS, N, 5)."""
     if annotated_bboxes.ndim != 3:
@@ -98,45 +91,78 @@ def convert_to_label_xyxy(annotated_bboxes: Tensor, image_shape: Tuple[int, int]
     return torch.cat([labels, xyxy_bboxes], dim=-1)
 
 
-def ask_user_xyxy_converter() -> Callable[[Tensor], Tensor]:
-    xyxy_converter_descriptions = {
-        lambda x: x: "xyxy: x- left, y-top, x-right, y-bottom",
-        xywh_to_xyxy: "xywh: x-left, y-top, width, height",
-        cxcywh_to_xyxy: "cxcywh: x-center, y-center, width, height",
-    }
-    xyxy_converter = ask_user(main_question="What is the format of the bounding boxes?", options_described=xyxy_converter_descriptions)
-    return xyxy_converter
+def show_annotated_bboxes(annotated_bboxes: Tensor) -> None:
+    """Show an example of the annotated bounding boxes."""
+    print("\n========================================================================")
+    print("SAMPLE BOUNDING BOXES")
+    print("========================================================================")
+    print("Here's a sample of how your labels look like:")
+    print("Each line corresponds to a bounding box, with the format you specified earlier.")
+    print(annotated_bboxes[0, :3, :])
+    print("")
 
 
 def ask_user_is_label_first() -> bool:
     is_label_first_descriptions = {
-        True: "Start with label, followed with bboxes ([label, x1, y1, x2, y2] for instance)",
-        False: "Start with bboxes, followed by labels ([x1, y1, x2, y2, label] for instance)",
+        "Label comes first (e.g. [label, x1, y1, x2, y2])": True,
+        "Bounding box comes first (e.g. [x1, y1, x2, y2, label])": False,
     }
-    is_label_first = ask_user(main_question='Are your Annotation "label first" or "label last"?', options_described=is_label_first_descriptions)
-    return is_label_first
+    selected_option = ask_user(
+        main_question="Which comes first in your annotations, the label or the bounding box?",
+        options=list(is_label_first_descriptions.keys()),
+        step_number=1,
+    )
+    return is_label_first_descriptions[selected_option]
 
 
-def ask_user(main_question: str, options_described: Dict[Any, str]) -> Any:
+def ask_user_xyxy_converter() -> Callable[[Tensor], Tensor]:
+    xyxy_converter_descriptions = {
+        "xyxy: x- left, y-top, x-right, y-bottom": lambda x: x,
+        "xywh: x-left, y-top, width, height": xywh_to_xyxy,
+        "cxcywh: x-center, y-center, width, height": cxcywh_to_xyxy,
+    }
+    selected_option = ask_user(
+        main_question="What is the format of the bounding boxes?",
+        options=list(xyxy_converter_descriptions.keys()),
+        step_number=2,
+    )
+    return xyxy_converter_descriptions[selected_option]
+
+
+def ask_user(main_question: str, options: List[str], step_number: int) -> str:
     """Prompt the user to choose an option from a list of options.
-
-    :param main_question:       The main question or instruction for the user.
-    :param options_described:   Dictionary containing the options as keys and their descriptions as values.
-    :return:                    The chosen option (key from the options_described dictionary).
+    :param main_question:   The main question or instruction for the user.
+    :param options:         List of options to chose from.
+    :param step_number:     The step number of the question.
+    :return:                The chosen option (key from the options_described dictionary).
     """
-    options, options_descriptions = list(options_described.keys()), list(options_described.values())
-    numbers_to_chose_from = [str(i) for i in range(len(options))]
+    numbers_to_chose_from = range(len(options))
 
-    options_formatted = "\n".join([f"\t {number} | {option_description}" for number, option_description in zip(numbers_to_chose_from, options_descriptions)])
+    options_formatted = "\n".join([f"[{number}] {option_description}" for number, option_description in zip(numbers_to_chose_from, options)])
 
     user_answer = None
     while user_answer not in numbers_to_chose_from:
-        print()
-        if user_answer is not None:
-            print(f'"{user_answer}" is not a valid option. Please chose a number between 0-{len(numbers_to_chose_from)}.')
-        user_answer = input(f"{main_question}\n{options_formatted}\n (Write down the number) >>> ")
+        print("\n------------------------------------------------------------------------")
+        print(f"Step {step_number}: {main_question}")
+        print("------------------------------------------------------------------------")
+        print("Please, enter the number corresponding to your choice.")
+        print("\nOptions:")
+        print(options_formatted)
+        print("")
 
-    return options[int(user_answer)]
+        try:
+            user_answer = input("Your choice >>> ")
+            user_answer = int(user_answer)
+        except Exception:
+            user_answer = None
+
+        if user_answer not in numbers_to_chose_from:
+            print(f'Oops! "{user_answer}" is not a valid choice. Let\'s try again.')
+
+    selected_option = options[user_answer]
+    print(f"Great! You chose: {selected_option}\n")
+
+    return selected_option
 
 
 def cxcywh_to_xyxy(bboxes: Tensor) -> Tensor:
