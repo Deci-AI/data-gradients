@@ -4,4 +4,5 @@ defaults:
   - common: common
   - _self_
 
-feature_extractors: []
+feature_extractors:
+  - DetectionComponentsSizeDistribution
