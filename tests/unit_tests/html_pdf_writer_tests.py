@@ -5,7 +5,7 @@ from data_gradients.utils.common.assets_container import assets
 from data_gradients.utils.html_writer import ResultsContainer, Section, Feature, HtmlWriter
 
 
-class VisualizationTests(unittest.TestCase):
+class HTML_PDF_Writer(unittest.TestCase):
     """ """
 
     def setUp(self):
@@ -23,6 +23,7 @@ class VisualizationTests(unittest.TestCase):
                                  section_template=assets.html.section_template, feature_template=assets.html.feature_template)
         html_writer.write_PDF(self.results_c, "./out.pdf")
         self.assertTrue(os.path.exists("./out.pdf"))
+
 
 if __name__ == "__main__":
     unittest.main()
