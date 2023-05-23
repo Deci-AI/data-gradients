@@ -6,23 +6,21 @@ import numpy as np
 import torch
 
 from data_gradients.visualize.image_samplers.base import ImageSampleManager
+from data_gradients.utils.data_classes import DetectionSample
 
 
 class DetectionImageSampleManager(ImageSampleManager):
-    def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
-        return draw_bboxes(image=image, annotated_bboxes=label)
+    def prepare_image(self, sample: DetectionSample) -> torch.Tensor:
+        return draw_bboxes(image=sample.image, annotated_bboxes=sample.target)
 
 
-def draw_bboxes(image: torch.Tensor, annotated_bboxes: torch.Tensor) -> torch.Tensor:
+def draw_bboxes(image: np.ndarray, annotated_bboxes: np.ndarray) -> np.ndarray:
     """Draw annotated bboxes on an image.
 
     :param image:               Input image tensor.
     :param annotated_bboxes:    Annotated BBoxes, in [BS, N, 5 (label_xyxy)].
     :return:                    Image with annotated bboxes.
     """
-    image = image.cpu().numpy().copy().transpose(1, 2, 0)
-    annotated_bboxes = annotated_bboxes.cpu().numpy()
-
     colors = generate_color_mapping(int(annotated_bboxes[:, 0].max()) + 1)
 
     for annotated_bbox in annotated_bboxes:
@@ -33,7 +31,7 @@ def draw_bboxes(image: torch.Tensor, annotated_bboxes: torch.Tensor) -> torch.Te
 
         image = draw_bbox(
             image=image,
-            title=f"id: {int(label)}",
+            title=f"Class = {int(label)}",
             color=colors[int(label)],
             box_thickness=2,
             x1=int(bbox[0]),
@@ -41,7 +39,7 @@ def draw_bboxes(image: torch.Tensor, annotated_bboxes: torch.Tensor) -> torch.Te
             x2=int(bbox[2]),
             y2=int(bbox[3]),
         )
-    return torch.from_numpy(image.transpose((2, 0, 1)))
+    return image
 
 
 def draw_bbox(
