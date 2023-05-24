@@ -14,3 +14,4 @@ rapidfuzz
 coverage~=5.3.1
 seaborn
 xhtml2pdf
+jinja
