@@ -42,7 +42,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
+        fig, axs = _setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
 
         for df, ax_i in zip(dfs, axs):
             scatterplot_args = dict(
@@ -88,7 +88,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
+        fig, axs = _setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
 
         for df, ax_i in zip(dfs, axs):
             histplot_args = dict(
@@ -212,7 +212,19 @@ class SeabornRenderer(PlotRenderer):
             _single(axs)
 
 
-def setup_multi_plot(n_rows: int, n_cols: int, title: str, figsize: Tuple[int, int], tight_layout: bool) -> tuple:
+def _setup_multi_plot(n_rows: int, n_cols: int, title: str, figsize: Tuple[int, int], tight_layout: bool) -> tuple:
+    """Set up a figure and axis to plot multiple graphs.
+
+    :param n_rows:          The number of rows in the grid.
+    :param n_cols:          The number of columns in the grid.
+    :param title:           The title of the figure.
+    :param figsize:         The size of the figure (width, height) in inches.
+    :param tight_layout:    Whether to enable tight layout for the figure.
+
+    :return:
+        - Matplotlib Figure object
+        - Axes
+    """
     fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=figsize)
     if tight_layout:
         fig.tight_layout()
