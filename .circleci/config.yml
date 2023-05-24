@@ -12,7 +12,6 @@ parameters:
     type: string
     description: Deci ai ORB version https://circleci.com/developer/orbs/orb/deci-ai/circleci-common-orb
     default: "10.5.1"
-#    default: "dev:alpha"
   ad_hoc_container_build:
     type: boolean
     default: false
