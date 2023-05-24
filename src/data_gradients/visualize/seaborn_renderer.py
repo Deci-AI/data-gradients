@@ -12,7 +12,7 @@ class SeabornRenderer(PlotRenderer):
     def __init__(self, style="whitegrid", palette="pastel"):
         seaborn.set_theme(style=style, palette=palette)
 
-    def render_with_options(self, df: pd.DataFrame, options: CommonPlotOptions):
+    def render_with_options(self, df: pd.DataFrame, options: CommonPlotOptions) -> plt.Figure:
         if isinstance(options, Hist2DPlotOptions):
             return self.render_histplot(df, options)
         if isinstance(options, BarPlotOptions):
