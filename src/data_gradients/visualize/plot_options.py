@@ -138,5 +138,5 @@ class ScatterPlotOptions(CommonPlotOptions):
 
 class PlotRenderer(ABC):
     @abstractmethod
-    def render_with_options(self, df: pd.DataFrame, options: CommonPlotOptions):
+    def render(self, df: pd.DataFrame, options: CommonPlotOptions):
         ...
