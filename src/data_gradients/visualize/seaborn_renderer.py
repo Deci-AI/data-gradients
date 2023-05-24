@@ -4,9 +4,9 @@ import pandas as pd
 import seaborn
 from matplotlib import pyplot as plt
 
-__all__ = ["SeabornRenderer"]
-
 from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolinPlotOptions
+
+__all__ = ["SeabornRenderer"]
 
 
 class SeabornRenderer(PlotRenderer):
@@ -165,6 +165,18 @@ class SeabornRenderer(PlotRenderer):
         if options.log_scale is True:
             ax.set_yscale("log")
             ax.set_ylabel(options.y_label_name + " (log scale)")
+
+        if options.x_ticks_rotation == "auto":
+            n_unique = len(df[options.x_label_key].unique())
+            if n_unique > 50:
+                options.x_ticks_rotation = 90
+            elif n_unique > 10:
+                options.x_ticks_rotation = 45
+
+        if options.show_values:
+            self._show_values(ax)
+
+        self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
         if options.x_ticks_rotation == "auto":
             n_unique = len(df[options.x_label_key].unique())
