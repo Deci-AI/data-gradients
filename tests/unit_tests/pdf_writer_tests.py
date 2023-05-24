@@ -1,8 +1,6 @@
 import os
 import unittest
 
-from jinja2 import Environment, FileSystemLoader
-
 from data_gradients.utils.common.assets_container import assets
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, Feature, PDFWriter
 
