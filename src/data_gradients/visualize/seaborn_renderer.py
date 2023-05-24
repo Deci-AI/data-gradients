@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 __all__ = ["SeabornRenderer"]
 
-from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
+from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolinPlotOptions
 
 
 class SeabornRenderer(PlotRenderer):
@@ -26,6 +26,8 @@ class SeabornRenderer(PlotRenderer):
             return self._render_barplot(df, options)
         if isinstance(options, ScatterPlotOptions):
             return self._render_scatterplot(df, options)
+        if isinstance(options, ViolinPlotOptions):
+            return self._render_violinplot(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
