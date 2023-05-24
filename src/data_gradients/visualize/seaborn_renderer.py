@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 import pandas as pd
 import seaborn
@@ -5,7 +6,7 @@ from matplotlib import pyplot as plt
 
 __all__ = ["SeabornRenderer"]
 
-from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
+from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolonPlotOptions
 
 
 class SeabornRenderer(PlotRenderer):
@@ -19,38 +20,25 @@ class SeabornRenderer(PlotRenderer):
             return self.render_barplot(df, options)
         if isinstance(options, ScatterPlotOptions):
             return self.render_scatterplot(df, options)
+        if isinstance(options, ViolonPlotOptions):
+            return self.render_violonplot(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
     def render_scatterplot(self, df, options: ScatterPlotOptions) -> plt.Figure:
-        dfs = []
 
-        if options.individual_plots_key is not None:
-            for key in df[options.individual_plots_key].unique():
-                df_key = df[df[options.individual_plots_key] == key]
-                dfs.append(df_key)
-        else:
-            dfs.append(df)
-
-        if len(dfs) == 1:
+        if options.individual_plots_key is None:
+            dfs = [df]
             n_rows = 1
             n_cols = 1
         else:
-            num_images = len(dfs)
-            max_cols = options.individual_plots_max_cols
-            n_cols = min(num_images, max_cols)
-            n_rows = int(np.ceil(num_images / n_cols))
+            dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
+            _num_images = len(dfs)
+            _max_cols = options.individual_plots_max_cols
+            n_cols = min(_num_images, _max_cols)
+            n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
-        if options.tight_layout:
-            fig.tight_layout()
-        fig.subplots_adjust(top=0.9)
-        fig.suptitle(options.title)
-
-        if n_rows == 1 and n_cols == 1:
-            axs = [axs]
-        else:
-            axs = axs.reshape(-1)
+        fig, axs = setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
 
         for df, ax_i in zip(dfs, axs):
             scatterplot_args = dict(
@@ -84,34 +72,19 @@ class SeabornRenderer(PlotRenderer):
         return fig
 
     def render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
-        dfs = []
 
-        if options.individual_plots_key is not None:
-            for key in df[options.individual_plots_key].unique():
-                df_key = df[df[options.individual_plots_key] == key]
-                dfs.append(df_key)
-        else:
-            dfs.append(df)
-
-        if len(dfs) == 1:
+        if options.individual_plots_key is None:
+            dfs = [df]
             n_rows = 1
             n_cols = 1
         else:
-            num_images = len(dfs)
-            max_cols = options.individual_plots_max_cols
-            n_cols = min(num_images, max_cols)
-            n_rows = int(np.ceil(num_images / n_cols))
+            dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
+            _num_images = len(dfs)
+            _max_cols = options.individual_plots_max_cols
+            n_cols = min(_num_images, _max_cols)
+            n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
-        if options.tight_layout:
-            fig.tight_layout()
-        fig.subplots_adjust(top=0.9)
-        fig.suptitle(options.title)
-
-        if n_rows == 1 and n_cols == 1:
-            axs = [axs]
-        else:
-            axs = axs.reshape(-1)
+        fig, axs = setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
 
         for df, ax_i in zip(dfs, axs):
             histplot_args = dict(
@@ -149,6 +122,7 @@ class SeabornRenderer(PlotRenderer):
         return fig
 
     def render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
+        # TODO: think if we keep
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
@@ -233,3 +207,17 @@ class SeabornRenderer(PlotRenderer):
                 _single(ax)
         else:
             _single(axs)
+
+
+def setup_multi_plot(n_rows: int, n_cols: int, title: str, figsize: Tuple[int, int], tight_layout: bool) -> tuple:
+    fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=figsize)
+    if tight_layout:
+        fig.tight_layout()
+    fig.subplots_adjust(top=0.9)
+    fig.suptitle(title)
+
+    if n_rows == 1 and n_cols == 1:
+        axs = [axs]
+    else:
+        axs = axs.reshape(-1)
+    return fig, axs
