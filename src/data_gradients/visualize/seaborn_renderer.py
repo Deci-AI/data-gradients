@@ -30,7 +30,6 @@ class SeabornRenderer(PlotRenderer):
         raise ValueError(f"Unknown options type: {type(options)}")
 
     def _render_scatterplot(self, df, options: ScatterPlotOptions) -> plt.Figure:
-        dfs = []
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -127,7 +126,6 @@ class SeabornRenderer(PlotRenderer):
         return fig
 
     def _render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
-        # TODO: think if we keep
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
