@@ -11,8 +11,8 @@ parameters:
   orb_version:
     type: string
     description: Deci ai ORB version https://circleci.com/developer/orbs/orb/deci-ai/circleci-common-orb
-#    default: "10.5.0"
-    default: "dev:alpha"
+    default: "10.5.1"
+#    default: "dev:alpha"
   ad_hoc_container_build:
     type: boolean
     default: false
@@ -167,9 +167,6 @@ jobs:
           command: |
             echo $CIRCLE_TAG > version.txt
 
-      - deci-common/pip_upload_package_artifactory:
-          pypi_repository: "data_gradients"
-          password: $ARTIFACTORY_UPLOAD_DEV
 
 #      - deci-common/pip_test_package_installation_codeartifact_dev:  #todo
 #          package_name: "data-gradients"
