@@ -1,6 +1,8 @@
 import os
 import unittest
 
+from jinja2 import Environment, FileSystemLoader
+
 from data_gradients.utils.common.assets_container import assets
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, Feature, PDFWriter
 
@@ -18,8 +20,7 @@ class PDF_Writer_Test(unittest.TestCase):
 
     def test_pdf_generation(self):
 
-        html_writer = PDFWriter(title="Data Gradients", subtitle="test 1", doc_template=assets.html.doc_template,
-                                section_template=assets.html.section_template, feature_template=assets.html.feature_template)
+        html_writer = PDFWriter(title="Data Gradients", subtitle="test 2", html_template=assets.html.doc_template)
         html_writer.write(self.results_c, "./out.pdf")
         self.assertTrue(os.path.exists("./out.pdf"))
 

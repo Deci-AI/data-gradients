@@ -190,8 +190,6 @@
 
 <!-- Content for Static Frame 'footer_frame' -->
 <div id="footer_content">
-    <!--        (c) - page <pdf:pagenumber>-->
-    <!--        of <pdf:pagecount>-->
     <div style="display: flex; justify-content: space-between;">
         <span style="text-align: left;">Generated with DataGradients &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
         <span style="text-align: center;">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<pdf:pagenumber> of <pdf:pagecount></span>
@@ -203,6 +201,21 @@
 <!-- HTML Content -->
 <p class="c8 title"><span class="title">{{title}}</span></p>
 <p class="c5 subtitle"><span class="subtitle">{{subtitle}}</span></p>
-{{sections}}
+    {% for section in results.sections %}
+        <p class="c0"><span class="section_title">{{section.section_name}}</span></p>
+            {% for feature in section.features %}
+                <p class="feature_class"><span class="feature_title">{{feature.name}}</span></p>
+                <p class="feature_class"><span
+                        style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 624.00px; height: 420.00px;"><img
+                        alt="" src="{{feature.image_path}}"
+                        style="width: 624.00px; height: 420.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                        title=""></span></p>
+                <p class="feature_class"><span class="c4">{{feature.description}}</span>
+                <p class="feature_separator">&nbsp;
+                <p>
+            {% endfor %}
+        <p class="c0 c2"><span class="c1"></span></p>
+        <p class="c0 c2"><span class="c1"></span></p>
+    {% endfor %}
 </body>
 </html>
