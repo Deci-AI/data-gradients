@@ -6,26 +6,31 @@ from matplotlib import pyplot as plt
 
 __all__ = ["SeabornRenderer"]
 
-from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolonPlotOptions
+from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
 
 
 class SeabornRenderer(PlotRenderer):
     def __init__(self, style="whitegrid", palette="pastel"):
         seaborn.set_theme(style=style, palette=palette)
 
-    def render_with_options(self, df: pd.DataFrame, options: CommonPlotOptions):
+    def render(self, df: pd.DataFrame, options: CommonPlotOptions) -> plt.Figure:
+        """Plot a graph using seaborn.
+
+        :param df:      The dataframe to render. It has to include the fields listed in the options.
+        :param options: The plotting options, which includes the information about the type of plot and the parameters required to plot it.
+        :return:        The matplotlib figure.
+        """
         if isinstance(options, Hist2DPlotOptions):
-            return self.render_histplot(df, options)
+            return self._render_histplot(df, options)
         if isinstance(options, BarPlotOptions):
-            return self.render_barplot(df, options)
+            return self._render_barplot(df, options)
         if isinstance(options, ScatterPlotOptions):
-            return self.render_scatterplot(df, options)
-        if isinstance(options, ViolonPlotOptions):
-            return self.render_violonplot(df, options)
+            return self._render_scatterplot(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
-    def render_scatterplot(self, df, options: ScatterPlotOptions) -> plt.Figure:
+    def _render_scatterplot(self, df, options: ScatterPlotOptions) -> plt.Figure:
+        dfs = []
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -71,7 +76,7 @@ class SeabornRenderer(PlotRenderer):
 
         return fig
 
-    def render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
+    def _render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -121,7 +126,7 @@ class SeabornRenderer(PlotRenderer):
 
         return fig
 
-    def render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
+    def _render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
         # TODO: think if we keep
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:

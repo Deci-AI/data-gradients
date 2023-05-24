@@ -73,7 +73,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render_with_options(self.image_size_df, options)
+        f = sns.render(self.image_size_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
@@ -93,7 +93,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render_with_options(self.image_size_df, options)
+        f = sns.render(self.image_size_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
@@ -110,7 +110,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render_with_options(self.fruits_df, options)
+        f = sns.render(self.fruits_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
@@ -127,7 +127,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render_with_options(self.fruits_df, options)
+        f = sns.render(self.fruits_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
@@ -144,7 +144,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render_with_options(self.fruits_df, options)
+        f = sns.render(self.fruits_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
@@ -161,7 +161,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render_with_options(self.image_size_df, options)
+        f = sns.render(self.image_size_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
@@ -180,7 +180,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render_with_options(self.image_size_df, options)
+        f = sns.render(self.image_size_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
