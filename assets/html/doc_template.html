@@ -1,0 +1,221 @@
+<html>
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <style type="text/css">ol {
+        margin: 0;
+        padding: 0
+    }
+
+    table td, table th {
+        padding: 0
+    }
+
+    .c4 {
+        color: #666666;
+        font-weight: 400;
+        text-decoration: none;
+        vertical-align: baseline;
+        font-size: 8.5pt;
+        font-family: 'Rubik';
+        font-style: normal;
+        max-width: 400pt;
+    }
+
+    .c5 {
+        padding-top: 0pt;
+        padding-bottom: 16pt;
+        line-height: 1.15;
+        page-break-after: avoid;
+        orphans: 2;
+        widows: 2;
+        text-align: left
+    }
+
+    .c1 {
+        color: #000000;
+        font-weight: 400;
+        text-decoration: none;
+        vertical-align: baseline;
+        font-size: 11pt;
+        font-family: "Arial";
+        font-style: normal
+    }
+
+    .c8 {
+        padding-top: 0pt;
+        padding-bottom: 3pt;
+        line-height: 1.15;
+        page-break-after: avoid;
+        orphans: 2;
+        widows: 2;
+        text-align: left
+    }
+
+    .c0 {
+        padding-top: 0pt;
+        padding-bottom: 0pt;
+        line-height: 1.15;
+        orphans: 2;
+        widows: 2;
+        text-align: left
+    }
+
+    .feature_class {
+        -pdf-keep-with-next: true;
+        padding-top: 0pt;
+        padding-bottom: 0pt;
+        line-height: 1.15;
+        orphans: 2;
+        widows: 2;
+        text-align: left
+    }
+
+    .feature_separator {
+        -pdf-keep-with-next: false;
+        font-size: 6pt;
+    }
+
+    .c2 {
+        height: 11pt
+    }
+
+    .title {
+        position: absolute;
+        width: 500px;
+        height: 24px;
+        left: 53px;
+        top: 51.62px;
+        font-family: 'Rubik';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 24px;
+        line-height: 100%;
+        color: #000000;
+    }
+
+    .subtitle {
+        position: absolute;
+        width: 107px;
+        height: 18px;
+        left: 53px;
+        top: 93.1px;
+
+        font-family: 'Rubik';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 100%;
+        color: #000000;
+    }
+
+    .section_title {
+        position: absolute;
+        width: 90px;
+        height: 14px;
+        left: 53px;
+        top: 128.59px;
+
+        font-family: 'Rubik';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 100%;
+        /* identical to box height, or 14px */
+        color: #000000;
+
+    }
+
+    .feature_title {
+        position: absolute;
+        width: 120px;
+        height: 14px;
+        left: 53px;
+        top: 160.07px;
+
+        font-family: 'Rubik';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 100%;
+        /* identical to box height, or 14px */
+        color: #000000;
+    }
+
+    li {
+        color: #000000;
+        font-size: 11pt;
+        font-family: "Arial"
+    }
+
+    p {
+        margin: 0;
+        color: #000000;
+        font-size: 11pt;
+        font-family: "Arial"
+    }
+
+    @page {
+        size: a4 portrait;
+        @frame header_frame { /* Static Frame */
+        -pdf-frame-content: header_content;
+        left: 50pt;
+        width: 500pt;
+        top: 50pt;
+        height: 40pt;
+    }
+    @frame content_frame {
+        /* Content Frame */
+    left: 50pt; width: 480pt; top: 90pt; height: 632pt;
+    }
+    @frame footer_frame {
+        /* Another static Frame */
+    -pdf-frame-content:footer_content;
+    left: 50pt; width: 500pt; top: 772pt; height: 20pt;
+    }
+    }
+
+
+    table, figure, img {
+        page-break-inside: avoid;
+    }
+
+
+    </style>
+</head>
+<body>
+
+
+<!-- Content for Static Frame 'header_frame' -->
+<div id="header_content">v 0.1</div>
+
+<!-- Content for Static Frame 'footer_frame' -->
+<div id="footer_content">
+    <div style="display: flex; justify-content: space-between;">
+        <span style="text-align: left;">Generated with DataGradients &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
+        <span style="text-align: center;">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<pdf:pagenumber> of <pdf:pagecount></span>
+    </div>
+
+</div>
+</div>
+
+<!-- HTML Content -->
+<p class="c8 title"><span class="title">{{title}}</span></p>
+<p class="c5 subtitle"><span class="subtitle">{{subtitle}}</span></p>
+    {% for section in results.sections %}
+        <p class="c0"><span class="section_title">{{section.section_name}}</span></p>
+            {% for feature in section.features %}
+                <p class="feature_class"><span class="feature_title">{{feature.name}}</span></p>
+                <p class="feature_class"><span
+                        style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 624.00px; height: 420.00px;"><img
+                        alt="" src="{{feature.image_path}}"
+                        style="width: 624.00px; height: 420.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                        title=""></span></p>
+                <p class="feature_class"><span class="c4">{{feature.description}}</span>
+                <p class="feature_separator">&nbsp;
+                <p>
+            {% endfor %}
+        <p class="c0 c2"><span class="c1"></span></p>
+        <p class="c0 c2"><span class="c1"></span></p>
+    {% endfor %}
+</body>
+</html>
