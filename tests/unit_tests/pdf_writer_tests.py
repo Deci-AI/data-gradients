@@ -7,7 +7,7 @@ from data_gradients.utils.common.assets_container import assets
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, Feature, PDFWriter
 
 
-class PDF_Writer_Test(unittest.TestCase):
+class PDFWriterTest(unittest.TestCase):
 
     def setUp(self):
         self.results_c = ResultsContainer()
