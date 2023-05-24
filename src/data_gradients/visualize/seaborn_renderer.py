@@ -13,6 +13,12 @@ class SeabornRenderer(PlotRenderer):
         seaborn.set_theme(style=style, palette=palette)
 
     def render_with_options(self, df: pd.DataFrame, options: CommonPlotOptions) -> plt.Figure:
+        """Plot a dataframe based on plotting options using seaborn.
+
+        :param df:      The dataframe to render. It has to include the fields listed in the options.
+        :param options: The plotting options, which includes the information about the type of plot and the parameters required to plot it.
+        :return:        The matplotlib figure.
+        """
         if isinstance(options, Hist2DPlotOptions):
             return self.render_histplot(df, options)
         if isinstance(options, BarPlotOptions):
