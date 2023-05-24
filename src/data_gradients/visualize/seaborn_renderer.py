@@ -192,6 +192,52 @@ class SeabornRenderer(PlotRenderer):
 
         return fig
 
+    def _render_violinplot(self, df, options: ViolinPlotOptions) -> plt.Figure:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
+        if options.tight_layout:
+            fig.tight_layout()
+        fig.suptitle(options.title)
+        fig.subplots_adjust(top=0.9)
+
+        barplot_args = dict(
+            data=df,
+            x=options.x_label_key,
+            y=options.y_label_key,
+            ax=ax,
+        )
+
+        if options.labels_key is not None:
+            barplot_args.update(hue=options.labels_key)
+            if options.labels_palette is not None:
+                barplot_args.update(palette=options.labels_palette)
+
+        ax = seaborn.violinplot(**barplot_args)
+
+        ax.set_xlabel(options.x_label_name)
+        ax.set_ylabel(options.y_label_name)
+        if options.labels_name is not None:
+            ax.legend(title=options.labels_name)
+
+        if options.x_ticks_rotation == "auto":
+            n_unique = len(df[options.x_label_key].unique())
+            if n_unique > 50:
+                options.x_ticks_rotation = 90
+            elif n_unique > 10:
+                options.x_ticks_rotation = 45
+
+        self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
+
+        if options.x_ticks_rotation == "auto":
+            n_unique = len(df[options.x_label_key].unique())
+            if n_unique > 50:
+                options.x_ticks_rotation = 90
+            elif n_unique > 10:
+                options.x_ticks_rotation = 45
+
+        self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
+
+        return fig
+
     def _set_ticks_rotation(self, ax, x_ticks_rotation, y_ticks_rotation):
         # Call to set_xticks is needed to avoid warning
         # https://stackoverflow.com/questions/63723514/userwarning-fixedformatter-should-only-be-used-together-with-fixedlocator
