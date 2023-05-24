@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from data_gradients.visualize.seaborn_renderer import SeabornRenderer, Hist2DPlotOptions, BarPlotOptions
+from data_gradients.visualize.seaborn_renderer import SeabornRenderer, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
 
 
 class VisualizationTests(unittest.TestCase):
@@ -40,7 +40,7 @@ class VisualizationTests(unittest.TestCase):
             dict(
                 x=np.random.randn(1000) * 0.85 - 0.4,
                 y=np.random.randn(1000) * 1.5 + 0.1,
-                weight = np.random.randn(1000) * 0.5 + 0.5,
+                weight=np.random.randn(1000) * 0.5 + 0.5,
                 class_name=np.random.choice(["apples", "oranges", "bananas", "kiwi"], 1000),
                 split=["train"] * 1000,
             )
@@ -69,7 +69,7 @@ class VisualizationTests(unittest.TestCase):
             labels_key="split",
             labels_palette={"train": "royalblue", "val": "red", "test": "limegreen"},
             bins=32,
-            kde=True
+            kde=True,
         )
 
         sns = SeabornRenderer()
@@ -96,7 +96,6 @@ class VisualizationTests(unittest.TestCase):
         f = sns.render_with_options(self.image_size_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
-
 
     def test_barplot_visualization_class_distribution(self):
         options = BarPlotOptions(
@@ -146,6 +145,42 @@ class VisualizationTests(unittest.TestCase):
 
         sns = SeabornRenderer()
         f = sns.render_with_options(self.fruits_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
+
+    def test_scatter_plot_image_size_by_split(self):
+        options = ScatterPlotOptions(
+            figsize=(10, 10),
+            title="Image size distribution",
+            x_label_name="Image width (pixels)",
+            x_label_key="image_width",
+            y_label_name="Image height (pixels)",
+            y_label_key="image_height",
+            labels_key="split",
+            labels_palette={"train": "royalblue", "val": "red", "test": "limegreen"},
+        )
+
+        sns = SeabornRenderer()
+        f = sns.render_with_options(self.image_size_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
+
+    def test_scatter_plot_image_size_individual_plots(self):
+        options = ScatterPlotOptions(
+            figsize=(15, 5),
+            title="Image size distribution",
+            x_label_name="Image width (pixels)",
+            x_label_key="image_width",
+            y_label_name="Image height (pixels)",
+            y_label_key="image_height",
+            labels_key="split",
+            labels_palette={"train": "royalblue", "val": "red", "test": "limegreen"},
+            individual_plots_key="split",
+            individual_plots_max_cols=3,
+        )
+
+        sns = SeabornRenderer()
+        f = sns.render_with_options(self.image_size_df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
