@@ -13,9 +13,6 @@ from data_gradients.visualize.plot_options import CommonPlotOptions
 class Feature:
     """Feature extracted from the whole dataset."""
 
-    title: str
-    description: str
-
     data: Union[pd.DataFrame, np.ndarray]
     plot_options: CommonPlotOptions
 
