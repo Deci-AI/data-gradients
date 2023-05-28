@@ -1,6 +1,7 @@
 import numpy as np
 from torch.utils.data import DataLoader
 
+# Note: This example will require you to install the super-gradients package
 from super_gradients.training.datasets import YoloDarknetFormatDetectionDataset
 
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
@@ -23,7 +24,7 @@ class PadTarget:
 
 
 if __name__ == "__main__":
-    data_dir = "/Users/Louis.Dupont/Downloads/avatar_recognition.v2-release.yolov8"
+    data_dir = "<path-to>/avatar_recognition.v2-release.yolov8"
     classes = ["Character"]
 
     # Create torch DataSet
