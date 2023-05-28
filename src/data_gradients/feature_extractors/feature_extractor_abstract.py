@@ -59,6 +59,11 @@ class FeatureExtractorAbstract(ABC):
             title_name += char
         return title_name
 
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        raise NotImplementedError
+
     def __repr__(self):
         return self.__class__.__name__
 

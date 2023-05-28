@@ -53,3 +53,7 @@ class PixelsPerClass(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
+
+    @property
+    def description(self) -> str:
+        return "Distribution among all classes, of the average pixel count of their objects."
