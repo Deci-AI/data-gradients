@@ -65,7 +65,8 @@ class ViolinPlotOptions(CommonPlotOptions):
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
     :attr individual_plots_key: If None, the data will be displayed in a single plot.
-                                If not None, will create a separate plot for each unique value of this column
+                                If not None, will create a separate plot for each unique value of this column.
+                                    e.g. `individual_plots_key="class_id"` will create a separate violin plot for each class.
     :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
     :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
