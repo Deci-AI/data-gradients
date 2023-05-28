@@ -48,9 +48,17 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
 
         feature = Feature(
             title=title,
-            description="Coming soon...",
+            description=self.description,
             data=df,
             plot_options=plot_options,
             json=json,
         )
         return feature
+
+    @property
+    def description(self) -> str:
+        return (
+            "The distribution of the areas of the boxes that bound connected components of the different classes as a histogram.\n"
+            "The size of the objects can significantly affect the performance of your model. "
+            "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
+        )
