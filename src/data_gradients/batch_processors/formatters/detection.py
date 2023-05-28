@@ -1,4 +1,4 @@
-from typing import Tuple, List, Optional, Callable
+from typing import Tuple, Optional, Callable
 
 import torch
 from torch import Tensor
@@ -6,6 +6,7 @@ from torch import Tensor
 from data_gradients.batch_processors.utils import check_all_integers
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
+from data_gradients.utils.utils import ask_user
 
 
 class DetectionBatchFormatter(BatchFormatter):
@@ -110,7 +111,6 @@ def ask_user_is_label_first() -> bool:
     selected_option = ask_user(
         main_question="Which comes first in your annotations, the label or the bounding box?",
         options=list(is_label_first_descriptions.keys()),
-        step_number=1,
     )
     return is_label_first_descriptions[selected_option]
 
@@ -124,45 +124,8 @@ def ask_user_xyxy_converter() -> Callable[[Tensor], Tensor]:
     selected_option = ask_user(
         main_question="What is the format of the bounding boxes?",
         options=list(xyxy_converter_descriptions.keys()),
-        step_number=2,
     )
     return xyxy_converter_descriptions[selected_option]
-
-
-def ask_user(main_question: str, options: List[str], step_number: int) -> str:
-    """Prompt the user to choose an option from a list of options.
-    :param main_question:   The main question or instruction for the user.
-    :param options:         List of options to chose from.
-    :param step_number:     The step number of the question.
-    :return:                The chosen option (key from the options_described dictionary).
-    """
-    numbers_to_chose_from = range(len(options))
-
-    options_formatted = "\n".join([f"[{number}] {option_description}" for number, option_description in zip(numbers_to_chose_from, options)])
-
-    user_answer = None
-    while user_answer not in numbers_to_chose_from:
-        print("\n------------------------------------------------------------------------")
-        print(f"Step {step_number}: {main_question}")
-        print("------------------------------------------------------------------------")
-        print("Please, enter the number corresponding to your choice.")
-        print("\nOptions:")
-        print(options_formatted)
-        print("")
-
-        try:
-            user_answer = input("Your choice >>> ")
-            user_answer = int(user_answer)
-        except Exception:
-            user_answer = None
-
-        if user_answer not in numbers_to_chose_from:
-            print(f'Oops! "{user_answer}" is not a valid choice. Let\'s try again.')
-
-    selected_option = options[user_answer]
-    print(f"Great! You chose: {selected_option}\n")
-
-    return selected_option
 
 
 def cxcywh_to_xyxy(bboxes: Tensor) -> Tensor:

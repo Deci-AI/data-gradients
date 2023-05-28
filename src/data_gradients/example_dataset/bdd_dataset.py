@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -81,7 +82,7 @@ class BDDDataset(Dataset):
             image = self.transforms(image)
             label = self.get_target(label)
 
-        return image, label
+        return {"image": image, "annotation": {"label": label, "id": i, "lst": [np.zeros((4, 3)), np.ones((10, 4))]}}
 
     def __len__(self):
         return len(self.samples_fn)
