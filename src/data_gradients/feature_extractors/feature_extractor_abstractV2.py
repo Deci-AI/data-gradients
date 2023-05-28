@@ -26,8 +26,16 @@ class AbstractFeatureExtractor(ABC):
     @abstractmethod
     def update(self, sample: ImageSample):
         """Accumulate information about samples"""
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def aggregate(self) -> Feature:
-        ...
+        raise NotImplementedError()
+
+    @property
+    def description(self) -> str:
+        raise NotImplementedError()
+
+    @property
+    def title(self) -> str:
+        raise NotImplementedError()
