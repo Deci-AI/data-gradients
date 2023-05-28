@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from data_gradients.visualize.seaborn_renderer import SeabornRenderer, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
+from data_gradients.visualize.seaborn_renderer import SeabornRenderer, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolinPlotOptions
 
 
 class VisualizationTests(unittest.TestCase):
@@ -141,6 +141,22 @@ class VisualizationTests(unittest.TestCase):
             x_ticks_rotation=None,
             labels_key="split",
             log_scale=False,
+        )
+
+        sns = SeabornRenderer()
+        f = sns.render(self.fruits_df, options)
+        f.savefig(self._testMethodName + ".png")
+        f.show()
+
+    def test_violinplot_visualization_class_distribution(self):
+        options = ViolinPlotOptions(
+            x_label_key="weight",
+            x_label_name="Weight",
+            y_label_key="class_name",
+            y_label_name="Fruit",
+            title="Fruit distribution with class imbalance",
+            x_ticks_rotation=None,
+            labels_key="split",
         )
 
         sns = SeabornRenderer()
