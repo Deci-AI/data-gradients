@@ -1,4 +1,3 @@
-from typing import Tuple
 import numpy as np
 import pandas as pd
 import seaborn
@@ -44,7 +43,16 @@ class SeabornRenderer(PlotRenderer):
             n_cols = min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = _setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        if options.tight_layout:
+            fig.tight_layout()
+        fig.subplots_adjust(top=0.9)
+        fig.suptitle(options.title)
+
+        if n_rows == 1 and n_cols == 1:
+            axs = [axs]
+        else:
+            axs = axs.reshape(-1)
 
         for df, ax_i in zip(dfs, axs):
             scatterplot_args = dict(
@@ -90,7 +98,16 @@ class SeabornRenderer(PlotRenderer):
             n_cols = min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = _setup_multi_plot(n_rows, n_cols, title=options.title, figsize=options.figsize, tight_layout=options.tight_layout)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        if options.tight_layout:
+            fig.tight_layout()
+        fig.subplots_adjust(top=0.9)
+        fig.suptitle(options.title)
+
+        if n_rows == 1 and n_cols == 1:
+            axs = [axs]
+        else:
+            axs = axs.reshape(-1)
 
         for df, ax_i in zip(dfs, axs):
             histplot_args = dict(
@@ -207,7 +224,7 @@ class SeabornRenderer(PlotRenderer):
         )
 
         if options.labels_key is not None:
-            barplot_args.update(hue=options.labels_key)
+            barplot_args.update(hue=options.labels_key, split=True)
             if options.labels_palette is not None:
                 barplot_args.update(palette=options.labels_palette)
 
@@ -270,29 +287,3 @@ class SeabornRenderer(PlotRenderer):
                 _single(ax)
         else:
             _single(axs)
-
-
-def _setup_multi_plot(n_rows: int, n_cols: int, title: str, figsize: Tuple[int, int], tight_layout: bool) -> tuple:
-    """Set up a figure and axis to plot multiple graphs.
-
-    :param n_rows:          The number of rows in the grid.
-    :param n_cols:          The number of columns in the grid.
-    :param title:           The title of the figure.
-    :param figsize:         The size of the figure (width, height) in inches.
-    :param tight_layout:    Whether to enable tight layout for the figure.
-
-    :return:
-        - Matplotlib Figure object
-        - Axes
-    """
-    fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=figsize)
-    if tight_layout:
-        fig.tight_layout()
-    fig.subplots_adjust(top=0.9)
-    fig.suptitle(title)
-
-    if n_rows == 1 and n_cols == 1:
-        axs = [axs]
-    else:
-        axs = axs.reshape(-1)
-    return fig, axs
