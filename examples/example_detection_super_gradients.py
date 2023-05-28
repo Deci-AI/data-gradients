@@ -1,3 +1,13 @@
+"""This is an example will require you to install the super-gradients package.
+
+It shows how DataGradients can be used on top of Datasets provided by SuperGradients.
+
+Required step:
+```
+pip install super-gradients
+```
+"""
+
 import numpy as np
 from torch.utils.data import DataLoader
 
