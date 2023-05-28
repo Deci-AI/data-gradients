@@ -3,7 +3,15 @@ import pandas as pd
 import seaborn
 from matplotlib import pyplot as plt
 
-from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolinPlotOptions
+from data_gradients.visualize.plot_options import (
+    PlotRenderer,
+    CommonPlotOptions,
+    Hist2DPlotOptions,
+    BarPlotOptions,
+    ScatterPlotOptions,
+    ViolinPlotOptions,
+    HistogramPlotOptions,
+)
 
 __all__ = ["SeabornRenderer"]
 
@@ -27,6 +35,8 @@ class SeabornRenderer(PlotRenderer):
             return self._render_scatterplot(df, options)
         if isinstance(options, ViolinPlotOptions):
             return self._render_violinplot(df, options)
+        if isinstance(options, HistogramPlotOptions):
+            return self._render_histogram(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
@@ -117,6 +127,8 @@ class SeabornRenderer(PlotRenderer):
                 kde=options.kde,
                 ax=ax_i,
             )
+            if options.y_label_key is not None:
+                histplot_args.update(y=options.y_label_key)
 
             if options.bins is not None:
                 histplot_args.update(bins=options.bins)
@@ -129,7 +141,9 @@ class SeabornRenderer(PlotRenderer):
             seaborn.histplot(**histplot_args)
 
             ax_i.set_xlabel(options.x_label_name)
-            ax_i.set_ylabel(options.y_label_name)
+            if options.y_label_name is not None:
+                ax_i.set_ylabel(options.y_label_name)
+
             if options.labels_name is not None:
                 ax_i.legend(title=options.labels_name)
 

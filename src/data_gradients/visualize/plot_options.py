@@ -54,6 +54,49 @@ class BarPlotOptions(CommonPlotOptions):
 
 
 @dataclasses.dataclass
+class HistogramPlotOptions(CommonPlotOptions):
+    """
+    Contains a set of options for displaying a bar plot
+
+    :attr x_label_key: A key for x-axis values
+    :attr x_label_name: A title for x-axis
+    :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
+    :attr y_label_name: A title for y-axis
+    :attr width: Width of the bars
+    :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
+    :attr x_ticks_rotation: X-ticks rotation (Helps to make more compact plots)
+    :attr y_ticks_rotation: Y-ticks rotation
+    :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
+    :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
+    :attr log_scale: If True, y-axis will be displayed in log scale
+    :attr tight_layout: If True enables more compact layout of the plot
+    :attr figsize: Size of the figure
+    :attr show_values: If True, will display the values of the bars above them
+    """
+
+    x_label_key: str
+    x_label_name: str
+    y_label_key: Optional[str]
+    y_label_name: str
+
+    width: float = 0.8
+    bins: Optional[int] = None
+
+    x_ticks_rotation: Optional[int] = 45
+    y_ticks_rotation: Optional[int] = None
+
+    labels_key: Optional[str] = None
+    labels_name: Optional[str] = None
+    labels_palette: Optional[Mapping] = None
+
+    show_values: bool = False
+
+    log_scale: Union[bool, str] = "auto"
+    tight_layout: bool = False
+    figsize: Optional[Tuple[int, int]] = (10, 6)
+
+
+@dataclasses.dataclass
 class ViolinPlotOptions(CommonPlotOptions):
     """
     Contains a set of options for displaying a violin distribution plot.
@@ -117,8 +160,8 @@ class Hist2DPlotOptions(CommonPlotOptions):
     x_label_key: str
     x_label_name: str
 
-    y_label_key: str
-    y_label_name: str
+    y_label_key: str = None
+    y_label_name: str = None
 
     bins: Optional[int] = None
     kde: bool = False
