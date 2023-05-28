@@ -49,3 +49,10 @@ class WidthHeight(FeatureExtractorAbstract):
         results.values_to_log = quantized_heat_map.tolist()
         results.keys = ["Width", "Height"]
         return results
+
+    @property
+    def description(self) -> str:
+        return "Width, Height of the bounding-boxes surrounding every object across all images. Plotted per-class on a " \
+               "heat-map.\n" \
+               "A large variation in object sizes within a class can make it harder for the model to recognize the " \
+               "objects."
