@@ -55,5 +55,8 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
     @property
     def description(self):
         return "The distribution of the areas of the boxes that bound connected components of the different classes " \
-               "as a histogram. "
+               "as a histogram.\n" \
+               "The size of the objects can significantly affect the performance of your model. If certain classes " \
+               "tend to have smaller objects, the model might struggle to segment them, especially if the resolution " \
+               "of the images is low "
 

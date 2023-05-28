@@ -52,3 +52,10 @@ class ComponentsConvexity(FeatureExtractorAbstract):
             plot="bar-plot",
         )
         return results
+
+    @property
+    def description(self):
+        return "Mean of the convexity measure across all components VS Class ID.\n" \
+               "Convexity measure of a component is defined by (" \
+               "component_perimeter-convex_hull_perimeter)/convex_hull_perimeter.\n" \
+               "High values can imply complex structures which might be difficult to segment."

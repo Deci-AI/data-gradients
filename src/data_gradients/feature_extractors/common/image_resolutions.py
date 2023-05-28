@@ -45,5 +45,7 @@ class ImagesResolutions(FeatureExtractorAbstract):
         )
         return results
 
+    @property
     def description(self):
-        print("The distribution of the image resolutions as a discrete histogram.")
+        print("The distribution of the image resolutions as a discrete histogram. \n"
+              "Note that if images are rescaled or padded, this plot will show the size after rescaling and padding.")

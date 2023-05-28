@@ -49,6 +49,10 @@ class MeanAndSTD(FeatureExtractorAbstract):
         )
         return results
 
+    @property
     def description(self):
         return "Thehe mean and std of the pixel values for each channel across all images (Blue-Mean, Blue-STD, "\
-              "Green-Mean, Green-STD, Red-Mean, Red-STD). Assumes BGR Channel ordering"
+              "Green-Mean, Green-STD, Red-Mean, Red-STD). Assumes BGR Channel ordering. \n" \
+               "Can reveal " \
+               "differences in the nature of the images in the two datasets or in the augmentation. I.e., if the mean " \
+               "of one of the colors is shifted between the datasets, it might indicate wrong augmentation. "

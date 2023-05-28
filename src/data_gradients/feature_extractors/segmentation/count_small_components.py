@@ -46,3 +46,6 @@ class CountSmallComponents(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
+    @property
+    def description(self):
+        return f"Number of objects in each image smaller then {self._min_size} % of the image size, over all classes."

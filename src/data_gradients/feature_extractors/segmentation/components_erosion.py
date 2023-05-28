@@ -67,3 +67,9 @@ class ErosionTest(FeatureExtractorAbstract):
             plot="bar-plot",
         )
         return results
+
+    @property
+    def description(self):
+        return "An assessment of object stability under morphological opening - erosion followed by dilation. " \
+               "When a lot of components are small then the number of components decrease which means we might have " \
+               "noise in our annotations (i.e 'sprinkles')."
