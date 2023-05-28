@@ -62,3 +62,7 @@ class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
         # results.json_values = quantized_heat_map.tolist()
 
         return results
+
+    @property
+    def description(self) -> str:
+        return "Heatmap plot of the center of mass coordinates (x,y) of all objects among all classes."
