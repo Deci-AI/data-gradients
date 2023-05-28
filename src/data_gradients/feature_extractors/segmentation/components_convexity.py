@@ -54,7 +54,7 @@ class ComponentsConvexity(FeatureExtractorAbstract):
         return results
 
     @property
-    def description(self):
+    def description(self) -> str:
         return "Mean of the convexity measure across all components VS Class ID.\n" \
                "Convexity measure of a component is defined by (" \
                "component_perimeter-convex_hull_perimeter)/convex_hull_perimeter.\n" \

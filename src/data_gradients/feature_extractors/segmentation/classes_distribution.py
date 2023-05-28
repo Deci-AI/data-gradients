@@ -45,7 +45,7 @@ class GetClassDistribution(FeatureExtractorAbstract):
         return results
 
     @property
-    def description(self):
-        return "Total # of connected components VS Class ID. \n" \
+    def description(self) -> str:
+        return "The total number of connected components for each class, across all images. \n" \
                "If the average number of components per image is too high, it might be due to image noise or the " \
-               "presence of many small objects."
+               "presence of many segmentation blobs."

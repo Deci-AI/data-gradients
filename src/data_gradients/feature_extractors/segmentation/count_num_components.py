@@ -92,7 +92,8 @@ class CountNumComponents(FeatureExtractorAbstract):
                 continue
 
         return hist
+
     @property
-    def description(self):
+    def description(self) -> str:
         return "Number of objects in each image, over all classes. If the average number of components per image is " \
                "too high, it might be due to image noise or the presence of many small objects."

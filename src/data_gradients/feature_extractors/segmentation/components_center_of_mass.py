@@ -64,5 +64,5 @@ class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
         return results
 
     @property
-    def description(self):
+    def description(self) -> str:
         return "Heatmap plot of the center of mass coordinates (x,y) of all objects among all classes."

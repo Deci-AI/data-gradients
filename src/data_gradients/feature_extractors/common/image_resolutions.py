@@ -14,6 +14,7 @@ class ImagesResolutions(FeatureExtractorAbstract):
     """
     Extracts the distribution of the image resolutions as a discrete histogram.
     """
+
     def __init__(self):
         super().__init__()
         self._hist = defaultdict(dict)
@@ -46,6 +47,6 @@ class ImagesResolutions(FeatureExtractorAbstract):
         return results
 
     @property
-    def description(self):
-        print("The distribution of the image resolutions as a discrete histogram. \n"
-              "Note that if images are rescaled or padded, this plot will show the size after rescaling and padding.")
+    def description(self) -> str:
+        return "The distribution of the image resolutions as a discrete histogram. \n Note that if images are " \
+               "rescaled or padded, this plot will show the size after rescaling and padding. "

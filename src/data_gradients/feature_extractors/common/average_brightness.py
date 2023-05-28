@@ -66,7 +66,7 @@ class AverageBrightness(FeatureExtractorAbstract):
         return new_keys
 
     @property
-    def description(self):
+    def description(self) -> str:
         return "The distribution of the image 'lightness' (as L channel pixel value distribution in CIELAB color " \
                "space, as a discrete histogram (divided into 10 bins). \n" \
                "Image brightness distribution can reveal differences between the train and validation set. I.e. if " \

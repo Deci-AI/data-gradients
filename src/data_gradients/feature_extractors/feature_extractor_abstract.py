@@ -60,7 +60,8 @@ class FeatureExtractorAbstract(ABC):
         return title_name
 
     @abstractmethod
-    def description(self):
+    @property
+    def description(self) -> str:
         raise NotImplementedError
 
 

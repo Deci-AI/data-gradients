@@ -53,7 +53,7 @@ class ComponentsSizeDistribution(FeatureExtractorAbstract):
         return results
 
     @property
-    def description(self):
+    def description(self) -> str:
         return "The distribution of the areas of the boxes that bound connected components of the different classes " \
                "as a histogram.\n" \
                "The size of the objects can significantly affect the performance of your model. If certain classes " \
