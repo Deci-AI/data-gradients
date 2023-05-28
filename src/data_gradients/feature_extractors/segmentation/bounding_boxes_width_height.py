@@ -1,7 +1,7 @@
 import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.utils import SegmentationBatchData
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
@@ -22,13 +22,12 @@ class WidthHeight(FeatureExtractorAbstract):
         self._height = {"train": [], "val": []}
         self.num_axis = (1, 2)
 
-    def update(self, data: SegmentationBatchData):
-        for i, image_contours in enumerate(data.contours):
-            for j, class_channel in enumerate(image_contours):
-                height, width = data.labels[i][j].shape
-                for contour in class_channel:
-                    self._width[data.split].append(contour.w / width)
-                    self._height[data.split].append(contour.h / height)
+    def update(self, sample: SegmentationSample):
+        height, width = sample.mask.shape[:2]
+        for j, class_channel in enumerate(sample.contours):
+            for contour in class_channel:
+                self._width[sample.split].append(contour.w / width)
+                self._height[sample.split].append(contour.h / height)
 
     def _aggregate(self, split: str):
         width = [w for w in self._width[split] if w > 0]

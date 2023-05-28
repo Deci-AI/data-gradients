@@ -11,4 +11,7 @@ numpy
 matplotlib
 scipy
 rapidfuzz
-re
+coverage~=5.3.1
+seaborn
+xhtml2pdf
+jinja2

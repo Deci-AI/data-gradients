@@ -1,8 +1,10 @@
+from collections import defaultdict
+
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstract import (
     FeatureExtractorAbstract,
 )
-from data_gradients.utils import BatchData
+from data_gradients.utils.data_classes import ImageSample
 from data_gradients.utils.data_classes.extractor_results import HistogramResults
 from data_gradients.feature_extractors.utils import align_histogram_keys
 
@@ -14,15 +16,15 @@ class ImagesResolutions(FeatureExtractorAbstract):
     """
     def __init__(self):
         super().__init__()
-        self._hist = {"train": dict(), "val": dict()}
+        self._hist = defaultdict(dict)
 
-    def update(self, data: BatchData):
-        for image in data.images:
-            res = str(tuple((image.shape[2], image.shape[1])))
-            if res not in self._hist[data.split]:
-                self._hist[data.split][res] = 1
-            else:
-                self._hist[data.split][res] += 1
+    def update(self, sample: ImageSample):
+        rows, cols = sample.image.shape[:2]
+        res = str(tuple((cols, rows)))
+        if res not in self._hist[sample.split]:
+            self._hist[sample.split][res] = 1
+        else:
+            self._hist[sample.split][res] += 1
 
     def _aggregate(self, split: str):
         self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])
