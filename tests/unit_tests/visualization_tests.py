@@ -149,6 +149,7 @@ class VisualizationTests(unittest.TestCase):
         f.show()
 
     def test_violinplot_visualization_class_distribution(self):
+        df = self.fruits_df
         options = ViolinPlotOptions(
             x_label_key="weight",
             x_label_name="Weight",
@@ -160,7 +161,7 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.fruits_df, options)
+        f = sns.render(df, options)
         f.savefig(self._testMethodName + ".png")
         f.show()
 
