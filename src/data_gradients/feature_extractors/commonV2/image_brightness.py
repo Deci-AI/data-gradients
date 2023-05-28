@@ -38,10 +38,13 @@ class ImageBrightness(AbstractFeatureExtractor):
             x_label_key="brightness",
             x_label_name="Brightness",
             title=title,
+            x_lim=(0, 255),
             x_ticks_rotation=None,
             labels_key="split",
+            individual_plots_key="split",
+            individual_plots_max_cols=2,
         )
-        json = ["coming soon..."]  # TODO: define what we want here. We might not want all the data, but in that case how to split it?
+        json = dict(df.brightness.describe())
 
         feature = Feature(
             title=title,

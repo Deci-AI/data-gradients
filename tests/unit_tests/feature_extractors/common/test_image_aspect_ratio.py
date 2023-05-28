@@ -2,83 +2,74 @@ import unittest
 import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
-from data_gradients.feature_extractors.commonV2.image_brightness import ImageBrightness
+from data_gradients.feature_extractors.commonV2.image_aspect_ratios import ImagesAspectRatio
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
 class ComponentsSizeDistributionV2Test(unittest.TestCase):
     def setUp(self) -> None:
-        self.extractor = ImageBrightness()
+        self.extractor = ImagesAspectRatio()
 
-        train_image = np.zeros((100, 100, 3), dtype=np.uint8)
+        train_sample = ImageSample(
+            sample_id="sample_0",
+            split="train",
+            image=np.zeros((50, 100, 3), dtype=np.uint8),
+            image_format=ImageChannelFormat.RGB,
+        )
+        self.extractor.update(train_sample)
+
         train_sample = ImageSample(
             sample_id="sample_1",
             split="train",
-            image=train_image,
+            image=np.zeros((150, 250, 3), dtype=np.uint8),
             image_format=ImageChannelFormat.RGB,
         )
         self.extractor.update(train_sample)
 
-        train_image = np.zeros((100, 100, 3), dtype=np.uint8)
-        train_image[0, :50, :] = 50
-        train_image[1, :80, :] = 200
         train_sample = ImageSample(
             sample_id="sample_2",
             split="train",
-            image=train_image,
+            image=np.zeros((150, 200, 3), dtype=np.uint8),
             image_format=ImageChannelFormat.RGB,
         )
         self.extractor.update(train_sample)
 
-        train_image = np.zeros((100, 100, 3), dtype=np.uint8)
-        train_image[1, :80, :] = 200
         train_sample = ImageSample(
             sample_id="sample_3",
             split="train",
-            image=train_image,
+            image=np.zeros((150, 300, 3), dtype=np.uint8),
             image_format=ImageChannelFormat.RGB,
         )
         self.extractor.update(train_sample)
 
-        train_image = np.zeros((100, 100, 3), dtype=np.uint8)
-        train_image[1, :80, :] = 200
         train_sample = ImageSample(
             sample_id="sample_3",
             split="train",
-            image=train_image,
+            image=np.zeros((200, 200, 3), dtype=np.uint8),
             image_format=ImageChannelFormat.RGB,
         )
         self.extractor.update(train_sample)
 
-        valid_image = np.zeros((100, 100, 3), dtype=np.uint8)
-        valid_image[0, :20, :] = 150
-        valid_image[1, :80, :] = 250
         valid_sample = ImageSample(
             sample_id="sample_4",
             split="valid",
-            image=valid_image,
+            image=np.zeros((100, 100, 3), dtype=np.uint8),
             image_format=ImageChannelFormat.RGB,
         )
         self.extractor.update(valid_sample)
 
-        valid_image = np.zeros((100, 100, 3), dtype=np.uint8)
-        valid_image[0, :20, :] = 150
-        valid_image[1, :80, :] = 250
         valid_sample = ImageSample(
             sample_id="sample_4",
             split="valid",
-            image=valid_image,
+            image=np.zeros((150, 150, 3), dtype=np.uint8),
             image_format=ImageChannelFormat.RGB,
         )
         self.extractor.update(valid_sample)
 
-        valid_image = np.zeros((100, 100, 3), dtype=np.uint8)
-        valid_image[0, :50, :] = 150
-        valid_image[1, :80, :] = 50
         valid_sample = ImageSample(
-            sample_id="sample_5",
+            sample_id="sample_4",
             split="valid",
-            image=valid_image,
+            image=np.zeros((200, 250, 3), dtype=np.uint8),
             image_format=ImageChannelFormat.RGB,
         )
         self.extractor.update(valid_sample)
@@ -88,18 +79,13 @@ class ComponentsSizeDistributionV2Test(unittest.TestCase):
         output_json = self.extractor.aggregate().json
 
         expected_json = {
-            "count": 7.0,
-            "mean": 93.3667,
-            "std": 9.501169,
-            "min": 85.333333,
-            "25%": 85.333333,
-            "50%": 94.166667,
-            "75%": 95.866667,
-            "max": 111.66667,
+            "width": {"count": 8.0, "mean": 193.75, "std": 72.88689868556625, "min": 100.0, "25%": 137.5, "50%": 200.0, "75%": 250.0, "max": 300.0},
+            "height": {"count": 8.0, "mean": 143.75, "std": 49.55156044825574, "min": 50.0, "25%": 137.5, "50%": 150.0, "75%": 162.5, "max": 200.0},
         }
 
-        for key in output_json.keys():
-            self.assertEqual(round(output_json[key], 4), round(expected_json[key], 4))
+        for col in ("width", "height"):
+            for key in output_json[col].keys():
+                self.assertEqual(round(output_json[col][key], 4), round(expected_json[col][key], 4))
 
     def test_plot(self):
         feature = self.extractor.aggregate()

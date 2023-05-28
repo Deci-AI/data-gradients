@@ -105,7 +105,7 @@ class SeabornRenderer(PlotRenderer):
             dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
             _num_images = len(dfs)
             _max_cols = options.individual_plots_max_cols
-            n_cols = min(_num_images, _max_cols)
+            n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
@@ -146,6 +146,12 @@ class SeabornRenderer(PlotRenderer):
 
             if options.labels_name is not None:
                 ax_i.legend(title=options.labels_name)
+
+            if options.x_lim is not None:
+                ax_i.set_xlim(options.x_lim)
+
+            if options.y_lim is not None:
+                ax_i.set_ylim(options.y_lim)
 
             if options.x_ticks_rotation == "auto":
                 n_unique = len(df[options.x_label_key].unique())
