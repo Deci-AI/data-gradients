@@ -59,6 +59,9 @@ class FeatureExtractorAbstract(ABC):
             title_name += char
         return title_name
 
+    def __repr__(self):
+        return self.__class__.__name__
+
 
 class MultiFeatureExtractorAbstract(FeatureExtractorAbstract, ABC):
     def aggregate_and_write(self, logger: LogWriter, id_to_name):

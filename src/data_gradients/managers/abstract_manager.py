@@ -75,6 +75,14 @@ class AnalysisManagerAbstract(abc.ABC):
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
         Method finish it work after both train & val iterables are exhausted.
         """
+
+        print(f"Executing analysis with: \n"
+              f"batches_early_stop: {self.batches_early_stop} \n"
+              f"len(train_data): {self.train_size} \n"
+              f"len(val_data): {self.val_size} \n"
+              f"log directory: {self._log_writer.log_dir} \n"
+              f"feature extractor list: {self.feature_extractors}")
+
         datasets_tqdm = tqdm.tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
             desc="Analyzing... ",
