@@ -27,7 +27,7 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
                     {
                         "split": sample.split,
                         "class_name": class_name,
-                        "bbox_area": 100 * contour.bbox_area / image_area,
+                        "bbox_area": 100 * (contour.bbox_area / image_area),
                     }
                 )
 
@@ -43,8 +43,9 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
             title=title,
             x_ticks_rotation=None,
             labels_key="split",
+            bandwidth=0.4,
         )
-        json = ["coming soon..."]  # TODO: define what we want here. We might not want all the data, but in that case how to split it?
+        json = dict(df.bbox_area.describe())
 
         feature = Feature(
             title=title,

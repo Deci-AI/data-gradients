@@ -171,6 +171,8 @@ class SeabornRenderer(PlotRenderer):
             y=options.y_label_key,
             ax=ax,
         )
+        if options.bandwidth is not None:
+            plot_args.update(bw=options.bandwidth)
 
         if options.labels_key is not None:
             plot_args.update(hue=options.labels_key, split=True)

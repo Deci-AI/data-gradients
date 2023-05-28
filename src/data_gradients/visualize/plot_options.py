@@ -112,6 +112,7 @@ class ViolinPlotOptions(CommonPlotOptions):
                                     e.g. `individual_plots_key="class_id"` will create a separate violin plot for each class.
     :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
     :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
+    :attr bandwidth: If None, use the default bandwidth of the violin plot. Affects the kernel estimation.
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
     :attr tight_layout: If True enables more compact layout of the plot
     :attr figsize: Size of the figure
@@ -129,6 +130,8 @@ class ViolinPlotOptions(CommonPlotOptions):
     labels_key: Optional[str] = None
     labels_name: Optional[str] = None
     labels_palette: Optional[Mapping] = None
+
+    bandwidth: Union[float, str] = None
 
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
