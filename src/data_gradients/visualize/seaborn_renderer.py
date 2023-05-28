@@ -159,11 +159,11 @@ class SeabornRenderer(PlotRenderer):
         )
 
         if options.labels_key is not None:
-            plot_args.update(hue=options.labels_key)
+            plot_args.update(hue=options.labels_key, split=True)
             if options.labels_palette is not None:
                 plot_args.update(palette=options.labels_palette)
 
-        ax = seaborn.boxplot(**plot_args)
+        ax = seaborn.violinplot(**plot_args)
 
         ax.set_xlabel(options.x_label_name)
         ax.set_ylabel(options.y_label_name)
