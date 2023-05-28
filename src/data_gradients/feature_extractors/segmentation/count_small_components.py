@@ -27,7 +27,8 @@ class CountSmallComponents(FeatureExtractorAbstract):
         self._total_objects[sample.split] += sum([len(cls_contours) for cls_contours in sample.contours])
         for class_contours in sample.contours:
             for contour in class_contours:
-                self._hist[sample.split][f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
+                self._hist[sample.split][
+                    f"<{self._min_size}"] += 1 if contour.area < labels_w * labels_h * self._min_size else 0
 
     def _aggregate(self, split: str):
         values = normalize_values_to_percentages(self._hist[split].values(), self._total_objects[split])
@@ -46,3 +47,7 @@ class CountSmallComponents(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
+
+    @property
+    def description(self) -> str:
+        return f"Number of objects in each image smaller then {self._min_size} % of the image size, over all classes."

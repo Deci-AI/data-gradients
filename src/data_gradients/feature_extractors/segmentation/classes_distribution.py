@@ -43,3 +43,9 @@ class GetClassDistribution(FeatureExtractorAbstract):
             values_to_log=list(self._hist[split].values()),
         )
         return results
+
+    @property
+    def description(self) -> str:
+        return "The total number of connected components for each class, across all images. \n" \
+               "If the average number of components per image is too high, it might be due to image noise or the " \
+               "presence of many segmentation blobs."

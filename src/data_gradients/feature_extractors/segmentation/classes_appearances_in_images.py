@@ -49,3 +49,10 @@ class AppearancesInImages(FeatureExtractorAbstract):
             ax_grid=True,
         )
         return results
+
+    @property
+    def description(self) -> str:
+        return "Percentage of images containing an appearance from VS class. \n" \
+               "If a certain class has significantly fewer instances, the model might not learn to recognize it " \
+               "effectively, which can lead to poor performance when predicting this class. It is recommended to use " \
+               "this feature along with the PixelsPerClass feature extractor."
