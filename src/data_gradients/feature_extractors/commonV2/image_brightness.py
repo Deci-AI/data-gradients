@@ -10,7 +10,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Featu
 
 
 @register_feature_extractor()
-class ImageBrightness(AbstractFeatureExtractor):
+class ImagesAverageBrightness(AbstractFeatureExtractor):
     """Extracts the distribution of the image 'brightness'."""
 
     def __init__(self):

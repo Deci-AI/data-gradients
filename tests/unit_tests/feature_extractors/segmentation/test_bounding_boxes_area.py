@@ -3,9 +3,9 @@ import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import SegmentationSample, ImageChannelFormat
 from data_gradients.utils.data_classes.contour import Contour
-from data_gradients.feature_extractors.segmentationV2.bounding_boxes_area import BoundingBoxAreaFeatureExtractor
-from data_gradients.feature_extractors.segmentationV2.bounding_boxes_resolution import BoundingBoxResolution
-from data_gradients.feature_extractors.segmentationV2.classes_distribution import ClassesDistribution
+from data_gradients.feature_extractors.segmentationV2.bounding_boxes_area import SegmentationBoundingBoxArea
+from data_gradients.feature_extractors.segmentationV2.bounding_boxes_resolution import SegmentationBoundingBoxResolution
+from data_gradients.feature_extractors.segmentationV2.classes_distribution import SegmentationClassesDistribution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
@@ -141,15 +141,15 @@ class SegmentationBBoxV2Test(unittest.TestCase):
             ],
         )
 
-        self.resolution_extractor = BoundingBoxResolution()
+        self.resolution_extractor = SegmentationBoundingBoxResolution()
         self.resolution_extractor.update(train_sample)
         self.resolution_extractor.update(valid_sample)
 
-        self.class_distribution_extractor = ClassesDistribution()
+        self.class_distribution_extractor = SegmentationClassesDistribution()
         self.class_distribution_extractor.update(train_sample)
         self.class_distribution_extractor.update(valid_sample)
 
-        self.area_extractor = BoundingBoxAreaFeatureExtractor()
+        self.area_extractor = SegmentationBoundingBoxArea()
         self.area_extractor.update(train_sample)
         self.area_extractor.update(valid_sample)
 

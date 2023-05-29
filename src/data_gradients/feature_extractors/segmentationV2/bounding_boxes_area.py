@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 
 @register_feature_extractor()
-class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
+class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     """
     Semantic Segmentation task feature extractor -
     Get all Bounding Boxes areas and plot them as a percentage of the whole image.

@@ -2,14 +2,14 @@ import unittest
 import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
-from data_gradients.feature_extractors.commonV2.image_brightness import ImageBrightness
+from data_gradients.feature_extractors.commonV2.image_brightness import ImagesAverageBrightness
 from data_gradients.feature_extractors.commonV2.image_color_distribution import ImageColorDistribution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
 class ImageBrightnessTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.average_brightness = ImageBrightness()
+        self.average_brightness = ImagesAverageBrightness()
         self.color_distribution = ImageColorDistribution()
 
         train_image = np.zeros((100, 100, 3), dtype=np.uint8)

@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 
 @register_feature_extractor()
-class BoundingBoxResolution(AbstractFeatureExtractor):
+class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
