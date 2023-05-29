@@ -33,6 +33,8 @@ class ImageColorDistribution(AbstractFeatureExtractor):
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")
 
+        sample.image = sample.image.astype(np.uint8)
+
         # We need this more complex logic because we cannot directly accumulate the images (this would take too much memory)
         # so we need to iteratively count the frequency per split and per color
         for i, color in enumerate(self.colors):
