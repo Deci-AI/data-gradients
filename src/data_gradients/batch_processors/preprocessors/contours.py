@@ -2,12 +2,11 @@ from typing import List, Tuple, Dict
 
 import cv2
 import numpy as np
-import torch
 
 from data_gradients.utils.data_classes.contour import Contour
 
 
-def get_contours(label: np.ndarray) -> np.ndarray:
+def get_contours(label: np.ndarray) -> List[list]:
     """
     Find contours in each class-channel individually, using opencv findContours method
     :param label: Tensor [N, W, H] where N is number of valid classes
@@ -18,7 +17,7 @@ def get_contours(label: np.ndarray) -> np.ndarray:
         raise TypeError(f"Expected numpy.ndarray, got {type(label)}")
 
     # Type to INT8 as for Index array
-    label = label.astype(np.uint8,copy=False)
+    label = label.astype(np.uint8, copy=False)
 
     all_onehot_contour = []
     # For each class

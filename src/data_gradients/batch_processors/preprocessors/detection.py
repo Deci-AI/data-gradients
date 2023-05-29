@@ -1,6 +1,7 @@
 from typing import Iterable
 from torch import Tensor
 import numpy as np
+import time
 
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
@@ -19,19 +20,26 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         labels = labels.cpu().numpy()
 
         for image, target in zip(images, labels):
-            target = filter_padding(target, padding_value=0).astype(np.int)
-
+            target = self.filter_padding(target, padding_value=0).astype(np.int)
             labels, bboxes_xyxy = target[:, 0], target[:, 1:]
+
             # TODO: image_format is hard-coded here, but it should be refactored afterwards
-            yield DetectionSample(image=image, labels=labels, bboxes_xyxy=bboxes_xyxy, split=None, image_format=ImageChannelFormat.RGB, sample_id=None)
+            yield DetectionSample(
+                image=image,
+                labels=labels,
+                bboxes_xyxy=bboxes_xyxy,
+                split=None,
+                image_format=ImageChannelFormat.RGB,
+                sample_id=str(time.time()),
+            )
 
+    @staticmethod
+    def filter_padding(target: np.ndarray, padding_value: int) -> np.ndarray:
+        """Drop rows that were padded with padding_value.
 
-def filter_padding(target: np.ndarray, padding_value: int) -> np.ndarray:
-    """Drop rows that were padded with padding_value.
-
-    :target:        Target bboxes of a given image, in shape (K, ?) with K either number of bboxes for this image, or padding size,
-    :padding_value: Value used for padding (if any)
-    :return:        Filtered bboxes of a given image, in shape (N, ?) with N number of bboxes for this image.
-    """
-    first_zero_row_index = np.where((target == padding_value).all(axis=1))[0][0]
-    return target[:first_zero_row_index]
+        :target:        Target bboxes of a given image, in shape (K, ?) with K either number of bboxes for this image, or padding size,
+        :padding_value: Value used for padding (if any)
+        :return:        Filtered bboxes of a given image, in shape (N, ?) with N number of bboxes for this image.
+        """
+        first_zero_row_index = np.where((target == padding_value).all(axis=1))[0][0]
+        return target[:first_zero_row_index]

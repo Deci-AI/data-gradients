@@ -59,6 +59,10 @@ class SegmentationBatchFormatter(BatchFormatter):
         for ignore_label in self.ignore_labels:
             labels[:, ignore_label, ...] = torch.zeros_like(labels[:, ignore_label, ...])
 
+        if 0 <= images.min() and images.max() <= 1:
+            images = images * 255
+        images = images.astype(torch.uint8)
+
         return images, labels
 
     @property
