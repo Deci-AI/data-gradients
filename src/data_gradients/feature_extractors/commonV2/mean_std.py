@@ -7,6 +7,8 @@ from data_gradients.utils.data_classes.data_samples import ImageSample, ImageCha
 from data_gradients.visualize.plot_options import Hist2DPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 
+# FIXME: WIP
+
 
 @register_feature_extractor()
 class ImageChannelsStats(AbstractFeatureExtractor):
