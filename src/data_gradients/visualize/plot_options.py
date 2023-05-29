@@ -133,6 +133,7 @@ class Hist2DPlotOptions(CommonPlotOptions):
 
     bins: Optional[int] = None
     kde: bool = False
+    stat: str = "count"
 
     individual_plots_key: str = None
     individual_plots_max_cols: int = None

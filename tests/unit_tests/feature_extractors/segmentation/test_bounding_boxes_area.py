@@ -5,7 +5,8 @@ from data_gradients.utils.data_classes.data_samples import SegmentationSample, I
 from data_gradients.utils.data_classes.contour import Contour
 from data_gradients.feature_extractors.segmentationV2.bounding_boxes_area import SegmentationBoundingBoxArea
 from data_gradients.feature_extractors.segmentationV2.bounding_boxes_resolution import SegmentationBoundingBoxResolution
-from data_gradients.feature_extractors.segmentationV2.classes_distribution import SegmentationClassesDistribution
+from data_gradients.feature_extractors.segmentationV2.classes_count import SegmentationClassesCount
+from data_gradients.feature_extractors.segmentationV2.classes_per_image_count import SegmentationClassesPerImageCount
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
@@ -145,13 +146,24 @@ class SegmentationBBoxV2Test(unittest.TestCase):
         self.resolution_extractor.update(train_sample)
         self.resolution_extractor.update(valid_sample)
 
-        self.class_distribution_extractor = SegmentationClassesDistribution()
-        self.class_distribution_extractor.update(train_sample)
-        self.class_distribution_extractor.update(valid_sample)
+        self.class_count = SegmentationClassesCount()
+        self.class_count.update(train_sample)
+        self.class_count.update(valid_sample)
+
+        self.classes_per_image_count = SegmentationClassesPerImageCount()
+        self.classes_per_image_count.update(train_sample)
+        self.classes_per_image_count.update(valid_sample)
 
         self.area_extractor = SegmentationBoundingBoxArea()
         self.area_extractor.update(train_sample)
         self.area_extractor.update(valid_sample)
+
+        self.feature_extractors = [
+            self.resolution_extractor,
+            self.class_count,
+            self.classes_per_image_count,
+            self.area_extractor,
+        ]
 
     def test_update_and_aggregate(self):
         # Create a sample SegmentationSample object for testing
@@ -173,10 +185,11 @@ class SegmentationBBoxV2Test(unittest.TestCase):
             self.assertAlmostEqual(x["bbox_area"], y["bbox_area"], delta=0.01)
 
     def test_plot(self):
-        feature = self.area_extractor.aggregate()
-        sns = SeabornRenderer()
-        f = sns.render(feature.data, feature.plot_options)
-        f.show()
+        for feature_extractor in self.feature_extractors:
+            feature = feature_extractor.aggregate()
+            sns = SeabornRenderer()
+            f = sns.render(feature.data, feature.plot_options)
+            f.show()
 
     def test_resolution_plot(self):
         feature = self.resolution_extractor.aggregate()
@@ -185,7 +198,7 @@ class SegmentationBBoxV2Test(unittest.TestCase):
         f.show()
 
     def test_class_distribution_plot(self):
-        feature = self.class_distribution_extractor.aggregate()
+        feature = self.class_count.aggregate()
         sns = SeabornRenderer()
         f = sns.render(feature.data, feature.plot_options)
         f.show()

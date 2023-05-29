@@ -26,7 +26,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
         elif sample.image_format == ImageChannelFormat.BGR:
             image = cv2.cvtColor(sample.image, cv2.COLOR_BGR2RGB)
         elif sample.image_format == ImageChannelFormat.GRAYSCALE:
-            image = sample.image[np.newaxis, :, :]
+            image = sample.image[:, :, np.newaxis]
             self.colors = ("Grayscale",)
         elif sample.image_format == ImageChannelFormat.UNKNOWN:
             image = sample.image
@@ -40,7 +40,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
         for i, color in enumerate(self.colors):
             pixel_frequency_per_channel = self.pixel_frequency_per_channel_per_split.get(sample.split, dict())
             pixel_frequency = pixel_frequency_per_channel.get(color, PixelFrequencyCounter())
-            pixel_frequency.update(image[i, :, :])
+            pixel_frequency.update(image[:, :, i])
 
             pixel_frequency_per_channel[color] = pixel_frequency
             self.pixel_frequency_per_channel_per_split[sample.split] = pixel_frequency_per_channel
@@ -59,6 +59,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             x_label_name="Color Intensity",
             weights="count",
             kde=True,
+            stat="density",
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,

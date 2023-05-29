@@ -37,6 +37,7 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
             x_label_key="brightness",
             x_label_name="Average Brightness of Images",
             kde=True,
+            stat="density",
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,

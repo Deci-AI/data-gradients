@@ -117,12 +117,7 @@ class SeabornRenderer(PlotRenderer):
             axs = axs.reshape(-1)
 
         for df, ax_i in zip(dfs, axs):
-            histplot_args = dict(
-                data=df,
-                x=options.x_label_key,
-                kde=options.kde,
-                ax=ax_i,
-            )
+            histplot_args = dict(data=df, x=options.x_label_key, kde=options.kde, stat=options.stat, ax=ax_i)
 
             if options.y_label_key is not None:
                 histplot_args.update(y=options.y_label_key)
@@ -176,6 +171,7 @@ class SeabornRenderer(PlotRenderer):
             x=options.x_label_key,
             y=options.y_label_key,
             ax=ax,
+            cut=True,
         )
         if options.bandwidth is not None:
             plot_args.update(bw=options.bandwidth)

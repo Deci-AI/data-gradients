@@ -3,18 +3,16 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.visualize.seaborn_renderer import Hist2DPlotOptions
+from data_gradients.visualize.plot_options import ViolinPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
+class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
     def update(self, sample: SegmentationSample):
-
-        height, width = sample.image.shape[:2]
         for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
                 class_id = contour.class_id
@@ -22,34 +20,34 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
                 self.data.append(
                     {
                         "split": sample.split,
+                        "sample_id": sample.sample_id,
                         "class_name": class_name,
-                        "height": 100 * (contour.h / height),  # TODO: Decide to divide it by image height or not...
-                        "width": 100 * (contour.w / width),
                     }
                 )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        plot_options = Hist2DPlotOptions(
-            x_label_key="width",
-            x_label_name="Width (in % of image)",
-            y_label_key="height",
-            y_label_name="Height (in % of image)",
+        # Include ("class_name", "split", "n_appearance")
+        # For each class, image, split, I want to know how many bbox I have
+        # TODO: check this
+        df_class_count = df.groupby(["class_name", "sample_id", "split"]).size().reset_index(name="n_appearance")
+
+        plot_options = ViolinPlotOptions(
+            x_label_key="n_appearance",
+            x_label_name="Number of class instance per Image",
+            y_label_key="class_name",
+            y_label_name="Class Names",
             title=self.title,
-            x_lim=(0, 100),
-            y_lim=(0, 100),
+            bandwidth=0.4,
             x_ticks_rotation=None,
             labels_key="split",
-            individual_plots_key="split",
-            tight_layout=True,
         )
 
-        description = df.describe()
-        json = {"width": dict(description["width"]), "height": dict(description["height"])}
+        json = dict(df_class_count.n_appearance.describe())
 
         feature = Feature(
-            data=df,
+            data=df_class_count,
             plot_options=plot_options,
             json=json,
         )
@@ -57,11 +55,12 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Bounding Boxes Height and Width."
+        return "Number of classes per image."
 
     @property
     def description(self) -> str:
         return (
-            "Width, Height of the bounding-boxes surrounding every object across all images. Plotted per-class on a heat-map.\n"
-            "A large variation in object sizes within a class can make it harder for the model to recognize the objects."
+            "The total number of connected components for each class, across all images. \n"
+            "If the average number of components per image is too high, it might be due to image noise or the "
+            "presence of many segmentation blobs."
         )
