@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Featu
 
 
 @register_feature_extractor()
-class ImagesAspectRatio(AbstractFeatureExtractor):
+class ImagesResolution(AbstractFeatureExtractor):
     """Extracts the distribution of the image aspect ratio."""
 
     def __init__(self):
@@ -50,4 +50,7 @@ class ImagesAspectRatio(AbstractFeatureExtractor):
 
     @property
     def description(self) -> str:
-        return "The distribution of the aspect ratios of the images as a discrete histogram."
+        return (
+            "The distribution of the image resolutions as a discrete histogram. \n Note that if images are "
+            "rescaled or padded, this plot will show the size after rescaling and padding. "
+        )

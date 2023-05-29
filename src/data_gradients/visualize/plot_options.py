@@ -48,6 +48,7 @@ class BarPlotOptions(CommonPlotOptions):
 
     show_values: bool = False
 
+    orient: str = "h"
     log_scale: Union[bool, str] = "auto"
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)

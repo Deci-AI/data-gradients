@@ -2,13 +2,13 @@ import unittest
 import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
-from data_gradients.feature_extractors.commonV2.image_aspect_ratios import ImagesAspectRatio
+from data_gradients.feature_extractors.commonV2.image_aspect_ratios import ImagesResolution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
 class ComponentsSizeDistributionV2Test(unittest.TestCase):
     def setUp(self) -> None:
-        self.extractor = ImagesAspectRatio()
+        self.extractor = ImagesResolution()
 
         train_sample = ImageSample(
             sample_id="sample_0",

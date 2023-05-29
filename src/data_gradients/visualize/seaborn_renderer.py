@@ -10,7 +10,6 @@ from data_gradients.visualize.plot_options import (
     BarPlotOptions,
     ScatterPlotOptions,
     ViolinPlotOptions,
-    HistogramPlotOptions,
 )
 
 __all__ = ["SeabornRenderer"]
@@ -35,8 +34,6 @@ class SeabornRenderer(PlotRenderer):
             return self._render_scatterplot(df, options)
         if isinstance(options, ViolinPlotOptions):
             return self._render_violinplot(df, options)
-        if isinstance(options, HistogramPlotOptions):
-            return self._render_histogram(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
@@ -215,6 +212,7 @@ class SeabornRenderer(PlotRenderer):
             x=options.x_label_key,
             width=options.width,
             ax=ax,
+            orient=options.orient,
         )
 
         if options.y_label_key is not None:

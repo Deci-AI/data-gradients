@@ -1,57 +1,66 @@
-import numpy as np
+import cv2
+import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.feature_extractors.feature_extractor_abstract import (
-    FeatureExtractorAbstract,
-)
-from data_gradients.feature_extractors.utils import align_histogram_keys
-from data_gradients.utils.data_classes import ImageSample
-from data_gradients.utils.data_classes.extractor_results import HistogramResults
+from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
+from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
+from data_gradients.visualize.plot_options import Hist2DPlotOptions
+from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 
 
 @register_feature_extractor()
-class MeanAndSTD(FeatureExtractorAbstract):
-    """
-    Extracts the mean and std of the pixel values for each channel across all images (Blue-Mean, Blue-STD,
-    Green-Mean, Green-STD, Red-Mean, Red-STD). Assumes BGR Channel ordering"
-    """
+class ImageChannelsStats(AbstractFeatureExtractor):
+    """Extracts the distribution of the image 'brightness'."""
 
     def __init__(self):
-        super().__init__()
-        self._hist = {"train": {"mean": [], "std": []}, "val": {"mean": [], "std": []}}
+        self.data = []
+        self.grayscale = False
 
     def update(self, sample: ImageSample):
-        self._hist[sample.split]["mean"].append(np.mean(sample.image, axis=(0, 1)))
-        self._hist[sample.split]["std"].append(np.std(sample.image, axis=(0, 1)))
+        if sample.image_format == ImageChannelFormat.RGB:
+            image = sample.image
+        elif sample.image_format == ImageChannelFormat.BGR:
+            image = cv2.cvtColor(sample.image, cv2.COLOR_BGR2RGB)
+        elif sample.image_format == ImageChannelFormat.GRAYSCALE:
+            image = sample.image
+            self.grayscale = True
+        elif sample.image_format == ImageChannelFormat.UNKNOWN:
+            image = sample.image
+        else:
+            raise ValueError(f"Unknown image format {sample.image_format}")
 
-    def _aggregate(self, split: str):
+        # TODO: Find a way to do it lazy correctly...
+        return image
+        # self.data.append({"split": sample.split, "brightness": brightness})
 
-        self._hist["train"], self._hist["val"] = align_histogram_keys(self._hist["train"], self._hist["val"])
-        bgr_means = np.zeros(3)
-        bgr_std = np.zeros(3)
-        for channel in range(3):
-            means = [self._hist[split]["mean"][i][channel].item() for i in range(len(self._hist[split]["mean"]))]
-            bgr_means[channel] = np.mean(means)
-            stds = [self._hist[split]["std"][i][channel].item() for i in range(len(self._hist[split]["std"]))]
-            bgr_std[channel] = np.mean(stds)
-        values = [bgr_means[0], bgr_std[0], bgr_means[1], bgr_std[1], bgr_means[2], bgr_std[2]]
-        bins = ["Blue-Mean", "Blue-STD", "Green-Mean", "Green-STD", "Red-Mean", "Red-STD"]
+    def aggregate(self) -> Feature:
+        df = pd.DataFrame(self.data)
+        title = "Distribution of Image Brightness"
 
-        results = HistogramResults(
-            bin_names=bins,
-            bin_values=values,
-            plot="bar-plot",
-            split=split,
-            color=self.colors[split],
-            title="Images mean & std",
-            y_label="Mean / STD",
-            ticks_rotation=0,
-            y_ticks=True,
+        plot_options = Hist2DPlotOptions(
+            x_label_key="brightness",
+            x_label_name="Brightness",
+            title=title,
+            x_lim=(0, 255),
+            x_ticks_rotation=None,
+            labels_key="split",
+            individual_plots_key="split",
+            individual_plots_max_cols=2,
         )
-        return results
+        json = dict(df.brightness.describe())
+
+        feature = Feature(
+            title=title,
+            description=self.description,
+            data=df,
+            plot_options=plot_options,
+            json=json,
+        )
+        return feature
 
     @property
     def description(self) -> str:
+        # TODO: update
         return (
             "The mean and std of the pixel values for each channel across all images (Blue-Mean, Blue-STD, "
             "Green-Mean, Green-STD, Red-Mean, Red-STD). Assumes BGR Channel ordering. \n"

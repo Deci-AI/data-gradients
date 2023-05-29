@@ -4,10 +4,12 @@ import numpy as np
 from data_gradients.utils.data_classes.data_samples import SegmentationSample, ImageChannelFormat
 from data_gradients.utils.data_classes.contour import Contour
 from data_gradients.feature_extractors.segmentationV2.bounding_boxes_area import BoundingBoxAreaFeatureExtractor
+from data_gradients.feature_extractors.segmentationV2.bounding_boxes_resolution import BoundingBoxResolution
+from data_gradients.feature_extractors.segmentationV2.classes_distribution import ClassesDistribution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
-class ComponentsSizeDistributionV2Test(unittest.TestCase):
+class SegmentationBBoxV2Test(unittest.TestCase):
     def setUp(self) -> None:
         train_sample = SegmentationSample(
             sample_id="sample_1",
@@ -138,13 +140,22 @@ class ComponentsSizeDistributionV2Test(unittest.TestCase):
                 ],
             ],
         )
-        self.extractor = BoundingBoxAreaFeatureExtractor()
-        self.extractor.update(train_sample)
-        self.extractor.update(valid_sample)
+
+        self.resolution_extractor = BoundingBoxResolution()
+        self.resolution_extractor.update(train_sample)
+        self.resolution_extractor.update(valid_sample)
+
+        self.class_distribution_extractor = ClassesDistribution()
+        self.class_distribution_extractor.update(train_sample)
+        self.class_distribution_extractor.update(valid_sample)
+
+        self.area_extractor = BoundingBoxAreaFeatureExtractor()
+        self.area_extractor.update(train_sample)
+        self.area_extractor.update(valid_sample)
 
     def test_update_and_aggregate(self):
         # Create a sample SegmentationSample object for testing
-        feature = self.extractor.aggregate()
+        feature = self.area_extractor.aggregate()
 
         expected_data = [
             {"split": "train", "class_name": "0", "bbox_area": 5},
@@ -162,7 +173,19 @@ class ComponentsSizeDistributionV2Test(unittest.TestCase):
             self.assertAlmostEqual(x["bbox_area"], y["bbox_area"], delta=0.01)
 
     def test_plot(self):
-        feature = self.extractor.aggregate()
+        feature = self.area_extractor.aggregate()
+        sns = SeabornRenderer()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
+
+    def test_resolution_plot(self):
+        feature = self.resolution_extractor.aggregate()
+        sns = SeabornRenderer()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
+
+    def test_class_distribution_plot(self):
+        feature = self.class_distribution_extractor.aggregate()
         sns = SeabornRenderer()
         f = sns.render(feature.data, feature.plot_options)
         f.show()
