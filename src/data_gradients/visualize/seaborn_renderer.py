@@ -3,9 +3,9 @@ import pandas as pd
 import seaborn
 from matplotlib import pyplot as plt
 
-__all__ = ["SeabornRenderer"]
+from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolinPlotOptions
 
-from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions
+__all__ = ["SeabornRenderer"]
 
 
 class SeabornRenderer(PlotRenderer):
@@ -25,27 +25,23 @@ class SeabornRenderer(PlotRenderer):
             return self._render_barplot(df, options)
         if isinstance(options, ScatterPlotOptions):
             return self._render_scatterplot(df, options)
+        if isinstance(options, ViolinPlotOptions):
+            return self._render_violinplot(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
     def _render_scatterplot(self, df, options: ScatterPlotOptions) -> plt.Figure:
-        dfs = []
 
-        if options.individual_plots_key is not None:
-            for key in df[options.individual_plots_key].unique():
-                df_key = df[df[options.individual_plots_key] == key]
-                dfs.append(df_key)
-        else:
-            dfs.append(df)
-
-        if len(dfs) == 1:
+        if options.individual_plots_key is None:
+            dfs = [df]
             n_rows = 1
             n_cols = 1
         else:
-            num_images = len(dfs)
-            max_cols = options.individual_plots_max_cols
-            n_cols = min(num_images, max_cols)
-            n_rows = int(np.ceil(num_images / n_cols))
+            dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
+            _num_images = len(dfs)
+            _max_cols = options.individual_plots_max_cols
+            n_cols = min(_num_images, _max_cols)
+            n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
         if options.tight_layout:
@@ -90,23 +86,17 @@ class SeabornRenderer(PlotRenderer):
         return fig
 
     def _render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
-        dfs = []
 
-        if options.individual_plots_key is not None:
-            for key in df[options.individual_plots_key].unique():
-                df_key = df[df[options.individual_plots_key] == key]
-                dfs.append(df_key)
-        else:
-            dfs.append(df)
-
-        if len(dfs) == 1:
+        if options.individual_plots_key is None:
+            dfs = [df]
             n_rows = 1
             n_cols = 1
         else:
-            num_images = len(dfs)
-            max_cols = options.individual_plots_max_cols
-            n_cols = min(num_images, max_cols)
-            n_rows = int(np.ceil(num_images / n_cols))
+            dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
+            _num_images = len(dfs)
+            _max_cols = options.individual_plots_max_cols
+            n_cols = min(_num_images, _max_cols)
+            n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
         if options.tight_layout:
@@ -151,6 +141,45 @@ class SeabornRenderer(PlotRenderer):
                     options.x_ticks_rotation = 45
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
+
+        return fig
+
+    def _render_violinplot(self, df, options: ViolinPlotOptions) -> plt.Figure:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
+        if options.tight_layout:
+            fig.tight_layout()
+        fig.suptitle(options.title)
+        fig.subplots_adjust(top=0.9)
+
+        plot_args = dict(
+            data=df,
+            x=options.x_label_key,
+            y=options.y_label_key,
+            ax=ax,
+        )
+        if options.bandwidth is not None:
+            plot_args.update(bw=options.bandwidth)
+
+        if options.labels_key is not None:
+            plot_args.update(hue=options.labels_key, split=True)
+            if options.labels_palette is not None:
+                plot_args.update(palette=options.labels_palette)
+
+        ax = seaborn.violinplot(**plot_args)
+
+        ax.set_xlabel(options.x_label_name)
+        ax.set_ylabel(options.y_label_name)
+        if options.labels_name is not None:
+            ax.legend(title=options.labels_name)
+
+        if options.x_ticks_rotation == "auto":
+            n_unique = len(df[options.x_label_key].unique())
+            if n_unique > 50:
+                options.x_ticks_rotation = 90
+            elif n_unique > 10:
+                options.x_ticks_rotation = 45
+
+        self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
         return fig
 

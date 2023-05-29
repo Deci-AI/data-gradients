@@ -54,6 +54,50 @@ class BarPlotOptions(CommonPlotOptions):
 
 
 @dataclasses.dataclass
+class ViolinPlotOptions(CommonPlotOptions):
+    """
+    Contains a set of options for displaying a violin distribution plot.
+
+    :attr x_label_key: A key for x-axis values
+    :attr x_label_name: A title for x-axis
+    :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
+    :attr y_label_name: A title for y-axis
+    :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
+    :attr kde: If True, will display a kernel density estimate
+    :attr individual_plots_key: If None, the data will be displayed in a single plot.
+                                If not None, will create a separate plot for each unique value of this column.
+                                    e.g. `individual_plots_key="class_id"` will create a separate violin plot for each class.
+    :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
+    :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
+    :attr bandwidth: If None, use the default bandwidth of the violin plot. Affects the kernel estimation.
+    :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
+    :attr tight_layout: If True enables more compact layout of the plot
+    :attr figsize: Size of the figure
+    """
+
+    x_label_key: str
+    x_label_name: str
+
+    y_label_key: str
+    y_label_name: str
+
+    individual_plots_key: str = None
+    individual_plots_max_cols: int = None
+
+    labels_key: Optional[str] = None
+    labels_name: Optional[str] = None
+    labels_palette: Optional[Mapping] = None
+
+    bandwidth: Union[float, str] = None
+
+    tight_layout: bool = False
+    figsize: Optional[Tuple[int, int]] = (10, 6)
+
+    x_ticks_rotation: Optional[int] = 45
+    y_ticks_rotation: Optional[int] = None
+
+
+@dataclasses.dataclass
 class Hist2DPlotOptions(CommonPlotOptions):
     """
     Contains a set of options for displaying a bivariative histogram plot.
@@ -64,7 +108,8 @@ class Hist2DPlotOptions(CommonPlotOptions):
     :attr y_label_name: A title for y-axis
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
-    :attr individual_plots_key: If not None, will create a separate plot for each unique value of this column
+    :attr individual_plots_key: If None, the data will be displayed in a single plot.
+                                If not None, will create a separate plot for each unique value of this column
     :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
     :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
@@ -106,7 +151,8 @@ class ScatterPlotOptions(CommonPlotOptions):
     :attr y_label_name: A title for y-axis
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
-    :attr individual_plots_key: If not None, will create a separate plot for each unique value of this column
+    :attr individual_plots_key: If None, the data will be displayed in a single plot.
+                                If not None, will create a separate plot for each unique value of this column
     :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
     :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
