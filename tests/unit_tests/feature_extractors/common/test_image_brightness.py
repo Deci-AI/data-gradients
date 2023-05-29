@@ -6,7 +6,7 @@ from data_gradients.feature_extractors.commonV2.image_brightness import ImageBri
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
-class ComponentsSizeDistributionV2Test(unittest.TestCase):
+class ImageBrightnessTest(unittest.TestCase):
     def setUp(self) -> None:
         self.extractor = ImageBrightness()
 

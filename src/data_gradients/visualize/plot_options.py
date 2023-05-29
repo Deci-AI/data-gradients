@@ -123,8 +123,8 @@ class Hist2DPlotOptions(CommonPlotOptions):
     x_label_key: str
     x_label_name: str
 
-    y_label_key: str = None
-    y_label_name: str = None
+    y_label_key: Optional[str] = None
+    y_label_name: Optional[str] = None
 
     x_lim: Tuple[float, float] = None
     y_lim: Tuple[float, float] = None
