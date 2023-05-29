@@ -1,4 +1,4 @@
-from typing import Mapping, Optional, Any, List, Tuple, Sequence
+from typing import Mapping, Optional, Any, List, Tuple, Sequence, Union
 import json
 import re
 
@@ -21,7 +21,14 @@ class TensorExtractor:
         return traverse_nested_data_structure(data=objs, keys=self.path_to_tensor)
 
 
-def parse_path(path):
+def parse_path(path: str) -> List[Union[str, int]]:
+    """Parse the path to an object into a list of indexes.
+
+    >>> parse_path("field1.field12[0]") # parsing path to {"field1": {"field12": [<object>, ...], ...}, ...}
+    ["field1", "field12", 0]  # data["field1"]["field12"][0] = <object>
+
+    :param path: Path to the object as a string
+    """
     pattern = r"\.|\[(\d+)\]"
 
     result = re.split(pattern, path)
@@ -37,6 +44,7 @@ def prompt_user_for_data_keys(objs: Any, name: str) -> List[str]:
     :param objs:        Dictionary of json-like structure.
     :param name:        The type of your targeted field ('image', 'label', ...). This is only for display purpose.
     :return:            List of keys that if you iterate with the Get Operation (d[k]) through all of them, you will get the data you intended.
+                        e.g. ["field1", "field12", 0]  # objs["field1"]["field12"][0] = <object>
     """
 
     if not (isinstance(objs, dict) or is_valid_json(objs)):
