@@ -126,6 +126,8 @@ class Hist2DPlotOptions(CommonPlotOptions):
     y_label_key: Optional[str] = None
     y_label_name: Optional[str] = None
 
+    weights: Optional[str] = None
+
     x_lim: Tuple[float, float] = None
     y_lim: Tuple[float, float] = None
 

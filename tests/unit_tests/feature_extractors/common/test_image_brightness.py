@@ -3,12 +3,14 @@ import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
 from data_gradients.feature_extractors.commonV2.image_brightness import ImageBrightness
+from data_gradients.feature_extractors.commonV2.image_color_distribution import ImageColorDistribution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
 class ImageBrightnessTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.extractor = ImageBrightness()
+        self.average_brightness = ImageBrightness()
+        self.color_distribution = ImageColorDistribution()
 
         train_image = np.zeros((100, 100, 3), dtype=np.uint8)
         train_sample = ImageSample(
@@ -17,7 +19,8 @@ class ImageBrightnessTest(unittest.TestCase):
             image=train_image,
             image_format=ImageChannelFormat.RGB,
         )
-        self.extractor.update(train_sample)
+        self.average_brightness.update(train_sample)
+        self.color_distribution.update(train_sample)
 
         train_image = np.zeros((100, 100, 3), dtype=np.uint8)
         train_image[0, :50, :] = 50
@@ -28,7 +31,8 @@ class ImageBrightnessTest(unittest.TestCase):
             image=train_image,
             image_format=ImageChannelFormat.RGB,
         )
-        self.extractor.update(train_sample)
+        self.average_brightness.update(train_sample)
+        self.color_distribution.update(train_sample)
 
         train_image = np.zeros((100, 100, 3), dtype=np.uint8)
         train_image[1, :80, :] = 200
@@ -38,7 +42,8 @@ class ImageBrightnessTest(unittest.TestCase):
             image=train_image,
             image_format=ImageChannelFormat.RGB,
         )
-        self.extractor.update(train_sample)
+        self.average_brightness.update(train_sample)
+        self.color_distribution.update(train_sample)
 
         train_image = np.zeros((100, 100, 3), dtype=np.uint8)
         train_image[1, :80, :] = 200
@@ -48,7 +53,8 @@ class ImageBrightnessTest(unittest.TestCase):
             image=train_image,
             image_format=ImageChannelFormat.RGB,
         )
-        self.extractor.update(train_sample)
+        self.average_brightness.update(train_sample)
+        self.color_distribution.update(train_sample)
 
         valid_image = np.zeros((100, 100, 3), dtype=np.uint8)
         valid_image[0, :20, :] = 150
@@ -59,7 +65,8 @@ class ImageBrightnessTest(unittest.TestCase):
             image=valid_image,
             image_format=ImageChannelFormat.RGB,
         )
-        self.extractor.update(valid_sample)
+        self.average_brightness.update(valid_sample)
+        self.color_distribution.update(valid_sample)
 
         valid_image = np.zeros((100, 100, 3), dtype=np.uint8)
         valid_image[0, :20, :] = 150
@@ -70,7 +77,8 @@ class ImageBrightnessTest(unittest.TestCase):
             image=valid_image,
             image_format=ImageChannelFormat.RGB,
         )
-        self.extractor.update(valid_sample)
+        self.average_brightness.update(valid_sample)
+        self.color_distribution.update(valid_sample)
 
         valid_image = np.zeros((100, 100, 3), dtype=np.uint8)
         valid_image[0, :50, :] = 150
@@ -81,11 +89,12 @@ class ImageBrightnessTest(unittest.TestCase):
             image=valid_image,
             image_format=ImageChannelFormat.RGB,
         )
-        self.extractor.update(valid_sample)
+        self.average_brightness.update(valid_sample)
+        self.color_distribution.update(valid_sample)
 
     def test_update_and_aggregate(self):
         # Create a sample SegmentationSample object for testing
-        output_json = self.extractor.aggregate().json
+        output_json = self.average_brightness.aggregate().json
 
         expected_json = {
             "count": 7.0,
@@ -102,7 +111,13 @@ class ImageBrightnessTest(unittest.TestCase):
             self.assertEqual(round(output_json[key], 4), round(expected_json[key], 4))
 
     def test_plot(self):
-        feature = self.extractor.aggregate()
+        feature = self.average_brightness.aggregate()
+        sns = SeabornRenderer()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
+
+    def test_color_distribution_plot(self):
+        feature = self.color_distribution.aggregate()
         sns = SeabornRenderer()
         f = sns.render(feature.data, feature.plot_options)
         f.show()

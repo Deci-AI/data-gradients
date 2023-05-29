@@ -120,12 +120,15 @@ class SeabornRenderer(PlotRenderer):
             histplot_args = dict(
                 data=df,
                 x=options.x_label_key,
-                y=options.y_label_key,
                 kde=options.kde,
                 ax=ax_i,
             )
+
             if options.y_label_key is not None:
                 histplot_args.update(y=options.y_label_key)
+
+            if options.weights is not None:
+                histplot_args.update(weights=options.weights)
 
             if options.bins is not None:
                 histplot_args.update(bins=options.bins)

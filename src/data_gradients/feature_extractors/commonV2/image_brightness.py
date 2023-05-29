@@ -35,7 +35,8 @@ class ImageBrightness(AbstractFeatureExtractor):
 
         plot_options = Hist2DPlotOptions(
             x_label_key="brightness",
-            x_label_name="Brightness",
+            x_label_name="Average Brightness of Images",
+            kde=True,
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
@@ -54,13 +55,12 @@ class ImageBrightness(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Image Brightness."
+        return "Average Brightness of Images."
 
     @property
     def description(self) -> str:
         return (
-            "The distribution of the image 'lightness' (as L channel pixel value distribution in CIELAB color "
-            "space, as a discrete histogram (divided into 10 bins). \n"
+            "Distribution of the average 'lightness' of images (as L channel pixel value distribution in CIELAB color). \n"
             "Image brightness distribution can reveal differences between the train and validation set. I.e. if "
             "the train set contains only day images while the validation set contains night images. "
         )
