@@ -151,19 +151,21 @@ class SeabornRenderer(PlotRenderer):
         fig.suptitle(options.title)
         fig.subplots_adjust(top=0.9)
 
-        barplot_args = dict(
+        plot_args = dict(
             data=df,
             x=options.x_label_key,
             y=options.y_label_key,
             ax=ax,
         )
+        if options.bandwidth is not None:
+            plot_args.update(bw=options.bandwidth)
 
         if options.labels_key is not None:
-            barplot_args.update(hue=options.labels_key, split=True)
+            plot_args.update(hue=options.labels_key, split=True)
             if options.labels_palette is not None:
-                barplot_args.update(palette=options.labels_palette)
+                plot_args.update(palette=options.labels_palette)
 
-        ax = seaborn.violinplot(**barplot_args)
+        ax = seaborn.violinplot(**plot_args)
 
         ax.set_xlabel(options.x_label_name)
         ax.set_ylabel(options.y_label_name)

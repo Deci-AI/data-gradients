@@ -1,6 +1,6 @@
 import dataclasses
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 
@@ -51,6 +51,7 @@ class SegmentationSample(ImageSample):
     mask: np.ndarray
 
     contours: List[List[Contour]]
+    class_names: Optional[List[str]] = None
 
     def __repr__(self):
         return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
