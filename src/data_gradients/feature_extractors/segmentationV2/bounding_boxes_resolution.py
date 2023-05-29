@@ -57,7 +57,7 @@ class BoundingBoxResolution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Bounding Boxes Height and Width per Class"
+        return "Distribution of Bounding Boxes Height and Width per Class."
 
     @property
     def description(self) -> str:

@@ -9,7 +9,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Featu
 
 @register_feature_extractor()
 class ImagesResolution(AbstractFeatureExtractor):
-    """Extracts the distribution of the image aspect ratio."""
+    """Extracts the distribution image Height and Width."""
 
     def __init__(self):
         super().__init__()
@@ -47,7 +47,7 @@ class ImagesResolution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Image Aspect Ratios"
+        return "Extracts the distribution image Height and Width."
 
     @property
     def description(self) -> str:

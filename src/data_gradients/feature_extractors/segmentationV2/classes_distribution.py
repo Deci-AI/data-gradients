@@ -52,7 +52,7 @@ class ClassesDistribution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of classes"
+        return "Distribution of classes."
 
     @property
     def description(self) -> str:

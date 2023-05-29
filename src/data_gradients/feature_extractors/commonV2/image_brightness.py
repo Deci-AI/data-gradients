@@ -54,7 +54,7 @@ class ImageBrightness(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Image Brightness"
+        return "Distribution of Image Brightness."
 
     @property
     def description(self) -> str:

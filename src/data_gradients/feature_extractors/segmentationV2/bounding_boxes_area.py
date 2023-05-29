@@ -55,7 +55,7 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Bounding Boxes Area per Class"
+        return "Distribution of Bounding Boxes Area per Class."
 
     @property
     def description(self) -> str:
