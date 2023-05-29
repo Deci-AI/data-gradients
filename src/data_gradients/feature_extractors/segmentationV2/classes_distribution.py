@@ -44,7 +44,6 @@ class ClassesDistribution(AbstractFeatureExtractor):
         json = dict(df.class_name.describe())
 
         feature = Feature(
-            description=self.description,
             data=df_class_count,
             plot_options=plot_options,
             json=json,

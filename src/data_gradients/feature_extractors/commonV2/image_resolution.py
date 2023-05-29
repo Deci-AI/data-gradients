@@ -21,14 +21,13 @@ class ImagesResolution(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
-        title = "Image Aspect Ratios"
 
         plot_options = Hist2DPlotOptions(
             x_label_key="width",
             x_label_name="Width",
             y_label_key="height",
             y_label_name="Height",
-            title=title,
+            title=self.title,
             x_lim=(0, df["width"].max() + 100),
             y_lim=(0, df["height"].max() + 100),
             x_ticks_rotation=None,
@@ -40,13 +39,15 @@ class ImagesResolution(AbstractFeatureExtractor):
         json = {"width": dict(description["width"]), "height": dict(description["height"])}
 
         feature = Feature(
-            title=title,
-            description=self.description,
             data=df,
             plot_options=plot_options,
             json=json,
         )
         return feature
+
+    @property
+    def title(self) -> str:
+        return "Image Aspect Ratios"
 
     @property
     def description(self) -> str:

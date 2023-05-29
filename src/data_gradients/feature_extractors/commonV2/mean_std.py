@@ -35,12 +35,11 @@ class ImageChannelsStats(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
-        title = "Distribution of Image Brightness"
 
         plot_options = Hist2DPlotOptions(
             x_label_key="brightness",
             x_label_name="Brightness",
-            title=title,
+            title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
             labels_key="split",
@@ -50,13 +49,15 @@ class ImageChannelsStats(AbstractFeatureExtractor):
         json = dict(df.brightness.describe())
 
         feature = Feature(
-            title=title,
-            description=self.description,
             data=df,
             plot_options=plot_options,
             json=json,
         )
         return feature
+
+    @property
+    def title(self) -> str:
+        return "Distribution of Image Brightness"
 
     @property
     def description(self) -> str:

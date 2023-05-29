@@ -54,13 +54,13 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
         return feature
 
     @property
+    def title(self) -> str:
+        return "Distribution of Bounding Boxes Area per Class"
+
+    @property
     def description(self) -> str:
         return (
             "The distribution of the areas of the boxes that bound connected components of the different classes as a histogram.\n"
             "The size of the objects can significantly affect the performance of your model. "
             "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
         )
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Bounding Boxes Area per Class"
