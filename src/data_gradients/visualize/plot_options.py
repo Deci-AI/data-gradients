@@ -48,6 +48,7 @@ class BarPlotOptions(CommonPlotOptions):
 
     show_values: bool = False
 
+    orient: str = "h"
     log_scale: Union[bool, str] = "auto"
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
@@ -106,6 +107,8 @@ class Hist2DPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr x_lim: X-axis limits
+    :attr y_lim: Y-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
     :attr individual_plots_key: If None, the data will be displayed in a single plot.
@@ -120,8 +123,13 @@ class Hist2DPlotOptions(CommonPlotOptions):
     x_label_key: str
     x_label_name: str
 
-    y_label_key: str
-    y_label_name: str
+    y_label_key: Optional[str] = None
+    y_label_name: Optional[str] = None
+
+    weights: Optional[str] = None
+
+    x_lim: Tuple[float, float] = None
+    y_lim: Tuple[float, float] = None
 
     bins: Optional[int] = None
     kde: bool = False

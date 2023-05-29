@@ -3,23 +3,17 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
+from data_gradients.visualize.seaborn_renderer import BarPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
-    """
-    Semantic Segmentation task feature extractor -
-    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
-    """
-
+class SegmentationClassesDistribution(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
     def update(self, sample: SegmentationSample):
-        image_area = sample.image.shape[0] * sample.image.shape[1]
-        for class_channel in sample.contours:
+        for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
                 class_id = contour.class_id
                 class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
@@ -27,27 +21,30 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
                     {
                         "split": sample.split,
                         "class_name": class_name,
-                        "bbox_area": 100 * (contour.bbox_area / image_area),
                     }
                 )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        plot_options = ViolinPlotOptions(
-            x_label_key="bbox_area",
-            x_label_name="Bound Box Area (in % of image)",
+        # Include ("class_name", "split", "n_appearance")
+        df_class_count = df.groupby(["class_name", "split"]).size().reset_index(name="n_appearance")
+
+        plot_options = BarPlotOptions(
+            x_label_key="n_appearance",
+            x_label_name="Number of Appearance",
             y_label_key="class_name",
-            y_label_name="Class",
+            y_label_name="Class Names",
             title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
-            bandwidth=0.4,
+            orient="h",
         )
-        json = dict(df.bbox_area.describe())
+
+        json = dict(df.class_name.describe())
 
         feature = Feature(
-            data=df,
+            data=df_class_count,
             plot_options=plot_options,
             json=json,
         )
@@ -55,12 +52,12 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Bounding Boxes Area per Class."
+        return "Distribution of classes."
 
     @property
     def description(self) -> str:
         return (
-            "The distribution of the areas of the boxes that bound connected components of the different classes as a histogram.\n"
-            "The size of the objects can significantly affect the performance of your model. "
-            "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
+            "The total number of connected components for each class, across all images. \n"
+            "If the average number of components per image is too high, it might be due to image noise or the "
+            "presence of many segmentation blobs."
         )
