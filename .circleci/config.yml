@@ -172,11 +172,11 @@ jobs:
 #          package_name: "data-gradients"
 #          version: $CIRCLE_TAG
 #          venv_name: << parameters.dev_venv_name >>
-#      - run:  #todo
-#          name: verify that the output of __version__ is what we expect
-#          command: |
-#            . << parameters.dev_venv_name >>-data-gradients-$CIRCLE_TAG/bin/activate
-#            python3 tests/verify_version.py $CIRCLE_TAG
+      - run:
+          name: verify that the output of __version__ is what we expect
+          command: |
+            . << parameters.dev_venv_name >>-data-gradients-$CIRCLE_TAG/bin/activate
+            python3 tests/verify_version.py $CIRCLE_TAG
 #
 #      - deci-common/pip_test_package_installation_codeartifact_prod: #todo
 #          package_name: "data-gradients"

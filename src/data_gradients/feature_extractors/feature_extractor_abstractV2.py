@@ -13,9 +13,6 @@ from data_gradients.visualize.plot_options import CommonPlotOptions
 class Feature:
     """Feature extracted from the whole dataset."""
 
-    title: str
-    description: str
-
     data: Union[pd.DataFrame, np.ndarray]
     plot_options: CommonPlotOptions
 
@@ -26,8 +23,16 @@ class AbstractFeatureExtractor(ABC):
     @abstractmethod
     def update(self, sample: ImageSample):
         """Accumulate information about samples"""
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def aggregate(self) -> Feature:
-        ...
+        raise NotImplementedError()
+
+    @property
+    def description(self) -> str:
+        raise NotImplementedError()
+
+    @property
+    def title(self) -> str:
+        raise NotImplementedError()

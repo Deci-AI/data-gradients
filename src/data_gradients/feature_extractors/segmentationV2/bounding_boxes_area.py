@@ -33,14 +33,13 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
-        title = "Distribution of Bounding Boxes Area per Class"
 
         plot_options = ViolinPlotOptions(
             x_label_key="bbox_area",
             x_label_name="Bound Box Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
-            title=title,
+            title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
             bandwidth=0.4,
@@ -48,8 +47,6 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
         json = dict(df.bbox_area.describe())
 
         feature = Feature(
-            title=title,
-            description=self.description,
             data=df,
             plot_options=plot_options,
             json=json,
@@ -63,3 +60,7 @@ class BoundingBoxAreaFeatureExtractor(AbstractFeatureExtractor):
             "The size of the objects can significantly affect the performance of your model. "
             "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
         )
+
+    @property
+    def title(self) -> str:
+        return "Distribution of Bounding Boxes Area per Class"
