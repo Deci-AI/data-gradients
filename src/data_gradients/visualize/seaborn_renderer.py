@@ -363,7 +363,7 @@ class SeabornRenderer(PlotRenderer):
             if options.tight_layout:
                 fig.tight_layout()
             fig.subplots_adjust(top=0.9)
-            fig.suptitle(f'{options.title} for class="{class_name}"')
+            fig.suptitle(f'{options.title}: "{class_name}"')
 
             for (split, image), ax_i in zip(images_per_split.items(), axs):
                 ax_i.imshow(image, cmap="hot")

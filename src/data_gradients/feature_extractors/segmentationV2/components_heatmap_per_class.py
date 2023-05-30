@@ -55,7 +55,7 @@ class SegmentationComponentHeatmap(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Heatmap of Components"
+        return "Heatmap of Class"
 
     @property
     def description(self) -> str:
