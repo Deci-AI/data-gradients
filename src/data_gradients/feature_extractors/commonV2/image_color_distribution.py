@@ -16,20 +16,29 @@ class ImageColorDistribution(AbstractFeatureExtractor):
     """Extracts the distribution of the image 'brightness'."""
 
     def __init__(self):
-        self.grayscale = False
+        self.image_format = None
         self.colors = ("Red", "Green", "Blue")
         self.pixel_frequency_per_channel_per_split: Dict[str, Dict[str, PixelFrequencyCounter]] = {}
         self.palette = {"Red": "red", "Green": "green", "Blue": "blue", "Grayscale": "gray"}
 
     def update(self, sample: ImageSample):
-        if sample.image_format == ImageChannelFormat.RGB:
+
+        if self.image_format is None:
+            self.image_format = sample.image_format
+        else:
+            if self.image_format != sample.image_format:
+                raise RuntimeError(
+                    f"Inconstancy in the image format. The image format of the sample {sample.sample_id} is not the same as the previous sample."
+                )
+
+        if self.image_format == ImageChannelFormat.RGB:
             image = sample.image
-        elif sample.image_format == ImageChannelFormat.BGR:
+        elif self.image_format == ImageChannelFormat.BGR:
             image = cv2.cvtColor(sample.image, cv2.COLOR_BGR2RGB)
-        elif sample.image_format == ImageChannelFormat.GRAYSCALE:
+        elif self.image_format == ImageChannelFormat.GRAYSCALE:
             image = sample.image[:, :, np.newaxis]
             self.colors = ("Grayscale",)
-        elif sample.image_format == ImageChannelFormat.UNKNOWN:
+        elif self.image_format == ImageChannelFormat.UNKNOWN:
             image = sample.image
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")
