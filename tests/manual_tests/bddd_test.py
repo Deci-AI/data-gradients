@@ -14,6 +14,8 @@ from data_gradients.feature_extractors.segmentationV2.bounding_boxes_resolution 
 from data_gradients.feature_extractors.segmentationV2.classes_count import SegmentationClassesCount
 from data_gradients.feature_extractors.segmentationV2.classes_per_image_count import SegmentationClassesPerImageCount
 from data_gradients.feature_extractors.segmentationV2.components_per_image_count import SegmentationComponentsPerImageCount
+from data_gradients.feature_extractors.segmentationV2.components_convexity import SegmentationComponentsConvexity
+from data_gradients.feature_extractors.segmentationV2.components_erosion import SegmentationComponentsErosion
 
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
@@ -51,6 +53,8 @@ feature_extractors = [
     SegmentationBoundingBoxResolution(),
     SegmentationClassesCount(),
     SegmentationClassesPerImageCount(),
+    SegmentationComponentsConvexity(),
+    SegmentationComponentsErosion(),
 ]
 
 sns = SeabornRenderer()

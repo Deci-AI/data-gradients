@@ -15,112 +15,112 @@ class TensorExtractor:
     """
 
     def __init__(self, objs: Any, name: str):
-        self.path_to_tensor: Optional[List[str]] = prompt_user_for_data_keys(objs=objs, name=name)
+        self.path_to_tensor: Optional[List[str]] = self.prompt_user_for_data_keys(objs=objs, name=name)
 
     def __call__(self, objs: Any) -> Tensor:
-        return traverse_nested_data_structure(data=objs, keys=self.path_to_tensor)
+        return self.traverse_nested_data_structure(data=objs, keys=self.path_to_tensor)
 
+    @staticmethod
+    def parse_path(path: str) -> List[Union[str, int]]:
+        """Parse the path to an object into a list of indexes.
 
-def parse_path(path: str) -> List[Union[str, int]]:
-    """Parse the path to an object into a list of indexes.
+        >>> parse_path("field1.field12[0]") # parsing path to {"field1": {"field12": [<object>, ...], ...}, ...}
+        ["field1", "field12", 0]  # data["field1"]["field12"][0] = <object>
 
-    >>> parse_path("field1.field12[0]") # parsing path to {"field1": {"field12": [<object>, ...], ...}, ...}
-    ["field1", "field12", 0]  # data["field1"]["field12"][0] = <object>
+        :param path: Path to the object as a string
+        """
+        pattern = r"\.|\[(\d+)\]"
 
-    :param path: Path to the object as a string
-    """
-    pattern = r"\.|\[(\d+)\]"
+        result = re.split(pattern, path)
+        result = [int(x) if x.isdigit() else x for x in result if x and x != "."]
 
-    result = re.split(pattern, path)
-    result = [int(x) if x.isdigit() else x for x in result if x and x != "."]
+        return result
 
-    return result
+    @staticmethod
+    def prompt_user_for_data_keys(objs: Any, name: str) -> List[str]:
+        """Extract out of objs all the potential fields of type [torch.Tensor, np.ndarray, PIL.Image], and then
+        asks the user to input which of the above keys mapping is the right one in order to retrieve the correct data (either images or labels).
 
+        :param objs:        Dictionary of json-like structure.
+        :param name:        The type of your targeted field ('image', 'label', ...). This is only for display purpose.
+        :return:            List of keys that if you iterate with the Get Operation (d[k]) through all of them, you will get the data you intended.
+                            e.g. ["field1", "field12", 0]  # objs["field1"]["field12"][0] = <object>
+        """
 
-def prompt_user_for_data_keys(objs: Any, name: str) -> List[str]:
-    """Extract out of objs all the potential fields of type [torch.Tensor, np.ndarray, PIL.Image], and then
-    asks the user to input which of the above keys mapping is the right one in order to retrieve the correct data (either images or labels).
+        if not (isinstance(objs, dict) or TensorExtractor.is_valid_json(objs)):
+            raise NotImplementedError(f"type{type(objs)} not currently supported")
 
-    :param objs:        Dictionary of json-like structure.
-    :param name:        The type of your targeted field ('image', 'label', ...). This is only for display purpose.
-    :return:            List of keys that if you iterate with the Get Operation (d[k]) through all of them, you will get the data you intended.
-                        e.g. ["field1", "field12", 0]  # objs["field1"]["field12"][0] = <object>
-    """
+        paths = []
+        printable_mapping = TensorExtractor.objects_mapping(objs, path="", targets=paths)
+        printable_mapping = json.dumps(printable_mapping, indent=4)
+        main_question = f"Which element is the {name} ?"
 
-    if not (isinstance(objs, dict) or is_valid_json(objs)):
-        raise NotImplementedError(f"type{type(objs)} not currently supported")
+        options = [f"{k}: {v}" for k, v in paths]
+        selected_option = ask_user(main_question=main_question, options=options, optional_description=printable_mapping)
+        selected_path = selected_option.split(":")[0]
 
-    paths = []
-    printable_mapping = objects_mapping(objs, path="", targets=paths)
-    printable_mapping = json.dumps(printable_mapping, indent=4)
-    main_question = f"Which element is the {name} ?"
+        keys = TensorExtractor.parse_path(selected_path)
+        return keys
 
-    options = [f"{k}: {v}" for k, v in paths]
-    selected_option = ask_user(main_question=main_question, options=options, optional_description=printable_mapping)
-    selected_path = selected_option.split(":")[0]
+    @staticmethod
+    def is_valid_json(myjson: str) -> bool:
+        """Check if an object is a JSON serialized object or not.
 
-    keys = parse_path(selected_path)
-    return keys
+        :param myjson: any object
+        :return: boolean if myjson is a JSON object
+        """
+        try:
+            json.loads(myjson)
+        except ValueError:
+            return False
+        else:
+            return True
 
+    @staticmethod
+    def objects_mapping(obj: Any, path: str, targets: List[Tuple[str, str]]) -> Any:
+        """Recursive function for "digging" into the mapping object it received and save a "path" to the target.
+        Target is defined as one of [torch.Tensor, np.ndarray, PIL.Image]. If got Mapping / Sequence -> continue recursion.
 
-def is_valid_json(myjson: str) -> bool:
-    """Check if an object is a JSON serialized object or not.
+        :param obj:     Recursively returned object
+        :param path:    Current path - not achieved a target yet
+        :param targets: List of tuples (path.to.object, object_type)
+        """
+        if isinstance(obj, Mapping):
+            printable_map = {}
+            for k, v in obj.items():
+                new_path = f"{path}.{k}" if path else k
+                printable_map[k] = TensorExtractor.objects_mapping(v, new_path, targets)
+        elif isinstance(obj, Sequence) and not isinstance(obj, str):
+            printable_map = []
+            for i, v in enumerate(obj):
+                new_path = f"{path}[{i}]"
+                printable_map.append(TensorExtractor.objects_mapping(v, new_path, targets))
+        elif isinstance(obj, str):
+            return "string"
+        elif isinstance(obj, torch.Tensor):
+            printable_map = "Tensor"
+            targets.append((path, printable_map))
+        elif isinstance(obj, ndarray):
+            printable_map = "ndarray"
+            targets.append((path, printable_map))
+        elif isinstance(obj, Image.Image):
+            printable_map = "PIL Image"
+            targets.append((path, printable_map))
+        else:
+            raise RuntimeError(
+                f"Unsupported object! Object found has a type of {type(obj)} which is not supported for now.\n"
+                f"Supported types: [Mapping, Sequence, String, Tensor, Numpy array, PIL Image]"
+            )
+        return printable_map
 
-    :param myjson: any object
-    :return: boolean if myjson is a JSON object
-    """
-    try:
-        json.loads(myjson)
-    except ValueError:
-        return False
-    else:
-        return True
+    @staticmethod
+    def traverse_nested_data_structure(data: Mapping, keys: List[str]) -> Any:
+        """Traverse a nested data structure and returns the value at the specified key path.
 
-
-def objects_mapping(obj: Any, path: str, targets: List[Tuple[str, str]]) -> Any:
-    """Recursive function for "digging" into the mapping object it received and save a "path" to the target.
-    Target is defined as one of [torch.Tensor, np.ndarray, PIL.Image]. If got Mapping / Sequence -> continue recursion.
-
-    :param obj:     Recursively returned object
-    :param path:    Current path - not achieved a target yet
-    :param targets: List of tuples (path.to.object, object_type)
-    """
-    if isinstance(obj, Mapping):
-        printable_map = {}
-        for k, v in obj.items():
-            new_path = f"{path}.{k}" if path else k
-            printable_map[k] = objects_mapping(v, new_path, targets)
-    elif isinstance(obj, Sequence) and not isinstance(obj, str):
-        printable_map = []
-        for i, v in enumerate(obj):
-            new_path = f"{path}[{i}]"
-            printable_map.append(objects_mapping(v, new_path, targets))
-    elif isinstance(obj, str):
-        return "string"
-    elif isinstance(obj, torch.Tensor):
-        printable_map = "Tensor"
-        targets.append((path, printable_map))
-    elif isinstance(obj, ndarray):
-        printable_map = "ndarray"
-        targets.append((path, printable_map))
-    elif isinstance(obj, Image.Image):
-        printable_map = "PIL Image"
-        targets.append((path, printable_map))
-    else:
-        raise RuntimeError(
-            f"Unsupported object! Object found has a type of {type(obj)} which is not supported for now.\n"
-            f"Supported types: [Mapping, Sequence, String, Tensor, Numpy array, PIL Image]"
-        )
-    return printable_map
-
-
-def traverse_nested_data_structure(data: Mapping, keys: List[str]) -> Any:
-    """Traverse a nested data structure and returns the value at the specified key path.
-
-    :param data:    Nested data structure like dict, defaultdict or OrderedDict
-    :param keys:    List of strings representing the keys in the data structure
-    :return:        Value at the specified key path in the data structure
-    """
-    for key in keys:
-        data = data[key]
-    return data
+        :param data:    Nested data structure like dict, defaultdict or OrderedDict
+        :param keys:    List of strings representing the keys in the data structure
+        :return:        Value at the specified key path in the data structure
+        """
+        for key in keys:
+            data = data[key]
+        return data

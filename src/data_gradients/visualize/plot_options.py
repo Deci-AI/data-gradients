@@ -63,6 +63,7 @@ class ViolinPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr x_lim: X-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
     :attr individual_plots_key: If None, the data will be displayed in a single plot.
@@ -81,6 +82,8 @@ class ViolinPlotOptions(CommonPlotOptions):
 
     y_label_key: str
     y_label_name: str
+
+    x_lim: Tuple[float, float] = None
 
     individual_plots_key: str = None
     individual_plots_max_cols: int = None
@@ -111,6 +114,7 @@ class Hist2DPlotOptions(CommonPlotOptions):
     :attr y_lim: Y-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
+    :attr stat: Aggregate statistic to compute in each bin. ("count", "frequency", "probability", "percent" or "density")
     :attr individual_plots_key: If None, the data will be displayed in a single plot.
                                 If not None, will create a separate plot for each unique value of this column
     :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
@@ -150,6 +154,51 @@ class Hist2DPlotOptions(CommonPlotOptions):
 
 
 @dataclasses.dataclass
+class KDEPlotOptions(CommonPlotOptions):
+    """
+    Contains a set of options for displaying a kde histogram plot.
+
+    :attr x_label_key: A key for x-axis values
+    :attr x_label_name: A title for x-axis
+    :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
+    :attr y_label_name: A title for y-axis
+    :attr x_lim: X-axis limits
+    :attr y_lim: Y-axis limits
+    :attr individual_plots_key: If None, the data will be displayed in a single plot.
+                                If not None, will create a separate plot for each unique value of this column
+    :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
+    :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
+    :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
+    :attr tight_layout: If True enables more compact layout of the plot
+    :attr figsize: Size of the figure
+    """
+
+    x_label_key: str
+    x_label_name: str
+
+    y_label_key: Optional[str] = None
+    y_label_name: Optional[str] = None
+
+    weights: Optional[str] = None
+
+    x_lim: Tuple[float, float] = None
+    y_lim: Tuple[float, float] = None
+
+    individual_plots_key: str = None
+    individual_plots_max_cols: int = None
+
+    labels_key: Optional[str] = None
+    labels_name: Optional[str] = None
+    labels_palette: Optional[Mapping] = None
+
+    tight_layout: bool = False
+    figsize: Optional[Tuple[int, int]] = (10, 6)
+
+    x_ticks_rotation: Optional[int] = 45
+    y_ticks_rotation: Optional[int] = None
+
+
+@dataclasses.dataclass
 class ScatterPlotOptions(CommonPlotOptions):
     """
     Contains a set of options for displaying a bivariative histogram plot.
@@ -158,6 +207,8 @@ class ScatterPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr x_lim: X-axis limits
+    :attr y_lim: Y-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
     :attr individual_plots_key: If None, the data will be displayed in a single plot.
@@ -174,6 +225,9 @@ class ScatterPlotOptions(CommonPlotOptions):
 
     y_label_key: str
     y_label_name: str
+
+    x_lim: Tuple[float, float] = None
+    y_lim: Tuple[float, float] = None
 
     individual_plots_key: str = None
     individual_plots_max_cols: int = None
