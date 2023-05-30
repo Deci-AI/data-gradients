@@ -2,27 +2,25 @@ import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
-from data_gradients.utils.data_classes import SegmentationSample
+from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.seaborn_renderer import BarPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class SegmentationClassesDistribution(AbstractFeatureExtractor):
+class DetectionClassesCount(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
-    def update(self, sample: SegmentationSample):
-        for j, class_channel in enumerate(sample.contours):
-            for contour in class_channel:
-                class_id = contour.class_id
-                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
-                self.data.append(
-                    {
-                        "split": sample.split,
-                        "class_name": class_name,
-                    }
-                )
+    def update(self, sample: DetectionSample):
+        for label_id, bbox_xyxy in zip(sample.labels, sample.bboxes_xyxy):
+            class_name = str(label_id) if sample.class_names is None else sample.class_names[label_id]
+            self.data.append(
+                {
+                    "split": sample.split,
+                    "class_name": class_name,
+                }
+            )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
@@ -41,7 +39,7 @@ class SegmentationClassesDistribution(AbstractFeatureExtractor):
             orient="h",
         )
 
-        json = dict(df.class_name.describe())
+        json = dict(df_class_count.class_name.describe())
 
         feature = Feature(
             data=df_class_count,
@@ -52,12 +50,8 @@ class SegmentationClassesDistribution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of classes."
+        return "Number of classes."
 
     @property
     def description(self) -> str:
-        return (
-            "The total number of connected components for each class, across all images. \n"
-            "If the average number of components per image is too high, it might be due to image noise or the "
-            "presence of many segmentation blobs."
-        )
+        return "The total number of bounding boxes for each class, across all images."

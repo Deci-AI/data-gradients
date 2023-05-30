@@ -73,6 +73,7 @@ class DetectionSample(ImageSample):
 
     bboxes_xyxy: np.ndarray
     labels: np.ndarray
+    class_names: Optional[List[str]] = None
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, labels={self.labels.shape})"
