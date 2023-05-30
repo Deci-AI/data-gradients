@@ -19,6 +19,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
         self.grayscale = False
         self.colors = ("Red", "Green", "Blue")
         self.pixel_frequency_per_channel_per_split: Dict[str, Dict[str, PixelFrequencyCounter]] = {}
+        self.palette = {"Red": "red", "Green": "green", "Blue": "blue", "Grayscale": "gray"}
 
     def update(self, sample: ImageSample):
         if sample.image_format == ImageChannelFormat.RGB:
@@ -47,7 +48,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         data = [
-            {"split": split, "color": color, "pixel_value": pixel_value, "count": count}
+            {"split": split, "Color": color, "pixel_value": pixel_value, "count": count}
             for split, pixel_frequency_per_channel in self.pixel_frequency_per_channel_per_split.items()
             for color, pixel_frequency in pixel_frequency_per_channel.items()
             for pixel_value, count in pixel_frequency.compute().items()
@@ -63,11 +64,12 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
-            labels_key="color",
+            labels_key="Color",
             individual_plots_key="split",
             individual_plots_max_cols=2,
+            labels_palette=self.palette,
         )
-        json = {color: dict(df[df["color"] == color].describe()) for color in self.colors}
+        json = {color: dict(df[df["Color"] == color].describe()) for color in self.colors}
 
         feature = Feature(
             data=df,
