@@ -3,48 +3,46 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.visualize.seaborn_renderer import BarPlotOptions
+from data_gradients.visualize.seaborn_renderer import Hist2DPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
+from data_gradients.batch_processors.preprocessors import contours
 
 
 @register_feature_extractor()
-class SegmentationClassesDistribution(AbstractFeatureExtractor):
+class SegmentationComponentsConvexity(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
     def update(self, sample: SegmentationSample):
         for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
-                class_id = contour.class_id
-                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
+                convex_hull = contours.get_convex_hull(contour)
+                convex_hull_perimeter = contours.get_contour_perimeter(convex_hull)
+                convexity_measure = (contour.perimeter - convex_hull_perimeter) / contour.perimeter
                 self.data.append(
                     {
                         "split": sample.split,
-                        "class_name": class_name,
+                        "convexity_measure": convexity_measure,
                     }
                 )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        # Include ("class_name", "split", "n_appearance")
-        df_class_count = df.groupby(["class_name", "split"]).size().reset_index(name="n_appearance")
-
-        plot_options = BarPlotOptions(
-            x_label_key="n_appearance",
-            x_label_name="Number of Appearance",
-            y_label_key="class_name",
-            y_label_name="Class Names",
+        plot_options = Hist2DPlotOptions(
+            x_label_key="convexity_measure",
+            x_label_name="Convexity",
             title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
-            orient="h",
+            individual_plots_key="split",
+            kde=True,
         )
 
-        json = dict(df.class_name.describe())
+        json = dict(df["convexity_measure"].describe())
 
         feature = Feature(
-            data=df_class_count,
+            data=df,
             plot_options=plot_options,
             json=json,
         )
@@ -52,12 +50,13 @@ class SegmentationClassesDistribution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of classes."
+        return "Components Convexity."
 
     @property
     def description(self) -> str:
         return (
-            "The total number of connected components for each class, across all images. \n"
-            "If the average number of components per image is too high, it might be due to image noise or the "
-            "presence of many segmentation blobs."
+            "Mean of the convexity measure across all components VS Class ID.\n"
+            "Convexity measure of a component is defined by ("
+            "component_perimeter-convex_hull_perimeter)/convex_hull_perimeter.\n"
+            "High values can imply complex structures which might be difficult to segment."
         )
