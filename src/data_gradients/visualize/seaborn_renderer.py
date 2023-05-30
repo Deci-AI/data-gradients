@@ -190,6 +190,10 @@ class SeabornRenderer(PlotRenderer):
 
         ax.set_xlabel(options.x_label_name)
         ax.set_ylabel(options.y_label_name)
+
+        if options.x_lim is not None:
+            ax.set_xlim(options.x_lim)
+
         if options.labels_name is not None:
             ax.legend(title=options.labels_name)
 

@@ -63,6 +63,7 @@ class ViolinPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr x_lim: X-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
     :attr individual_plots_key: If None, the data will be displayed in a single plot.
@@ -81,6 +82,8 @@ class ViolinPlotOptions(CommonPlotOptions):
 
     y_label_key: str
     y_label_name: str
+
+    x_lim: Tuple[float, float] = None
 
     individual_plots_key: str = None
     individual_plots_max_cols: int = None

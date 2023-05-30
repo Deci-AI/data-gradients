@@ -33,12 +33,14 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
         # TODO: check this
         df_class_count = df.groupby(["class_name", "sample_id", "split"]).size().reset_index(name="n_appearance")
 
+        max_n_appearance = df_class_count["n_appearance"].max()
         plot_options = ViolinPlotOptions(
             x_label_key="n_appearance",
             x_label_name="Number of class instance per Image",
             y_label_key="class_name",
             y_label_name="Class Names",
             title=self.title,
+            x_lim=(0, max_n_appearance * 1.2),  # Cut the max_x at 120% of the highest max n_appearance to increase readability
             bandwidth=0.4,
             x_ticks_rotation=None,
             labels_key="split",
