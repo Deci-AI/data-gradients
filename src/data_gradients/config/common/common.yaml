@@ -1,7 +1,6 @@
 feature_extractors:
-  - ImagesResolutions
-  - ImagesAspectRatios
-  - AverageBrightness
-  - MeanAndSTD
+  - ImagesAverageBrightness
+  - ImageColorDistribution
+  - ImagesResolution
 
 _convert_: all

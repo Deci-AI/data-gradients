@@ -6,31 +6,14 @@ defaults:
   - _self_
 
 feature_extractors:
-  - GetClassDistribution:
-      num_classes: ${number_of_classes}
-      ignore_labels: ${ignore_labels}
-  - PixelsPerClass:
-      num_classes: ${number_of_classes}
-      ignore_labels: ${ignore_labels}
-  - AppearancesInImages:
-      num_classes: ${number_of_classes}
-      ignore_labels: ${ignore_labels}
-  - ComponentsSizeDistribution:
-      num_classes: ${number_of_classes}
-      ignore_labels: ${ignore_labels}
-  - ComponentsCenterOfMass:
-      num_classes: ${number_of_classes}
-      ignore_labels: ${ignore_labels}
-  - CountNumComponents
-  - WidthHeight
-  - ComponentsConvexity:
-      num_classes: ${number_of_classes}
-      ignore_labels: ${ignore_labels}
-  - ErosionTest:
-      num_classes: ${number_of_classes}
-      ignore_labels: ${ignore_labels}
-  - CountSmallComponents:
-      minimum_percent_of_an_image: 0.0005
+  - SegmentationBoundingBoxArea
+  - SegmentationBoundingBoxResolution
+  - SegmentationClassesCount
+  - SegmentationClassesPerImageCount
+  - SegmentationComponentCenterOfMass
+  - SegmentationComponentsConvexity
+  - SegmentationComponentsErosion
+  - SegmentationComponentsPerImageCount
 
 
 _convert_: all

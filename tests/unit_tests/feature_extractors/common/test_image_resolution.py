@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
-from data_gradients.feature_extractors.commonV2.image_resolution import ImagesResolution
+from data_gradients.feature_extractors.common.image_resolution import ImagesResolution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 

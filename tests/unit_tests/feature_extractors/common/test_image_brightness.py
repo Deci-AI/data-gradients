@@ -2,8 +2,8 @@ import unittest
 import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
-from data_gradients.feature_extractors.commonV2.image_average_brightness import ImagesAverageBrightness
-from data_gradients.feature_extractors.commonV2.image_color_distribution import ImageColorDistribution
+from data_gradients.feature_extractors.common.image_average_brightness import ImagesAverageBrightness
+from data_gradients.feature_extractors.common.image_color_distribution import ImageColorDistribution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 

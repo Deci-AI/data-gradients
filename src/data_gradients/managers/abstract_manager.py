@@ -6,10 +6,11 @@ from logging import getLogger
 
 import tqdm
 
-from data_gradients.feature_extractors import FeatureExtractorAbstract
+from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.logging.log_writer import LogWriter
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.visualize.image_samplers.base import ImageSampleManager
+from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -28,7 +29,7 @@ class AnalysisManagerAbstract(abc.ABC):
         val_data: Optional[Iterable] = None,
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
-        feature_extractors: List[FeatureExtractorAbstract],
+        feature_extractors: List[AbstractFeatureExtractor],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         short_run: bool = False,
@@ -57,6 +58,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
         # Logger
+        self.renderer = SeabornRenderer()
         self._log_writer = LogWriter(log_dir=log_dir)
 
         self.batch_processor = batch_processor
@@ -76,12 +78,14 @@ class AnalysisManagerAbstract(abc.ABC):
         Method finish it work after both train & val iterables are exhausted.
         """
 
-        print(f"Executing analysis with: \n"
-              f"batches_early_stop: {self.batches_early_stop} \n"
-              f"len(train_data): {self.train_size} \n"
-              f"len(val_data): {self.val_size} \n"
-              f"log directory: {self._log_writer.log_dir} \n"
-              f"feature extractor list: {self.feature_extractors}")
+        print(
+            f"Executing analysis with: \n"
+            f"batches_early_stop: {self.batches_early_stop} \n"
+            f"len(train_data): {self.train_size} \n"
+            f"len(val_data): {self.val_size} \n"
+            f"log directory: {self._log_writer.log_dir} \n"
+            f"feature extractor list: {self.feature_extractors}"
+        )
 
         datasets_tqdm = tqdm.tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
@@ -133,8 +137,10 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         # Post process each feature executor to json / tensorboard
-        for extractor in self.feature_extractors:
-            extractor.aggregate_and_write(self._log_writer, self.id_to_name)
+        for feature_extractor in self.feature_extractors:
+            feature = feature_extractor.aggregate()
+            f = self.renderer.render(feature.data, feature.plot_options)
+            f.show()
 
         for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
             title = f"Data Visualization/{len(self.image_sample_manager.samples) - i}"
