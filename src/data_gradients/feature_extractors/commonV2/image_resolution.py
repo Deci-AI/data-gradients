@@ -3,7 +3,7 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 from data_gradients.utils.data_classes.data_samples import ImageSample
-from data_gradients.visualize.plot_options import Hist2DPlotOptions
+from data_gradients.visualize.plot_options import Hist2DPlotOptions, ScatterPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 
 
@@ -22,19 +22,37 @@ class ImagesResolution(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        plot_options = Hist2DPlotOptions(
-            x_label_key="width",
-            x_label_name="Width",
-            y_label_key="height",
-            y_label_name="Height",
-            title=self.title,
-            x_lim=(0, df["width"].max() + 100),
-            y_lim=(0, df["height"].max() + 100),
-            x_ticks_rotation=None,
-            labels_key="split",
-            individual_plots_key="split",
-            individual_plots_max_cols=2,
-        )
+        max_size = max(df["height"].max(), df["width"].max())
+        unique_resolution = (df["height"].astype(str) + df["width"].astype(str)).unique()
+        if len(unique_resolution) == 1:
+            plot_options = ScatterPlotOptions(
+                x_label_key="width",
+                x_label_name="Width",
+                y_label_key="height",
+                y_label_name="Height",
+                title=self.title,
+                x_lim=(0, max_size + 100),
+                y_lim=(0, max_size + 100),
+                x_ticks_rotation=None,
+                labels_key="split",
+                individual_plots_key="split",
+                individual_plots_max_cols=2,
+            )
+        else:
+            plot_options = Hist2DPlotOptions(
+                x_label_key="width",
+                x_label_name="Width",
+                y_label_key="height",
+                y_label_name="Height",
+                title=self.title,
+                x_lim=(0, max_size + 100),
+                y_lim=(0, max_size + 100),
+                x_ticks_rotation=None,
+                labels_key="split",
+                individual_plots_key="split",
+                individual_plots_max_cols=2,
+            )
+
         description = df.describe()
         json = {"width": dict(description["width"]), "height": dict(description["height"])}
 

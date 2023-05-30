@@ -64,7 +64,7 @@ class SegmentationBatchFormatter(BatchFormatter):
 
         if 0 <= images.min() and images.max() <= 1:
             images = images * 255
-        images = images.astype(torch.uint8)
+        images = images.type(torch.uint8)
 
         return images, labels
 

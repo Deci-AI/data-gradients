@@ -7,7 +7,7 @@ from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.commonV2.utils import PixelFrequencyCounter
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
-from data_gradients.visualize.plot_options import Hist2DPlotOptions
+from data_gradients.visualize.plot_options import KDEPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 
 
@@ -55,12 +55,10 @@ class ImageColorDistribution(AbstractFeatureExtractor):
         ]
         df = pd.DataFrame(data)
 
-        plot_options = Hist2DPlotOptions(
+        plot_options = KDEPlotOptions(
             x_label_key="pixel_value",
             x_label_name="Color Intensity",
             weights="count",
-            kde=True,
-            stat="density",
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
