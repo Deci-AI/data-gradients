@@ -73,9 +73,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.image_size_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.image_size_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
     def test_hist2d_plot_image_size_individual_plots(self):
         options = Hist2DPlotOptions(
@@ -93,9 +94,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.image_size_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.image_size_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
     def test_barplot_visualization_class_distribution(self):
         options = BarPlotOptions(
@@ -110,9 +112,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.fruits_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.fruits_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
     def test_barplot_visualization_split_distribution(self):
         options = BarPlotOptions(
@@ -127,9 +130,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.fruits_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.fruits_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
     def test_barplot_visualization_weight_distribution(self):
         options = BarPlotOptions(
@@ -141,12 +145,14 @@ class VisualizationTests(unittest.TestCase):
             x_ticks_rotation=None,
             labels_key="split",
             log_scale=False,
+            orient="v",
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.fruits_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.fruits_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
     def test_violinplot_visualization_class_distribution(self):
         options = ViolinPlotOptions(
@@ -160,9 +166,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.fruits_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.fruits_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
     def test_scatter_plot_image_size_by_split(self):
         options = ScatterPlotOptions(
@@ -177,9 +184,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.image_size_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.image_size_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
     def test_scatter_plot_image_size_individual_plots(self):
         options = ScatterPlotOptions(
@@ -196,9 +204,10 @@ class VisualizationTests(unittest.TestCase):
         )
 
         sns = SeabornRenderer()
-        f = sns.render(self.image_size_df, options)
-        f.savefig(self._testMethodName + ".png")
-        f.show()
+        figs = sns.render(self.image_size_df, options)
+        for f in figs:
+            f.savefig(self._testMethodName + ".png")
+            f.show()
 
 
 if __name__ == "__main__":

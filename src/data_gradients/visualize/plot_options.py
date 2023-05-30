@@ -243,6 +243,21 @@ class ScatterPlotOptions(CommonPlotOptions):
     y_ticks_rotation: Optional[int] = None
 
 
+@dataclasses.dataclass
+class ImagePlotOptions(CommonPlotOptions):
+    """
+    Contains a set of options for displaying a plot made of image(s).
+
+    :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
+    :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
+    :attr tight_layout: If True enables more compact layout of the plot
+    :attr figsize: Size of the figure
+    """
+
+    tight_layout: bool = False
+    figsize: Optional[Tuple[int, int]] = (10, 6)
+
+
 class PlotRenderer(ABC):
     @abstractmethod
     def render(self, df: pd.DataFrame, options: CommonPlotOptions):

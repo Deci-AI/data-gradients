@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import seaborn
+from typing import Union, List, Dict
 from matplotlib import pyplot as plt
 
 from data_gradients.visualize.plot_options import (
@@ -11,6 +12,7 @@ from data_gradients.visualize.plot_options import (
     ScatterPlotOptions,
     ViolinPlotOptions,
     KDEPlotOptions,
+    ImagePlotOptions,
 )
 
 __all__ = ["SeabornRenderer"]
@@ -20,27 +22,29 @@ class SeabornRenderer(PlotRenderer):
     def __init__(self, style="whitegrid", palette="pastel"):
         seaborn.set_theme(style=style, palette=palette)
 
-    def render(self, df: pd.DataFrame, options: CommonPlotOptions) -> plt.Figure:
+    def render(self, data: Union[pd.DataFrame, Dict[str, Dict[str, np.ndarray]]], options: CommonPlotOptions) -> List[plt.Figure]:
         """Plot a graph using seaborn.
 
-        :param df:      The dataframe to render. It has to include the fields listed in the options.
+        :param data:    The data to render. It has to include the fields listed in the options.
         :param options: The plotting options, which includes the information about the type of plot and the parameters required to plot it.
         :return:        The matplotlib figure.
         """
         if isinstance(options, Hist2DPlotOptions):
-            return self._render_histplot(df, options)
+            return self._render_histplot(data, options)
         if isinstance(options, BarPlotOptions):
-            return self._render_barplot(df, options)
+            return self._render_barplot(data, options)
         if isinstance(options, ScatterPlotOptions):
-            return self._render_scatterplot(df, options)
+            return self._render_scatterplot(data, options)
         if isinstance(options, ViolinPlotOptions):
-            return self._render_violinplot(df, options)
+            return self._render_violinplot(data, options)
         if isinstance(options, KDEPlotOptions):
-            return self._render_kdeplot(df, options)
+            return self._render_kdeplot(data, options)
+        if isinstance(options, ImagePlotOptions):
+            return self._render_images(data, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
-    def _render_scatterplot(self, df, options: ScatterPlotOptions) -> plt.Figure:
+    def _render_scatterplot(self, df, options: ScatterPlotOptions) -> List[plt.Figure]:
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -99,9 +103,9 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return fig
+        return [fig]
 
-    def _render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
+    def _render_histplot(self, df, options: Hist2DPlotOptions) -> List[plt.Figure]:
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -172,9 +176,9 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return fig
+        return [fig]
 
-    def _render_kdeplot(self, df, options: KDEPlotOptions) -> plt.Figure:
+    def _render_kdeplot(self, df, options: KDEPlotOptions) -> List[plt.Figure]:
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -246,9 +250,9 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return fig
+        return [fig]
 
-    def _render_violinplot(self, df, options: ViolinPlotOptions) -> plt.Figure:
+    def _render_violinplot(self, df, options: ViolinPlotOptions) -> List[plt.Figure]:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
@@ -289,9 +293,9 @@ class SeabornRenderer(PlotRenderer):
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return fig
+        return [fig]
 
-    def _render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
+    def _render_barplot(self, df, options: BarPlotOptions) -> List[plt.Figure]:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
@@ -343,7 +347,31 @@ class SeabornRenderer(PlotRenderer):
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return fig
+        return [fig]
+
+    def _render_images(self, images_per_split_per_class: Dict[str, Dict[str, np.ndarray]], options: ImagePlotOptions) -> List[plt.Figure]:
+        """Render images using matplotlib. Plot one graph with all splits per class.
+
+        :param images_per_split_per_class:  Mapping of class names and splits to images. e.g. {"class1": {"train": np.ndarray, "valid": np.ndarray},...}
+        :param options:                     Plotting options
+        """
+        figs = []
+        for class_name, images_per_split in images_per_split_per_class.items():
+            n_cols = len(images_per_split)
+            fig, axs = plt.subplots(nrows=1, ncols=n_cols, figsize=options.figsize)
+
+            if options.tight_layout:
+                fig.tight_layout()
+            fig.subplots_adjust(top=0.9)
+            fig.suptitle(f'{options.title} for class="{class_name}"')
+
+            for (split, image), ax_i in zip(images_per_split.items(), axs):
+                ax_i.imshow(image, cmap="hot")
+                ax_i.set_title(split)
+                ax_i.axis("off")
+
+            figs.append(fig)
+        return figs
 
     def _set_ticks_rotation(self, ax, x_ticks_rotation, y_ticks_rotation):
         # Call to set_xticks is needed to avoid warning

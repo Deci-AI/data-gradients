@@ -16,6 +16,7 @@ from data_gradients.feature_extractors.segmentationV2.classes_per_image_count im
 from data_gradients.feature_extractors.segmentationV2.components_per_image_count import SegmentationComponentsPerImageCount
 from data_gradients.feature_extractors.segmentationV2.components_convexity import SegmentationComponentsConvexity
 from data_gradients.feature_extractors.segmentationV2.components_erosion import SegmentationComponentsErosion
+from data_gradients.feature_extractors.segmentationV2.components_heatmap_per_class import SegmentationComponentHeatmap
 
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
@@ -55,6 +56,7 @@ feature_extractors = [
     SegmentationClassesPerImageCount(),
     SegmentationComponentsConvexity(),
     SegmentationComponentsErosion(),
+    SegmentationComponentHeatmap(),
 ]
 
 sns = SeabornRenderer()
@@ -71,5 +73,6 @@ for val_batch in tqdm(val_loader):
 
 for feature_extractor in feature_extractors:
     feature = feature_extractor.aggregate()
-    f = sns.render(feature.data, feature.plot_options)
-    f.show()
+    figs = sns.render(feature.data, feature.plot_options)
+    for fig in figs:
+        fig.show()
