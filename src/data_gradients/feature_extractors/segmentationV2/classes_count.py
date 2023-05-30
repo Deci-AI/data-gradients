@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 
 @register_feature_extractor()
-class SegmentationClassesDistribution(AbstractFeatureExtractor):
+class SegmentationClassesCount(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
@@ -41,7 +41,7 @@ class SegmentationClassesDistribution(AbstractFeatureExtractor):
             orient="h",
         )
 
-        json = dict(df.class_name.describe())
+        json = dict(df_class_count.class_name.describe())
 
         feature = Feature(
             data=df_class_count,
@@ -52,7 +52,7 @@ class SegmentationClassesDistribution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of classes."
+        return "Number of classes."
 
     @property
     def description(self) -> str:

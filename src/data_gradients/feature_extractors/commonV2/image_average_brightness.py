@@ -14,16 +14,26 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
     """Extracts the distribution of the image 'brightness'."""
 
     def __init__(self):
+        self.image_format = None
         self.data = []
 
     def update(self, sample: ImageSample):
-        if sample.image_format == ImageChannelFormat.RGB:
+
+        if self.image_format is None:
+            self.image_format = sample.image_format
+        else:
+            if self.image_format != sample.image_format:
+                raise RuntimeError(
+                    f"Inconstancy in the image format. The image format of the sample {sample.sample_id} is not the same as the previous sample."
+                )
+
+        if self.image_format == ImageChannelFormat.RGB:
             brightness = np.mean(cv2.cvtColor(sample.image, cv2.COLOR_RGB2LAB)[0])
-        elif sample.image_format == ImageChannelFormat.BGR:
+        elif self.image_format == ImageChannelFormat.BGR:
             brightness = np.mean(cv2.cvtColor(sample.image, cv2.COLOR_BGR2LAB)[0])
-        elif sample.image_format == ImageChannelFormat.GRAYSCALE:
+        elif self.image_format == ImageChannelFormat.GRAYSCALE:
             brightness = np.mean(sample.image)
-        elif sample.image_format == ImageChannelFormat.UNKNOWN:
+        elif self.image_format == ImageChannelFormat.UNKNOWN:
             brightness = np.mean(sample.image)
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")
@@ -37,6 +47,7 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
             x_label_key="brightness",
             x_label_name="Average Brightness of Images",
             kde=True,
+            stat="density",
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
