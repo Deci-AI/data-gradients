@@ -23,8 +23,9 @@ class ImagesResolution(AbstractFeatureExtractor):
         df = pd.DataFrame(self.data)
 
         max_size = max(df["height"].max(), df["width"].max())
-        unique_resolution = (df["height"].astype(str) + df["width"].astype(str)).unique()
-        if len(unique_resolution) == 1:
+        n_unique_resolution = (df["height"].astype(str) + df["width"].astype(str)).unique()
+        if len(n_unique_resolution) == 1:
+            # Show as a scatter plot (which will basically be a single dot)
             plot_options = ScatterPlotOptions(
                 x_label_key="width",
                 x_label_name="Width",
