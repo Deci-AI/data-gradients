@@ -47,7 +47,7 @@ class DetectionBatchFormatter(BatchFormatter):
             self.xyxy_converter = self.ask_user_xyxy_converter()
 
         if 0 <= images.min() and images.max() <= 1:
-            images *= images * 255
+            images *= 255
             images = images.to(torch.uint8)
 
         labels = self.convert_to_label_xyxy(
