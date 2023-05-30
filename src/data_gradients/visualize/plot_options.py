@@ -114,6 +114,7 @@ class Hist2DPlotOptions(CommonPlotOptions):
     :attr y_lim: Y-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
+    :attr stat: Aggregate statistic to compute in each bin. ("count", "frequency", "probability", "percent" or "density")
     :attr individual_plots_key: If None, the data will be displayed in a single plot.
                                 If not None, will create a separate plot for each unique value of this column
     :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
