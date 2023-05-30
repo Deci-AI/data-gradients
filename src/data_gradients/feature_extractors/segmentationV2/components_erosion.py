@@ -1,4 +1,5 @@
 import cv2
+from typing import Tuple
 import pandas as pd
 import numpy as np
 
@@ -13,65 +14,45 @@ from data_gradients.batch_processors.preprocessors import contours
 @register_feature_extractor()
 class SegmentationComponentsErosion(AbstractFeatureExtractor):
     def __init__(self):
+        self.kernel_shape = (3, 3)
         self.data = []
 
     def update(self, sample: SegmentationSample):
-        label = sample.mask.transpose(1, 2, 0).astype(np.uint8)
-        label = cv2.morphologyEx(label, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-        if len(label.shape) == 2:
-            label = label[..., np.newaxis]
-        eroded_contours = contours.get_contours(label.transpose(2, 0, 1))
+        opened_mask = self.apply_mask_opening(mask=sample.mask, kernel_shape=self.kernel_shape)
+        contours_after_opening = contours.get_contours(opened_mask)
 
-        for j, class_channel in enumerate(sample.contours):
-            for contour in class_channel:
-                class_id = contour.class_id
-                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
-                self.data.append(
-                    {
-                        "split": sample.split,
-                        "eroded": "Without Erosion",
-                        "class_name": class_name,
-                    }
-                )
+        n_components_without_opening = sum(1 for class_channel in sample.contours for _contour in class_channel)
+        n_components_after_opening = sum(1 for class_channel in contours_after_opening for _contour in class_channel)
 
-        for j, class_channel in enumerate(eroded_contours):
-            for contour in class_channel:
-                class_id = contour.class_id
-                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
-                self.data.append(
-                    {
-                        "split": sample.split,
-                        "eroded": "With Erosion",
-                        "class_name": class_name,
-                    }
-                )
+        increase_of_n_components = n_components_after_opening - n_components_without_opening
+        percent_change_of_n_components = 100 * (increase_of_n_components / n_components_without_opening)
 
-        # FIXME: I dont think this is what we want to do
+        self.data.append(
+            {
+                "split": sample.split,
+                "percent_change_of_n_components": percent_change_of_n_components,
+            }
+        )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
         plot_options = Hist2DPlotOptions(
-            x_label_key="eroded",
-            x_label_name="Number of Components",
+            x_label_key="percent_change_of_n_components",
+            x_label_name="Increase of number of components in %",
             title=self.title,
+            kde=True,
             x_ticks_rotation=None,
             labels_key="split",
             individual_plots_key="split",
         )
 
         json = dict(df.describe())
-
-        feature = Feature(
-            data=df,
-            plot_options=plot_options,
-            json=json,
-        )
-        return feature
+        return Feature(data=df, plot_options=plot_options, json=json)
 
     @property
     def title(self) -> str:
-        return "Components Erosion."
+        return "Components Stability to Erosion."
 
     @property
     def description(self) -> str:
@@ -81,3 +62,17 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
             "noise in our annotations (i.e 'sprinkles')."
         )
         # FIXME: Can this also lead to increase of components, when breaking existing component into 2?
+
+    def apply_mask_opening(self, mask: np.ndarray, kernel_shape: Tuple[int, int]) -> np.ndarray:
+        """Opening is just another name of erosion followed by dilation.
+
+        It is useful in removing noise, as we explained above. Here we use the function, cv2.morphologyEx(). See [Official OpenCV documentation](
+        https://opencv24-python-tutorials.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_morphological_ops/py_morphological_ops.html)
+
+        :param mask:            Mask to open in shape [N, H, W]
+        :param kernel_shape:    Shape of the kernel used for Opening (Eroded + Dilated)
+        :return:                Opened (Eroded + Dilated) mask in shape [N, H, W]
+        """
+        masks = mask.transpose((1, 2, 0)).astype(np.uint8)
+        masks = cv2.morphologyEx(masks, cv2.MORPH_OPEN, np.ones(kernel_shape, np.uint8))
+        return masks.transpose((2, 0, 1))
