@@ -1,32 +1,32 @@
-from data_gradients.feature_extractors.segmentation import (
-    ComponentsSizeDistribution,
-    WidthHeight,
-    AppearancesInImages,
-    GetClassDistribution,
-    PixelsPerClass,
-    ComponentsCenterOfMass,
-    ComponentsConvexity,
-    ErosionTest,
-    CountNumComponents,
-    CountSmallComponents,
+from .abstract_feature_extractor import AbstractFeatureExtractor
+from .common import (
+    ImagesAverageBrightness,
+    ImageColorDistribution,
+    ImagesResolution,
 )
-from data_gradients.feature_extractors.common import AverageBrightness, ImagesResolutions, ImagesAspectRatios, MeanAndSTD
-from data_gradients.feature_extractors.feature_extractor_abstract import FeatureExtractorAbstract
+from .segmentation import (
+    SegmentationBoundingBoxArea,
+    SegmentationBoundingBoxResolution,
+    SegmentationClassesCount,
+    SegmentationClassesPerImageCount,
+    SegmentationComponentCenterOfMass,
+    SegmentationComponentsConvexity,
+    SegmentationComponentsErosion,
+    SegmentationComponentsPerImageCount,
+)
+
 
 __all__ = [
-    "ComponentsSizeDistribution",
-    "WidthHeight",
-    "AppearancesInImages",
-    "GetClassDistribution",
-    "PixelsPerClass",
-    "ComponentsCenterOfMass",
-    "ComponentsConvexity",
-    "ErosionTest",
-    "CountNumComponents",
-    "CountSmallComponents",
-    "AverageBrightness",
-    "ImagesResolutions",
-    "ImagesAspectRatios",
-    "MeanAndSTD",
-    "FeatureExtractorAbstract",
+    "AbstractFeatureExtractor",
+    "ImagesAverageBrightness",
+    "ImageColorDistribution",
+    "ImagesResolution",
+    "SegmentationBoundingBoxArea",
+    "SegmentationBoundingBoxResolution",
+    "SegmentationClassesCount",
+    "SegmentationClassesPerImageCount",
+    "SegmentationComponentCenterOfMass",
+    "SegmentationComponentsConvexity",
+    "SegmentationComponentsErosion",
+    "SegmentationComponentsPerImageCount",
 ]
