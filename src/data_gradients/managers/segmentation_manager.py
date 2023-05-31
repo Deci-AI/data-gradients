@@ -27,7 +27,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         labels_extractor: Callable = None,
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
-        short_run: bool = False,
         samples_to_visualize: int = 10,
     ):
         """
@@ -45,8 +44,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param labels_extractor:
         :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
-        :param short_run:               Flag indicating whether to run for a single epoch first to estimate total duration,
-                                        before choosing the number of epochs.
         :param samples_to_visualize:    Number of samples to visualize at tensorboard [0-n]
         """
 
@@ -71,6 +68,5 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             log_dir=log_dir,
             id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
-            short_run=short_run,
             image_sample_manager=image_sample_manager,
         )
