@@ -17,8 +17,8 @@ class DetectionBoundingBoxSize(AbstractFeatureExtractor):
     def update(self, sample: DetectionSample):
 
         height, width = sample.image.shape[:2]
-        for label_id, bbox_xyxy in zip(sample.labels, sample.bboxes_xyxy):
-            class_name = str(label_id) if sample.class_names is None else sample.class_names[label_id]
+        for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
+            class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
             self.data.append(
                 {
                     "split": sample.split,

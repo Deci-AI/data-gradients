@@ -15,7 +15,7 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
         self.data = []
 
     def update(self, sample: DetectionSample):
-        for _ in sample.labels:
+        for _ in sample.class_ids:
             self.data.append(
                 {
                     "split": sample.split,
