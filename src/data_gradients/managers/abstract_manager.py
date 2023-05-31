@@ -60,11 +60,10 @@ class AnalysisManagerAbstract(abc.ABC):
         self.train_iter = iter(train_data)
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
-        # TODO: What do we want to do SeabornRenderer, and PDFWriter ? Hard code them, let the user pass them ? We can always improve later on.
         self.renderer = SeabornRenderer()
         self.html_writer = PDFWriter(title="Data Gradients", subtitle="Automated Exploratory Data Analysis", html_template=assets.html.doc_template)
         self._log_writer = LogWriter(log_dir=log_dir)
-        self.output_folder = self._log_writer.log_dir  # TODO: remove LogWriter
+        self.output_folder = self._log_writer.log_dir
 
         self.batch_processor = batch_processor
         self.feature_extractors = feature_extractors
@@ -142,7 +141,7 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         summary = ResultsContainer()
-        section = Section("Unique Section (WIP)")
+        section = Section("Features")  # TODO: add section title for each section
         for feature_extractor in self.feature_extractors:
             feature = feature_extractor.aggregate()
 
