@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from jinja2 import Template
 from xhtml2pdf import pisa
 
+import data_gradients
 from data_gradients.utils.common.assets_container import assets
 
 
@@ -70,7 +71,7 @@ class PDFWriter:
             raise RuntimeError("filename must end with .pdf")
 
         doc = self.template.render(
-            title=self.title, subtitle=self.subtitle, results=results_container
+            title=self.title, subtitle=self.subtitle, results=results_container, version=data_gradients.__version__
         )
 
         with open(output_filename, "w+b") as result_file:
