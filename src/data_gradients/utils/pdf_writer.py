@@ -8,7 +8,7 @@ from data_gradients.utils.common.assets_container import assets
 
 
 @dataclass
-class FeatureSummary:
+class Feature:
     name: str
     description: str
     image_path: str
@@ -19,7 +19,7 @@ class Section:
         self.section_name = section_name
         self.features = []
 
-    def add_feature(self, feature: FeatureSummary):
+    def add_feature(self, feature: Feature):
         self.features.append(feature)
 
 

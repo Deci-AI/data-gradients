@@ -1,4 +1,3 @@
-import os
 import abc
 import logging
 from typing import Iterable, List, Dict, Optional
@@ -7,13 +6,10 @@ from logging import getLogger
 
 import tqdm
 
-from data_gradients.feature_extractors import AbstractFeatureExtractor
+from data_gradients.feature_extractors import FeatureExtractorAbstract
 from data_gradients.logging.log_writer import LogWriter
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.visualize.image_samplers.base import ImageSampleManager
-from data_gradients.visualize.seaborn_renderer import SeabornRenderer
-
-from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -32,7 +28,7 @@ class AnalysisManagerAbstract(abc.ABC):
         val_data: Optional[Iterable] = None,
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
-        feature_extractors: List[AbstractFeatureExtractor],
+        feature_extractors: List[FeatureExtractorAbstract],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         image_sample_manager: ImageSampleManager,
@@ -57,10 +53,8 @@ class AnalysisManagerAbstract(abc.ABC):
         self.train_iter = iter(train_data)
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
-        self.renderer = SeabornRenderer()
-        self.html_writer = PDFWriter(title="Data Gradients", subtitle="Automated Exploratory Data Analysis", html_template=assets.html.doc_template)
+        # Logger
         self._log_writer = LogWriter(log_dir=log_dir)
-        self.output_folder = self._log_writer.log_dir
 
         self.batch_processor = batch_processor
         self.feature_extractors = feature_extractors
@@ -114,32 +108,10 @@ class AnalysisManagerAbstract(abc.ABC):
         :return:
         """
 
-        summary = ResultsContainer()
-        section = Section("Features")  # TODO: add section title for each section
-        for feature_extractor in self.feature_extractors:
-            feature = feature_extractor.aggregate()
+        # Post process each feature executor to json / tensorboard
+        for extractor in self.feature_extractors:
+            extractor.aggregate_and_write(self._log_writer, self.id_to_name)
 
-            self._log_writer.log_json(title=feature_extractor.title, data=feature.json)
-
-            f = self.renderer.render(feature.data, feature.plot_options)
-            image_name = feature_extractor.__class__.__name__ + ".png"
-            image_path = os.path.join(self.output_folder, image_name)
-            f.savefig(image_path)
-
-            section.add_feature(
-                FeatureSummary(
-                    name=feature_extractor.title,
-                    description=feature_extractor.description,
-                    image_path=image_path,
-                )
-            )
-        summary.add_section(section)
-
-        output_path = os.path.join(self.output_folder, "report.pdf")
-        logger.info(f"Writing the result of the Data Analysis into: {output_path}")
-        self.html_writer.write(results_container=summary, output_filename=output_path)
-
-        # TODO: add images to the report...
         for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
             title = f"Data Visualization/{len(self.image_sample_manager.samples) - i}"
             self._log_writer.log_image(title=title, image=sample_to_visualize)
@@ -155,7 +127,14 @@ class AnalysisManagerAbstract(abc.ABC):
     def close(self):
         """Safe logging closing"""
         self._log_writer.close()
-        print(f'{"*" * 100}' f"\nWe have finished evaluating your dataset!" f"\nThe results can be seen in {self.output_folder}" f"\n")
+        print(
+            f'{"*" * 100}'
+            f"\nWe have finished evaluating your dataset!"
+            f"\nThe results can be seen in {self._log_writer.log_dir}"
+            f"\n\nShow tensorboard by writing in terminal:"
+            f"\n\ttensorboard --logdir={self._log_writer.log_dir} --bind_all"
+            f"\n"
+        )
 
     def run(self):
         """
