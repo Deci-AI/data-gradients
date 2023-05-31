@@ -35,7 +35,6 @@ class AnalysisManagerAbstract(abc.ABC):
         feature_extractors: List[AbstractFeatureExtractor],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
-        short_run: bool = False,
         image_sample_manager: ImageSampleManager,
     ):
         """
@@ -46,8 +45,6 @@ class AnalysisManagerAbstract(abc.ABC):
         :param feature_extractors:  List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
-        :param short_run:           Flag indicating whether to run for a single epoch first to estimate total duration,
-                                    before choosing the number of epochs.
         :param image_sample_manager:     Object responsible for collecting images
         """
 
@@ -70,10 +67,6 @@ class AnalysisManagerAbstract(abc.ABC):
 
         self.id_to_name = id_to_name
 
-        if short_run and self.n_batches is None:
-            logger.warning("`short_run=True` will be ignored because it expects your dataloaders to implement `__len__`, or you to set `early_stop=...`")
-            short_run = False
-        self.short_run = short_run
         self.image_sample_manager = image_sample_manager
 
     def execute(self):
@@ -112,25 +105,6 @@ class AnalysisManagerAbstract(abc.ABC):
                 for sample in self.batch_processor.process(val_batch, split="val"):
                     for extractor in self.feature_extractors:
                         extractor.update(sample)
-
-            if i == 0 and self.short_run:
-                datasets_tqdm.refresh()
-                single_batch_duration = datasets_tqdm.format_dict["elapsed"]
-                self.reevaluate_early_stop(remaining_time=(self.n_batches - 1) * single_batch_duration)
-
-    def reevaluate_early_stop(self, remaining_time: float) -> None:
-        """Give option to the user to reevaluate the early stop criteria.
-
-        :param remaining_time: Time remaining for the whole analyze."""
-
-        print(f"\nEstimated remaining time for the whole analyze is {remaining_time} (1/{self.n_batches} done)")
-        inp = input("Do you want to shorten the amount of data to analyze? (Yes/No) : ")
-        if inp.lower() in ("y", "yes"):
-            early_stop_ratio_100 = input("What percentage of the remaining data do you want to process? (0-100) : ")
-            early_stop_ratio = float(early_stop_ratio_100) / 100
-            remaining_batches = self.n_batches - 1
-            self.batches_early_stop = int(remaining_batches * early_stop_ratio + 1)
-            print(f"Running for {self.batches_early_stop} batches!")
 
     def post_process(self):
         """
@@ -187,7 +161,14 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         Run method activating build, execute, post process and close the manager.
         """
-        self.execute()
+        try:
+            self.execute()
+        except KeyboardInterrupt:
+            logger.info(
+                "[EXECUTION HAS BEEN INTERRUPTED]... "
+                "Please wait until SOFT-TERMINATION process finishes and saves the report and log files before terminating..."
+            )
+            logger.info("For HARD Termination - Stop the process again")
         self.post_process()
         self.close()
 
