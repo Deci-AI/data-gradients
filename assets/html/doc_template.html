@@ -202,9 +202,10 @@
 <p class="c8 title"><span class="title">{{title}}</span></p>
 <p class="c5 subtitle"><span class="subtitle">{{subtitle}}</span></p>
     {% for section in results.sections %}
-        <p class="c0"><span class="section_title">{{section.section_name}}</span></p>
+        <p class="c0"><span class="section_title">{{loop.index}}. {{section.section_name}}</span></p>
+        {% set s_i = loop.index %}
             {% for feature in section.features %}
-                <p class="feature_class"><span class="feature_title">{{feature.name}}</span></p>
+                <p class="feature_class"><span class="feature_title" id="{{s_i}}_{{loop.index}}">{{s_i}}.{{loop.index}}. {{feature.name}}</span></p>
                 <p class="feature_class"><span
                         style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 624.00px; height: 420.00px;"><img
                         alt="" src="{{feature.image_path}}"
