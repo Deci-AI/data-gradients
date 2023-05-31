@@ -26,7 +26,7 @@ class ImageSampleManager(ABC):
             self.samples.append(self.prepare_image(sample))
 
     @abstractmethod
-    def prepare_image(self, image: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
+    def prepare_image(self, sample: ImageSample) -> torch.Tensor:
         """Prepare an individual image for visualization.
 
         :param image:   Input image tensor.

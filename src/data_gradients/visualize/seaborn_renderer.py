@@ -3,7 +3,15 @@ import pandas as pd
 import seaborn
 from matplotlib import pyplot as plt
 
-from data_gradients.visualize.plot_options import PlotRenderer, CommonPlotOptions, Hist2DPlotOptions, BarPlotOptions, ScatterPlotOptions, ViolinPlotOptions
+from data_gradients.visualize.plot_options import (
+    PlotRenderer,
+    CommonPlotOptions,
+    Hist2DPlotOptions,
+    BarPlotOptions,
+    ScatterPlotOptions,
+    ViolinPlotOptions,
+    KDEPlotOptions,
+)
 
 __all__ = ["SeabornRenderer"]
 
@@ -27,6 +35,8 @@ class SeabornRenderer(PlotRenderer):
             return self._render_scatterplot(df, options)
         if isinstance(options, ViolinPlotOptions):
             return self._render_violinplot(df, options)
+        if isinstance(options, KDEPlotOptions):
+            return self._render_kdeplot(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
@@ -40,7 +50,7 @@ class SeabornRenderer(PlotRenderer):
             dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
             _num_images = len(dfs)
             _max_cols = options.individual_plots_max_cols
-            n_cols = min(_num_images, _max_cols)
+            n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
@@ -69,6 +79,12 @@ class SeabornRenderer(PlotRenderer):
 
             seaborn.scatterplot(**scatterplot_args)
 
+            if options.x_lim is not None:
+                ax_i.set_xlim(options.x_lim)
+
+            if options.y_lim is not None:
+                ax_i.set_ylim(options.y_lim)
+
             ax_i.set_xlabel(options.x_label_name)
             ax_i.set_ylabel(options.y_label_name)
             if options.labels_name is not None:
@@ -95,7 +111,7 @@ class SeabornRenderer(PlotRenderer):
             dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
             _num_images = len(dfs)
             _max_cols = options.individual_plots_max_cols
-            n_cols = min(_num_images, _max_cols)
+            n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
@@ -110,13 +126,19 @@ class SeabornRenderer(PlotRenderer):
             axs = axs.reshape(-1)
 
         for df, ax_i in zip(dfs, axs):
-            histplot_args = dict(
-                data=df,
-                x=options.x_label_key,
-                y=options.y_label_key,
-                kde=options.kde,
-                ax=ax_i,
-            )
+            histplot_args = dict(data=df, x=options.x_label_key, kde=options.kde, stat=options.stat, ax=ax_i)
+
+            if options.y_label_key is not None:
+                histplot_args.update(y=options.y_label_key)
+
+            if options.weights is not None:
+                histplot_args.update(weights=options.weights)
+
+            if options.y_label_key is not None:
+                histplot_args.update(y=options.y_label_key)
+
+            if options.weights is not None:
+                histplot_args.update(weights=options.weights)
 
             if options.bins is not None:
                 histplot_args.update(bins=options.bins)
@@ -129,9 +151,91 @@ class SeabornRenderer(PlotRenderer):
             seaborn.histplot(**histplot_args)
 
             ax_i.set_xlabel(options.x_label_name)
-            ax_i.set_ylabel(options.y_label_name)
+            if options.y_label_name is not None:
+                ax_i.set_ylabel(options.y_label_name)
+
             if options.labels_name is not None:
                 ax_i.legend(title=options.labels_name)
+
+            if options.x_lim is not None:
+                ax_i.set_xlim(options.x_lim)
+
+            if options.y_lim is not None:
+                ax_i.set_ylim(options.y_lim)
+
+            if options.x_ticks_rotation == "auto":
+                n_unique = len(df[options.x_label_key].unique())
+                if n_unique > 50:
+                    options.x_ticks_rotation = 90
+                elif n_unique > 10:
+                    options.x_ticks_rotation = 45
+
+            self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
+
+        return fig
+
+    def _render_kdeplot(self, df, options: KDEPlotOptions) -> plt.Figure:
+
+        if options.individual_plots_key is None:
+            dfs = [df]
+            n_rows = 1
+            n_cols = 1
+        else:
+            dfs = [df[df[options.individual_plots_key] == key] for key in df[options.individual_plots_key].unique()]
+            _num_images = len(dfs)
+            _max_cols = options.individual_plots_max_cols
+            n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
+            n_rows = int(np.ceil(_num_images / n_cols))
+
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        if options.tight_layout:
+            fig.tight_layout()
+        fig.subplots_adjust(top=0.9)
+        fig.suptitle(options.title)
+
+        if n_rows == 1 and n_cols == 1:
+            axs = [axs]
+        else:
+            axs = axs.reshape(-1)
+
+        for df, ax_i in zip(dfs, axs):
+            plot_args = dict(
+                data=df,
+                x=options.x_label_key,
+                ax=ax_i,
+            )
+
+            if options.y_label_key is not None:
+                plot_args.update(y=options.y_label_key)
+
+            if options.weights is not None:
+                plot_args.update(weights=options.weights)
+
+            if options.y_label_key is not None:
+                plot_args.update(y=options.y_label_key)
+
+            if options.weights is not None:
+                plot_args.update(weights=options.weights)
+
+            if options.labels_key is not None:
+                plot_args.update(hue=options.labels_key)
+                if options.labels_palette is not None:
+                    plot_args.update(palette=options.labels_palette)
+
+            seaborn.kdeplot(**plot_args)
+
+            ax_i.set_xlabel(options.x_label_name)
+            if options.y_label_name is not None:
+                ax_i.set_ylabel(options.y_label_name)
+
+            if options.labels_name is not None:
+                ax_i.legend(title=options.labels_name)
+
+            if options.x_lim is not None:
+                ax_i.set_xlim(options.x_lim)
+
+            if options.y_lim is not None:
+                ax_i.set_ylim(options.y_lim)
 
             if options.x_ticks_rotation == "auto":
                 n_unique = len(df[options.x_label_key].unique())
@@ -169,6 +273,10 @@ class SeabornRenderer(PlotRenderer):
 
         ax.set_xlabel(options.x_label_name)
         ax.set_ylabel(options.y_label_name)
+
+        if options.x_lim is not None:
+            ax.set_xlim(options.x_lim)
+
         if options.labels_name is not None:
             ax.legend(title=options.labels_name)
 
@@ -195,6 +303,7 @@ class SeabornRenderer(PlotRenderer):
             x=options.x_label_key,
             width=options.width,
             ax=ax,
+            orient=options.orient,
         )
 
         if options.y_label_key is not None:

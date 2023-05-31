@@ -3,23 +3,19 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
+from data_gradients.visualize.seaborn_renderer import Hist2DPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
-    """
-    Semantic Segmentation task feature extractor -
-    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
-    """
-
+class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
     def update(self, sample: SegmentationSample):
-        image_area = sample.image.shape[0] * sample.image.shape[1]
-        for class_channel in sample.contours:
+
+        height, width = sample.image.shape[:2]
+        for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
                 class_id = contour.class_id
                 class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
@@ -27,26 +23,30 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
                     {
                         "split": sample.split,
                         "class_name": class_name,
-                        "bbox_area": 100 * (contour.bbox_area / image_area),
+                        "height": 100 * (contour.h / height),  # TODO: Decide to divide it by image height or not...
+                        "width": 100 * (contour.w / width),
                     }
                 )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        max_area = min(100, df["bbox_area"].max())
-        plot_options = ViolinPlotOptions(
-            x_label_key="bbox_area",
-            x_label_name="Bound Box Area (in % of image)",
-            y_label_key="class_name",
-            y_label_name="Class",
+        plot_options = Hist2DPlotOptions(
+            x_label_key="width",
+            x_label_name="Width (in % of image)",
+            y_label_key="height",
+            y_label_name="Height (in % of image)",
             title=self.title,
-            x_lim=(0, max_area),
+            x_lim=(0, 100),
+            y_lim=(0, 100),
             x_ticks_rotation=None,
             labels_key="split",
-            bandwidth=0.4,
+            individual_plots_key="split",
+            tight_layout=True,
         )
-        json = dict(df.bbox_area.describe())
+
+        description = df.describe()
+        json = {"width": dict(description["width"]), "height": dict(description["height"])}
 
         feature = Feature(
             data=df,
@@ -57,12 +57,11 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Bounding Boxes Area per Class."
+        return "Distribution of Bounding Boxes Height and Width."
 
     @property
     def description(self) -> str:
         return (
-            "The distribution of the areas of the boxes that bound connected components of the different classes as a histogram.\n"
-            "The size of the objects can significantly affect the performance of your model. "
-            "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
+            "Width, Height of the bounding-boxes surrounding every object across all images. Plotted per-class on a heat-map.\n"
+            "A large variation in object sizes within a class can make it harder for the model to recognize the objects."
         )
