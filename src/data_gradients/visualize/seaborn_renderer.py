@@ -176,7 +176,7 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return [fig]
+        return fig
 
     def _render_kdeplot(self, df, options: KDEPlotOptions) -> List[plt.Figure]:
 
