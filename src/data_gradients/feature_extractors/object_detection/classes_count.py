@@ -9,6 +9,8 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 @register_feature_extractor()
 class DetectionClassesCount(AbstractFeatureExtractor):
+    """Feature Extractor to count the number of instance of each class."""
+
     def __init__(self):
         self.data = []
 

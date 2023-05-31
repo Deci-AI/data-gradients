@@ -6,10 +6,10 @@ from data_gradients.feature_extractors.commonV2.image_resolution import ImagesRe
 from data_gradients.feature_extractors.commonV2.image_average_brightness import ImagesAverageBrightness
 from data_gradients.feature_extractors.commonV2.image_color_distribution import ImageColorDistribution
 from data_gradients.feature_extractors.object_detection.bounding_boxes_area import DetectionBoundingBoxArea
-from data_gradients.feature_extractors.object_detection.bounding_boxes_resolution import DetectionBoundingBoxResolution
+from data_gradients.feature_extractors.object_detection.bounding_boxes_resolution import DetectionBoundingBoxSize
 from data_gradients.feature_extractors.object_detection.classes_count import DetectionClassesCount
 from data_gradients.feature_extractors.object_detection.classes_per_image_count import DetectionClassesPerImageCount
-from data_gradients.feature_extractors.object_detection.bounding_boxes_per_image_count import DetectionComponentsPerImageCount
+from data_gradients.feature_extractors.object_detection.bounding_boxes_per_image_count import DetectionBoundingBoxPerImageCount
 
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 import numpy as np
@@ -63,9 +63,9 @@ feature_extractors = [
     ImagesResolution(),
     ImagesAverageBrightness(),
     ImageColorDistribution(),
-    DetectionComponentsPerImageCount(),
+    DetectionBoundingBoxPerImageCount(),
     DetectionBoundingBoxArea(),
-    DetectionBoundingBoxResolution(),
+    DetectionBoundingBoxSize(),
     DetectionClassesCount(),
     DetectionClassesPerImageCount(),
 ]

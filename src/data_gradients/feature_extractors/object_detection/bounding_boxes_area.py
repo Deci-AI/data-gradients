@@ -9,10 +9,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 @register_feature_extractor()
 class DetectionBoundingBoxArea(AbstractFeatureExtractor):
-    """
-    Semantic Segmentation task feature extractor -
-    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
-    """
+    """Feature Extractor to compute the area covered Bounding Boxes."""
 
     def __init__(self):
         self.data = []
@@ -59,7 +56,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "The distribution of the areas of the boxes of the different classes as a histogram.\n"
+            "The distribution of the areas of the boxes of the different classes.\n"
             "The size of the objects can significantly affect the performance of your model. "
             "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
         )

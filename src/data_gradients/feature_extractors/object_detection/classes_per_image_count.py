@@ -9,6 +9,9 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 @register_feature_extractor()
 class DetectionClassesPerImageCount(AbstractFeatureExtractor):
+    """Feature Extractor to show the distribution of number of instance of each class per image.
+    This gives information like "The class 'Human' usually appears 2 to 20 times per image."""
+
     def __init__(self):
         self.data = []
 

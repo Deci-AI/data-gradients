@@ -8,7 +8,9 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 
 @register_feature_extractor()
-class DetectionComponentsPerImageCount(AbstractFeatureExtractor):
+class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
+    """Feature Extractor to count the number of Bounding Boxes per Image."""
+
     def __init__(self):
         self.data = []
 

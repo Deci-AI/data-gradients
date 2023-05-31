@@ -8,7 +8,9 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 
 @register_feature_extractor()
-class DetectionBoundingBoxResolution(AbstractFeatureExtractor):
+class DetectionBoundingBoxSize(AbstractFeatureExtractor):
+    """Feature Extractor to gather the size (Height x Width) of Bounding Boxes."""
+
     def __init__(self):
         self.data = []
 
