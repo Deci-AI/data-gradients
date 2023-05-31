@@ -7,7 +7,7 @@ from data_gradients.utils.common.assets_container import assets
 
 
 @dataclass
-class Feature:
+class FeatureSummary:
     name: str
     description: str
     image_path: str
@@ -18,7 +18,7 @@ class Section:
         self.section_name = section_name
         self.features = []
 
-    def add_feature(self, feature: Feature):
+    def add_feature(self, feature: FeatureSummary):
         self.features.append(feature)
 
 
@@ -69,9 +69,7 @@ class PDFWriter:
         if not output_filename.endswith("pdf"):
             raise RuntimeError("filename must end with .pdf")
 
-        doc = self.template.render(
-            title=self.title, subtitle=self.subtitle, results=results_container
-        )
+        doc = self.template.render(title=self.title, subtitle=self.subtitle, results=results_container)
 
         with open(output_filename, "w+b") as result_file:
             pisa.CreatePDF(doc, dest=result_file)

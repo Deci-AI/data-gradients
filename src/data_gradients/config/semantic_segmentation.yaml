@@ -6,14 +6,14 @@ defaults:
   - _self_
 
 feature_extractors:
-  - SegmentationBoundingBoxArea
-  - SegmentationBoundingBoxResolution
   - SegmentationClassesCount
   - SegmentationClassesPerImageCount
-  - SegmentationComponentCenterOfMass
+  - SegmentationComponentsPerImageCount
+  - SegmentationBoundingBoxResolution
+  - SegmentationBoundingBoxArea
   - SegmentationComponentsConvexity
   - SegmentationComponentsErosion
-  - SegmentationComponentsPerImageCount
+  - SegmentationComponentCenterOfMass
 
 
 _convert_: all

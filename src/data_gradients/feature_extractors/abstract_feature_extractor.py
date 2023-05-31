@@ -36,3 +36,6 @@ class AbstractFeatureExtractor(ABC):
     @property
     def title(self) -> str:
         raise NotImplementedError()
+
+    def __repr__(self):
+        return self.__class__.__name__

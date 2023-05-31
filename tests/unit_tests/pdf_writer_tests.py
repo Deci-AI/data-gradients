@@ -5,7 +5,7 @@ from data_gradients.utils.common.assets_container import assets
 from data_gradients.utils.pdf_writer import (
     ResultsContainer,
     Section,
-    Feature,
+    FeatureSummary,
     PDFWriter,
 )
 
@@ -18,7 +18,7 @@ class PDFWriterTest(unittest.TestCase):
             section = Section(f"Section {section_index}")
             for feature_index in range(6):
                 section.add_feature(
-                    Feature(
+                    FeatureSummary(
                         f"Feature {feature_index}",
                         assets.text.lorem_ipsum,
                         assets.image.chart_demo,
