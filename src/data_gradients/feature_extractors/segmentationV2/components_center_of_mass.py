@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 
 @register_feature_extractor()
-class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
+class SegmentationComponentCenterOfMass(AbstractFeatureExtractor):
     """
     Semantic Segmentation task feature extractor -
     Get all Bounding Boxes areas and plot them as a percentage of the whole image.
@@ -34,14 +34,12 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        max_area = min(100, df["bbox_area"].max())
         plot_options = ViolinPlotOptions(
             x_label_key="bbox_area",
             x_label_name="Bound Box Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
             title=self.title,
-            x_lim=(0, max_area),
             x_ticks_rotation=None,
             labels_key="split",
             bandwidth=0.4,
