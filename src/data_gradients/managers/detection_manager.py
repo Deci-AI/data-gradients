@@ -24,7 +24,6 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         images_extractor: Callable = None,
         labels_extractor: Callable = None,
         n_image_channels: int = 3,
-        short_run: bool = False,
         samples_to_visualize: int = 10,
     ):
         """
@@ -39,8 +38,6 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param images_extractor:
         :param labels_extractor:
         :param n_image_channels:      Number of channels for each image in the dataset
-        :param short_run:               Flag indicating whether to run for a single epoch first to estimate total duration,
-                                        before choosing the number of epochs.
         :param samples_to_visualize:    Number of samples to visualize at tensorboard [0-n]
         """
 
@@ -62,6 +59,5 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             log_dir=log_dir,
             id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
-            short_run=short_run,
             image_sample_manager=image_sample_manager,
         )
