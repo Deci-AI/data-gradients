@@ -165,12 +165,12 @@
     }
     @frame content_frame {
         /* Content Frame */
-    left: 50pt; width: 480pt; top: 90pt; height: 632pt;
+    left: 50pt; width: 480pt; top: 90pt; height: 700pt;
     }
     @frame footer_frame {
         /* Another static Frame */
     -pdf-frame-content:footer_content;
-    left: 50pt; width: 500pt; top: 772pt; height: 20pt;
+    left: 50pt; width: 500pt; top: 780pt; height: 20pt;
     }
     }
 
@@ -205,10 +205,9 @@
         <p class="c0"><span class="section_title">{{section.section_name}}</span></p>
             {% for feature in section.features %}
                 <p class="feature_class"><span class="feature_title">{{feature.name}}</span></p>
-                <p class="feature_class"><span
-                        style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 624.00px; height: 420.00px;"><img
+                <p class="feature_class" style="padding-bottom: 10pt"><span><img
                         alt="" src="{{feature.image_path}}"
-                        style="width: 624.00px; height: 420.00px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                        style="max-width: 624.00px; height: 770.00px;"
                         title=""></span></p>
                 <p class="feature_class"><span class="c4">{{feature.description}}</span>
                 <p class="feature_separator">&nbsp;
