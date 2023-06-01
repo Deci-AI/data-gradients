@@ -22,6 +22,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             self.data.append(
                 {
                     "split": sample.split,
+                    "class_id": class_id,
                     "class_name": class_name,
                     "relative_bbox_area": 100 * (bbox_area / image_area),
                 }
@@ -35,6 +36,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             x_label_name="Bounding Box Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
+            order_key="class_id",
             title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
