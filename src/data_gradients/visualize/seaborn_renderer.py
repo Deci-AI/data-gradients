@@ -127,7 +127,6 @@ class SeabornRenderer(PlotRenderer):
 
         for df, ax_i in zip(dfs, axs):
             histplot_args = dict(data=df, x=options.x_label_key, kde=options.kde, stat=options.stat, ax=ax_i)
-            seaborn.histplot(**histplot_args)
 
             if options.y_label_key is not None:
                 histplot_args.update(y=options.y_label_key)
