@@ -30,7 +30,14 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
         df = pd.DataFrame(self.data)
 
         plot_options = KDEPlotOptions(
-            x_label_key="convexity_measure", x_label_name="Convexity", title=self.title, x_ticks_rotation=None, labels_key="split", common_norm=False, fill=True
+            x_label_key="convexity_measure",
+            x_label_name="Convexity",
+            title=self.title,
+            x_ticks_rotation=None,
+            labels_key="split",
+            common_norm=False,
+            fill=True,
+            sharey=True,
         )
 
         json = dict(df["convexity_measure"].describe())
