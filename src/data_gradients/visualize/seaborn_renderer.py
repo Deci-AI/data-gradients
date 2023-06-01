@@ -203,13 +203,11 @@ class SeabornRenderer(PlotRenderer):
                 data=df,
                 x=options.x_label_key,
                 ax=ax_i,
+                common_norm=options.common_norm,
             )
 
-            if options.y_label_key is not None:
-                plot_args.update(y=options.y_label_key)
-
-            if options.weights is not None:
-                plot_args.update(weights=options.weights)
+            if options.bw_adjust is not None:
+                plot_args.update(bw_adjust=options.bw_adjust)
 
             if options.y_label_key is not None:
                 plot_args.update(y=options.y_label_key)

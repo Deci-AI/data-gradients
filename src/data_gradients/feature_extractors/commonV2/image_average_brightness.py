@@ -5,7 +5,7 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
-from data_gradients.visualize.plot_options import Hist2DPlotOptions
+from data_gradients.visualize.plot_options import KDEPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 
 
@@ -43,17 +43,14 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        plot_options = Hist2DPlotOptions(
+        plot_options = KDEPlotOptions(
             x_label_key="brightness",
             x_label_name="Average Brightness of Images",
-            kde=True,
-            stat="density",
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
             labels_key="split",
-            individual_plots_key="split",
-            individual_plots_max_cols=2,
+            common_norm=False,
         )
         json = dict(df.brightness.describe())
 

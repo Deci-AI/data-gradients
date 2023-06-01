@@ -193,6 +193,8 @@ class KDEPlotOptions(CommonPlotOptions):
 
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
+    common_norm: bool = True
+    bw_adjust: Optional[float] = None
 
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
