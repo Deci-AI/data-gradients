@@ -38,6 +38,7 @@ class ImagesResolution(AbstractFeatureExtractor):
                 labels_key="split",
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
+                sharey=True,
             )
         else:
             plot_options = Hist2DPlotOptions(
@@ -52,6 +53,7 @@ class ImagesResolution(AbstractFeatureExtractor):
                 labels_key="split",
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
+                sharey=True,
             )
 
         description = df.describe()

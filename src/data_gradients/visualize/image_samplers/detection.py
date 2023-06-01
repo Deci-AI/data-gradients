@@ -10,7 +10,7 @@ from data_gradients.utils.data_classes import DetectionSample
 
 class DetectionImageSampleManager(ImageSampleManager):
     def prepare_image(self, sample: DetectionSample) -> np.ndarray:
-        return draw_bboxes(image=sample.image, bboxes_xyxy=sample.bboxes_xyxy, labels=sample.labels)
+        return draw_bboxes(image=sample.image, bboxes_xyxy=sample.bboxes_xyxy, labels=sample.class_ids)
 
 
 def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, labels: np.ndarray) -> np.ndarray:

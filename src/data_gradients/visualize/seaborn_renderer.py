@@ -53,7 +53,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
@@ -114,7 +114,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
@@ -187,7 +187,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
@@ -203,13 +203,14 @@ class SeabornRenderer(PlotRenderer):
                 data=df,
                 x=options.x_label_key,
                 ax=ax_i,
+                common_norm=options.common_norm,
             )
 
-            if options.y_label_key is not None:
-                plot_args.update(y=options.y_label_key)
+            if options.fill:
+                plot_args.update(fill=options.fill, alpha=options.alpha)
 
-            if options.weights is not None:
-                plot_args.update(weights=options.weights)
+            if options.bw_adjust is not None:
+                plot_args.update(bw_adjust=options.bw_adjust)
 
             if options.y_label_key is not None:
                 plot_args.update(y=options.y_label_key)
@@ -261,6 +262,14 @@ class SeabornRenderer(PlotRenderer):
             y=options.y_label_key,
             ax=ax,
         )
+
+        if options.order_key is not None:
+            if options.order_key not in df.columns:
+                raise ValueError(f"{options.order_key} is not a column in {df.columns}")
+            sorted_df = df.sort_values(options.order_key)
+            sorted_labels = sorted_df[options.y_label_key].unique()
+            plot_args.update(order=sorted_labels)
+
         if options.bandwidth is not None:
             plot_args.update(bw=options.bandwidth)
 
@@ -311,6 +320,13 @@ class SeabornRenderer(PlotRenderer):
             plot_fn = seaborn.barplot
         else:
             plot_fn = seaborn.countplot
+
+        if options.order_key is not None:
+            if options.order_key not in df.columns:
+                raise ValueError(f"{options.order_key} is not a column in {df.columns}")
+            sorted_df = df.sort_values(options.order_key)
+            sorted_labels = sorted_df[options.y_label_key].unique()
+            barplot_args.update(order=sorted_labels)
 
         if options.bins is not None:
             barplot_args.update(bins=options.bins)

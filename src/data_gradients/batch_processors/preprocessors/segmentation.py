@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Optional, List, Iterable
 import time
 import numpy as np
 from torch import Tensor
@@ -11,12 +11,19 @@ from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class SegmentationBatchPreprocessor(BatchPreprocessor):
-    def preprocess(self, images: Tensor, labels: Tensor) -> Iterable[SegmentationSample]:
+    def __init__(self, class_names: Optional[List[str]] = None):
+        """
+        :param class_names: List of class names
+        """
+        self.class_names = class_names
+
+    def preprocess(self, images: Tensor, labels: Tensor, split: str) -> Iterable[SegmentationSample]:
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
-        :param images:  Batch of images already formatted into (BS, C, H, W)
-        :param labels:  Batch of labels already formatted into (BS, N, H, W)
-        :return:        Ready to analyse segmentation batch object.
+        :param images:      Batch of images already formatted into (BS, C, H, W)
+        :param labels:      Batch of labels already formatted into (BS, N, H, W)
+        :param split:       Name of the split (train, val, test)
+        :return:            Ready to analyse segmentation batch object.
         """
         images = np.transpose(images.cpu().numpy(), (0, 2, 3, 1))
         labels = labels.cpu().numpy()
@@ -25,4 +32,12 @@ class SegmentationBatchPreprocessor(BatchPreprocessor):
             contours = get_contours(mask)
 
             # TODO: image_format is hard-coded here, but it should be refactored afterwards
-            yield SegmentationSample(image=image, mask=mask, contours=contours, split=None, image_format=ImageChannelFormat.RGB, sample_id=str(time.time()))
+            yield SegmentationSample(
+                image=image,
+                mask=mask,
+                contours=contours,
+                class_names=self.class_names,
+                split=split,
+                image_format=ImageChannelFormat.RGB,
+                sample_id=str(time.time()),
+            )

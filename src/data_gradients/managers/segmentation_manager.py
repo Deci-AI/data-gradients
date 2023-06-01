@@ -15,7 +15,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
     def __init__(
         self,
         *,
-        num_classes: int,
+        class_names: Optional[List[str]] = None,
+        n_classes: Optional[int] = None,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         config_name: str = "semantic_segmentation",
@@ -32,7 +33,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
 
-        :param num_classes:             Number of valid classes to analyze
+        :param class_names:             List of class names. If None, the class names will be the class ids.
+        :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_name:             Name of the hydra configuration file
@@ -47,8 +49,16 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param samples_to_visualize:    Number of samples to visualize at tensorboard [0-n]
         """
 
+        if n_classes and class_names:
+            raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
+        if n_classes is None and class_names is None:
+            raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+
+        class_names = class_names if class_names else list(map(str, range(n_classes)))
+        n_classes = len(class_names)
+
         batch_processor = SegmentationBatchProcessor(
-            n_classes=num_classes,
+            class_names=class_names,
             ignore_labels=ignore_labels,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
@@ -56,7 +66,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             threshold_value=threshold_soft_labels,
         )
 
-        feature_extractors = load_extractors(config_name=config_name, overrides={"number_of_classes": num_classes, "ignore_labels": ignore_labels})
+        feature_extractors = load_extractors(config_name=config_name, overrides={"number_of_classes": n_classes, "ignore_labels": ignore_labels})
 
         image_sample_manager = SegmentationImageSampleManager(n_samples=samples_to_visualize)
 

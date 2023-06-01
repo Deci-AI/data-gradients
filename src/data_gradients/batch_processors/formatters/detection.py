@@ -111,11 +111,11 @@ class DetectionBatchFormatter(BatchFormatter):
     @staticmethod
     def ask_user_is_label_first() -> bool:
         is_label_first_descriptions = {
-            "Label comes first (e.g. [label, x1, y1, x2, y2])": True,
-            "Bounding box comes first (e.g. [x1, y1, x2, y2, label])": False,
+            "Label comes first (e.g. [class_id, x1, y1, x2, y2])": True,
+            "Bounding box comes first (e.g. [x1, y1, x2, y2, class_id])": False,
         }
         selected_option = ask_user(
-            main_question="Which comes first in your annotations, the label or the bounding box?",
+            main_question="Which comes first in your annotations, the class id or the bounding box?",
             options=list(is_label_first_descriptions.keys()),
         )
         return is_label_first_descriptions[selected_option]
