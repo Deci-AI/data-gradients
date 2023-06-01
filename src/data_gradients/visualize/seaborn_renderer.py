@@ -266,6 +266,14 @@ class SeabornRenderer(PlotRenderer):
             y=options.y_label_key,
             ax=ax,
         )
+
+        if options.order_key is not None:
+            if options.order_key not in df.columns:
+                raise ValueError(f"{options.order_key} is not a column in {df.columns}")
+            sorted_df = df.sort_values(options.order_key)
+            sorted_labels = sorted_df[options.y_label_key].unique()
+            plot_args.update(order=sorted_labels)
+
         if options.bandwidth is not None:
             plot_args.update(bw=options.bandwidth)
 
@@ -316,6 +324,13 @@ class SeabornRenderer(PlotRenderer):
             plot_fn = seaborn.barplot
         else:
             plot_fn = seaborn.countplot
+
+        if options.order_key is not None:
+            if options.order_key not in df.columns:
+                raise ValueError(f"{options.order_key} is not a column in {df.columns}")
+            sorted_df = df.sort_values(options.order_key)
+            sorted_labels = sorted_df[options.y_label_key].unique()
+            barplot_args.update(order=sorted_labels)
 
         if options.bins is not None:
             barplot_args.update(bins=options.bins)

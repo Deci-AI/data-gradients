@@ -19,6 +19,7 @@ class BarPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr order_key: Key that will be used to order the violins. If None, the order will be automatically determined.
     :attr width: Width of the bars
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr x_ticks_rotation: X-ticks rotation (Helps to make more compact plots)
@@ -35,6 +36,8 @@ class BarPlotOptions(CommonPlotOptions):
     x_label_name: str
     y_label_key: Optional[str]
     y_label_name: str
+
+    order_key: Optional[str] = None
 
     width: float = 0.8
     bins: Optional[int] = None
@@ -63,6 +66,7 @@ class ViolinPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr order_key: Key that will be used to order the violins. If None, the order will be automatically determined.
     :attr x_lim: X-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
@@ -82,6 +86,8 @@ class ViolinPlotOptions(CommonPlotOptions):
 
     y_label_key: str
     y_label_name: str
+
+    order_key: Optional[str] = None
 
     x_lim: Tuple[float, float] = None
 

@@ -20,6 +20,7 @@ class DetectionClassesCount(AbstractFeatureExtractor):
             self.data.append(
                 {
                     "split": sample.split,
+                    "class_id": class_id,
                     "class_name": class_name,
                 }
             )
@@ -28,13 +29,14 @@ class DetectionClassesCount(AbstractFeatureExtractor):
         df = pd.DataFrame(self.data)
 
         # Include ("class_name", "split", "n_appearance")
-        df_class_count = df.groupby(["class_name", "split"]).size().reset_index(name="n_appearance")
+        df_class_count = df.groupby(["class_name", "class_id", "split"]).size().reset_index(name="n_appearance")
 
         plot_options = BarPlotOptions(
             x_label_key="n_appearance",
             x_label_name="Number of Appearance",
             y_label_key="class_name",
             y_label_name="Class Names",
+            order_key="class_id",
             title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
