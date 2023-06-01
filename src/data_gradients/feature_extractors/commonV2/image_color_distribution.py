@@ -75,6 +75,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             individual_plots_key="split",
             individual_plots_max_cols=2,
             labels_palette=self.palette,
+            sharey=True,
         )
         json = {color: dict(df[df["Color"] == color].describe()) for color in self.colors}
 

@@ -37,6 +37,7 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
             labels_key="split",
             individual_plots_key="split",
             kde=True,
+            sharey=True,
         )
 
         json = dict(df["convexity_measure"].describe())

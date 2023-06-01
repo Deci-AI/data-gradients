@@ -45,6 +45,7 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
             x_ticks_rotation=None,
             labels_key="split",
             individual_plots_key="split",
+            sharey=True,
         )
 
         json = dict(df.describe())
