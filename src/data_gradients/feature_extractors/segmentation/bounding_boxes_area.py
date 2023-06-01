@@ -1,10 +1,10 @@
 import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.feature_extractors.abstract_feature_extractor import Feature
+from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
-from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
@@ -27,6 +27,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
                     {
                         "split": sample.split,
                         "class_name": class_name,
+                        "class_id": class_id,
                         "bbox_area": 100 * (contour.bbox_area / image_area),
                     }
                 )
@@ -37,9 +38,10 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
         max_area = min(100, df["bbox_area"].max())
         plot_options = ViolinPlotOptions(
             x_label_key="bbox_area",
-            x_label_name="Bound Box Area (in % of image)",
+            x_label_name="Bounding Box Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
+            order_key="class_id",
             title=self.title,
             x_lim=(0, max_area),
             x_ticks_rotation=None,
