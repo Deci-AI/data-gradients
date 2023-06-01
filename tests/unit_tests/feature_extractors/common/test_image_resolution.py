@@ -90,9 +90,8 @@ class ImageResolutionTest(unittest.TestCase):
     def test_plot(self):
         feature = self.extractor.aggregate()
         sns = SeabornRenderer()
-        figs = sns.render(feature.data, feature.plot_options)
-        for f in figs:
-            f.show()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
 
 
 if __name__ == "__main__":

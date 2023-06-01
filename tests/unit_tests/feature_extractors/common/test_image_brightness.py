@@ -113,16 +113,14 @@ class ImageBrightnessTest(unittest.TestCase):
     def test_plot(self):
         feature = self.average_brightness.aggregate()
         sns = SeabornRenderer()
-        figs = sns.render(feature.data, feature.plot_options)
-        for f in figs:
-            f.show()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
 
     def test_color_distribution_plot(self):
         feature = self.color_distribution.aggregate()
         sns = SeabornRenderer()
-        figs = sns.render(feature.data, feature.plot_options)
-        for f in figs:
-            f.show()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
 
 
 if __name__ == "__main__":

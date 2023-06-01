@@ -73,6 +73,5 @@ for val_batch in tqdm(val_loader):
 
 for feature_extractor in feature_extractors:
     feature = feature_extractor.aggregate()
-    figs = sns.render(feature.data, feature.plot_options)
-    for fig in figs:
-        fig.show()
+    f = sns.render(feature.data, feature.plot_options)
+    f.show()

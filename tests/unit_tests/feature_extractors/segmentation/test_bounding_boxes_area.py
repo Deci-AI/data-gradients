@@ -188,23 +188,20 @@ class SegmentationBBoxV2Test(unittest.TestCase):
         for feature_extractor in self.feature_extractors:
             feature = feature_extractor.aggregate()
             sns = SeabornRenderer()
-            figs = sns.render(feature.data, feature.plot_options)
-            for f in figs:
-                f.show()
+            f = sns.render(feature.data, feature.plot_options)
+            f.show()
 
     def test_resolution_plot(self):
         feature = self.resolution_extractor.aggregate()
         sns = SeabornRenderer()
-        figs = sns.render(feature.data, feature.plot_options)
-        for f in figs:
-            f.show()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
 
     def test_class_distribution_plot(self):
         feature = self.class_count.aggregate()
         sns = SeabornRenderer()
-        figs = sns.render(feature.data, feature.plot_options)
-        for f in figs:
-            f.show()
+        f = sns.render(feature.data, feature.plot_options)
+        f.show()
 
 
 if __name__ == "__main__":
