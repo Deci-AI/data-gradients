@@ -70,9 +70,7 @@ class PDFWriter:
         if not output_filename.endswith("pdf"):
             raise RuntimeError("filename must end with .pdf")
 
-        doc = self.template.render(
-            title=self.title, subtitle=self.subtitle, results=results_container, version=data_gradients.__version__
-        )
+        doc = self.template.render(title=self.title, subtitle=self.subtitle, results=results_container, version=data_gradients.__version__)
 
         with open(output_filename, "w+b") as result_file:
             pisa.CreatePDF(doc, dest=result_file)

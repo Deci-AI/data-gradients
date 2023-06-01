@@ -1,68 +1,66 @@
-import numpy as np
+import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.utils.utils import class_id_to_name
+from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.feature_extractors.feature_extractor_abstract import MultiFeatureExtractorAbstract
-from data_gradients.utils.data_classes.extractor_results import HeatMapResults
+from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
+from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class ComponentsCenterOfMass(MultiFeatureExtractorAbstract):
+class SegmentationComponentCenterOfMass(AbstractFeatureExtractor):
     """
     Semantic Segmentation task feature extractor -
-    Get all X, Y positions of center of mass of every object in every image for every class.
-    Plot those X, Y positions as a heat-map
+    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
     """
 
-    def __init__(self, num_classes, ignore_labels):
-        super().__init__()
-        keys = [int(i) for i in range(0, num_classes + len(ignore_labels)) if i not in ignore_labels]
-        self._hist = {
-            "train": {k: {"x": list(), "y": list()} for k in keys},
-            "val": {k: {"x": list(), "y": list()} for k in keys},
-        }
-
-        self.num_axis = (1, 2)
+    def __init__(self):
+        self.data = []
 
     def update(self, sample: SegmentationSample):
-        label_shape = sample.mask[0].shape
-        for j, cls_contours in enumerate(sample.contours):
-            for contour in cls_contours:
-                self._hist[sample.split][contour.class_id]["x"].append(round(contour.center[0] / label_shape[1], 2))
-                self._hist[sample.split][contour.class_id]["y"].append(round(contour.center[1] / label_shape[0], 2))
+        image_area = sample.image.shape[0] * sample.image.shape[1]
+        for class_channel in sample.contours:
+            for contour in class_channel:
+                class_id = contour.class_id
+                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
+                self.data.append(
+                    {
+                        "split": sample.split,
+                        "class_name": class_name,
+                        "bbox_area": 100 * (contour.bbox_area / image_area),
+                    }
+                )
 
-    def _aggregate(self, split: str):
-        self._hist[split] = class_id_to_name(self.id_to_name, self._hist[split])
+    def aggregate(self) -> Feature:
+        df = pd.DataFrame(self.data)
 
-        # self._hist = self.merge_dict_splits(self._hist)
-        x, y = {}, {}
-        for key, val in self._hist[split].items():
-            x[key] = val["x"]
-            y[key] = val["y"]
+        plot_options = ViolinPlotOptions(
+            x_label_key="bbox_area",
+            x_label_name="Bound Box Area (in % of image)",
+            y_label_key="class_name",
+            y_label_name="Class",
+            title=self.title,
+            x_ticks_rotation=None,
+            labels_key="split",
+            bandwidth=0.4,
+        )
+        json = dict(df.bbox_area.describe())
 
-        results = dict.fromkeys(self._hist[split])
-        for key in self._hist[split]:
-            n_bins = max(int(np.sqrt(len([key])) * 4), 20)
-            results[key] = HeatMapResults(
-                x=x[key],
-                y=y[key],
-                n_bins=n_bins,
-                split=split,
-                plot="heat-map",
-                title="Center of mass average locations",
-                x_label="X axis",
-                y_label="Y axis",
-                keys=["X", "Y"],
-                range=[[0, 1], [0, 1]],
-                invert=True,
-            )
+        feature = Feature(
+            data=df,
+            plot_options=plot_options,
+            json=json,
+        )
+        return feature
 
-        # quantized_heat_map, _, _ = np.histogram2d(x, y, bins=25)
-        # results.json_values = quantized_heat_map.tolist()
-
-        return results
+    @property
+    def title(self) -> str:
+        return "Distribution of Bounding Boxes Area per Class."
 
     @property
     def description(self) -> str:
-        return "Heatmap plot of the center of mass coordinates (x,y) of all objects among all classes."
+        return (
+            "The distribution of the areas of the boxes that bound connected components of the different classes as a histogram.\n"
+            "The size of the objects can significantly affect the performance of your model. "
+            "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
+        )
