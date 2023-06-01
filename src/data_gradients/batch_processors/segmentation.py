@@ -10,29 +10,20 @@ class SegmentationBatchProcessor(BatchProcessor):
     def __init__(
         self,
         *,
-        n_classes: Optional[int] = None,
-        class_names: Optional[List[str]] = None,
+        class_names: List[str],
         n_image_channels: int,
         threshold_value: float,
         ignore_labels: Optional[List[int]] = None,
         images_extractor: Optional[Callable] = None,
         labels_extractor: Optional[Callable] = None,
     ):
-        if n_classes is None and class_names is None:
-            raise RuntimeError("Either `n_classes` or `class_names` must be specified")
-
-        if n_classes and class_names:
-            if len(class_names) != n_classes:
-                raise RuntimeError(f"`len(class_names) != n_classes ({len(class_names)} != {n_classes})")
-
-        n_classes = n_classes or len(class_names)
 
         dataset_adapter = DatasetAdapter(
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
         )
         formatter = SegmentationBatchFormatter(
-            n_classes=n_classes,
+            n_classes=len(class_names),
             n_image_channels=n_image_channels,
             threshold_value=threshold_value,
             ignore_labels=ignore_labels,
