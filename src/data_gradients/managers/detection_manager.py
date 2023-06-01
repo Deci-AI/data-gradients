@@ -1,7 +1,7 @@
 from typing import Optional, Iterable, Dict, Callable, List
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
-from data_gradients.config.utils import load_extractors
+from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.detection import DetectionBatchProcessor
 from data_gradients.visualize.image_samplers.detection import DetectionImageSampleManager
 
@@ -58,7 +58,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             class_names=class_names,
         )
 
-        feature_extractors = load_extractors(config_name=config_name, overrides={"number_of_classes": n_classes})
+        feature_extractors = load_report_feature_extractors(config_name=config_name)
 
         image_sample_manager = DetectionImageSampleManager(n_samples=samples_to_visualize)
 
@@ -66,7 +66,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             train_data=train_data,
             val_data=val_data,
             batch_processor=batch_processor,
-            feature_extractors=feature_extractors,
+            grouped_feature_extractors=feature_extractors,
             log_dir=log_dir,
             id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,

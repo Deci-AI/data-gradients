@@ -12,7 +12,9 @@ from data_gradients.common.factories import FeatureExtractorsFactory, ListFactor
 OmegaConf.register_new_resolver("merge", lambda x, y: x + y)
 
 
-def load_extractors(config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None) -> List[AbstractFeatureExtractor]:
+def load_report_feature_extractors(
+    config_name: str, config_dir: Optional[str] = None, overrides: Optional[Dict[str, Any]] = None
+) -> Dict[str, List[AbstractFeatureExtractor]]:
     """Load and instantiate extractors from a Hydra configuration file.
 
     :param config_name: Name of the Hydra configuration file to load.
@@ -23,9 +25,11 @@ def load_extractors(config_name: str, config_dir: Optional[str] = None, override
     :return:            A list of instantiated feature extractors.
     """
     cfg = load_config(config_name=config_name, config_dir=config_dir, overrides=overrides)
-    extractors = cfg["feature_extractors"] + cfg["common"]["feature_extractors"]
-    extractors = ListFactory(FeatureExtractorsFactory()).get(extractors)
-    return extractors
+    grouped_feature_extractors = {}
+    for section in cfg["report_sections"]:
+        section_name, feature_extractors = section["name"], section["features"]
+        grouped_feature_extractors[section_name] = ListFactory(FeatureExtractorsFactory()).get(feature_extractors)
+    return grouped_feature_extractors
 
 
 def load_config(config_name: str, config_dir: str, overrides: Optional[Dict[str, Any]] = None) -> DictConfig:

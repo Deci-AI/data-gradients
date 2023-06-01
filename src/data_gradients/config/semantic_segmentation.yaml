@@ -1,19 +1,16 @@
-number_of_classes:
-ignore_labels:
-
-defaults:
-  - common: common
-  - _self_
-
-feature_extractors:
-  - SegmentationClassesCount
-  - SegmentationClassesPerImageCount
-  - SegmentationComponentsPerImageCount
-  - SegmentationBoundingBoxResolution
-  - SegmentationBoundingBoxArea
-  - SegmentationComponentsConvexity
-  - SegmentationComponentsErosion
-  - SegmentationComponentCenterOfMass
-
-
-_convert_: all
+report_sections:
+  - name: Image Features
+    features:
+      - ImagesResolution
+      - ImageColorDistribution
+      - ImagesAverageBrightness
+  - name: Segmentation Features
+    features:
+      - SegmentationClassesCount
+      - SegmentationClassesPerImageCount
+      - SegmentationComponentsPerImageCount
+      - SegmentationBoundingBoxResolution
+      - SegmentationBoundingBoxArea
+      - SegmentationComponentsConvexity
+      - SegmentationComponentsErosion
+      - SegmentationComponentCenterOfMass
