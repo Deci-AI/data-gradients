@@ -32,7 +32,7 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
             x_label_key="n_components",
             x_label_name="Number of component per Image",
             title=self.title,
-            kde=True,
+            kde=False,
             labels_key="split",
             individual_plots_key="split",
             x_ticks_rotation=None,

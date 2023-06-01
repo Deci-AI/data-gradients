@@ -206,6 +206,9 @@ class SeabornRenderer(PlotRenderer):
                 common_norm=options.common_norm,
             )
 
+            if options.fill:
+                plot_args.update(fill=options.fill, alpha=options.alpha)
+
             if options.bw_adjust is not None:
                 plot_args.update(bw_adjust=options.bw_adjust)
 
