@@ -73,7 +73,8 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             x_ticks_rotation=None,
             labels_key="Color",
             individual_plots_key="split",
-            individual_plots_max_cols=2,
+            common_norm=True,
+            bw_adjust=0.4,
             labels_palette=self.palette,
             sharey=True,
         )
