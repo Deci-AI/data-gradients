@@ -13,7 +13,7 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
         :param images:  Batch of images already formatted into (BS, C, H, W)
-        :param labels:  Batch of labels already formatted into (BS, N, 5), in format (label, x1, y1, x2, y2)
+        :param labels:  Batch of labels already formatted into (BS, N, 5), in format (class_id, x1, y1, x2, y2)
         :return:        Iterable of ready to analyse detection samples.
         """
         images = np.transpose(images.cpu().numpy(), (0, 2, 3, 1))
@@ -21,12 +21,12 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
 
         for image, target in zip(images, labels):
             target = self.filter_padding(target, padding_value=0).astype(np.int)
-            labels, bboxes_xyxy = target[:, 0], target[:, 1:]
+            class_ids, bboxes_xyxy = target[:, 0], target[:, 1:]
 
             # TODO: image_format is hard-coded here, but it should be refactored afterwards
             yield DetectionSample(
                 image=image,
-                labels=labels,
+                class_ids=class_ids,
                 bboxes_xyxy=bboxes_xyxy,
                 split=None,
                 image_format=ImageChannelFormat.RGB,
