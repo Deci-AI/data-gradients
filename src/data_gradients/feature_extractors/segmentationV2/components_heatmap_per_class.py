@@ -1,5 +1,5 @@
 import cv2
-from typing import List, Optional
+from typing import Tuple
 import numpy as np
 from collections import defaultdict
 
@@ -12,21 +12,18 @@ from data_gradients.feature_extractors.feature_extractor_abstractV2 import Abstr
 
 @register_feature_extractor()
 class SegmentationComponentHeatmap(AbstractFeatureExtractor):
-    def __init__(self):
-        self.heatmap_dim = (200, 200)
-        self.kernel_shape = (3, 3)
+    def __init__(self, n_classes_to_show: int = 12, heatmap_dim: Tuple[int, int] = (200, 200)):
+        """
+        :param n_classes_to_show:   The `n_classes_to_show` classes that are the most represented in the dataset will be shown.
+        :param heatmap_dim:         Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed
+        """
+        self.heatmap_dim = heatmap_dim
+        self.n_classes_to_show = n_classes_to_show
+
         self.heatmaps_per_split_per_cls = defaultdict(lambda: defaultdict(lambda: np.zeros(self.heatmap_dim, dtype=np.uint8)))
         self.count_class_appearance = defaultdict(lambda: 0)
-        self.n_classes_to_show = 12
-        self.class_names: Optional[List[str]] = None
-
-    def new_heatmap(self):
-        return
 
     def update(self, sample: SegmentationSample):
-
-        if self.class_names is None:
-            self.class_names = sample.class_names
 
         # Making sure all the masks are the same size (100, 100) for visualization.
         mask = sample.mask.transpose((1, 2, 0))
@@ -58,7 +55,7 @@ class SegmentationComponentHeatmap(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Heatmap of components density"
+        return "Heatmap of Object Density"
 
     @property
     def description(self) -> str:

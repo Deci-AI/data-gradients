@@ -356,8 +356,11 @@ class SeabornRenderer(PlotRenderer):
         :param images_per_split_per_class:  Mapping of class names and splits to images. e.g. {"class1": {"train": np.ndarray, "valid": np.ndarray},...}
         :param options:                     Plotting options
         """
+        n_class_per_row = 2
+
         figs = []
-        for class_name, images_per_split in images_per_split_per_class.items():
+
+        for i, (class_name, images_per_split) in enumerate(images_per_split_per_class.items()):
             n_cols = len(images_per_split)
             fig, axs = plt.subplots(nrows=1, ncols=n_cols, figsize=(10, 6))
 
@@ -368,8 +371,19 @@ class SeabornRenderer(PlotRenderer):
 
             for (split, image), ax_i in zip(images_per_split.items(), axs):
                 ax_i.imshow(image, cmap="hot")
-                ax_i.set_title(split, fontsize=36)
-                ax_i.axis("off")
+
+                if i >= n_class_per_row:
+                    ax_i.set_axis_off()
+                else:
+                    # Write the split for the last row only
+                    ax_i.set_xticks([])
+                    ax_i.set_yticks([])
+                    ax_i.spines["top"].set_visible(False)
+                    ax_i.spines["right"].set_visible(False)
+                    ax_i.spines["bottom"].set_visible(False)
+                    ax_i.spines["left"].set_visible(False)
+                    ax_i.set_title(split, fontsize=48)
+                    # ax_i.xaxis.set_label_coords(0.5, -0.05)  # Move a little down to increase readability
 
             figs.append(fig)
 
@@ -386,15 +400,18 @@ class SeabornRenderer(PlotRenderer):
             plt.close(fig)  # Close the figure
 
         # Create a new figure to hold the images
-        n_rows = len(images) // 2 + len(images) % 2
-        n_cols = 2
+        n_rows = len(images) // n_class_per_row + len(images) % n_class_per_row
+        n_cols = n_class_per_row
+
         fig, axs = plt.subplots(n_rows, n_cols, figsize=(10, 2.5 * n_rows))  # Reduced the vertical size
-        fig.suptitle(options.title)
 
         # Plot each PIL image to a subplot
-        for ax, img in zip(axs.flatten(), images):
-            ax.imshow(img)
+        from itertools import zip_longest
+
+        for ax, img in zip_longest(axs.flatten(), images, fillvalue=None):
             ax.axis("off")
+            if img is not None:
+                ax.imshow(img)
 
         plt.tight_layout()
         return [fig]
