@@ -26,8 +26,7 @@ class BatchProcessor(ABC):
     def process(self, unprocessed_batch: Union[Tuple, List, Mapping], split: str) -> Iterable[ImageSample]:
         images, labels = self.dataset_adapter.extract(unprocessed_batch)
         images, labels = self.batch_formatter.format(images, labels)
-        for sample in self.batch_preprocessor.preprocess(images, labels):
-            sample.split = split
+        for sample in self.batch_preprocessor.preprocess(images, labels, split):
             yield sample
 
     @property
