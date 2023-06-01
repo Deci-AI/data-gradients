@@ -358,20 +358,45 @@ class SeabornRenderer(PlotRenderer):
         figs = []
         for class_name, images_per_split in images_per_split_per_class.items():
             n_cols = len(images_per_split)
-            fig, axs = plt.subplots(nrows=1, ncols=n_cols, figsize=options.figsize)
+            fig, axs = plt.subplots(nrows=1, ncols=n_cols, figsize=(10, 6))
 
             if options.tight_layout:
                 fig.tight_layout()
             fig.subplots_adjust(top=0.9)
-            fig.suptitle(f'{options.title}: "{class_name}"')
+            fig.suptitle(class_name, fontsize=36)
 
             for (split, image), ax_i in zip(images_per_split.items(), axs):
                 ax_i.imshow(image, cmap="hot")
-                ax_i.set_title(split)
+                ax_i.set_title(split, fontsize=36)
                 ax_i.axis("off")
 
             figs.append(fig)
-        return figs
+
+        import io
+        from PIL import Image
+
+        # Convert figs to PIL Images
+        images = []
+        for fig in figs:
+            buf = io.BytesIO()
+            fig.savefig(buf, format="png")
+            buf.seek(0)
+            images.append(Image.open(buf))
+            plt.close(fig)  # Close the figure
+
+        # Create a new figure to hold the images
+        n_rows = len(images) // 2 + len(images) % 2
+        n_cols = 2
+        fig, axs = plt.subplots(n_rows, n_cols, figsize=(10, 2.5 * n_rows))  # Reduced the vertical size
+        fig.suptitle(options.title)
+
+        # Plot each PIL image to a subplot
+        for ax, img in zip(axs.flatten(), images):
+            ax.imshow(img)
+            ax.axis("off")
+
+        plt.tight_layout()
+        return [fig]
 
     def _set_ticks_rotation(self, ax, x_ticks_rotation, y_ticks_rotation):
         # Call to set_xticks is needed to avoid warning
