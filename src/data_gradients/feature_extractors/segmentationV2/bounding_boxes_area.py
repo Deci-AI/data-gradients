@@ -27,6 +27,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
                     {
                         "split": sample.split,
                         "class_name": class_name,
+                        "class_id": class_id,
                         "bbox_area": 100 * (contour.bbox_area / image_area),
                     }
                 )
@@ -40,6 +41,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
             x_label_name="Bounding Box Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
+            order_key="class_id",
             title=self.title,
             x_lim=(0, max_area),
             x_ticks_rotation=None,
