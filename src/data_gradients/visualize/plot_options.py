@@ -261,18 +261,16 @@ class ScatterPlotOptions(CommonPlotOptions):
 
 
 @dataclasses.dataclass
-class ImagePlotOptions(CommonPlotOptions):
+class ImageHeatmapPlotOptions(CommonPlotOptions):
     """
-    Contains a set of options for displaying a plot made of image(s).
+    Contains a set of options for displaying heatmaps.
 
-    :attr individual_plots_max_cols: Sets the maximum number of columns to plot in the individual plots
-    :attr labels_key: If you want to display multiple classes on same plot use this property to indicate column
-    :attr tight_layout: If True enables more compact layout of the plot
-    :attr figsize: Size of the figure
+    :attr n_cols:   Number of columns, i.e. classes shown per row
+    :attr cmap:     Name of the colormap to use
     """
 
-    tight_layout: bool = False
-    figsize: Optional[Tuple[int, int]] = (10, 6)
+    n_cols: int = 2
+    cmap: Optional[str] = None
 
 
 class PlotRenderer(ABC):

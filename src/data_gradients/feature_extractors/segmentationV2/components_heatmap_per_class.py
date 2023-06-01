@@ -6,7 +6,7 @@ from collections import defaultdict
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.visualize.seaborn_renderer import ImagePlotOptions
+from data_gradients.visualize.seaborn_renderer import ImageHeatmapPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 
 
@@ -49,7 +49,7 @@ class SegmentationComponentHeatmap(AbstractFeatureExtractor):
                 for split, heatmap in heatmaps_per_split.items():
                     cleaned_heatmaps_per_split_per_cls[class_name][split] = (255 * (heatmap / heatmap.max())).astype(np.uint8)
 
-        plot_options = ImagePlotOptions(title=self.title, tight_layout=True)
+        plot_options = ImageHeatmapPlotOptions(title=self.title, tight_layout=True)
         json = {class_name: "No Data" for class_name in cleaned_heatmaps_per_split_per_cls.keys()}
         return Feature(data=cleaned_heatmaps_per_split_per_cls, plot_options=plot_options, json=json)
 

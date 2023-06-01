@@ -1,8 +1,13 @@
+import io
+from itertools import zip_longest
+from PIL import Image
+
 import numpy as np
 import pandas as pd
 import seaborn
-from typing import Union, List, Dict
+from typing import Union, Dict
 from matplotlib import pyplot as plt
+
 
 from data_gradients.visualize.plot_options import (
     PlotRenderer,
@@ -12,7 +17,7 @@ from data_gradients.visualize.plot_options import (
     ScatterPlotOptions,
     ViolinPlotOptions,
     KDEPlotOptions,
-    ImagePlotOptions,
+    ImageHeatmapPlotOptions,
 )
 
 __all__ = ["SeabornRenderer"]
@@ -22,7 +27,7 @@ class SeabornRenderer(PlotRenderer):
     def __init__(self, style="whitegrid", palette="pastel"):
         seaborn.set_theme(style=style, palette=palette)
 
-    def render(self, data: Union[pd.DataFrame, Dict[str, Dict[str, np.ndarray]]], options: CommonPlotOptions) -> List[plt.Figure]:
+    def render(self, data: Union[pd.DataFrame, Dict[str, Dict[str, np.ndarray]]], options: CommonPlotOptions) -> plt.Figure:
         """Plot a graph using seaborn.
 
         :param data:    The data to render. It has to include the fields listed in the options.
@@ -39,12 +44,12 @@ class SeabornRenderer(PlotRenderer):
             return self._render_violinplot(data, options)
         if isinstance(options, KDEPlotOptions):
             return self._render_kdeplot(data, options)
-        if isinstance(options, ImagePlotOptions):
+        if isinstance(options, ImageHeatmapPlotOptions):
             return self._render_images(data, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
-    def _render_scatterplot(self, df, options: ScatterPlotOptions) -> List[plt.Figure]:
+    def _render_scatterplot(self, df, options: ScatterPlotOptions) -> plt.Figure:
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -103,9 +108,9 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return [fig]
+        return fig
 
-    def _render_histplot(self, df, options: Hist2DPlotOptions) -> List[plt.Figure]:
+    def _render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -178,7 +183,7 @@ class SeabornRenderer(PlotRenderer):
 
         return fig
 
-    def _render_kdeplot(self, df, options: KDEPlotOptions) -> List[plt.Figure]:
+    def _render_kdeplot(self, df, options: KDEPlotOptions) -> plt.Figure:
 
         if options.individual_plots_key is None:
             dfs = [df]
@@ -251,9 +256,9 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return [fig]
+        return fig
 
-    def _render_violinplot(self, df, options: ViolinPlotOptions) -> List[plt.Figure]:
+    def _render_violinplot(self, df, options: ViolinPlotOptions) -> plt.Figure:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
@@ -302,9 +307,9 @@ class SeabornRenderer(PlotRenderer):
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return [fig]
+        return fig
 
-    def _render_barplot(self, df, options: BarPlotOptions) -> List[plt.Figure]:
+    def _render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
@@ -363,73 +368,59 @@ class SeabornRenderer(PlotRenderer):
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
-        return [fig]
+        return fig
 
-    def _render_images(self, images_per_split_per_class: Dict[str, Dict[str, np.ndarray]], options: ImagePlotOptions) -> List[plt.Figure]:
+    def _render_images(self, images_per_split_per_class: Dict[str, Dict[str, np.ndarray]], options: ImageHeatmapPlotOptions) -> plt.Figure:
         """Render images using matplotlib. Plot one graph with all splits per class.
 
         :param images_per_split_per_class:  Mapping of class names and splits to images. e.g. {"class1": {"train": np.ndarray, "valid": np.ndarray},...}
         :param options:                     Plotting options
         """
-        n_class_per_row = 2
+        n_classes = len(images_per_split_per_class)
+        n_cols = options.n_cols
+        n_rows = n_classes // n_cols + n_classes % n_cols
 
-        figs = []
-
-        for i, (class_name, images_per_split) in enumerate(images_per_split_per_class.items()):
-            n_cols = len(images_per_split)
-            fig, axs = plt.subplots(nrows=1, ncols=n_cols, figsize=(10, 6))
-
-            if options.tight_layout:
-                fig.tight_layout()
-            fig.subplots_adjust(top=0.9)
-            fig.suptitle(f"Class: {class_name}", fontsize=36)
-
-            for (split, image), ax_i in zip(images_per_split.items(), axs):
-                ax_i.imshow(image, cmap="hot")
-
-                if i >= n_class_per_row:
-                    ax_i.set_axis_off()
-                else:
-                    # Write the split for the last row only
-                    ax_i.set_xticks([])
-                    ax_i.set_yticks([])
-                    ax_i.spines["top"].set_visible(False)
-                    ax_i.spines["right"].set_visible(False)
-                    ax_i.spines["bottom"].set_visible(False)
-                    ax_i.spines["left"].set_visible(False)
-                    ax_i.set_title(split, fontsize=48)
-                    # ax_i.xaxis.set_label_coords(0.5, -0.05)  # Move a little down to increase readability
-
-            figs.append(fig)
-
-        import io
-        from PIL import Image
-
-        # Convert figs to PIL Images
+        # Generate one image per class
         images = []
-        for fig in figs:
-            buf = io.BytesIO()
-            fig.savefig(buf, format="png")
-            buf.seek(0)
-            images.append(Image.open(buf))
-            plt.close(fig)  # Close the figure
+        for i, (class_name, images_per_split) in enumerate(images_per_split_per_class.items()):
 
-        # Create a new figure to hold the images
-        n_rows = len(images) // n_class_per_row + len(images) % n_class_per_row
-        n_cols = n_class_per_row
+            # This plot is for a single class, which is made of at least 1 split
+            class_fig, class_axs = plt.subplots(nrows=1, ncols=len(images_per_split), figsize=(10, 6))
+            class_fig.subplots_adjust(top=0.9)
+            class_fig.suptitle(f"Class: {class_name}", fontsize=36)
 
-        fig, axs = plt.subplots(n_rows, n_cols, figsize=(10, 2.5 * n_rows))  # Reduced the vertical size
+            for (split, split_image), split_ax in zip(images_per_split.items(), class_axs):
+                plot_args = dict()
 
-        # Plot each PIL image to a subplot
-        from itertools import zip_longest
+                if options.cmap is not None:
+                    plot_args.update(cmap=options.cmap)
 
+                split_ax.imshow(split_image, **plot_args)
+
+                # Write the split name for the first row
+                if i < n_cols:
+                    split_ax.set_xticks([])
+                    split_ax.set_yticks([])
+                    split_ax.spines["top"].set_visible(False)
+                    split_ax.spines["right"].set_visible(False)
+                    split_ax.spines["bottom"].set_visible(False)
+                    split_ax.spines["left"].set_visible(False)
+                    split_ax.set_title(split, fontsize=48)
+                else:
+                    split_ax.set_axis_off()
+
+            class_image = fig_to_image(class_fig)
+            images.append(class_image)
+
+        # Combine the images together in a single figure
+        fig, axs = plt.subplots(n_rows, n_cols, figsize=(10, 2.5 * n_rows))
         for ax, img in zip_longest(axs.flatten(), images, fillvalue=None):
             ax.axis("off")
             if img is not None:
                 ax.imshow(img)
-
         plt.tight_layout()
-        return [fig]
+
+        return fig
 
     def _set_ticks_rotation(self, ax, x_ticks_rotation, y_ticks_rotation):
         # Call to set_xticks is needed to avoid warning
@@ -463,3 +454,12 @@ class SeabornRenderer(PlotRenderer):
                 _single(ax)
         else:
             _single(axs)
+
+
+def fig_to_image(fig: plt.Figure) -> Image:
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    image = Image.open(buf)
+    plt.close(fig)
+    return image
