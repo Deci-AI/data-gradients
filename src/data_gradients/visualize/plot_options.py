@@ -171,6 +171,11 @@ class KDEPlotOptions(CommonPlotOptions):
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
     :attr tight_layout: If True enables more compact layout of the plot
     :attr figsize: Size of the figure
+    :attr common_norm:  If True, scale each conditional density by the number of observations such that the total area under all densities sums to 1.
+                        Otherwise, normalize each density independently
+    :attr bw_adjust:    Multiply the bandwidth by this value
+    :attr fill:         If True, will fill the area under the curve
+    :attr alpha:        Set the alpha value of the fill. Used only when fill==True
     """
 
     x_label_key: str
@@ -194,8 +199,14 @@ class KDEPlotOptions(CommonPlotOptions):
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
 
+    common_norm: bool = True
+    bw_adjust: Optional[float] = None
+
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
+
+    fill: bool = False
+    alpha: float = 0.1
 
 
 @dataclasses.dataclass

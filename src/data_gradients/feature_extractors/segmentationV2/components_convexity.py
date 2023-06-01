@@ -3,7 +3,7 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.visualize.seaborn_renderer import Hist2DPlotOptions
+from data_gradients.visualize.seaborn_renderer import KDEPlotOptions
 from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
 from data_gradients.batch_processors.preprocessors import contours
 
@@ -29,14 +29,8 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        plot_options = Hist2DPlotOptions(
-            x_label_key="convexity_measure",
-            x_label_name="Convexity",
-            title=self.title,
-            x_ticks_rotation=None,
-            labels_key="split",
-            individual_plots_key="split",
-            kde=True,
+        plot_options = KDEPlotOptions(
+            x_label_key="convexity_measure", x_label_name="Convexity", title=self.title, x_ticks_rotation=None, labels_key="split", common_norm=False, fill=True
         )
 
         json = dict(df["convexity_measure"].describe())
