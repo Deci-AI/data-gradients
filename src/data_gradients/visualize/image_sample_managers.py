@@ -20,7 +20,7 @@ class ImageSampleManager(ABC):
 
         :param data: The batch data containing images and labels.
         """
-        for image, label in zip(data.images, data.labels):
+        for image, label in zip(sample.images, sample.labels):
             if len(self.samples) < self.n_samples:
                 self.samples.append(self.prepare_image(image=image, label=label))
 

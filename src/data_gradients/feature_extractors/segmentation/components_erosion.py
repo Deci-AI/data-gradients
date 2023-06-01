@@ -6,7 +6,7 @@ import numpy as np
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.visualize.seaborn_renderer import Hist2DPlotOptions
+from data_gradients.visualize.seaborn_renderer import KDEPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.batch_processors.preprocessors import contours
 
@@ -37,14 +37,15 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        plot_options = Hist2DPlotOptions(
+        plot_options = KDEPlotOptions(
             x_label_key="percent_change_of_n_components",
             x_label_name="Increase of number of components in %",
             title=self.title,
-            kde=True,
             x_ticks_rotation=None,
             labels_key="split",
-            individual_plots_key="split",
+            common_norm=False,
+            fill=True,
+            sharey=True,
         )
 
         json = dict(df.describe())

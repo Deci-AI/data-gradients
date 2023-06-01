@@ -19,6 +19,7 @@ class BarPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr order_key: Key that will be used to order the violins. If None, the order will be automatically determined.
     :attr width: Width of the bars
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr x_ticks_rotation: X-ticks rotation (Helps to make more compact plots)
@@ -35,6 +36,8 @@ class BarPlotOptions(CommonPlotOptions):
     x_label_name: str
     y_label_key: Optional[str]
     y_label_name: str
+
+    order_key: Optional[str] = None
 
     width: float = 0.8
     bins: Optional[int] = None
@@ -63,6 +66,7 @@ class ViolinPlotOptions(CommonPlotOptions):
     :attr x_label_name: A title for x-axis
     :attr y_label_key: An optional key for y-axis (If None, bar plot will use count of x-axis values)
     :attr y_label_name: A title for y-axis
+    :attr order_key: Key that will be used to order the violins. If None, the order will be automatically determined.
     :attr x_lim: X-axis limits
     :attr bins: Generic bin parameter that can be the name of a reference rule, the number of bins, or the breaks of the bins.
     :attr kde: If True, will display a kernel density estimate
@@ -82,6 +86,8 @@ class ViolinPlotOptions(CommonPlotOptions):
 
     y_label_key: str
     y_label_name: str
+
+    order_key: Optional[str] = None
 
     x_lim: Tuple[float, float] = None
 
@@ -122,6 +128,7 @@ class Hist2DPlotOptions(CommonPlotOptions):
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
     :attr tight_layout: If True enables more compact layout of the plot
     :attr figsize: Size of the figure
+    :attr sharey: Controls sharing of properties among y-axis (title, ticks, y_lim, ...). bool or {'none', 'all', 'row', 'col'}
     """
 
     x_label_key: str
@@ -152,6 +159,8 @@ class Hist2DPlotOptions(CommonPlotOptions):
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
 
+    sharey: Union[bool, str] = False
+
 
 @dataclasses.dataclass
 class KDEPlotOptions(CommonPlotOptions):
@@ -171,6 +180,12 @@ class KDEPlotOptions(CommonPlotOptions):
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
     :attr tight_layout: If True enables more compact layout of the plot
     :attr figsize: Size of the figure
+    :attr common_norm:  If True, scale each conditional density by the number of observations such that the total area under all densities sums to 1.
+                        Otherwise, normalize each density independently
+    :attr bw_adjust:    Multiply the bandwidth by this value
+    :attr fill:         If True, will fill the area under the curve
+    :attr alpha:        Set the alpha value of the fill. Used only when fill==True
+    :attr sharey: Controls sharing of properties among y-axis (title, ticks, y_lim, ...). bool or {'none', 'all', 'row', 'col'}
     """
 
     x_label_key: str
@@ -194,8 +209,16 @@ class KDEPlotOptions(CommonPlotOptions):
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
 
+    common_norm: bool = True
+    bw_adjust: Optional[float] = None
+
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
+
+    fill: bool = False
+    alpha: float = 0.1
+
+    sharey: Union[bool, str] = False
 
 
 @dataclasses.dataclass
@@ -218,6 +241,7 @@ class ScatterPlotOptions(CommonPlotOptions):
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
     :attr tight_layout: If True enables more compact layout of the plot
     :attr figsize: Size of the figure
+    :attr sharey: Controls sharing of properties among y-axis (title, ticks, y_lim, ...). bool or {'none', 'all', 'row', 'col'}
     """
 
     x_label_key: str
@@ -241,6 +265,8 @@ class ScatterPlotOptions(CommonPlotOptions):
 
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
+
+    sharey: Union[bool, str] = False
 
 
 class PlotRenderer(ABC):

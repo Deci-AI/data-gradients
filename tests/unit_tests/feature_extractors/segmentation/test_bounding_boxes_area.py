@@ -10,7 +10,7 @@ from data_gradients.feature_extractors.segmentation.classes_per_image_count impo
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
-class SegmentationBBoxV2Test(unittest.TestCase):
+class SegmentationBBoxTest(unittest.TestCase):
     def setUp(self) -> None:
         train_sample = SegmentationSample(
             sample_id="sample_1",

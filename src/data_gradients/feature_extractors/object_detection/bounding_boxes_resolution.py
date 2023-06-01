@@ -2,39 +2,39 @@ import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
-from data_gradients.utils.data_classes import SegmentationSample
+from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.seaborn_renderer import Hist2DPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
+class DetectionBoundingBoxSize(AbstractFeatureExtractor):
+    """Feature Extractor to gather the size (Height x Width) of Bounding Boxes."""
+
     def __init__(self):
         self.data = []
 
-    def update(self, sample: SegmentationSample):
+    def update(self, sample: DetectionSample):
 
         height, width = sample.image.shape[:2]
-        for j, class_channel in enumerate(sample.contours):
-            for contour in class_channel:
-                class_id = contour.class_id
-                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
-                self.data.append(
-                    {
-                        "split": sample.split,
-                        "class_name": class_name,
-                        "height": 100 * (contour.h / height),  # TODO: Decide to divide it by image height or not...
-                        "width": 100 * (contour.w / width),
-                    }
-                )
+        for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
+            class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
+            self.data.append(
+                {
+                    "split": sample.split,
+                    "class_name": class_name,
+                    "relative_height": 100 * ((bbox_xyxy[3] - bbox_xyxy[1]) / height),
+                    "relative_width": 100 * ((bbox_xyxy[2] - bbox_xyxy[0]) / width),
+                }
+            )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
         plot_options = Hist2DPlotOptions(
-            x_label_key="width",
+            x_label_key="relative_width",
             x_label_name="Width (in % of image)",
-            y_label_key="height",
+            y_label_key="relative_height",
             y_label_name="Height (in % of image)",
             title=self.title,
             x_lim=(0, 100),
@@ -47,7 +47,7 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
         )
 
         description = df.describe()
-        json = {"width": dict(description["width"]), "height": dict(description["height"])}
+        json = {"relative_width": dict(description["relative_width"]), "relative_height": dict(description["relative_height"])}
 
         feature = Feature(
             data=df,
