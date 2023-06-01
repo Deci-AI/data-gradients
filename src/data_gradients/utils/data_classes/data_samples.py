@@ -68,11 +68,12 @@ class DetectionSample(ImageSample):
         split: str - The name of the dataset split. Could be "train", "val", "test", etc.
         image: np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
         bboxes_xyxy: np.ndarray of shape [N, 4] (X, Y, X, Y)
-        labels: np.ndarray of shape [N, ]
+        class_ids: np.ndarray of shape [N, ]
     """
 
     bboxes_xyxy: np.ndarray
-    labels: np.ndarray
+    class_ids: np.ndarray
+    class_names: Optional[List[str]] = None
 
     def __repr__(self):
-        return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, labels={self.labels.shape})"
+        return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, class_ids={self.class_ids.shape})"
