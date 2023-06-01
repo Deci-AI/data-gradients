@@ -49,7 +49,7 @@ class SegmentationComponentHeatmap(AbstractFeatureExtractor):
                 for split, heatmap in heatmaps_per_split.items():
                     cleaned_heatmaps_per_split_per_cls[class_name][split] = (255 * (heatmap / heatmap.max())).astype(np.uint8)
 
-        plot_options = ImageHeatmapPlotOptions(title=self.title)
+        plot_options = ImageHeatmapPlotOptions(title=self.title, cmap="hot")
         json = {class_name: "No Data" for class_name in cleaned_heatmaps_per_split_per_cls.keys()}
         return Feature(data=cleaned_heatmaps_per_split_per_cls, plot_options=plot_options, json=json)
 
