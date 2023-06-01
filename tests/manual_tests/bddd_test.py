@@ -36,9 +36,8 @@ val_dataset = BDDDataset(
 train_loader = DataLoader(train_dataset, batch_size=8)
 val_loader = DataLoader(val_dataset, batch_size=8)
 
-class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
 batch_processor = SegmentationBatchProcessor(
-    n_classes=BDDDataset.NUM_CLASSES,
+    class_names=BDDDataset.CLASS_NAMES,
     ignore_labels=BDDDataset.IGNORE_LABELS,
     threshold_value=0.5,
     n_image_channels=3,
