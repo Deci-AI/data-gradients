@@ -43,6 +43,7 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
             labels_key="split",
             individual_plots_key="split",
             tight_layout=True,
+            sharey=True,
         )
 
         description = df.describe()

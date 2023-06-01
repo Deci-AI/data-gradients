@@ -76,6 +76,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             common_norm=True,
             bw_adjust=0.4,
             labels_palette=self.palette,
+            sharey=True,
         )
         json = {color: dict(df[df["Color"] == color].describe()) for color in self.colors}
 

@@ -36,6 +36,7 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
             labels_key="split",
             individual_plots_key="split",
             x_ticks_rotation=None,
+            sharey=True,
         )
 
         json = dict(df_class_count.n_components.describe())

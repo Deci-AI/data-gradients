@@ -62,7 +62,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
@@ -123,7 +123,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
@@ -196,7 +196,7 @@ class SeabornRenderer(PlotRenderer):
             n_cols = _num_images if _max_cols is None else min(_num_images, _max_cols)
             n_rows = int(np.ceil(_num_images / n_cols))
 
-        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize)
+        fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)

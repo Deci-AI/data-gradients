@@ -52,6 +52,7 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
             labels_key="split",
             common_norm=False,
             fill=True,
+            sharey=True,
         )
         json = dict(df.brightness.describe())
 

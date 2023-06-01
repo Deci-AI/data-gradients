@@ -128,6 +128,7 @@ class Hist2DPlotOptions(CommonPlotOptions):
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
     :attr tight_layout: If True enables more compact layout of the plot
     :attr figsize: Size of the figure
+    :attr sharey: Controls sharing of properties among y-axis (title, ticks, y_lim, ...). bool or {'none', 'all', 'row', 'col'}
     """
 
     x_label_key: str
@@ -158,6 +159,8 @@ class Hist2DPlotOptions(CommonPlotOptions):
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
 
+    sharey: Union[bool, str] = False
+
 
 @dataclasses.dataclass
 class KDEPlotOptions(CommonPlotOptions):
@@ -182,6 +185,7 @@ class KDEPlotOptions(CommonPlotOptions):
     :attr bw_adjust:    Multiply the bandwidth by this value
     :attr fill:         If True, will fill the area under the curve
     :attr alpha:        Set the alpha value of the fill. Used only when fill==True
+    :attr sharey: Controls sharing of properties among y-axis (title, ticks, y_lim, ...). bool or {'none', 'all', 'row', 'col'}
     """
 
     x_label_key: str
@@ -214,6 +218,8 @@ class KDEPlotOptions(CommonPlotOptions):
     fill: bool = False
     alpha: float = 0.1
 
+    sharey: Union[bool, str] = False
+
 
 @dataclasses.dataclass
 class ScatterPlotOptions(CommonPlotOptions):
@@ -235,6 +241,7 @@ class ScatterPlotOptions(CommonPlotOptions):
     :attr labels_palette: Setting this allows you to control the colors of the bars of each label: { "train": "royalblue", "val": "red", "test": "limegreen" }
     :attr tight_layout: If True enables more compact layout of the plot
     :attr figsize: Size of the figure
+    :attr sharey: Controls sharing of properties among y-axis (title, ticks, y_lim, ...). bool or {'none', 'all', 'row', 'col'}
     """
 
     x_label_key: str
@@ -258,6 +265,8 @@ class ScatterPlotOptions(CommonPlotOptions):
 
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
+
+    sharey: Union[bool, str] = False
 
 
 @dataclasses.dataclass
