@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Optional, List, Iterable
 from torch import Tensor
 import numpy as np
 import time
@@ -9,12 +9,19 @@ from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class DetectionBatchPreprocessor(BatchPreprocessor):
-    def preprocess(self, images: Tensor, labels: Tensor) -> Iterable[DetectionSample]:
+    def __init__(self, class_names: Optional[List[str]] = None):
+        """
+        :param class_names: List of class names
+        """
+        self.class_names = class_names
+
+    def preprocess(self, images: Tensor, labels: Tensor, split: str) -> Iterable[DetectionSample]:
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
-        :param images:  Batch of images already formatted into (BS, C, H, W)
-        :param labels:  Batch of labels already formatted into (BS, N, 5), in format (class_id, x1, y1, x2, y2)
-        :return:        Iterable of ready to analyse detection samples.
+        :param images:      Batch of images already formatted into (BS, C, H, W)
+        :param labels:      Batch of labels already formatted into (BS, N, 5), in format (class_id, x1, y1, x2, y2)
+        :param split:       Name of the split (train, val, test)
+        :return:            Iterable of ready to analyse detection samples.
         """
         images = np.transpose(images.cpu().numpy(), (0, 2, 3, 1))
         labels = labels.cpu().numpy()
@@ -28,7 +35,8 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
                 image=image,
                 class_ids=class_ids,
                 bboxes_xyxy=bboxes_xyxy,
-                split=None,
+                class_names=self.class_names,
+                split=split,
                 image_format=ImageChannelFormat.RGB,
                 sample_id=str(time.time()),
             )
