@@ -1,5 +1,4 @@
 import cv2
-import numpy
 import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
@@ -51,11 +50,11 @@ class SegmentationSampleVisualization(AbstractFeatureExtractor):
 
     @staticmethod
     def prepare_segmentation_image(
-        image: numpy.ndarray,
-        labels: numpy.ndarray,
+        image: np.ndarray,
+        labels: np.ndarray,
         image_format: ImageChannelFormat,
         stack_mask_horizontally: bool,
-    ) -> numpy.ndarray:
+    ) -> np.ndarray:
         """Combine image and label to a single image.
 
         :param image:           Input image tensor

@@ -51,7 +51,6 @@ if __name__ == "__main__":
         class_names=BDDDataset.CLASS_NAMES,
         # Optionals
         ignore_labels=ignore_labels,
-        samples_to_visualize=3,
         images_extractor=None,
         labels_extractor=None,
         threshold_soft_labels=0.5,

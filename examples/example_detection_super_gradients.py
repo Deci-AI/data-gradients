@@ -58,10 +58,10 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, batch_size=8)
 
     analyzer = DetectionAnalysisManager(
+        report_title="Yolo Darknet Format Detection",
         train_data=train_loader,
         val_data=val_loader,
         class_names=classes,
-        samples_to_visualize=3,
     )
 
     analyzer.run()
