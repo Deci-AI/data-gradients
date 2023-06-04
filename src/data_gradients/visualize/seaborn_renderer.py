@@ -27,6 +27,8 @@ class SeabornRenderer(PlotRenderer):
         :param options: The plotting options, which includes the information about the type of plot and the parameters required to plot it.
         :return:        The matplotlib figure.
         """
+        if df is None:
+            return None
         if isinstance(options, Hist2DPlotOptions):
             return self._render_histplot(df, options)
         if isinstance(options, BarPlotOptions):

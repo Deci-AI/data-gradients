@@ -133,10 +133,13 @@ class AnalysisManagerAbstract(abc.ABC):
                 self._log_writer.log_json(title=feature_extractor.title, data=feature.json)
 
                 f = self.renderer.render(feature.data, feature.plot_options)
-                image_name = feature_extractor.__class__.__name__ + ".png"
-                image_path = os.path.join(self.output_folder, image_name)
-                f.savefig(image_path)
-                images_created.append(image_path)
+                if f is not None:
+                    image_name = feature_extractor.__class__.__name__ + ".png"
+                    image_path = os.path.join(self.output_folder, image_name)
+                    f.savefig(image_path)
+                    images_created.append(image_path)
+                else:
+                    image_path = None
 
                 section.add_feature(
                     FeatureSummary(
