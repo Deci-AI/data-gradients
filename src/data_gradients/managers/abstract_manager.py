@@ -121,6 +121,7 @@ class AnalysisManagerAbstract(abc.ABC):
         Then, it logs the information through the logging.
         :return:
         """
+        images_created = []
 
         summary = ResultsContainer()
         section = Section("Features")  # TODO: add section title for each section
@@ -133,6 +134,7 @@ class AnalysisManagerAbstract(abc.ABC):
             image_name = feature_extractor.__class__.__name__ + ".png"
             image_path = os.path.join(self.output_folder, image_name)
             f.savefig(image_path)
+            images_created.append(image_path)
 
             section.add_feature(
                 FeatureSummary(
@@ -147,6 +149,10 @@ class AnalysisManagerAbstract(abc.ABC):
         output_path = os.path.join(self.output_folder, f"{formatted_tite}.pdf")
         logger.info(f"Writing the result of the Data Analysis into: {output_path}")
         self.html_writer.write(results_container=summary, output_filename=output_path)
+
+        # Cleanup of generated images
+        for image_created in images_created:
+            os.remove(image_created)
 
         # TODO: add images to the report...
         for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
