@@ -1,4 +1,4 @@
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 import torch
 from torch import Tensor
@@ -15,18 +15,19 @@ class SegmentationBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
-        n_classes: int,
+        class_names: Optional[Dict[int, str]],
         n_image_channels: int,
         threshold_value: float,
         ignore_labels: Optional[List[int]] = None,
     ):
         """
-        :param n_classes:           Number of valid classes
+        :param n_classes:           Number of classes, including classes to ignore if any.
         :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         :param threshold_value:     Threshold
         :param ignore_labels:       Numbers that we should avoid from analyzing as valid classes, such as background
         """
-        self.n_classes_used = n_classes
+        self.relevant_class_ids = list(class_names.keys())
+
         self.n_image_channels = n_image_channels
         self.ignore_labels = ignore_labels or []
 
@@ -51,13 +52,13 @@ class SegmentationBatchFormatter(BatchFormatter):
         images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
 
-        labels = self.ensure_hard_labels(labels, n_classes_used=self.n_classes_used, ignore_labels=self.ignore_labels, threshold_value=self.threshold_value)
+        labels = self.ensure_hard_labels(labels, n_classes_used=len(self.relevant_class_ids), threshold_value=self.threshold_value)
+        labels_to_ignore = set(range(int(labels.max().item()) + 1)) - set(self.relevant_class_ids)
 
-        if self.require_onehot(labels, n_classes_used=self.n_classes_used, total_n_classes=self.total_n_classes):
-            labels = to_one_hot(labels, n_classes=self.total_n_classes)
+        labels = to_one_hot(labels, class_ids=self.relevant_class_ids)
 
-        for ignore_label in self.ignore_labels:
-            labels[:, ignore_label, ...] = torch.zeros_like(labels[:, ignore_label, ...])
+        for label_to_ignore in labels_to_ignore:
+            labels[:, label_to_ignore, ...] = torch.zeros_like(labels[:, label_to_ignore, ...])
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
@@ -65,12 +66,8 @@ class SegmentationBatchFormatter(BatchFormatter):
 
         return images, labels
 
-    @property
-    def total_n_classes(self) -> int:
-        return self.n_classes_used + len(self.ignore_labels)
-
     @staticmethod
-    def ensure_hard_labels(labels: Tensor, n_classes_used: int, ignore_labels: List[int], threshold_value: float) -> Tensor:
+    def ensure_hard_labels(labels: Tensor, n_classes_used: int, threshold_value: float) -> Tensor:
         unique_values = torch.unique(labels)
 
         if check_all_integers(unique_values):
@@ -79,9 +76,7 @@ class SegmentationBatchFormatter(BatchFormatter):
             return labels * 255
         else:
             if n_classes_used > 1:
-                raise NotImplementedError(
-                    f"Not supporting soft-labeling for number of classes > 1!\nGot {n_classes_used} classes, while ignore labels are {ignore_labels}."
-                )
+                raise NotImplementedError(f"Not supporting soft-labeling for number of classes > 1!\nGot {n_classes_used} classes.")
             labels = SegmentationBatchFormatter.binary_mask_above_threshold(labels=labels, threshold_value=threshold_value)
         return labels
 

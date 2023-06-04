@@ -29,9 +29,8 @@ class SegmentationClassHeatmap(AbstractFeatureExtractor):
         resized_masks = cv2.resize(src=mask, dsize=self.heatmap_dim, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
         resized_masks = resized_masks.transpose((2, 0, 1))
 
-        for class_id, mask in enumerate(resized_masks):
-            class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
-            self.heatmaps_per_split_per_cls[class_name][sample.split] += mask
+        for class_id, class_name in sample.class_names.items():
+            self.heatmaps_per_split_per_cls[class_name][sample.split] += resized_masks[class_id, :, :]
             self.count_class_appearance[class_name] += 1
 
     def aggregate(self) -> Feature:
@@ -59,3 +58,28 @@ class SegmentationClassHeatmap(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return "Show the areas of high density of components. This can be useful to understand if the objects are positioned in the right area."
+
+
+CLASS_NAMES = [
+    "road",
+    "sidewalk",
+    "building",
+    "wall",
+    "fence",
+    "pole",
+    "traffic light",
+    "traffic sign",
+    "vegetation",
+    "terrain",
+    "sky",
+    "person",
+    "rider",
+    "car",
+    "truck",
+    "bus",
+    "train",
+    "motorcycle",
+    "bicycle",
+]
+
+print([(i, cls_name) for i, cls_name in enumerate(CLASS_NAMES)])

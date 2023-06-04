@@ -16,7 +16,7 @@ from data_gradients.feature_extractors.segmentation.classes_per_image_count impo
 from data_gradients.feature_extractors.segmentation.components_per_image_count import SegmentationComponentsPerImageCount
 from data_gradients.feature_extractors.segmentation.components_convexity import SegmentationComponentsConvexity
 from data_gradients.feature_extractors.segmentation.components_erosion import SegmentationComponentsErosion
-from data_gradients.feature_extractors.segmentation.components_heatmap_per_class import SegmentationComponentHeatmap
+from data_gradients.feature_extractors.segmentation.classes_heatmap_per_class import SegmentationClassHeatmap
 
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
@@ -39,7 +39,6 @@ val_loader = DataLoader(val_dataset, batch_size=8)
 
 batch_processor = SegmentationBatchProcessor(
     class_names=BDDDataset.CLASS_NAMES,
-    ignore_labels=BDDDataset.IGNORE_LABELS,
     threshold_value=0.5,
     n_image_channels=3,
 )
@@ -55,7 +54,7 @@ feature_extractors = [
     SegmentationClassesPerImageCount(),
     SegmentationComponentsConvexity(),
     SegmentationComponentsErosion(),
-    SegmentationComponentHeatmap(),
+    SegmentationClassHeatmap(),
 ]
 
 sns = SeabornRenderer()

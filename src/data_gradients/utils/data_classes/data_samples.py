@@ -1,6 +1,6 @@
 import dataclasses
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import numpy as np
 
@@ -51,7 +51,7 @@ class SegmentationSample(ImageSample):
     mask: np.ndarray
 
     contours: List[List[Contour]]
-    class_names: Optional[List[str]] = None
+    class_names: Dict[int, str] = dataclasses.field(default_factory=dict)
 
     def __repr__(self):
         return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
