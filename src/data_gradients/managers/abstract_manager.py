@@ -125,11 +125,6 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
-        section = Section("Features")  # TODO: add section title for each section
-        for feature_extractor in self.feature_extractors:
-            feature = feature_extractor.aggregate()
-
-        summary = ResultsContainer()
         for section_name, feature_extractors in self.grouped_feature_extractors.items():
             section = Section(section_name)
             for feature_extractor in feature_extractors:
