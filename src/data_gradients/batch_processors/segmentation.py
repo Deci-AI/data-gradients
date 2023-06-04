@@ -1,4 +1,4 @@
-from typing import List, Optional, Callable
+from typing import Optional, Callable, Dict
 
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
@@ -10,10 +10,9 @@ class SegmentationBatchProcessor(BatchProcessor):
     def __init__(
         self,
         *,
-        class_names: List[str],
+        class_names: Optional[Dict[int, str]],
         n_image_channels: int = 3,
         threshold_value: float = 0.5,
-        ignore_labels: Optional[List[int]] = None,
         images_extractor: Optional[Callable] = None,
         labels_extractor: Optional[Callable] = None,
     ):
@@ -23,10 +22,9 @@ class SegmentationBatchProcessor(BatchProcessor):
             labels_extractor=labels_extractor,
         )
         formatter = SegmentationBatchFormatter(
-            n_classes=len(class_names),
+            class_names=class_names,
             n_image_channels=n_image_channels,
             threshold_value=threshold_value,
-            ignore_labels=ignore_labels,
         )
         preprocessor = SegmentationBatchPreprocessor(class_names=class_names)
 

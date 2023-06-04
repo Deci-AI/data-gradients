@@ -16,7 +16,7 @@ class DetectionClassesCount(AbstractFeatureExtractor):
 
     def update(self, sample: DetectionSample):
         for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
-            class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
+            class_name = sample.class_names.get(class_id, str(class_id))
             self.data.append(
                 {
                     "split": sample.split,

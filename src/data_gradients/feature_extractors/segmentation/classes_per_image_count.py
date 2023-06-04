@@ -17,7 +17,7 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
         for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
                 class_id = contour.class_id
-                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
+                class_name = sample.class_names.get(class_id, str(class_id))
                 self.data.append(
                     {
                         "split": sample.split,
