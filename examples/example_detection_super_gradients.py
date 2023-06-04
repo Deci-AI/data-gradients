@@ -34,7 +34,7 @@ class PadTarget:
 
 
 if __name__ == "__main__":
-    data_dir = "/Users/Louis.Dupont/Downloads/avatar_recognition.v2-release.yolov8"
+    data_dir = "<path-to-avatar_recognition>"
     class_names = {0: "Character"}
 
     # Create torch DataSet

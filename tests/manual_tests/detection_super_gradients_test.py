@@ -36,9 +36,9 @@ class PadTarget:
         return sample
 
 
-data_dir = "<soccer players>"
+data_dir = "<soccer-players-dataset>"
 # class_names = {0: "football", 1: "player", 2: "referee"}
-class_names = {1: "player", 2: "referee"}
+class_names = {1: "player", 2: "referee"}  # Testing without football
 
 # Create torch DataSet
 train_dataset = YoloDarknetFormatDetectionDataset(
