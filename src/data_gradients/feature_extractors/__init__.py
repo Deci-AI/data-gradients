@@ -14,7 +14,13 @@ from .segmentation import (
     SegmentationComponentsErosion,
     SegmentationComponentsPerImageCount,
 )
-
+from .object_detection import (
+    DetectionBoundingBoxArea,
+    DetectionBoundingBoxPerImageCount,
+    DetectionBoundingBoxSize,
+    DetectionClassesCount,
+    DetectionClassesPerImageCount,
+)
 
 __all__ = [
     "AbstractFeatureExtractor",
@@ -29,4 +35,9 @@ __all__ = [
     "SegmentationComponentsConvexity",
     "SegmentationComponentsErosion",
     "SegmentationComponentsPerImageCount",
+    "DetectionBoundingBoxArea",
+    "DetectionBoundingBoxPerImageCount",
+    "DetectionBoundingBoxSize",
+    "DetectionClassesCount",
+    "DetectionClassesPerImageCount",
 ]
