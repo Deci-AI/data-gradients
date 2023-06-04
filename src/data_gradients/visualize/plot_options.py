@@ -269,6 +269,22 @@ class ScatterPlotOptions(CommonPlotOptions):
     sharey: Union[bool, str] = False
 
 
+@dataclasses.dataclass
+class ImagesRenderer(CommonPlotOptions):
+    """Contains a set of options for displaying images.
+
+    :attr n_cols:               Number of columns to display
+    :attr tight_layout:         If True enables more compact layout of the plot
+    :attr figsize_x:            Size of the figure in the x-axis
+    :attr figsize_y_per_row:    Size of the figure in the y-axis per row
+    """
+
+    n_cols: int = 4
+    tight_layout: bool = False
+    figsize_x: Optional[float] = 10
+    figsize_y_per_row: Optional[float] = 2.5
+
+
 class PlotRenderer(ABC):
     @abstractmethod
     def render(self, df: pd.DataFrame, options: CommonPlotOptions):

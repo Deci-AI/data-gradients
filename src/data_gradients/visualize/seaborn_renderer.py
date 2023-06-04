@@ -1,3 +1,5 @@
+from typing import List
+from itertools import zip_longest
 import numpy as np
 import pandas as pd
 import seaborn
@@ -11,6 +13,7 @@ from data_gradients.visualize.plot_options import (
     ScatterPlotOptions,
     ViolinPlotOptions,
     KDEPlotOptions,
+    ImagesRenderer,
 )
 
 __all__ = ["SeabornRenderer"]
@@ -37,6 +40,8 @@ class SeabornRenderer(PlotRenderer):
             return self._render_violinplot(df, options)
         if isinstance(options, KDEPlotOptions):
             return self._render_kdeplot(df, options)
+        if isinstance(options, ImagesRenderer):
+            return self._render_images(df, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
@@ -358,6 +363,29 @@ class SeabornRenderer(PlotRenderer):
             self._show_values(ax)
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
+
+        return fig
+
+    def _render_images(self, images: List[np.ndarray], options: ImagesRenderer) -> plt.Figure:
+        """Render images using matplotlib. Plot one graph with all splits per class.
+
+        :param images:  List of images
+        :param options: Plotting options
+        """
+
+        n_cols = options.n_cols
+        n_rows = len(images) // n_cols + len(images) % n_cols
+
+        # Combine the images together in a single figure
+        fig_size = (options.figsize_x, options.figsize_y_per_row * n_rows)
+        fig, axs = plt.subplots(n_rows, n_cols, figsize=fig_size)
+        for ax, img in zip_longest(axs.flatten(), images, fillvalue=None):
+            ax.axis("off")
+            if img is not None:
+                ax.imshow(img)
+
+        if options.tight_layout:
+            plt.tight_layout()
 
         return fig
 

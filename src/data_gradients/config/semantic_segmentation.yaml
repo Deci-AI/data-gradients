@@ -6,6 +6,7 @@ report_sections:
       - ImagesAverageBrightness
   - name: Segmentation Features
     features:
+      - SegmentationSampleVisualization
       - SegmentationClassesCount
       - SegmentationClassesPerImageCount
       - SegmentationComponentsPerImageCount
