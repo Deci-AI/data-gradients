@@ -15,10 +15,12 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
     def __init__(
         self,
         *,
+        report_title: str,
         class_names: Optional[Dict[int, str]] = None,
         n_classes: Optional[int] = None,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
+        report_subtitle: Optional[str] = None,
         config_name: str = "semantic_segmentation",
         log_dir: Optional[str] = None,
         id_to_name: Optional[Dict] = None,
@@ -32,6 +34,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
 
+        :param report_title:            Title of the report. Will be used to save the report
+        :param report_subtitle:         Subtitle of the report
         :param class_names:             Mapping of ids to class names. Ids not mapped will be ignored. If None, the class names will be the class ids.
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
@@ -68,6 +72,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         image_sample_manager = SegmentationImageSampleManager(n_samples=samples_to_visualize)
 
         super().__init__(
+            report_title=report_title,
+            report_subtitle=report_subtitle,
             train_data=train_data,
             val_data=val_data,
             batch_processor=batch_processor,

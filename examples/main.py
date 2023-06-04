@@ -42,17 +42,15 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=8)
     val_loader = DataLoader(val_dataset, batch_size=8)
 
-    num_classes = BDDDataset.NUM_CLASSES
     ignore_labels = BDDDataset.IGNORE_LABELS
-    class_id_to_name = BDDDataset.CLASS_ID_TO_NAMES
 
     da = SegmentationAnalysisManager(
+        report_title="Testing Data-Gradients",
         train_data=train_loader,
         val_data=val_loader,
-        num_classes=num_classes,
+        class_names=BDDDataset.CLASS_NAMES,
         # Optionals
         ignore_labels=ignore_labels,
-        id_to_name=class_id_to_name,
         samples_to_visualize=3,
         images_extractor=None,
         labels_extractor=None,
