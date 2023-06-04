@@ -3,14 +3,14 @@ import numpy as np
 
 from data_gradients.utils.data_classes.data_samples import SegmentationSample, ImageChannelFormat
 from data_gradients.utils.data_classes.contour import Contour
-from data_gradients.feature_extractors.segmentationV2.bounding_boxes_area import SegmentationBoundingBoxArea
-from data_gradients.feature_extractors.segmentationV2.bounding_boxes_resolution import SegmentationBoundingBoxResolution
-from data_gradients.feature_extractors.segmentationV2.classes_count import SegmentationClassesCount
-from data_gradients.feature_extractors.segmentationV2.classes_per_image_count import SegmentationClassesPerImageCount
+from data_gradients.feature_extractors.segmentation.bounding_boxes_area import SegmentationBoundingBoxArea
+from data_gradients.feature_extractors.segmentation.bounding_boxes_resolution import SegmentationBoundingBoxResolution
+from data_gradients.feature_extractors.segmentation.classes_count import SegmentationClassesCount
+from data_gradients.feature_extractors.segmentation.classes_per_image_count import SegmentationClassesPerImageCount
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
-class SegmentationBBoxV2Test(unittest.TestCase):
+class SegmentationBBoxTest(unittest.TestCase):
     def setUp(self) -> None:
         train_sample = SegmentationSample(
             sample_id="sample_1",

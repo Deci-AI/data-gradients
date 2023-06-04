@@ -1,6 +1,10 @@
-from data_gradients.feature_extractors.common.average_brightness import AverageBrightness
-from data_gradients.feature_extractors.common.image_resolutions import ImagesResolutions
-from data_gradients.feature_extractors.common.image_aspect_ratios import ImagesAspectRatios
-from data_gradients.feature_extractors.common.mean_std import MeanAndSTD
+from .image_average_brightness import ImagesAverageBrightness
+from .image_color_distribution import ImageColorDistribution
+from .image_resolution import ImagesResolution
 
-__all__ = ["AverageBrightness", "ImagesResolutions", "ImagesAspectRatios", "MeanAndSTD"]
+
+__all__ = [
+    "ImagesAverageBrightness",
+    "ImageColorDistribution",
+    "ImagesResolution",
+]

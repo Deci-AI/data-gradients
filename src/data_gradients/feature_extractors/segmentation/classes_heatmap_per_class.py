@@ -4,14 +4,13 @@ import numpy as np
 from collections import defaultdict
 
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.feature_extractors.feature_extractor_abstractV2 import Feature
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.seaborn_renderer import ImageHeatmapPlotOptions
-from data_gradients.feature_extractors.feature_extractor_abstractV2 import AbstractFeatureExtractor
+from data_gradients.feature_extractors.abstract_feature_extractor import Feature, AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class SegmentationComponentHeatmap(AbstractFeatureExtractor):
+class SegmentationClassHeatmap(AbstractFeatureExtractor):
     def __init__(self, n_classes_to_show: int = 12, heatmap_dim: Tuple[int, int] = (200, 200)):
         """
         :param n_classes_to_show:   The `n_classes_to_show` classes that are the most represented in the dataset will be shown.
