@@ -14,10 +14,12 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
     def __init__(
         self,
         *,
-        class_names: Optional[List[str]] = None,
-        n_classes: Optional[int] = None,
+        report_title: str,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
+        report_subtitle: Optional[str] = None,
+        class_names: Optional[List[str]] = None,
+        n_classes: Optional[int] = None,
         config_name: str = "detection",
         log_dir: Optional[str] = None,
         id_to_name: Optional[Dict] = None,
@@ -29,6 +31,8 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
     ):
         """
         Constructor of detection manager which controls the analyzer
+        :param report_title:            Title of the report. Will be used to save the report
+        :param report_subtitle:         Subtitle of the report
         :param class_names:             List of class names. If None, the class names will be the class ids.
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
@@ -63,6 +67,8 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         image_sample_manager = DetectionImageSampleManager(n_samples=samples_to_visualize)
 
         super().__init__(
+            report_title=report_title,
+            report_subtitle=report_subtitle,
             train_data=train_data,
             val_data=val_data,
             batch_processor=batch_processor,

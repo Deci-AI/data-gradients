@@ -4,7 +4,7 @@ import logging
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
-
+from datetime import datetime
 import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
@@ -28,8 +28,10 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
+        report_title: str,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
+        report_subtitle: Optional[str] = None,
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
@@ -38,6 +40,8 @@ class AnalysisManagerAbstract(abc.ABC):
         image_sample_manager: ImageSampleManager,
     ):
         """
+        :param report_title:        Title of the report. Will be used to save the report
+        :param report_subtitle:     Subtitle of the report
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
         :param log_dir:             Directory where to save the logs. By default uses the current working directory
@@ -58,7 +62,10 @@ class AnalysisManagerAbstract(abc.ABC):
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
         self.renderer = SeabornRenderer()
-        self.html_writer = PDFWriter(title="Data Gradients", subtitle="Automated Exploratory Data Analysis", html_template=assets.html.doc_template)
+        self.report_title = report_title
+
+        report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
+        self.html_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
         self._log_writer = LogWriter(log_dir=log_dir)
         self.output_folder = self._log_writer.log_dir
 
@@ -115,6 +122,12 @@ class AnalysisManagerAbstract(abc.ABC):
         Then, it logs the information through the logging.
         :return:
         """
+        images_created = []
+
+        summary = ResultsContainer()
+        section = Section("Features")  # TODO: add section title for each section
+        for feature_extractor in self.feature_extractors:
+            feature = feature_extractor.aggregate()
 
         summary = ResultsContainer()
         for section_name, feature_extractors in self.grouped_feature_extractors.items():
@@ -128,6 +141,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 image_name = feature_extractor.__class__.__name__ + ".png"
                 image_path = os.path.join(self.output_folder, image_name)
                 f.savefig(image_path)
+                images_created.append(image_path)
 
                 section.add_feature(
                     FeatureSummary(
@@ -141,6 +155,10 @@ class AnalysisManagerAbstract(abc.ABC):
         output_path = os.path.join(self.output_folder, "report.pdf")
         logger.info(f"Writing the result of the Data Analysis into: {output_path}")
         self.html_writer.write(results_container=summary, output_filename=output_path)
+
+        # Cleanup of generated images
+        for image_created in images_created:
+            os.remove(image_created)
 
         # TODO: add images to the report...
         for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
