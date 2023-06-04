@@ -17,12 +17,14 @@ def check_all_integers(tensor: torch.Tensor) -> bool:
 
 
 def to_one_hot(labels: torch.Tensor, class_ids: List[int]) -> torch.Tensor:
+    """Method gets label with the shape of [BS, N, H, W] where N is the number of classes.
+    :param labels:      Tensor of shape [BS, H, W]
+    :param class_ids:   List of ids to class names. Ids not mapped will be ignored
+    :return:            Labels tensor shaped as [BS, N, H, W]
     """
-    Method gets label with the shape of [BS, N, W, H] where N is either 1 or n_classes, if is_one_hot=True.
-    param label: Tensor
-    param is_one_hot: Determine if labels are one-hot shaped
-    :return: Labels tensor shaped as [BS, VC, H, W] where VC is Valid Classes only - ignores are omitted.
-    """
+
+    # class_ids might not include every ids (in case the user want to ignore some ids).
+    # This means we don't know the number of classes, so the workaround is to take the max value between batch ids and class_ids.
     n_dims = int(max(labels.max().item() + 1, *class_ids))
 
     masks = []

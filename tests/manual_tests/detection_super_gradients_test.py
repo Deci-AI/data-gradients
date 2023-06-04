@@ -36,7 +36,7 @@ class PadTarget:
         return sample
 
 
-data_dir = "<soccer-players-dataset>"
+data_dir = "/Users/Louis.Dupont/Downloads/soccer players.v2-release.yolov8"
 # class_names = {0: "football", 1: "player", 2: "referee"}
 class_names = {1: "player", 2: "referee"}  # Testing without football
 

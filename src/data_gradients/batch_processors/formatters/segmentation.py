@@ -21,7 +21,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         ignore_labels: Optional[List[int]] = None,
     ):
         """
-        :param class_names: Mapping of ids to class names. Ids not mapped will be ignored
+        :param class_names:         Mapping of ids to class names. Ids not mapped will be ignored
         :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         :param threshold_value:     Threshold
         :param ignore_labels:       Numbers that we should avoid from analyzing as valid classes, such as background
@@ -55,7 +55,8 @@ class SegmentationBatchFormatter(BatchFormatter):
         labels = self.ensure_hard_labels(labels, n_classes_used=len(self.class_ids), threshold_value=self.threshold_value)
         labels_to_ignore = set(range(int(labels.max().item()) + 1)) - set(self.class_ids)
 
-        labels = to_one_hot(labels, class_ids=self.class_ids)
+        if self.require_onehot(labels=labels):
+            labels = to_one_hot(labels, class_ids=self.class_ids)
 
         for label_to_ignore in labels_to_ignore:
             labels[:, label_to_ignore, ...] = torch.zeros_like(labels[:, label_to_ignore, ...])
@@ -90,10 +91,8 @@ class SegmentationBatchFormatter(BatchFormatter):
         return True
 
     @staticmethod
-    def require_onehot(labels: Tensor, n_classes_used: int, total_n_classes: int) -> bool:
-        is_binary = n_classes_used == 1
-        is_onehot = labels.shape[1] == total_n_classes
-        return not (is_binary or is_onehot)
+    def require_onehot(labels: Tensor) -> bool:
+        return labels.shape[1] == 1  # Assuming that we alreaddy made sure to have ndim==4
 
     @staticmethod
     def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
