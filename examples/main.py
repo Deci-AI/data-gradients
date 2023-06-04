@@ -45,6 +45,7 @@ if __name__ == "__main__":
     ignore_labels = BDDDataset.IGNORE_LABELS
 
     da = SegmentationAnalysisManager(
+        report_title="Testing Data-Gradients",
         train_data=train_loader,
         val_data=val_loader,
         class_names=BDDDataset.CLASS_NAMES,

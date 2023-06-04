@@ -28,8 +28,10 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
+        report_title: str,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
+        report_subtitle: Optional[str] = None,
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
         feature_extractors: List[AbstractFeatureExtractor],
@@ -38,6 +40,8 @@ class AnalysisManagerAbstract(abc.ABC):
         image_sample_manager: ImageSampleManager,
     ):
         """
+        :param report_title:        Title of the report. Will be used to save the report
+        :param report_subtitle:     Subtitle of the report
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
         :param log_dir:             Directory where to save the logs. By default uses the current working directory
@@ -58,7 +62,11 @@ class AnalysisManagerAbstract(abc.ABC):
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
         self.renderer = SeabornRenderer()
-        self.html_writer = PDFWriter(title="Data Gradients", subtitle="Automated Exploratory Data Analysis", html_template=assets.html.doc_template)
+        self.report_title = report_title
+        from datetime import datetime
+
+        report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
+        self.html_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
         self._log_writer = LogWriter(log_dir=log_dir)
         self.output_folder = self._log_writer.log_dir
 
@@ -135,7 +143,8 @@ class AnalysisManagerAbstract(abc.ABC):
             )
         summary.add_section(section)
 
-        output_path = os.path.join(self.output_folder, "report.pdf")
+        formatted_tite = self.report_title.lower().replace(" ", "_")
+        output_path = os.path.join(self.output_folder, f"{formatted_tite}.pdf")
         logger.info(f"Writing the result of the Data Analysis into: {output_path}")
         self.html_writer.write(results_container=summary, output_filename=output_path)
 
