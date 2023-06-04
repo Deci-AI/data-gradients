@@ -4,7 +4,7 @@ import logging
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
-
+from datetime import datetime
 import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
@@ -34,7 +34,7 @@ class AnalysisManagerAbstract(abc.ABC):
         report_subtitle: Optional[str] = None,
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
-        feature_extractors: List[AbstractFeatureExtractor],
+        grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
         image_sample_manager: ImageSampleManager,
@@ -46,7 +46,7 @@ class AnalysisManagerAbstract(abc.ABC):
         :param val_data:            Iterable object contains images and labels of the validation dataset
         :param log_dir:             Directory where to save the logs. By default uses the current working directory
         :param batch_processor:     Batch processor object to be used before extracting features
-        :param feature_extractors:  List of feature extractors to be used
+        :param grouped_feature_extractors:  List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param image_sample_manager:     Object responsible for collecting images
@@ -63,7 +63,6 @@ class AnalysisManagerAbstract(abc.ABC):
 
         self.renderer = SeabornRenderer()
         self.report_title = report_title
-        from datetime import datetime
 
         report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
         self.html_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
@@ -71,7 +70,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self.output_folder = self._log_writer.log_dir
 
         self.batch_processor = batch_processor
-        self.feature_extractors = feature_extractors
+        self.grouped_feature_extractors = grouped_feature_extractors
 
         self.id_to_name = id_to_name
 
@@ -89,7 +88,7 @@ class AnalysisManagerAbstract(abc.ABC):
             f"len(train_data): {self.train_size} \n"
             f"len(val_data): {self.val_size} \n"
             f"log directory: {self._log_writer.log_dir} \n"
-            f"feature extractor list: {self.feature_extractors}"
+            f"feature extractor list: {self.grouped_feature_extractors}"
         )
 
         datasets_tqdm = tqdm.tqdm(
@@ -106,13 +105,15 @@ class AnalysisManagerAbstract(abc.ABC):
             if train_batch is not None:
                 for sample in self.batch_processor.process(train_batch, split="train"):
                     self.image_sample_manager.update(sample)
-                    for extractor in self.feature_extractors:
-                        extractor.update(sample)
+                    for feature_extractors in self.grouped_feature_extractors.values():
+                        for feature_extractor in feature_extractors:
+                            feature_extractor.update(sample)
 
             if val_batch is not None:
                 for sample in self.batch_processor.process(val_batch, split="val"):
-                    for extractor in self.feature_extractors:
-                        extractor.update(sample)
+                    for feature_extractors in self.grouped_feature_extractors.values():
+                        for feature_extractor in feature_extractors:
+                            feature_extractor.update(sample)
 
     def post_process(self):
         """
@@ -124,29 +125,29 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
-        section = Section("Features")  # TODO: add section title for each section
-        for feature_extractor in self.feature_extractors:
-            feature = feature_extractor.aggregate()
+        for section_name, feature_extractors in self.grouped_feature_extractors.items():
+            section = Section(section_name)
+            for feature_extractor in feature_extractors:
+                feature = feature_extractor.aggregate()
 
-            self._log_writer.log_json(title=feature_extractor.title, data=feature.json)
+                self._log_writer.log_json(title=feature_extractor.title, data=feature.json)
 
-            f = self.renderer.render(feature.data, feature.plot_options)
-            image_name = feature_extractor.__class__.__name__ + ".png"
-            image_path = os.path.join(self.output_folder, image_name)
-            f.savefig(image_path)
-            images_created.append(image_path)
+                f = self.renderer.render(feature.data, feature.plot_options)
+                image_name = feature_extractor.__class__.__name__ + ".png"
+                image_path = os.path.join(self.output_folder, image_name)
+                f.savefig(image_path)
+                images_created.append(image_path)
 
-            section.add_feature(
-                FeatureSummary(
-                    name=feature_extractor.title,
-                    description=feature_extractor.description,
-                    image_path=image_path,
+                section.add_feature(
+                    FeatureSummary(
+                        name=feature_extractor.title,
+                        description=feature_extractor.description,
+                        image_path=image_path,
+                    )
                 )
-            )
-        summary.add_section(section)
+            summary.add_section(section)
 
-        formatted_tite = self.report_title.lower().replace(" ", "_")
-        output_path = os.path.join(self.output_folder, f"{formatted_tite}.pdf")
+        output_path = os.path.join(self.output_folder, "report.pdf")
         logger.info(f"Writing the result of the Data Analysis into: {output_path}")
         self.html_writer.write(results_container=summary, output_filename=output_path)
 

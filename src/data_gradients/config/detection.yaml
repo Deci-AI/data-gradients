@@ -1,7 +1,13 @@
-number_of_classes:
-
-defaults:
-  - common: common
-  - _self_
-
-feature_extractors: []
+report_sections:
+  - name: Image Features
+    features:
+      - ImagesResolution
+      - ImageColorDistribution
+      - ImagesAverageBrightness
+  - name: Object Detection Features
+    features:
+      - DetectionBoundingBoxArea
+      - DetectionBoundingBoxPerImageCount
+      - DetectionBoundingBoxSize
+      - DetectionClassesCount
+      - DetectionClassesPerImageCount
