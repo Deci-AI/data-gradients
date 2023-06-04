@@ -15,18 +15,18 @@ class SegmentationBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
-        class_names: Optional[Dict[int, str]],
+        class_names: Dict[int, str],
         n_image_channels: int,
         threshold_value: float,
         ignore_labels: Optional[List[int]] = None,
     ):
         """
-        :param n_classes:           Number of classes, including classes to ignore if any.
+        :param class_names: Mapping of ids to class names. Ids not mapped will be ignored
         :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         :param threshold_value:     Threshold
         :param ignore_labels:       Numbers that we should avoid from analyzing as valid classes, such as background
         """
-        self.relevant_class_ids = list(class_names.keys())
+        self.class_ids = list(class_names.keys())
 
         self.n_image_channels = n_image_channels
         self.ignore_labels = ignore_labels or []
@@ -52,10 +52,10 @@ class SegmentationBatchFormatter(BatchFormatter):
         images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
 
-        labels = self.ensure_hard_labels(labels, n_classes_used=len(self.relevant_class_ids), threshold_value=self.threshold_value)
-        labels_to_ignore = set(range(int(labels.max().item()) + 1)) - set(self.relevant_class_ids)
+        labels = self.ensure_hard_labels(labels, n_classes_used=len(self.class_ids), threshold_value=self.threshold_value)
+        labels_to_ignore = set(range(int(labels.max().item()) + 1)) - set(self.class_ids)
 
-        labels = to_one_hot(labels, class_ids=self.relevant_class_ids)
+        labels = to_one_hot(labels, class_ids=self.class_ids)
 
         for label_to_ignore in labels_to_ignore:
             labels[:, label_to_ignore, ...] = torch.zeros_like(labels[:, label_to_ignore, ...])

@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Callable
+from typing import Tuple, Optional, Callable, Dict, List
 
 import torch
 from torch import Tensor
@@ -12,12 +12,20 @@ from data_gradients.utils.utils import ask_user
 class DetectionBatchFormatter(BatchFormatter):
     """Detection formatter class"""
 
-    def __init__(self, n_image_channels: int, xyxy_converter: Optional[Callable[[Tensor], Tensor]] = None, label_first: Optional[bool] = None):
+    def __init__(
+        self,
+        class_names: Dict[int, str],
+        n_image_channels: int,
+        xyxy_converter: Optional[Callable[[Tensor], Tensor]] = None,
+        label_first: Optional[bool] = None,
+    ):
         """
+        :param class_names: Mapping of ids to class names. Ids not mapped will be ignored
         :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         :param xyxy_converter:      Function to convert the bboxes to the `xyxy` format.
         :param label_first:         Whether the annotated_bboxes states with labels, or with the bboxes. (typically label_xyxy vs xyxy_label)
         """
+        self.class_ids = list(class_names.keys())
         self.n_image_channels = n_image_channels
         self.xyxy_converter = xyxy_converter
         self.label_first = label_first
@@ -29,7 +37,7 @@ class DetectionBatchFormatter(BatchFormatter):
         :param labels: Batch of labels, in (BS, N, 5) format
         :return:
             - images: Batch of images already formatted into (BS, C, H, W)
-            - labels: Batch of labels already formatted into (BS, N, 5 [label_xyxy])
+            - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
         labels = drop_nan(labels)
 
@@ -53,6 +61,9 @@ class DetectionBatchFormatter(BatchFormatter):
         labels = self.convert_to_label_xyxy(
             annotated_bboxes=labels, image_shape=images.shape[-2:], xyxy_converter=self.xyxy_converter, label_first=self.label_first
         )
+
+        labels = self.filter_non_relevant_annotations(bboxes=labels, relevant_class_ids=self.class_ids)
+
         return images, labels
 
     @staticmethod
@@ -60,7 +71,8 @@ class DetectionBatchFormatter(BatchFormatter):
         """Make sure that the labels have the correct shape, i.e. (BS, N, 5)."""
         if annotated_bboxes.ndim != 3:
             raise RuntimeError(
-                f"The batch labels should have 3 dimensions (Batch_size x N_labels_per_image x 5 (label + 4 bbox coordinates)), but got {annotated_bboxes.ndim}"
+                f"The batch labels should have 3 dimensions (Batch_size x N_labels_per_image x 5 (label + 4 bbox coordinates)), "
+                f"but got {annotated_bboxes.ndim}: {annotated_bboxes.shape}"
             )
 
         if annotated_bboxes.shape[-1] != 5:
@@ -160,3 +172,26 @@ class DetectionBatchFormatter(BatchFormatter):
         y2 = y1 + h
 
         return torch.stack([x1, y1, x2, y2], dim=-1)
+
+    @staticmethod
+    def filter_non_relevant_annotations(bboxes: torch.Tensor, relevant_class_ids: List[int]) -> List[torch.Tensor]:
+        """Filter the bounding box tensors to keep only the ones with relevant label, excluding padding.
+
+        :param bboxes:              Bounding box tensors with shape [batch_size, padding_size, 5], where 5 represents (label, x, y, x, y).
+        :param relevant_class_ids:  List of valid labels to keep.
+        :return: List of filtered bounding box tensors, each of shape [n_bbox, 5],
+                 where n_bbox is the number of bounding boxes with a label in the `valid_labels` list.
+        """
+        filtered_bbox_tensors = []
+        relevant_class_ids_tensor = torch.tensor(relevant_class_ids)
+
+        for bbox_tensor in bboxes:
+            valid_indices = torch.nonzero(torch.isin(bbox_tensor[:, 0], relevant_class_ids_tensor)).squeeze()
+            filtered_bbox = bbox_tensor[valid_indices]
+
+            non_zero_indices = torch.any(filtered_bbox[:, 1:] != 0, dim=1)
+            filtered_bbox = filtered_bbox[non_zero_indices]
+
+            filtered_bbox_tensors.append(filtered_bbox)
+
+        return filtered_bbox_tensors

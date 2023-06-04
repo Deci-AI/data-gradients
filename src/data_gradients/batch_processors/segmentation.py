@@ -10,7 +10,7 @@ class SegmentationBatchProcessor(BatchProcessor):
     def __init__(
         self,
         *,
-        class_names: Optional[Dict[int, str]],
+        class_names: Optional[Dict[int, str]] = None,
         n_image_channels: int = 3,
         threshold_value: float = 0.5,
         images_extractor: Optional[Callable] = None,

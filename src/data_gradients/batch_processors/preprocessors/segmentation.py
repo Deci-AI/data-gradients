@@ -1,4 +1,4 @@
-from typing import Optional, List, Iterable
+from typing import Optional, Dict, Iterable
 import time
 import numpy as np
 from torch import Tensor
@@ -11,9 +11,9 @@ from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class SegmentationBatchPreprocessor(BatchPreprocessor):
-    def __init__(self, class_names: Optional[List[str]] = None):
+    def __init__(self, class_names: Optional[Dict[int, str]] = None):
         """
-        :param class_names: List of class names
+        :param class_names: Mapping of ids to class names. Ids not mapped will be ignored.
         """
         self.class_names = class_names
 

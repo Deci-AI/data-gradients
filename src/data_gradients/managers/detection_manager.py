@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, Dict, Callable, List
+from typing import Optional, Iterable, Dict, Callable
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_extractors
@@ -18,7 +18,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
-        class_names: Optional[List[str]] = None,
+        class_names: Optional[Dict[int, str]] = None,
         n_classes: Optional[int] = None,
         config_name: str = "detection",
         log_dir: Optional[str] = None,

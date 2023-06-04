@@ -34,22 +34,22 @@ class PadTarget:
 
 
 if __name__ == "__main__":
-    data_dir = "<path-to-avatar_recognition>"
-    classes = ["Character"]
+    data_dir = "/Users/Louis.Dupont/Downloads/avatar_recognition.v2-release.yolov8"
+    class_names = {0: "Character"}
 
     # Create torch DataSet
     train_dataset = YoloDarknetFormatDetectionDataset(
         data_dir=data_dir,
         images_dir="train/images",
         labels_dir="train/labels",
-        classes=classes,
+        classes=list(class_names.values()),
         transforms=[PadTarget(max_targets=50)],
     )
     val_dataset = YoloDarknetFormatDetectionDataset(
         data_dir=data_dir,
         images_dir="valid/images",
         labels_dir="valid/labels",
-        classes=classes,
+        classes=list(class_names.values()),
         transforms=[PadTarget(max_targets=50)],
     )
 
@@ -58,9 +58,10 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, batch_size=8)
 
     analyzer = DetectionAnalysisManager(
+        report_title="Testing Data-Gradients",
+        class_names=class_names,
         train_data=train_loader,
         val_data=val_loader,
-        class_names=classes,
         samples_to_visualize=3,
     )
 
