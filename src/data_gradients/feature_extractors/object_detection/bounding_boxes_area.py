@@ -17,7 +17,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     def update(self, sample: DetectionSample):
         image_area = sample.image.shape[0] * sample.image.shape[1]
         for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
-            class_name = sample.class_names.get(class_id, str(class_id))
+            class_name = sample.class_names[class_id]
             bbox_area = (bbox_xyxy[2] - bbox_xyxy[0]) * (bbox_xyxy[3] - bbox_xyxy[1])
             self.data.append(
                 {

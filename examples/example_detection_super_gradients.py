@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 
 # Note: This example will require you to install the super-gradients package
 from super_gradients.training.datasets import YoloDarknetFormatDetectionDataset
+from super_gradients.training.transforms.transforms import DetectionRescale
 
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
@@ -34,23 +35,23 @@ class PadTarget:
 
 
 if __name__ == "__main__":
-    data_dir = "<path-to-avatar_recognition>"
-    class_names = {0: "Character"}
+    data_dir = "<soccer-players-dataset>"
+    class_names = ["football", "player", "referee"]
 
     # Create torch DataSet
     train_dataset = YoloDarknetFormatDetectionDataset(
         data_dir=data_dir,
         images_dir="train/images",
         labels_dir="train/labels",
-        classes=list(class_names.values()),
-        transforms=[PadTarget(max_targets=50)],
+        classes=class_names,
+        transforms=[DetectionRescale((640, 640)), PadTarget(max_targets=50)],
     )
     val_dataset = YoloDarknetFormatDetectionDataset(
         data_dir=data_dir,
         images_dir="valid/images",
         labels_dir="valid/labels",
-        classes=list(class_names.values()),
-        transforms=[PadTarget(max_targets=50)],
+        classes=class_names,
+        transforms=[DetectionRescale((640, 640)), PadTarget(max_targets=50)],
     )
 
     # Create torch DataLoader
@@ -59,7 +60,7 @@ if __name__ == "__main__":
 
     analyzer = DetectionAnalysisManager(
         report_title="Testing Data-Gradients",
-        class_names=class_names,
+        class_names=[class_names[0], class_names[-1]],
         train_data=train_loader,
         val_data=val_loader,
         samples_to_visualize=3,

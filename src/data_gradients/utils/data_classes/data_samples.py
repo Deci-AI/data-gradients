@@ -1,6 +1,6 @@
 import dataclasses
 from enum import Enum
-from typing import List, Dict
+from typing import List
 
 import numpy as np
 
@@ -44,13 +44,13 @@ class SegmentationSample(ImageSample):
     :attr image:            np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
     :attr mask:             np.ndarray of shape [N, H, W] representing one-hot encoded mask for each class.
     :attr contours:         A list of contours for each class in the mask.
-    :attr class_names:      Mapping of ids to class names. Ids not mapped will be ignored. If None, the class names will be the class ids.
+    :attr class_names:      List of all class names in the dataset. The index should represent the class_id.
     """
 
     mask: np.ndarray
 
     contours: List[List[Contour]]
-    class_names: Dict[int, str] = dataclasses.field(default_factory=dict)
+    class_names: List[str]
 
     def __repr__(self):
         return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
@@ -67,12 +67,12 @@ class DetectionSample(ImageSample):
     :attr image:        np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
     :attr bboxes_xyxy:  np.ndarray of shape [N, 4] (X, Y, X, Y)
     :attr class_ids:    np.ndarray of shape [N, ]
-    :attr class_names:  Mapping of ids to class names. Ids not mapped will be ignored. If None, the class names will be the class ids.
+    :attr class_names:  List of all class names in the dataset. The index should represent the class_id.
     """
 
     bboxes_xyxy: np.ndarray
     class_ids: np.ndarray
-    class_names: Dict[int, str] = dataclasses.field(default_factory=dict)
+    class_names: List[str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, class_ids={self.class_ids.shape})"

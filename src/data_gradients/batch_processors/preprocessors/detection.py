@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Iterable
+from typing import Iterable, List
 from torch import Tensor
 import numpy as np
 import time
@@ -9,9 +9,9 @@ from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class DetectionBatchPreprocessor(BatchPreprocessor):
-    def __init__(self, class_names: Optional[Dict[int, str]] = None):
+    def __init__(self, class_names: List[str]):
         """
-        :param class_names: Mapping of ids to class names. Ids not mapped will be ignored.
+        :param class_names: List of all class names in the dataset. The index should represent the class_id.
         """
         self.class_names = class_names
 

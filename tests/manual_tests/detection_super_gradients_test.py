@@ -37,29 +37,33 @@ class PadTarget:
 
 
 data_dir = "/Users/Louis.Dupont/Downloads/soccer players.v2-release.yolov8"
-# class_names = {0: "football", 1: "player", 2: "referee"}
-class_names = {1: "player", 2: "referee"}  # Testing without football
+class_names = ["football", "player", "referee"]
+# class_names_to_use = ["player", "referee"]  # Testing without football
 
 # Create torch DataSet
 train_dataset = YoloDarknetFormatDetectionDataset(
     data_dir=data_dir,
     images_dir="train/images",
     labels_dir="train/labels",
-    classes=list(class_names.values()),
+    classes=class_names,
     transforms=[DetectionRescale(output_shape=(640, 640)), PadTarget(max_targets=50)],
 )
 val_dataset = YoloDarknetFormatDetectionDataset(
     data_dir=data_dir,
     images_dir="valid/images",
     labels_dir="valid/labels",
-    classes=list(class_names.values()),
+    classes=class_names,
     transforms=[DetectionRescale(output_shape=(640, 640)), PadTarget(max_targets=50)],
 )
 
 # Create torch DataLoader
 train_loader = DataLoader(train_dataset, batch_size=8)
 val_loader = DataLoader(val_dataset, batch_size=8)
-batch_processor = DetectionBatchProcessor(n_image_channels=3, class_names=class_names)
+batch_processor = DetectionBatchProcessor(
+    n_image_channels=3,
+    class_names=class_names,
+    class_names_to_use=class_names,
+)
 
 feature_extractors = [
     ImagesResolution(),
