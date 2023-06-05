@@ -60,7 +60,7 @@ class SummaryStats(AbstractFeatureExtractor):
             basic_stats.classes_count = len(sample.class_names)
 
         elif isinstance(sample, DetectionSample):
-            labels = sample.labels
+            labels = sample.class_ids
             basic_stats.classes.extend(labels)
             boxes = sample.bboxes_xyxy
             basic_stats.annotations_per_image.append(len(boxes))
