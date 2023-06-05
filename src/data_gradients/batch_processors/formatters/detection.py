@@ -89,7 +89,7 @@ class DetectionBatchFormatter(BatchFormatter):
             if annotated_bboxes.shape[-1] != 6:
                 raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
             else:
-                return group_detection_batch(annotated_bboxes)
+                return DetectionBatchFormatter.group_detection_batch(annotated_bboxes)
         elif annotated_bboxes.ndim != 3 or annotated_bboxes.shape[-1] != 5:
             raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
         else:
@@ -211,29 +211,29 @@ class DetectionBatchFormatter(BatchFormatter):
 
         return filtered_bbox_tensors
 
+    @staticmethod
+    def group_detection_batch(flat_batch: torch.Tensor) -> torch.Tensor:
+        """Convert a flat batch of detections (N, 6) into a grouped batch of detections (B, P, 4)
 
-def group_detection_batch(flat_batch: torch.Tensor) -> torch.Tensor:
-    """Convert a flat batch of detections (N, 6) into a grouped batch of detections (B, P, 4)
+        :param flat_batch: Flat batch of detections (N, 6) with 6: (image_id + class_id + 4 bbox coordinates)
+        :return: Grouped batch of detections (B, P, 5) with:
+                    B: Batch size
+                    P: Padding size
+                    5: (class_id + 4 bbox coordinates)
+        """
+        batch_size = int(torch.max(flat_batch[:, 0])) + 1
+        batch_targets = [[] for _ in range(batch_size)]
 
-    :param flat_batch: Flat batch of detections (N, 6) with 6: (image_id + class_id + 4 bbox coordinates)
-    :return: Grouped batch of detections (B, P, 5) with:
-                B: Batch size
-                P: Padding size
-                5: (class_id + 4 bbox coordinates)
-    """
-    batch_size = int(torch.max(flat_batch[:, 0])) + 1
-    batch_targets = [[] for _ in range(batch_size)]
+        for target in flat_batch:
+            image_id, target = target[0].item(), target[1:]
+            batch_targets[int(image_id)].append(target)
 
-    for target in flat_batch:
-        image_id, target = target[0].item(), target[1:]
-        batch_targets[int(image_id)].append(target)
+        max_n_labels_per_image = max(len(labels) for labels in batch_targets)
 
-    max_n_labels_per_image = max(len(labels) for labels in batch_targets)
+        output_array = torch.zeros(batch_size, max_n_labels_per_image, 5)
 
-    output_array = torch.zeros(batch_size, max_n_labels_per_image, 5)
+        for batch_index, targets in enumerate(batch_targets):
+            for target_index, target in enumerate(targets):
+                output_array[batch_index, target_index] = target
 
-    for batch_index, targets in enumerate(batch_targets):
-        for target_index, target in enumerate(targets):
-            output_array[batch_index, target_index] = target
-
-    return output_array
+        return output_array

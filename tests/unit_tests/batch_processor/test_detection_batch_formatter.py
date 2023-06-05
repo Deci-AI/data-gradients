@@ -1,6 +1,6 @@
 import torch
 import unittest
-from data_gradients.batch_processors.formatters.detection import group_detection_batch
+from data_gradients.batch_processors.formatters.detection import DetectionBatchFormatter
 
 
 class GroupDetectionBatchTest(unittest.TestCase):
@@ -28,7 +28,7 @@ class GroupDetectionBatchTest(unittest.TestCase):
                 [[2, 10, 20, 15, 25], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
             ]
         )
-        grouped_batch = group_detection_batch(flat_batch)
+        grouped_batch = DetectionBatchFormatter.group_detection_batch(flat_batch)
         self.assertTrue(torch.equal(grouped_batch, expected_grouped_batch))
 
 
