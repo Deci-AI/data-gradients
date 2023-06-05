@@ -47,7 +47,7 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
             labels_key="split",
         )
 
-        json = dict(df_class_count.n_appearance.describe())
+        json = dict(df_class_count["n_appearance"].describe())
 
         feature = Feature(
             data=df_class_count,

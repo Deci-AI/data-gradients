@@ -51,7 +51,7 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
             sharey=True,
         )
 
-        json = dict(df.describe())
+        json = dict(df["percent_change_of_n_components"].describe())
         return Feature(data=df, plot_options=plot_options, json=json)
 
     @property

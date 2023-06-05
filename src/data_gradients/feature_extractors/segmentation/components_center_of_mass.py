@@ -44,7 +44,7 @@ class SegmentationComponentCenterOfMass(AbstractFeatureExtractor):
             labels_key="split",
             bandwidth=0.4,
         )
-        json = dict(df.bbox_area.describe())
+        json = dict(df["bbox_area"].describe())
 
         feature = Feature(
             data=df,
