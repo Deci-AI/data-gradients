@@ -59,7 +59,7 @@ class SegmentationBatchFormatter(BatchFormatter):
 
         labels = self.ensure_hard_labels(labels, n_classes=len(self.class_names), threshold_value=self.threshold_value)
 
-        if self.require_onehot(labels=labels):
+        if self.require_onehot(labels=labels, n_classes=len(self.class_names)):
             labels = to_one_hot(labels, n_classes=len(self.class_names))
 
         for class_id_to_ignore in self.class_ids_to_ignore:
@@ -95,8 +95,10 @@ class SegmentationBatchFormatter(BatchFormatter):
         return True
 
     @staticmethod
-    def require_onehot(labels: Tensor) -> bool:
-        return labels.shape[1] == 1  # Assuming that we alreaddy made sure to have ndim==4
+    def require_onehot(labels: Tensor, n_classes: int) -> bool:
+        is_binary = n_classes == 1
+        is_onehot = labels.shape[1] == n_classes
+        return not (is_binary or is_onehot)
 
     @staticmethod
     def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
