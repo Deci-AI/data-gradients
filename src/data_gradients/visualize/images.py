@@ -12,7 +12,14 @@ def stack_split_images_to_fig(
     split_figsize: Tuple[float, float],
     tight_layout: bool = True,
     stack_vertically: bool = True,
-):
+) -> plt.Figure:
+    """Stack a mapping of split_name -> split_image into a single figure. This can be done horizontally or vertically.
+    :param image_per_split:      Mapping of split_name -> split_image
+    :param split_figsize:        Size of each split image. Final size will be a multiple of this, either horizontally or vertically
+    :param tight_layout:         Whether to use tight layout
+    :param stack_vertically:     Whether to stack the images vertically or horizontally
+    :return: Resulting figure
+    """
     if stack_vertically:
         fig, axs = plt.subplots(len(image_per_split), 1, figsize=(split_figsize[0], split_figsize[1] * len(image_per_split)))
     else:
