@@ -182,7 +182,7 @@ class DetectionBatchFormatter(BatchFormatter):
 
     @staticmethod
     def filter_non_relevant_annotations(bboxes: torch.Tensor, class_ids_to_use: List[int]) -> List[torch.Tensor]:
-        """Filter the bounding box tensors to keep only the ones with relevant label, excluding padding.
+        """Filter the bounding box tensors to keep only the ones with relevant label; also removes padding.
 
         :param bboxes:              Bounding box tensors with shape [batch_size, padding_size, 5], where 5 represents (label, x, y, x, y).
         :param class_ids_to_use:    List of class ids to keep use.
