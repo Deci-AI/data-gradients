@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Callable
+from typing import Tuple, Optional, Callable, List
 
 import torch
 from torch import Tensor
@@ -21,24 +21,36 @@ class UnsupportedDetectionBatchFormatError(Exception):
 class DetectionBatchFormatter(BatchFormatter):
     """Detection formatter class"""
 
-    def __init__(self, n_image_channels: int, xyxy_converter: Optional[Callable[[Tensor], Tensor]] = None, label_first: Optional[bool] = None):
+    def __init__(
+        self,
+        class_names: List[str],
+        class_names_to_use: List[str],
+        n_image_channels: int,
+        xyxy_converter: Optional[Callable[[Tensor], Tensor]] = None,
+        label_first: Optional[bool] = None,
+    ):
         """
+        :param class_names:         List of all class names in the dataset. The index should represent the class_id.
+        :param class_names_to_use:  List of class names that we should use for analysis.
         :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         :param xyxy_converter:      Function to convert the bboxes to the `xyxy` format.
         :param label_first:         Whether the annotated_bboxes states with labels, or with the bboxes. (typically label_xyxy vs xyxy_label)
         """
+        class_names_to_use = set(class_names_to_use)
+        self.class_ids_to_use = [class_id for class_id, class_name in enumerate(class_names) if class_name in class_names_to_use]
+
         self.n_image_channels = n_image_channels
         self.xyxy_converter = xyxy_converter
         self.label_first = label_first
 
-    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
+    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, List[Tensor]]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
 
         :param images: Batch of images, in (BS, ...) format
         :param labels: Batch of labels, in (BS, N, 5) format
         :return:
             - images: Batch of images already formatted into (BS, C, H, W)
-            - labels: Batch of labels already formatted into (BS, N, 5 [label_xyxy])
+            - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
         labels = drop_nan(labels)
 
@@ -60,8 +72,14 @@ class DetectionBatchFormatter(BatchFormatter):
             images = images.to(torch.uint8)
 
         labels = self.convert_to_label_xyxy(
-            annotated_bboxes=labels, image_shape=images.shape[-2:], xyxy_converter=self.xyxy_converter, label_first=self.label_first
+            annotated_bboxes=labels,
+            image_shape=images.shape[-2:],
+            xyxy_converter=self.xyxy_converter,
+            label_first=self.label_first,
         )
+
+        labels = self.filter_non_relevant_annotations(bboxes=labels, class_ids_to_use=self.class_ids_to_use)
+
         return images, labels
 
     @staticmethod
@@ -169,6 +187,29 @@ class DetectionBatchFormatter(BatchFormatter):
         y2 = y1 + h
 
         return torch.stack([x1, y1, x2, y2], dim=-1)
+
+    @staticmethod
+    def filter_non_relevant_annotations(bboxes: torch.Tensor, class_ids_to_use: List[int]) -> List[torch.Tensor]:
+        """Filter the bounding box tensors to keep only the ones with relevant label; also removes padding.
+
+        :param bboxes:              Bounding box tensors with shape [batch_size, padding_size, 5], where 5 represents (label, x, y, x, y).
+        :param class_ids_to_use:    List of class ids to keep use.
+        :return: List of filtered bounding box tensors, each of shape [n_bbox, 5],
+                 where n_bbox is the number of bounding boxes with a label in the `valid_labels` list.
+        """
+        filtered_bbox_tensors = []
+        class_ids_to_use_tensor = torch.tensor(class_ids_to_use)
+
+        for bbox_tensor in bboxes:
+            valid_indices = torch.nonzero(torch.isin(bbox_tensor[:, 0], class_ids_to_use_tensor)).squeeze()
+            filtered_bbox = bbox_tensor[valid_indices]
+
+            non_zero_indices = torch.any(filtered_bbox[:, 1:] != 0, dim=1)
+            filtered_bbox = filtered_bbox[non_zero_indices]
+
+            filtered_bbox_tensors.append(filtered_bbox)
+
+        return filtered_bbox_tensors
 
 
 def group_detection_batch(flat_batch: torch.Tensor) -> torch.Tensor:

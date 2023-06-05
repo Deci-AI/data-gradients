@@ -19,7 +19,7 @@ if __name__ == "__main__":
     val_loader = coco2017_val()
 
     analyzer = DetectionAnalysisManager(
-        report_title="test",
+        report_title="Testing Data-Gradients",
         train_data=train_loader,
         val_data=val_loader,
         class_names=train_loader.dataset.classes,
