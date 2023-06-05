@@ -49,7 +49,7 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
             split: combine_images(split_images, n_cols=self.n_cols_per_split, row_figsize=(10, 2.5)) for split, split_images in self.images_per_split.items()
         }
 
-        # Generate a single image
+        # Generate a single figure
         fig = stack_split_images_to_fig(
             image_per_split=combined_images_per_split,
             split_figsize=(10, 6),
