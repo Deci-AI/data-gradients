@@ -16,7 +16,7 @@ class SegmentationClassesCount(AbstractFeatureExtractor):
         for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
                 class_id = contour.class_id
-                class_name = str(class_id) if sample.class_names is None else sample.class_names[class_id]
+                class_name = sample.class_names[class_id]
                 self.data.append(
                     {
                         "split": sample.split,
@@ -43,7 +43,7 @@ class SegmentationClassesCount(AbstractFeatureExtractor):
             orient="h",
         )
 
-        json = dict(df_class_count.class_name.describe())
+        json = dict(df_class_count["n_appearance"].describe())
 
         feature = Feature(
             data=df_class_count,

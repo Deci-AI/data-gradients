@@ -14,7 +14,6 @@ class BDDDataset(Dataset):
     The BDD100K data and annotations can be obtained at https://bdd-data.berkeley.edu/.
     """
 
-    IGNORE_LABELS = [19]
     CLASS_NAMES = [
         "road",
         "sidewalk",
@@ -35,6 +34,7 @@ class BDDDataset(Dataset):
         "train",
         "motorcycle",
         "bicycle",
+        "<?>",
     ]
 
     def __init__(

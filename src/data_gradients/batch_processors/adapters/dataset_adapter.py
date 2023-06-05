@@ -28,13 +28,10 @@ class DatasetAdapter:
             - images: Batch of images
             - labels: Batch of labels
         """
-        if isinstance(objs, Tuple) or isinstance(objs, List):
-            if len(objs) == 2:
-                images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], tuple_idx=0)
-                labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], tuple_idx=1)
-            else:
-                raise NotImplementedError(f"Got tuple/list object with length {len(objs)}! Supporting only len == 2")
-        elif isinstance(objs, Mapping):
+        if isinstance(objs, (Tuple, List)) and len(objs) == 2:
+            images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], tuple_idx=0)
+            labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], tuple_idx=1)
+        elif isinstance(objs, (Mapping, Tuple, List)):
             images = self._extract_tensor_from_container(objs, 0)
             labels = self._extract_tensor_from_container(objs, 1)
         else:

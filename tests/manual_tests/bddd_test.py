@@ -38,7 +38,6 @@ val_loader = DataLoader(val_dataset, batch_size=8)
 
 batch_processor = SegmentationBatchProcessor(
     class_names=BDDDataset.CLASS_NAMES,
-    ignore_labels=BDDDataset.IGNORE_LABELS,
     threshold_value=0.5,
     n_image_channels=3,
 )

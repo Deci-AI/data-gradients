@@ -1,4 +1,4 @@
-from typing import Optional, List, Iterable
+from typing import Iterable, List
 from torch import Tensor
 import numpy as np
 import time
@@ -9,9 +9,9 @@ from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class DetectionBatchPreprocessor(BatchPreprocessor):
-    def __init__(self, class_names: Optional[List[str]] = None):
+    def __init__(self, class_names: List[str]):
         """
-        :param class_names: List of class names
+        :param class_names: List of all class names in the dataset. The index should represent the class_id.
         """
         self.class_names = class_names
 
@@ -19,15 +19,14 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
 
         :param images:      Batch of images already formatted into (BS, C, H, W)
-        :param labels:      Batch of labels already formatted into (BS, N, 5), in format (class_id, x1, y1, x2, y2)
+        :param labels:      List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         :param split:       Name of the split (train, val, test)
         :return:            Iterable of ready to analyse detection samples.
         """
         images = np.transpose(images.cpu().numpy(), (0, 2, 3, 1))
-        labels = labels.cpu().numpy()
 
         for image, target in zip(images, labels):
-            target = self.filter_padding(target, padding_value=0).astype(np.int)
+            target = target.cpu().numpy().astype(np.int)
             class_ids, bboxes_xyxy = target[:, 0], target[:, 1:]
 
             # TODO: image_format is hard-coded here, but it should be refactored afterwards
@@ -49,5 +48,7 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         :padding_value: Value used for padding (if any)
         :return:        Filtered bboxes of a given image, in shape (N, ?) with N number of bboxes for this image.
         """
-        first_zero_row_index = np.where((target == padding_value).all(axis=1))[0][0]
-        return target[:first_zero_row_index]
+        is_padded_index = np.where((target == padding_value).all(axis=1))[0]
+        if len(is_padded_index) > 0:
+            target = target[is_padded_index]
+        return target

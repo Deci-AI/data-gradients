@@ -39,7 +39,7 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
             sharey=True,
         )
 
-        json = dict(df_class_count.n_components.describe())
+        json = dict(df_class_count["n_components"].describe())
 
         feature = Feature(data=df_class_count, plot_options=plot_options, json=json)
         return feature
