@@ -67,6 +67,7 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
     @property
     def description(self) -> str:
         return (
-            f"Visualization of {self.n_samples_per_split} random samples from the dataset. "
-            f"This can be useful to see how your dataset looks like which can be valuable to understand following features."
+            f"Visualization of {self.n_samples_per_split} samples per split. "
+            f"This can be useful to make sure the mapping of class_names to class_ids is done correctly, "
+            f"but also to get a better understanding of what your dataset is made of.."
         )

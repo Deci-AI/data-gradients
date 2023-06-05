@@ -271,12 +271,9 @@ class ScatterPlotOptions(CommonPlotOptions):
 
 @dataclasses.dataclass
 class FigureRenderer(CommonPlotOptions):
-    """Contains a set of options for displaying a pre-defined figure.
+    """Contains a set of options for displaying a pre-defined figure."""
 
-    :attr figsize: Size of the figure
-    """
-
-    figsize: Optional[Tuple[int, int]] = (10, 6)
+    pass
 
 
 class PlotRenderer(ABC):
