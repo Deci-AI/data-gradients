@@ -57,17 +57,17 @@ class ImageColorDistribution(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         data = [
-            {"split": split, "Color": color, "pixel_value": pixel_value, "count": count}
+            {"split": split, "Color": color, "pixel_value": pixel_value, "n": n}
             for split, pixel_frequency_per_channel in self.pixel_frequency_per_channel_per_split.items()
             for color, pixel_frequency in pixel_frequency_per_channel.items()
-            for pixel_value, count in pixel_frequency.compute().items()
+            for pixel_value, n in pixel_frequency.compute().items()
         ]
         df = pd.DataFrame(data)
 
         plot_options = KDEPlotOptions(
             x_label_key="pixel_value",
             x_label_name="Color Intensity",
-            weights="count",
+            weights="n",
             title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
@@ -78,7 +78,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             labels_palette=self.palette,
             sharey=True,
         )
-        json = {color: dict(df[df["Color"] == color].describe()) for color in self.colors}
+        json = {color: dict(df[df["Color"] == color]["n"].describe()) for color in self.colors}
 
         feature = Feature(
             data=df,

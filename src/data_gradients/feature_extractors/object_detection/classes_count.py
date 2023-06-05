@@ -43,7 +43,7 @@ class DetectionClassesCount(AbstractFeatureExtractor):
             orient="h",
         )
 
-        json = dict(df_class_count.class_name.describe())
+        json = dict(df_class_count["n_appearance"].describe())
 
         feature = Feature(
             data=df_class_count,
