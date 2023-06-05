@@ -1,4 +1,4 @@
-from typing import Optional, List, Iterable
+from typing import List, Iterable
 import time
 import numpy as np
 from torch import Tensor
@@ -11,9 +11,9 @@ from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class SegmentationBatchPreprocessor(BatchPreprocessor):
-    def __init__(self, class_names: Optional[List[str]] = None):
+    def __init__(self, class_names: List[str]):
         """
-        :param class_names: List of class names
+        :param class_names: List of all class names in the dataset. The index should represent the class_id.
         """
         self.class_names = class_names
 
