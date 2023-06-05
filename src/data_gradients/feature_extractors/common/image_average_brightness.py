@@ -54,7 +54,7 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
             fill=True,
             sharey=True,
         )
-        json = dict(df.brightness.describe())
+        json = dict(df["brightness"].describe())
 
         feature = Feature(
             data=df,
