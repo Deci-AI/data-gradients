@@ -21,11 +21,14 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
         opened_mask = self.apply_mask_opening(mask=sample.mask, kernel_shape=self.kernel_shape)
         contours_after_opening = contours.get_contours(opened_mask)
 
-        n_components_without_opening = sum(1 for class_channel in sample.contours for _contour in class_channel)
-        n_components_after_opening = sum(1 for class_channel in contours_after_opening for _contour in class_channel)
+        if sample.contours:
+            n_components_without_opening = sum(1 for class_channel in sample.contours for _contour in class_channel)
+            n_components_after_opening = sum(1 for class_channel in contours_after_opening for _contour in class_channel)
 
-        increase_of_n_components = n_components_after_opening - n_components_without_opening
-        percent_change_of_n_components = 100 * (increase_of_n_components / n_components_without_opening)
+            increase_of_n_components = n_components_after_opening - n_components_without_opening
+            percent_change_of_n_components = 100 * (increase_of_n_components / n_components_without_opening)
+        else:
+            percent_change_of_n_components = 0
 
         self.data.append(
             {
