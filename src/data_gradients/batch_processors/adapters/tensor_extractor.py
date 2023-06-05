@@ -47,9 +47,6 @@ class TensorExtractor:
                             e.g. ["field1", "field12", 0]  # objs["field1"]["field12"][0] = <object>
         """
 
-        if not (isinstance(objs, dict) or TensorExtractor.is_valid_json(objs)):
-            raise NotImplementedError(f"type{type(objs)} not currently supported")
-
         paths = []
         printable_mapping = TensorExtractor.objects_mapping(objs, path="", targets=paths)
         printable_mapping = json.dumps(printable_mapping, indent=4)
