@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 import seaborn
-from typing import Union
+from typing import Union, Optional
 from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
 
 from data_gradients.visualize.plot_options import (
     PlotRenderer,
@@ -22,14 +23,14 @@ class SeabornRenderer(PlotRenderer):
     def __init__(self, style="whitegrid", palette="pastel"):
         seaborn.set_theme(style=style, palette=palette)
 
-    def render(self, data: Union[pd.DataFrame, np.ndarray, plt.Figure], options: CommonPlotOptions) -> plt.Figure:
+    def render(self, data: Union[pd.DataFrame, np.ndarray, plt.Figure], options: CommonPlotOptions) -> Optional[Figure]:
         """Plot a graph using seaborn.
 
         :param df:      The dataframe to render. It has to include the fields listed in the options.
         :param options: The plotting options, which includes the information about the type of plot and the parameters required to plot it.
         :return:        The matplotlib figure.
         """
-        if df is None:
+        if data is None:
             return None
         if isinstance(options, Hist2DPlotOptions):
             return self._render_histplot(data, options)
