@@ -9,7 +9,7 @@ from data_gradients.batch_processors.formatters.utils import ensure_images_shape
 from data_gradients.utils.utils import ask_user
 
 
-class UnsupportedDetectionFormatError(Exception):
+class UnsupportedDetectionBatchFormatError(Exception):
     def __init__(self, batch_format: tuple):
         grouped_batch_format = "(Batch_size x padding_size x 5) with 5: (class_id + 4 bbox coordinates))"
         flat_batch_format = "(N, 6) with 6: (image_id + class_id + 4 bbox coordinates)"
@@ -69,11 +69,11 @@ class DetectionBatchFormatter(BatchFormatter):
         """Make sure that the labels have the correct shape, i.e. (BS, N, 5)."""
         if annotated_bboxes.ndim == 2:
             if annotated_bboxes.shape[-1] != 6:
-                raise UnsupportedDetectionFormatError(batch_format=annotated_bboxes.shape)
+                raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
             else:
                 return group_detection_batch(annotated_bboxes)
         elif annotated_bboxes.ndim != 3 or annotated_bboxes.shape[-1] != 5:
-            raise UnsupportedDetectionFormatError(batch_format=annotated_bboxes.shape)
+            raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
         else:
             return annotated_bboxes
 

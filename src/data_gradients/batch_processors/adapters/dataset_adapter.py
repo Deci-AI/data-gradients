@@ -28,7 +28,7 @@ class DatasetAdapter:
             - images: Batch of images
             - labels: Batch of labels
         """
-        if (isinstance(objs, Tuple) or isinstance(objs, List)) and len(objs) == 2:
+        if isinstance(objs, (Tuple, List)) and len(objs) == 2:
             images = objs[0] if isinstance(objs[0], torch.Tensor) else self._to_tensor(objs[0], tuple_idx=0)
             labels = objs[1] if isinstance(objs[1], torch.Tensor) else self._to_tensor(objs[1], tuple_idx=1)
         elif isinstance(objs, (Mapping, Tuple, List)):

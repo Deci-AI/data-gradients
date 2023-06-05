@@ -3,7 +3,7 @@ import unittest
 from data_gradients.batch_processors.formatters.detection import group_detection_batch
 
 
-class ImageBrightnessTest(unittest.TestCase):
+class GroupDetectionBatchTest(unittest.TestCase):
     def test_update_and_aggregate(self):
         flat_batch = torch.Tensor(
             [
