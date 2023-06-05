@@ -172,13 +172,13 @@ class DetectionBatchFormatter(BatchFormatter):
 
 
 def group_detection_batch(flat_batch: torch.Tensor) -> torch.Tensor:
-    """Convert a flat batch of detections (N, 6) into a grouped batch of detections (Bs, Ps, 4)
+    """Convert a flat batch of detections (N, 6) into a grouped batch of detections (B, P, 4)
 
-    :param flat_batch: Flat batch of detections (N, 6) with 6: (image_id, label, x1, y1, x2, y2) or (image_id, x1, y1, x2, y2. label) or any similar pattern.
-    :return: Grouped batch of detections (Bs, Ps, 5) with:
-                Bs: Batch size
-                Ps: Padding size
-                5: (label, x1, y1, x2, y2) or (x1, y1, x2, y2, label) or any similar pattern.
+    :param flat_batch: Flat batch of detections (N, 6) with 6: (image_id + class_id + 4 bbox coordinates)
+    :return: Grouped batch of detections (B, P, 5) with:
+                B: Batch size
+                P: Padding size
+                5: (class_id + 4 bbox coordinates)
     """
     batch_size = int(torch.max(flat_batch[:, 0])) + 1
     batch_targets = [[] for _ in range(batch_size)]
