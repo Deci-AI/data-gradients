@@ -49,5 +49,7 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         :padding_value: Value used for padding (if any)
         :return:        Filtered bboxes of a given image, in shape (N, ?) with N number of bboxes for this image.
         """
-        first_zero_row_index = np.where((target == padding_value).all(axis=1))[0][0]
-        return target[:first_zero_row_index]
+        is_padded_index = np.where((target == padding_value).all(axis=1))[0]
+        if len(is_padded_index) > 0:
+            target = target[is_padded_index]
+        return target

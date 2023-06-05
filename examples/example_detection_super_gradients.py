@@ -8,60 +8,23 @@ pip install super-gradients
 ```
 """
 
-import numpy as np
-from torch.utils.data import DataLoader
-
 # Note: This example will require you to install the super-gradients package
-from super_gradients.training.datasets import YoloDarknetFormatDetectionDataset
-
+from super_gradients.training.dataloaders.dataloaders import coco2017_train, coco2017_val
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
 
-class PadTarget:
-    """Transform targets (Compatible with Sg DetectionDatasets)"""
-
-    def __init__(self, max_targets: int):
-        self.max_targets = max_targets
-
-    def __call__(self, sample):
-        targets = sample["target"]
-        targets = np.ascontiguousarray(targets, dtype=np.float32)
-        padded_targets = np.zeros((self.max_targets, targets.shape[-1]))
-        padded_targets[range(len(targets))[: self.max_targets]] = targets[: self.max_targets]
-        padded_targets = np.ascontiguousarray(padded_targets, dtype=np.float32)
-        sample["target"] = padded_targets
-        return sample
-
-
 if __name__ == "__main__":
-    data_dir = "<path-to-avatar_recognition>"
-    classes = ["Character"]
 
-    # Create torch DataSet
-    train_dataset = YoloDarknetFormatDetectionDataset(
-        data_dir=data_dir,
-        images_dir="train/images",
-        labels_dir="train/labels",
-        classes=classes,
-        transforms=[PadTarget(max_targets=50)],
-    )
-    val_dataset = YoloDarknetFormatDetectionDataset(
-        data_dir=data_dir,
-        images_dir="valid/images",
-        labels_dir="valid/labels",
-        classes=classes,
-        transforms=[PadTarget(max_targets=50)],
-    )
-
-    # Create torch DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=8)
-    val_loader = DataLoader(val_dataset, batch_size=8)
+    train_loader = coco2017_train()
+    val_loader = coco2017_val()
 
     analyzer = DetectionAnalysisManager(
+        report_title="test",
         train_data=train_loader,
         val_data=val_loader,
-        class_names=classes,
+        class_names=train_loader.dataset.classes,
         samples_to_visualize=3,
+        batches_early_stop=20,
     )
 
     analyzer.run()
