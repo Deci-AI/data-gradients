@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import seaborn
+from typing import Union
 from matplotlib import pyplot as plt
 
 from data_gradients.visualize.plot_options import (
@@ -11,6 +12,7 @@ from data_gradients.visualize.plot_options import (
     ScatterPlotOptions,
     ViolinPlotOptions,
     KDEPlotOptions,
+    FigureRenderer,
 )
 
 __all__ = ["SeabornRenderer"]
@@ -20,7 +22,7 @@ class SeabornRenderer(PlotRenderer):
     def __init__(self, style="whitegrid", palette="pastel"):
         seaborn.set_theme(style=style, palette=palette)
 
-    def render(self, df: pd.DataFrame, options: CommonPlotOptions) -> plt.Figure:
+    def render(self, data: Union[pd.DataFrame, np.ndarray, plt.Figure], options: CommonPlotOptions) -> plt.Figure:
         """Plot a graph using seaborn.
 
         :param df:      The dataframe to render. It has to include the fields listed in the options.
@@ -28,15 +30,17 @@ class SeabornRenderer(PlotRenderer):
         :return:        The matplotlib figure.
         """
         if isinstance(options, Hist2DPlotOptions):
-            return self._render_histplot(df, options)
+            return self._render_histplot(data, options)
         if isinstance(options, BarPlotOptions):
-            return self._render_barplot(df, options)
+            return self._render_barplot(data, options)
         if isinstance(options, ScatterPlotOptions):
-            return self._render_scatterplot(df, options)
+            return self._render_scatterplot(data, options)
         if isinstance(options, ViolinPlotOptions):
-            return self._render_violinplot(df, options)
+            return self._render_violinplot(data, options)
         if isinstance(options, KDEPlotOptions):
-            return self._render_kdeplot(df, options)
+            return self._render_kdeplot(data, options)
+        if isinstance(options, FigureRenderer):
+            return self._render_figure(data, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
@@ -359,6 +363,14 @@ class SeabornRenderer(PlotRenderer):
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        return fig
+
+    def _render_figure(self, fig: plt.Figure, options: FigureRenderer) -> plt.Figure:
+        """Render an image using matplotlib.
+
+        :param fig:     Figure
+        :param options: Plotting options
+        """
         return fig
 
     def _set_ticks_rotation(self, ax, x_ticks_rotation, y_ticks_rotation):
