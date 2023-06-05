@@ -10,7 +10,6 @@ import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.logging.log_writer import LogWriter
 from data_gradients.batch_processors.base import BatchProcessor
-from data_gradients.visualize.image_samplers.base import ImageSampleManager
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
@@ -37,7 +36,6 @@ class AnalysisManagerAbstract(abc.ABC):
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
-        image_sample_manager: ImageSampleManager,
     ):
         """
         :param report_title:        Title of the report. Will be used to save the report
@@ -49,7 +47,6 @@ class AnalysisManagerAbstract(abc.ABC):
         :param grouped_feature_extractors:  List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
-        :param image_sample_manager:     Object responsible for collecting images
         """
 
         if batches_early_stop:
@@ -73,8 +70,6 @@ class AnalysisManagerAbstract(abc.ABC):
         self.grouped_feature_extractors = grouped_feature_extractors
 
         self.id_to_name = id_to_name
-
-        self.image_sample_manager = image_sample_manager
 
     def execute(self):
         """
@@ -104,7 +99,6 @@ class AnalysisManagerAbstract(abc.ABC):
 
             if train_batch is not None:
                 for sample in self.batch_processor.process(train_batch, split="train"):
-                    self.image_sample_manager.update(sample)
                     for feature_extractors in self.grouped_feature_extractors.values():
                         for feature_extractor in feature_extractors:
                             feature_extractor.update(sample)
@@ -157,11 +151,6 @@ class AnalysisManagerAbstract(abc.ABC):
         # Cleanup of generated images
         for image_created in images_created:
             os.remove(image_created)
-
-        # TODO: add images to the report...
-        for i, sample_to_visualize in enumerate(self.image_sample_manager.samples):
-            title = f"Data Visualization/{len(self.image_sample_manager.samples) - i}"
-            self._log_writer.log_image(title=title, image=sample_to_visualize)
 
         if self.batch_processor.images_route is not None:
             self._log_writer.log_json(title="Get images out of dictionary", data=self.batch_processor.images_route)

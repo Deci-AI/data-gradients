@@ -4,33 +4,27 @@ import cv2
 
 import numpy as np
 
-from data_gradients.visualize.image_samplers.base import ImageSampleManager
-from data_gradients.utils.data_classes import DetectionSample
 
-
-class DetectionImageSampleManager(ImageSampleManager):
-    def prepare_image(self, sample: DetectionSample) -> np.ndarray:
-        return draw_bboxes(image=sample.image, bboxes_xyxy=sample.bboxes_xyxy, labels=sample.class_ids)
-
-
-def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, labels: np.ndarray) -> np.ndarray:
+def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, class_names: np.ndarray) -> np.ndarray:
     """Draw annotated bboxes on an image.
 
     :param image:       Input image tensor.
     :param bboxes_xyxy: BBoxes, in [N, 4].
-    :param labels:      Labels [N].
+    :param class_names: Labels [N].
     :return:            Image with annotated bboxes.
     """
-    if len(labels) == 0:
+    if len(class_names) == 0:
         return image
+    unique_class_names = list(set(class_names))
+    colors = generate_color_mapping(len(unique_class_names) + 1)
 
-    colors = generate_color_mapping(labels.max() + 1)
+    for (x1, y1, x2, y2), class_name in zip(bboxes_xyxy, class_names):
 
-    for (x1, y1, x2, y2), label in zip(bboxes_xyxy, labels):
+        title = class_name if not class_name.isdigit() else f"class_id={class_name}"
         image = draw_bbox(
             image=image,
-            title=f"Class = {label}",
-            color=colors[label],
+            title=title,
+            color=colors[unique_class_names.index(class_name)],
             box_thickness=2,
             x1=x1,
             y1=y1,

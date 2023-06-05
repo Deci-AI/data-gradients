@@ -3,7 +3,6 @@ from typing import Optional, Iterable, Dict, Callable, List
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
-from data_gradients.visualize.image_samplers.segmentation import SegmentationImageSampleManager
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -30,7 +29,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         labels_extractor: Callable = None,
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
-        samples_to_visualize: int = 10,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -50,7 +48,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param labels_extractor:
         :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
-        :param samples_to_visualize:    Number of samples to visualize at tensorboard [0-n]
         """
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
@@ -78,8 +75,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
         grouped_feature_extractors = load_report_feature_extractors(config_name=config_name)
 
-        image_sample_manager = SegmentationImageSampleManager(n_samples=samples_to_visualize)
-
         super().__init__(
             report_title=report_title,
             report_subtitle=report_subtitle,
@@ -90,5 +85,4 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             log_dir=log_dir,
             id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
-            image_sample_manager=image_sample_manager,
         )

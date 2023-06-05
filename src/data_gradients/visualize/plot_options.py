@@ -269,6 +269,13 @@ class ScatterPlotOptions(CommonPlotOptions):
     sharey: Union[bool, str] = False
 
 
+@dataclasses.dataclass
+class FigureRenderer(CommonPlotOptions):
+    """Contains a set of options for displaying a pre-defined figure."""
+
+    pass
+
+
 class PlotRenderer(ABC):
     @abstractmethod
     def render(self, df: pd.DataFrame, options: CommonPlotOptions):
