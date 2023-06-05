@@ -17,7 +17,6 @@ from torch.utils.data import DataLoader
 
 # Note: This example will require you to install the super-gradients package
 from super_gradients.training.datasets import YoloDarknetFormatDetectionDataset
-from super_gradients.training.transforms.transforms import DetectionRescale
 
 
 class PadTarget:
@@ -36,34 +35,29 @@ class PadTarget:
         return sample
 
 
-data_dir = "/Users/Louis.Dupont/Downloads/soccer players.v2-release.yolov8"
-class_names = ["football", "player", "referee"]
-# class_names_to_use = ["player", "referee"]  # Testing without football
+data_dir = "/Users/Louis.Dupont/Downloads/avatar_recognition.v2-release.yolov8"
+classes = ["Character"]
 
 # Create torch DataSet
 train_dataset = YoloDarknetFormatDetectionDataset(
     data_dir=data_dir,
     images_dir="train/images",
     labels_dir="train/labels",
-    classes=class_names,
-    transforms=[DetectionRescale(output_shape=(640, 640)), PadTarget(max_targets=50)],
+    classes=classes,
+    transforms=[PadTarget(max_targets=50)],
 )
 val_dataset = YoloDarknetFormatDetectionDataset(
     data_dir=data_dir,
     images_dir="valid/images",
     labels_dir="valid/labels",
-    classes=class_names,
-    transforms=[DetectionRescale(output_shape=(640, 640)), PadTarget(max_targets=50)],
+    classes=classes,
+    transforms=[PadTarget(max_targets=50)],
 )
 
 # Create torch DataLoader
 train_loader = DataLoader(train_dataset, batch_size=8)
 val_loader = DataLoader(val_dataset, batch_size=8)
-batch_processor = DetectionBatchProcessor(
-    n_image_channels=3,
-    class_names=class_names,
-    class_names_to_use=class_names,
-)
+batch_processor = DetectionBatchProcessor(n_image_channels=3)
 
 feature_extractors = [
     ImagesResolution(),
