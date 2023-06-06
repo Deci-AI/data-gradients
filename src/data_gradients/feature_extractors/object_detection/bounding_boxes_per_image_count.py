@@ -2,6 +2,7 @@ import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
+from data_gradients.utils.common import LABELS_PALETTE
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.plot_options import Hist2DPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
@@ -38,6 +39,7 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
             individual_plots_key="split",
             x_ticks_rotation=None,
             sharey=True,
+            labels_palette=LABELS_PALETTE
         )
 
         json = dict(df_class_count.n_components.describe())

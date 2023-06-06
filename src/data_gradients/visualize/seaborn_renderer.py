@@ -5,6 +5,7 @@ from typing import Union, Optional
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
+from data_gradients.utils.common import PALETTE_NAME
 from data_gradients.visualize.plot_options import (
     PlotRenderer,
     CommonPlotOptions,
@@ -20,7 +21,7 @@ __all__ = ["SeabornRenderer"]
 
 
 class SeabornRenderer(PlotRenderer):
-    def __init__(self, style="whitegrid", palette="pastel"):
+    def __init__(self, style="whitegrid", palette=PALETTE_NAME):
         seaborn.set_theme(style=style, palette=palette)
 
     def render(self, data: Union[pd.DataFrame, np.ndarray, plt.Figure], options: CommonPlotOptions) -> Optional[Figure]:
