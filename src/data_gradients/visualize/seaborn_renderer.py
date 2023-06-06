@@ -61,7 +61,6 @@ class SeabornRenderer(PlotRenderer):
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
-        fig.suptitle(options.title)
 
         if n_rows == 1 and n_cols == 1:
             axs = [axs]
@@ -122,7 +121,6 @@ class SeabornRenderer(PlotRenderer):
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
-        fig.suptitle(options.title)
 
         if n_rows == 1 and n_cols == 1:
             axs = [axs]
@@ -195,7 +193,6 @@ class SeabornRenderer(PlotRenderer):
         if options.tight_layout:
             fig.tight_layout()
         fig.subplots_adjust(top=0.9)
-        fig.suptitle(options.title)
 
         if n_rows == 1 and n_cols == 1:
             axs = [axs]
@@ -257,7 +254,6 @@ class SeabornRenderer(PlotRenderer):
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
-        fig.suptitle(options.title)
         fig.subplots_adjust(top=0.9)
 
         plot_args = dict(
@@ -308,7 +304,6 @@ class SeabornRenderer(PlotRenderer):
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
         if options.tight_layout:
             fig.tight_layout()
-        fig.suptitle(options.title)
         fig.subplots_adjust(top=0.9)
 
         barplot_args = dict(
