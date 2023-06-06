@@ -106,14 +106,14 @@
     .subtitle {
         position: absolute;
         width: 107px;
-        height: 18px;
+        height: 14px;
         left: 53px;
         top: 93.1px;
 
         font-family: 'Rubik';
         font-style: normal;
         font-weight: 400;
-        font-size: 18px;
+        font-size: 14px;
         line-height: 100%;
         color: #000000;
     }
@@ -121,14 +121,14 @@
     .section_title {
         position: absolute;
         width: 90px;
-        height: 14px;
+        height: 18px;
         left: 53px;
         top: 128.59px;
 
         font-family: 'Rubik';
         font-style: normal;
         font-weight: 500;
-        font-size: 14px;
+        font-size: 18px;
         line-height: 100%;
         /* identical to box height, or 14px */
         color: #000000;
@@ -151,6 +151,14 @@
         color: #000000;
     }
 
+    .footer_text {
+        font-family: 'Rubik';
+        font-style: normal;
+        font-weight: 400;
+        font-size: 10px;
+        line-height: 100%;
+    }
+
     li {
         color: #000000;
         font-size: 11pt;
@@ -166,7 +174,7 @@
 
     .train_text {
         color: {{train_color}};
-        text-align: right;
+        text-align: left;
         font-weight: 500;
         font-size: 18px;
     }
@@ -180,24 +188,43 @@
 
     @page {
         size: a4 portrait;
-        @frame header_frame { /* Static Frame */
-        -pdf-frame-content: header_content;
-        left: 50pt;
-        width: 500pt;
-        top: 50pt;
-        height: 40pt;
-    }
-    @frame content_frame {
-        /* Content Frame */
-    left: 50pt; width: 480pt; top: 90pt; height: 700pt;
-    }
-    @frame footer_frame {
-        /* Another static Frame */
-    -pdf-frame-content:footer_content;
-    left: 50pt; width: 500pt; top: 780pt; height: 20pt;
-    }
+        @frame header_frame_first { /* Static Frame */
+            -pdf-frame-content: header_content_first;
+            left: 50pt;
+            width: 500pt;
+            top: 30pt;
+            height: 50pt;
+        }
+        @frame content_frame {
+            /* Content Frame */
+            left: 50pt; width: 480pt; top: 70pt; height: 740pt;
+        }
+        @frame footer_frame {
+            /* Another static Frame */
+            -pdf-frame-content:footer_content;
+            left: 50pt; width: 500pt; top: 800pt; height: 20pt;
+        }
     }
 
+    @page innerpages {
+        size: a4 portrait;
+        @frame header_frame { /* Static Frame */
+            -pdf-frame-content: header_content;
+            left: 50pt;
+            width: 500pt;
+            top: 30pt;
+            height: 40pt;
+        }
+        @frame content_frame {
+            /* Content Frame */
+            left: 50pt; width: 480pt; top: 70pt; height: 740pt;
+        }
+        @frame footer_frame {
+            /* Another static Frame */
+            -pdf-frame-content:footer_content;
+            left: 50pt; width: 500pt; top: 800pt; height: 20pt;
+        }
+    }
 
     table, figure, img {
         page-break-inside: avoid;
@@ -210,15 +237,18 @@
 
 
 <!-- Content for Static Frame 'header_frame' -->
-<div id="header_content">v {{version}}</div>
-
+<div id="header_content_first"><img alt="" src="{{logo}}" title="" style="height: 24px"></div>
+<pdf:nexttemplate name="innerpages"/>
 <!-- Content for Static Frame 'footer_frame' -->
 <div id="footer_content">
     <div style="display: flex; justify-content: space-between;">
-        <span style="text-align: left;">Generated with DataGradients &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
-        <span style="text-align: center;">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<pdf:pagenumber> of <pdf:pagecount></span>
+    <table>
+      <tr>
+          <th style="text-align: left;"><span class=footer_text style="color: gray">Generated with DataGradients &nbsp; &nbsp; v {{version}}</span></th>
+          <th style="text-align: right;"><span class=footer_text><pdf:pagenumber/>&nbsp;of&nbsp;<pdf:pagecount/> </span></th>
+      </tr>
+    </table>
     </div>
-
 </div>
 </div>
 
@@ -238,7 +268,7 @@
                 {% endif %}
                 <p class="feature_class"><span class="c4">{{feature.description}}</span>
                 <p class="feature_separator">&nbsp;
-                <p>
+                <p class="c0 c2"><span class="c1"></span></p>
             {% endfor %}
         <p class="c0 c2"><span class="c1"></span></p>
         <p class="c0 c2"><span class="c1"></span></p>
