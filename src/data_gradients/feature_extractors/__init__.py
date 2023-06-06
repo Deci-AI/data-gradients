@@ -13,6 +13,7 @@ from .segmentation import (
     SegmentationComponentsConvexity,
     SegmentationComponentsErosion,
     SegmentationComponentsPerImageCount,
+    SegmentationSampleVisualization,
 )
 from .object_detection import (
     DetectionBoundingBoxArea,
@@ -20,6 +21,7 @@ from .object_detection import (
     DetectionBoundingBoxSize,
     DetectionClassesCount,
     DetectionClassesPerImageCount,
+    DetectionSampleVisualization,
 )
 
 __all__ = [
@@ -35,9 +37,11 @@ __all__ = [
     "SegmentationComponentsConvexity",
     "SegmentationComponentsErosion",
     "SegmentationComponentsPerImageCount",
+    "SegmentationSampleVisualization",
     "DetectionBoundingBoxArea",
     "DetectionBoundingBoxPerImageCount",
     "DetectionBoundingBoxSize",
     "DetectionClassesCount",
     "DetectionClassesPerImageCount",
+    "DetectionSampleVisualization",
 ]

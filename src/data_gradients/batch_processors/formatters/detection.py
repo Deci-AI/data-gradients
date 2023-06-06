@@ -9,6 +9,15 @@ from data_gradients.batch_processors.formatters.utils import ensure_images_shape
 from data_gradients.utils.utils import ask_user
 
 
+class UnsupportedDetectionBatchFormatError(Exception):
+    def __init__(self, batch_format: tuple):
+        grouped_batch_format = "(Batch_size x padding_size x 5) with 5: (class_id + 4 bbox coordinates))"
+        flat_batch_format = "(N, 6) with 6: (image_id + class_id + 4 bbox coordinates)"
+        super().__init__(
+            f"Supported format for detection is not supported. Supported formats are:\n- {grouped_batch_format}\n- {flat_batch_format}\n Got: {batch_format}"
+        )
+
+
 class DetectionBatchFormatter(BatchFormatter):
     """Detection formatter class"""
 
@@ -82,16 +91,15 @@ class DetectionBatchFormatter(BatchFormatter):
     @staticmethod
     def ensure_labels_shape(annotated_bboxes: Tensor) -> Tensor:
         """Make sure that the labels have the correct shape, i.e. (BS, N, 5)."""
-        if annotated_bboxes.ndim != 3:
-            raise RuntimeError(
-                f"The batch labels should have 3 dimensions (Batch_size x N_labels_per_image x 5 (label + 4 bbox coordinates)), "
-                f"but got {annotated_bboxes.ndim}: {annotated_bboxes.shape}"
-            )
-
-        if annotated_bboxes.shape[-1] != 5:
-            raise RuntimeError(f"Labels last dimension should be 5 (label + 4 bbox coordinates), but got {annotated_bboxes.shape[-1]}")
-
-        return annotated_bboxes
+        if annotated_bboxes.ndim == 2:
+            if annotated_bboxes.shape[-1] != 6:
+                raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
+            else:
+                return DetectionBatchFormatter.group_detection_batch(annotated_bboxes)
+        elif annotated_bboxes.ndim != 3 or annotated_bboxes.shape[-1] != 5:
+            raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
+        else:
+            return annotated_bboxes
 
     @staticmethod
     def convert_to_label_xyxy(annotated_bboxes: Tensor, image_shape: Tuple[int, int], xyxy_converter: Callable[[Tensor], Tensor], label_first: bool):
@@ -208,3 +216,30 @@ class DetectionBatchFormatter(BatchFormatter):
             filtered_bbox_tensors.append(filtered_bbox)
 
         return filtered_bbox_tensors
+
+    @staticmethod
+    def group_detection_batch(flat_batch: torch.Tensor) -> torch.Tensor:
+        """Convert a flat batch of detections (N, 6) into a grouped batch of detections (B, P, 4)
+
+        :param flat_batch: Flat batch of detections (N, 6) with 6: (image_id + class_id + 4 bbox coordinates)
+        :return: Grouped batch of detections (B, P, 5) with:
+                    B: Batch size
+                    P: Padding size
+                    5: (class_id + 4 bbox coordinates)
+        """
+        batch_size = int(torch.max(flat_batch[:, 0])) + 1
+        batch_targets = [[] for _ in range(batch_size)]
+
+        for target in flat_batch:
+            image_id, target = target[0].item(), target[1:]
+            batch_targets[int(image_id)].append(target)
+
+        max_n_labels_per_image = max(len(labels) for labels in batch_targets)
+
+        output_array = torch.zeros(batch_size, max_n_labels_per_image, 5)
+
+        for batch_index, targets in enumerate(batch_targets):
+            for target_index, target in enumerate(targets):
+                output_array[batch_index, target_index] = target
+
+        return output_array
