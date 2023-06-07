@@ -1,7 +1,6 @@
 import cv2
 import pandas as pd
 import numpy as np
-from line_profiler_pycharm import profile
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
@@ -22,7 +21,6 @@ class ImageColorDistribution(AbstractFeatureExtractor):
         for split in ["train", "val"]:
             self.pixel_frequency_per_channel_per_split[split] = np.zeros(shape=(3, 256), dtype=np.int64)
 
-    @profile
     def update(self, sample: ImageSample):
 
         if self.image_format is None:
