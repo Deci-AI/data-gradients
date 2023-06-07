@@ -23,7 +23,6 @@ if __name__ == "__main__":
         train_data=train_loader,
         val_data=val_loader,
         class_names=train_loader.dataset.classes,
-        samples_to_visualize=3,
         batches_early_stop=20,
     )
 

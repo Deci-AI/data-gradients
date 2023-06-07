@@ -88,7 +88,7 @@ class SegmentationBatchFormatter(BatchFormatter):
             labels = to_one_hot(labels, n_classes=len(self.class_names))
 
         for class_id_to_ignore in self.class_ids_to_ignore:
-            labels[:, class_id_to_ignore, ...] = torch.zeros_like(labels[:, class_id_to_ignore, ...])
+            labels[:, class_id_to_ignore, ...] = 0
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
