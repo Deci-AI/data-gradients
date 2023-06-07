@@ -55,6 +55,12 @@ class DetectionBatchFormatter(BatchFormatter):
             - images: Batch of images already formatted into (BS, C, H, W)
             - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
+
+        # If the label is of shape [N, 5] we can assume that it represents the targets of a single sample (class_name + 4 bbox coordinates)
+        if labels.ndim == 2 and labels.shape[1] == 5:
+            images = images.unsqueeze(0)
+            labels = labels.unsqueeze(0)
+
         labels = drop_nan(labels)
 
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)

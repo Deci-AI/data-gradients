@@ -3,6 +3,7 @@ from typing import Optional, List, Tuple
 import torch
 from torch import Tensor
 
+from data_gradients.utils.utils import ask_user
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.utils import check_all_integers, to_one_hot
 from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
@@ -38,6 +39,7 @@ class SegmentationBatchFormatter(BatchFormatter):
 
         self.threshold_value = threshold_value
         self.is_input_soft_label = None
+        self.is_batch = None
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for segmentation.
@@ -48,6 +50,29 @@ class SegmentationBatchFormatter(BatchFormatter):
             - images: Batch of images already formatted into (BS, C, H, W)
             - labels: Batch of labels already formatted into (BS, N, H, W)
         """
+
+        if self.is_batch is None:
+            # if less any dim is 4, we know it's a batch
+            if images.ndim == 4 or labels.ndim == 4:
+                self.is_batch = True
+            # If image or mask only includes 2 dims, we can guess it's a single sample
+            elif images.ndim == 2 or labels.ndim == 2:
+                self.is_batch = False
+            # Otherwise, we need to ask the user
+            else:
+                is_batch_descriptions = {"Batch Data": True, "Single Image Data": False}
+                selected_option = ask_user(
+                    main_question=(
+                        f"Do your tensors represent a batch or a single image data?\n    - Image shape: {images.shape}\n    - Mask shape:  {labels.shape}"
+                    ),
+                    options=list(is_batch_descriptions.keys()),
+                )
+                self.is_batch = is_batch_descriptions[selected_option]
+
+        if not self.is_batch:
+            images = images.unsqueeze(0)
+            labels = labels.unsqueeze(0)
+
         images = drop_nan(images)
         labels = drop_nan(labels)
 
@@ -63,7 +88,7 @@ class SegmentationBatchFormatter(BatchFormatter):
             labels = to_one_hot(labels, n_classes=len(self.class_names))
 
         for class_id_to_ignore in self.class_ids_to_ignore:
-            labels[:, class_id_to_ignore, ...] = torch.zeros_like(labels[:, class_id_to_ignore, ...])
+            labels[:, class_id_to_ignore, ...] = 0
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
