@@ -6,7 +6,7 @@ from torch import Tensor
 from data_gradients.batch_processors.utils import check_all_integers
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
-from data_gradients.config.interactive_config import InteractiveConfig
+from data_gradients.config.interactive_config import DetectionInteractiveConfig
 
 
 class UnsupportedDetectionBatchFormatError(Exception):
@@ -23,7 +23,7 @@ class DetectionBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
-        config: InteractiveConfig,
+        config: DetectionInteractiveConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int,

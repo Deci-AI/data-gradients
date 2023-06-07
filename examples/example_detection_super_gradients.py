@@ -11,7 +11,7 @@ pip install super-gradients
 # Note: This example will require you to install the super-gradients package
 from super_gradients.training.dataloaders.dataloaders import coco2017_train, coco2017_val
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
-from data_gradients.config.interactive_config import InteractiveConfig
+from data_gradients.config.interactive_config import DetectionInteractiveConfig
 
 
 if __name__ == "__main__":
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     train_loader = coco2017_train()
     val_loader = coco2017_val()
 
-    config = InteractiveConfig("config.json", reset_cache=False)
+    config = DetectionInteractiveConfig("config.json", reset_cache=False)
     analyzer = DetectionAnalysisManager(
         config=config,
         report_title="Testing Data-Gradients",

@@ -1,9 +1,9 @@
-from typing import Optional, Iterable, Dict, Callable, List
+from typing import Optional, Iterable, Dict, List
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
-from data_gradients.config.interactive_config import InteractiveConfig
+from data_gradients.config.interactive_config import SegmentationInteractiveConfig
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -16,7 +16,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        config: InteractiveConfig,
+        config: SegmentationInteractiveConfig,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
@@ -27,8 +27,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         log_dir: Optional[str] = None,
         id_to_name: Optional[Dict] = None,
         batches_early_stop: int = 999,
-        images_extractor: Callable = None,
-        labels_extractor: Callable = None,
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
     ):

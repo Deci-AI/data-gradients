@@ -13,7 +13,7 @@ from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
-from data_gradients.config.interactive_config import InteractiveConfig
+from data_gradients.config.interactive_config import BaseInteractiveConfig
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -29,7 +29,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self,
         *,
         report_title: str,
-        config: InteractiveConfig,
+        config: BaseInteractiveConfig,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,

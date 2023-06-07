@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, Callable
-
+from abc import ABC
 import torch
 
 from data_gradients.utils.detection import xywh_to_xyxy, cxcywh_to_xyxy
@@ -57,25 +57,19 @@ class CacheManager:
 
 
 @dataclass
-class InteractiveConfig:
+class BaseInteractiveConfig(ABC):
     def __init__(
         self,
         config_path: str,
         reset_cache: bool = False,
-        is_label_first: Optional[bool] = None,
-        xyxy_converter: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
         images_extractor: Optional[Callable] = None,
         labels_extractor: Optional[Callable] = None,
+        **kwargs,
     ):
         self.config_path = config_path
 
         # This includes the objects that will be used throughout the code
-        self._parameters = dict(
-            is_label_first=is_label_first,
-            xyxy_converter=xyxy_converter,
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
-        )
+        self._parameters = dict(images_extractor=images_extractor, labels_extractor=labels_extractor, **kwargs)
 
         # This includes answers to questions, which is used only when no _parameter[param_nam] value was found.
         self.cache_answers = CacheManager(cache_path=config_path, reset_cache=reset_cache)
@@ -88,12 +82,6 @@ class InteractiveConfig:
             cached_answer = self.cache_answers.get(key)
             self._parameters[key] = question.options[cached_answer]
         return self._parameters[key]
-
-    def is_label_first(self, hint: str = "") -> bool:
-        return self._get_parameter(key="is_label_first", question=STATIC_QUESTIONS["is_label_first"], hint=hint)
-
-    def xyxy_converter(self, hint: str = "") -> Callable:
-        return self._get_parameter(key="xyxy_converter", question=STATIC_QUESTIONS["xyxy_converter"], hint=hint)
 
     def get_images_extractor(self, question: Question, hint: str = "") -> Callable:
         return self._get_parameter(key="images_extractor", question=question, hint=hint)
@@ -111,3 +99,47 @@ class InteractiveConfig:
 
     def save(self):
         self.cache_answers.save()
+
+
+@dataclass
+class SegmentationInteractiveConfig(BaseInteractiveConfig):
+    def __init__(
+        self,
+        config_path: str,
+        reset_cache: bool = False,
+        images_extractor: Optional[Callable] = None,
+        labels_extractor: Optional[Callable] = None,
+    ):
+        super().__init__(
+            config_path=config_path,
+            reset_cache=reset_cache,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+        )
+
+
+@dataclass
+class DetectionInteractiveConfig(BaseInteractiveConfig):
+    def __init__(
+        self,
+        config_path: str,
+        reset_cache: bool = False,
+        images_extractor: Optional[Callable] = None,
+        labels_extractor: Optional[Callable] = None,
+        is_label_first: Optional[bool] = None,
+        xyxy_converter: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
+    ):
+        super().__init__(
+            config_path=config_path,
+            reset_cache=reset_cache,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            is_label_first=is_label_first,
+            xyxy_converter=xyxy_converter,
+        )
+
+    def is_label_first(self, hint: str = "") -> bool:
+        return self._get_parameter(key="is_label_first", question=STATIC_QUESTIONS["is_label_first"], hint=hint)
+
+    def xyxy_converter(self, hint: str = "") -> Callable:
+        return self._get_parameter(key="xyxy_converter", question=STATIC_QUESTIONS["xyxy_converter"], hint=hint)

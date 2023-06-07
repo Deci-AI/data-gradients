@@ -6,7 +6,7 @@ import torch
 from torchvision.transforms import transforms
 
 from data_gradients.batch_processors.adapters.tensor_extractor import get_tensor_extractor_options
-from data_gradients.config.interactive_config import InteractiveConfig, Question
+from data_gradients.config.interactive_config import BaseInteractiveConfig, Question
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
@@ -14,7 +14,7 @@ SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 class DatasetAdapter:
     """Class responsible to convert raw batch (coming from dataloader) into a batch of image and a batch of labels."""
 
-    def __init__(self, config: InteractiveConfig):
+    def __init__(self, config: BaseInteractiveConfig):
         self.config = config
         self.images_extractor: Optional[Callable] = None
         self.labels_extractor: Optional[Callable] = None
