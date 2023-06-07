@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import seaborn
 from jinja2 import Template
 from xhtml2pdf import pisa
 
@@ -50,6 +51,7 @@ class PDFWriter:
         subtitle: str,
         html_template: str = assets.html.doc_template,
         logo_path: str = assets.image.logo,
+        palette="pastel"
     ):
         """
         :param title: The title of the PDF document.
@@ -61,6 +63,9 @@ class PDFWriter:
         self.subtitle = subtitle
         self.template = Template(source=html_template)
         self.logo_path = logo_path
+        palette = seaborn.color_palette(palette=palette).as_hex()
+        self.train_color = palette[0]
+        self.val_color = palette[1]
 
     def write(self, results_container: ResultsContainer, output_filename: str):
         """
@@ -70,7 +75,8 @@ class PDFWriter:
         if not output_filename.endswith("pdf"):
             raise RuntimeError("filename must end with .pdf")
 
-        doc = self.template.render(title=self.title, subtitle=self.subtitle, results=results_container, version=data_gradients.__version__)
+        doc = self.template.render(title=self.title, subtitle=self.subtitle, results=results_container, version=data_gradients.__version__,
+                                   train_color=self.train_color, val_color=self.val_color, logo=assets.image.logo)
 
         with open(output_filename, "w+b") as result_file:
             pisa.CreatePDF(doc, dest=result_file)

@@ -1,0 +1,73 @@
+<table align="center" border="0" cellpadding="1" cellspacing="1" style="width:800px">
+    <thead>
+    <tr>
+        <th scope="col" style="column-width: 300px;">
+            <h2>&nbsp;</h2>
+        </th>
+        <th scope="col" class="train_header">
+            <strong>Train</strong>
+        </th>
+        <th scope="col" class="val_header">
+            <strong>Validation</strong>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td style="text-align:left; color:black;">Images</td>
+        <td class="train_header"><strong>{{train.image_count}}</strong></td>
+        <td class="val_header"><strong>{{val.image_count}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Classes</td>
+        <td class="train_header"><strong>{{train.classes_count}}</strong></td>
+        <td class="val_header"><strong>{{val.classes_count}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Classes in use</td>
+        <td class="train_header"><strong>{{train.classes_in_use}}</strong></td>
+        <td class="val_header"><strong>{{val.classes_in_use}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Annotations</td>
+        <td class="train_header"><strong>{{train.annotation_count}}</strong></td>
+        <td class="val_header"><strong>{{val.annotation_count}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Annotations per images</td>
+        <td class="train_text"><strong>{{train.annotations_per_image}}</strong></td>
+        <td class="val_text"><strong>{{val.annotations_per_image}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Images with no annotations</td>
+        <td class="train_text"><strong>{{train.images_without_annotation}}</strong></td>
+        <td class="val_text"><strong>{{val.images_without_annotation}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Median image resolution</td>
+        <td class="train_text"><strong>{{train.med_image_resolution}}</strong></td>
+        <td class="val_text"><strong>{{val.med_image_resolution}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Smallest annotation</td>
+        <td class="train_text"><strong>{{train.smallest_annotations}}</strong></td>
+        <td class="val_text"><strong>{{val.smallest_annotations}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Largest annotation</td>
+        <td class="train_text"><strong>{{train.largest_annotations}}</strong></td>
+        <td class="val_text"><strong>{{val.largest_annotations}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Most annotations in an image</td>
+        <td class="train_text"><strong>{{train.most_annotations}}</strong></td>
+        <td class="val_text"><strong>{{val.most_annotations}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Least annotations in an image</td>
+        <td class="train_text"><strong>{{train.least_annotations}}</strong></td>
+        <td class="val_text"><strong>{{val.least_annotations}}</strong></td>
+    </tr>
+
+    </tbody>
+</table>
