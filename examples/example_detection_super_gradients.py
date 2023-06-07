@@ -19,11 +19,15 @@ if __name__ == "__main__":
     train_loader = coco2017_train()
     val_loader = coco2017_val()
 
-    config = DetectionInteractiveConfig(caching_path="coco2017_config.json", reset_cache=False)
+    images_extractor = lambda x: x[0]
+    labels_extractor = lambda x: x[1]
+    config = DetectionInteractiveConfig(
+        caching_path="coco2017_config.json", reset_cache=False, images_extractor=images_extractor, labels_extractor=labels_extractor
+    )
     analyzer = DetectionAnalysisManager(
         config=config,
         report_title="Testing Data-Gradients",
-        train_data=val_loader,
+        train_data=train_loader,
         val_data=val_loader,
         class_names=val_loader.dataset.classes,
         batches_early_stop=20,

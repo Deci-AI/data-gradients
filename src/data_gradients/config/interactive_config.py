@@ -1,11 +1,13 @@
 import json
 from dataclasses import dataclass
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional, Callable, Union, Tuple, Mapping, List
 from abc import ABC
 import torch
 
 from data_gradients.utils.detection import xywh_to_xyxy, cxcywh_to_xyxy
 from data_gradients.utils.utils import ask_user
+
+SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
 
 @dataclass
@@ -35,7 +37,7 @@ STATIC_QUESTIONS = {
 
 
 class CacheManager:
-    def __init__(self, cache_path, reset_cache: bool = False):
+    def __init__(self, cache_path: str, reset_cache: bool = False):
         self.cache_path = cache_path
         self.cache: Dict[str, str] = {}
         if not reset_cache:
@@ -62,8 +64,8 @@ class BaseInteractiveConfig(ABC):
         self,
         caching_path: str,
         reset_cache: bool = False,
-        images_extractor: Optional[Callable] = None,
-        labels_extractor: Optional[Callable] = None,
+        images_extractor: Optional[Callable[[SupportedData], torch.Tensor]] = None,
+        labels_extractor: Optional[Callable[[SupportedData], torch.Tensor]] = None,
         **kwargs,
     ):
         self.caching_path = caching_path
@@ -83,17 +85,17 @@ class BaseInteractiveConfig(ABC):
             self._parameters[key] = question.options[cached_answer]
         return self._parameters[key]
 
-    def get_images_extractor(self, question: Question, hint: str = "") -> Callable:
+    def get_images_extractor(self, question: Question, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
         return self._get_parameter(key="images_extractor", question=question, hint=hint)
 
-    def set_images_extractor(self, image_extractor: Callable, path_description: str):
+    def set_images_extractor(self, image_extractor: Callable[[SupportedData], torch.Tensor], path_description: str):
         self._parameters["images_extractor"] = image_extractor
         self.cache_answers.set("images_extractor", path_description)  # This won't be used directly but improves tracability of what we do.
 
-    def get_labels_extractor(self, question: Question, hint: str = "") -> Callable:
+    def get_labels_extractor(self, question: Question, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
         return self._get_parameter(key="labels_extractor", question=question, hint=hint)
 
-    def set_labels_extractor(self, labels_extractor: Callable, path_description: str):
+    def set_labels_extractor(self, labels_extractor: Callable[[SupportedData], torch.Tensor], path_description: str):
         self._parameters["labels_extractor"] = labels_extractor
         self.cache_answers.set("labels_extractor", path_description)  # This won't be used directly but improves tracability of what we do.
 
@@ -107,8 +109,8 @@ class SegmentationInteractiveConfig(BaseInteractiveConfig):
         self,
         caching_path: str,
         reset_cache: bool = False,
-        images_extractor: Optional[Callable] = None,
-        labels_extractor: Optional[Callable] = None,
+        images_extractor: Optional[Callable[[SupportedData], torch.Tensor]] = None,
+        labels_extractor: Optional[Callable[[SupportedData], torch.Tensor]] = None,
     ):
         super().__init__(
             caching_path=caching_path,
@@ -124,8 +126,8 @@ class DetectionInteractiveConfig(BaseInteractiveConfig):
         self,
         caching_path: str,
         reset_cache: bool = False,
-        images_extractor: Optional[Callable] = None,
-        labels_extractor: Optional[Callable] = None,
+        images_extractor: Optional[Callable[[SupportedData], torch.Tensor]] = None,
+        labels_extractor: Optional[Callable[[SupportedData], torch.Tensor]] = None,
         is_label_first: Optional[bool] = None,
         xyxy_converter: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
     ):
@@ -141,5 +143,5 @@ class DetectionInteractiveConfig(BaseInteractiveConfig):
     def is_label_first(self, hint: str = "") -> bool:
         return self._get_parameter(key="is_label_first", question=STATIC_QUESTIONS["is_label_first"], hint=hint)
 
-    def xyxy_converter(self, hint: str = "") -> Callable:
+    def xyxy_converter(self, hint: str = "") -> Callable[[torch.Tensor], torch.Tensor]:
         return self._get_parameter(key="xyxy_converter", question=STATIC_QUESTIONS["xyxy_converter"], hint=hint)
