@@ -118,15 +118,6 @@ class TensorExtractor:
         elif isinstance(obj, Image.Image):
             printable_map = "PIL Image"
             targets.append((path, printable_map))
-        elif isinstance(obj, torch.Tensor):
-            printable_map = "Tensor"
-            targets.append((path, printable_map))
-        elif isinstance(obj, ndarray):
-            printable_map = "ndarray"
-            targets.append((path, printable_map))
-        elif isinstance(obj, Image.Image):
-            printable_map = "PIL Image"
-            targets.append((path, printable_map))
         else:
             raise RuntimeError(
                 f"Unsupported object! Object found has a type of {type(obj)} which is not supported for now.\n"
