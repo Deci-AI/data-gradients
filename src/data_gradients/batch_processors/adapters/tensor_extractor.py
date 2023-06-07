@@ -106,7 +106,6 @@ class TensorExtractor:
             printable_map = "float"
             targets.append((path, printable_map))
         elif isinstance(obj, str):
-            # return "string"
             printable_map = "String"
             targets.append((path, printable_map))
         elif isinstance(obj, torch.Tensor):
