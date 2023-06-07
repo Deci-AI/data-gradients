@@ -161,7 +161,7 @@ class AnalysisManagerAbstract(abc.ABC):
     def close(self):
         """Safe logging closing"""
         self._log_writer.close()
-        self.config.save()
+        self.config.save_cache()
         print(f'{"*" * 100}' f"\nWe have finished evaluating your dataset!" f"\nThe results can be seen in {self.output_folder}" f"\n")
 
     def run(self):
