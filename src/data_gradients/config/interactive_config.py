@@ -60,19 +60,19 @@ class CacheManager:
 class BaseInteractiveConfig(ABC):
     def __init__(
         self,
-        config_path: str,
+        caching_path: str,
         reset_cache: bool = False,
         images_extractor: Optional[Callable] = None,
         labels_extractor: Optional[Callable] = None,
         **kwargs,
     ):
-        self.config_path = config_path
+        self.caching_path = caching_path
 
         # This includes the objects that will be used throughout the code
         self._parameters = dict(images_extractor=images_extractor, labels_extractor=labels_extractor, **kwargs)
 
         # This includes answers to questions, which is used only when no _parameter[param_nam] value was found.
-        self.cache_answers = CacheManager(cache_path=config_path, reset_cache=reset_cache)
+        self.cache_answers = CacheManager(cache_path=caching_path, reset_cache=reset_cache)
 
     def _get_parameter(self, key: str, question: Question, hint: str = "") -> Any:
         if self._parameters.get(key) is None:
@@ -105,13 +105,13 @@ class BaseInteractiveConfig(ABC):
 class SegmentationInteractiveConfig(BaseInteractiveConfig):
     def __init__(
         self,
-        config_path: str,
+        caching_path: str,
         reset_cache: bool = False,
         images_extractor: Optional[Callable] = None,
         labels_extractor: Optional[Callable] = None,
     ):
         super().__init__(
-            config_path=config_path,
+            caching_path=caching_path,
             reset_cache=reset_cache,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
@@ -122,7 +122,7 @@ class SegmentationInteractiveConfig(BaseInteractiveConfig):
 class DetectionInteractiveConfig(BaseInteractiveConfig):
     def __init__(
         self,
-        config_path: str,
+        caching_path: str,
         reset_cache: bool = False,
         images_extractor: Optional[Callable] = None,
         labels_extractor: Optional[Callable] = None,
@@ -130,7 +130,7 @@ class DetectionInteractiveConfig(BaseInteractiveConfig):
         xyxy_converter: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
     ):
         super().__init__(
-            config_path=config_path,
+            caching_path=caching_path,
             reset_cache=reset_cache,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,

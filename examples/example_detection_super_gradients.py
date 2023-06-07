@@ -19,7 +19,7 @@ if __name__ == "__main__":
     train_loader = coco2017_train()
     val_loader = coco2017_val()
 
-    config = DetectionInteractiveConfig("config.json", reset_cache=False)
+    config = DetectionInteractiveConfig(caching_path="coco2017_config.json", reset_cache=False)
     analyzer = DetectionAnalysisManager(
         config=config,
         report_title="Testing Data-Gradients",

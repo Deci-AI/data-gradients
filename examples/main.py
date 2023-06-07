@@ -43,7 +43,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=8)
     val_loader = DataLoader(val_dataset, batch_size=8)
 
-    config = SegmentationInteractiveConfig("config.json", reset_cache=True)
+    config = SegmentationInteractiveConfig(caching_path="config.json", reset_cache=True)
     da = SegmentationAnalysisManager(
         config=config,
         report_title="Testing Data-Gradients",
@@ -51,9 +51,6 @@ if __name__ == "__main__":
         val_data=val_loader,
         class_names=BDDDataset.CLASS_NAMES,
         class_names_to_use=BDDDataset.CLASS_NAMES[1:5],
-        # Optionals
-        images_extractor=None,
-        labels_extractor=None,
         threshold_soft_labels=0.5,
         batches_early_stop=75,
     )
