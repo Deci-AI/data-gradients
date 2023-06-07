@@ -1,27 +1,24 @@
-from typing import Optional, Callable, List
+from typing import List
 
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
 from data_gradients.batch_processors.preprocessors.segmentation import SegmentationBatchPreprocessor
 from data_gradients.batch_processors.formatters.segmentation import SegmentationBatchFormatter
+from data_gradients.config.interactive_config import InteractiveConfig
 
 
 class SegmentationBatchProcessor(BatchProcessor):
     def __init__(
         self,
         *,
+        config: InteractiveConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int = 3,
         threshold_value: float = 0.5,
-        images_extractor: Optional[Callable] = None,
-        labels_extractor: Optional[Callable] = None,
     ):
 
-        dataset_adapter = DatasetAdapter(
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
-        )
+        dataset_adapter = DatasetAdapter(config=config)
         formatter = SegmentationBatchFormatter(
             class_names=class_names,
             class_names_to_use=class_names_to_use,

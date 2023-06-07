@@ -3,6 +3,7 @@ from typing import Optional, Iterable, Dict, Callable, List
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
+from data_gradients.config.interactive_config import InteractiveConfig
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -15,6 +16,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
+        config: InteractiveConfig,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
@@ -65,10 +67,9 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         class_names_to_use = class_names_to_use or class_names
 
         batch_processor = SegmentationBatchProcessor(
+            config=config,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
             n_image_channels=num_image_channels,
             threshold_value=threshold_soft_labels,
         )
@@ -76,6 +77,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         grouped_feature_extractors = load_report_feature_extractors(config_name=config_name)
 
         super().__init__(
+            config=config,
             report_title=report_title,
             report_subtitle=report_subtitle,
             train_data=train_data,

@@ -13,6 +13,7 @@ from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
+from data_gradients.config.interactive_config import InteractiveConfig
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -28,6 +29,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self,
         *,
         report_title: str,
+        config: InteractiveConfig,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
@@ -60,6 +62,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         self.renderer = SeabornRenderer()
         self.report_title = report_title
+        self.config = config
 
         report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
         self.html_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
@@ -152,17 +155,13 @@ class AnalysisManagerAbstract(abc.ABC):
         for image_created in images_created:
             os.remove(image_created)
 
-        if self.batch_processor.images_route is not None:
-            self._log_writer.log_json(title="Get images out of dictionary", data=self.batch_processor.images_route)
-        if self.batch_processor.labels_route is not None:
-            self._log_writer.log_json(title="Get labels out of dictionary", data=self.batch_processor.labels_route)
-
         # Write all text data to json file
         self._log_writer.save_as_json()
 
     def close(self):
         """Safe logging closing"""
         self._log_writer.close()
+        self.config.save()
         print(f'{"*" * 100}' f"\nWe have finished evaluating your dataset!" f"\nThe results can be seen in {self.output_folder}" f"\n")
 
     def run(self):

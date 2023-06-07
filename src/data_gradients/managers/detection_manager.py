@@ -1,8 +1,9 @@
-from typing import Optional, Iterable, Dict, Callable, List
+from typing import Optional, Iterable, Dict, List
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.detection import DetectionBatchProcessor
+from data_gradients.config.interactive_config import InteractiveConfig
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -14,6 +15,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
+        config: InteractiveConfig,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
@@ -24,8 +26,6 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         log_dir: Optional[str] = None,
         id_to_name: Optional[Dict] = None,
         batches_early_stop: int = 999,
-        images_extractor: Callable = None,
-        labels_extractor: Callable = None,
         n_image_channels: int = 3,
     ):
         """
@@ -61,8 +61,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         class_names_to_use = class_names_to_use or class_names
 
         batch_processor = DetectionBatchProcessor(
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
+            config=config,
             n_image_channels=n_image_channels,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
@@ -71,6 +70,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         feature_extractors = load_report_feature_extractors(config_name=config_name)
 
         super().__init__(
+            config=config,
             report_title=report_title,
             report_subtitle=report_subtitle,
             train_data=train_data,
