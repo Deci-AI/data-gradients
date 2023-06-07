@@ -43,7 +43,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=8)
     val_loader = DataLoader(val_dataset, batch_size=8)
 
-    config = SegmentationInteractiveConfig(caching_path="config.json", reset_cache=True)
+    config = SegmentationInteractiveConfig(caching_path="BDDD_config.json", reset_cache=False)
     da = SegmentationAnalysisManager(
         config=config,
         report_title="Testing Data-Gradients",
