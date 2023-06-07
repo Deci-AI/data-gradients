@@ -1,10 +1,9 @@
 import cv2
 import pandas as pd
-from typing import Dict
 import numpy as np
+from line_profiler_pycharm import profile
 
 from data_gradients.common.registry.registry import register_feature_extractor
-from data_gradients.feature_extractors.common.utils import PixelFrequencyCounter
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
 from data_gradients.visualize.plot_options import KDEPlotOptions
@@ -18,9 +17,12 @@ class ImageColorDistribution(AbstractFeatureExtractor):
     def __init__(self):
         self.image_format = None
         self.colors = ("Red", "Green", "Blue")
-        self.pixel_frequency_per_channel_per_split: Dict[str, Dict[str, PixelFrequencyCounter]] = {}
         self.palette = {"Red": "red", "Green": "green", "Blue": "blue", "Grayscale": "gray"}
+        self.pixel_frequency_per_channel_per_split = {}
+        for split in ["train", "val"]:
+            self.pixel_frequency_per_channel_per_split[split] = np.zeros(shape=(3, 256), dtype=np.int64)
 
+    @profile
     def update(self, sample: ImageSample):
 
         if self.image_format is None:
@@ -44,23 +46,19 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             raise ValueError(f"Unknown image format {sample.image_format}")
 
         sample.image = sample.image.astype(np.uint8)
+        pixel_frequency_per_channel = self.pixel_frequency_per_channel_per_split.get(sample.split)
 
         # We need this more complex logic because we cannot directly accumulate the images (this would take too much memory)
         # so we need to iteratively count the frequency per split and per color
         for i, color in enumerate(self.colors):
-            pixel_frequency_per_channel = self.pixel_frequency_per_channel_per_split.get(sample.split, dict())
-            pixel_frequency = pixel_frequency_per_channel.get(color, PixelFrequencyCounter())
-            pixel_frequency.update(image[:, :, i])
-
-            pixel_frequency_per_channel[color] = pixel_frequency
-            self.pixel_frequency_per_channel_per_split[sample.split] = pixel_frequency_per_channel
+            pixel_frequency_per_channel[i] += np.histogram(image[:, :, i], bins=256)[0]
 
     def aggregate(self) -> Feature:
         data = [
             {"split": split, "Color": color, "pixel_value": pixel_value, "n": n}
             for split, pixel_frequency_per_channel in self.pixel_frequency_per_channel_per_split.items()
-            for color, pixel_frequency in pixel_frequency_per_channel.items()
-            for pixel_value, n in pixel_frequency.compute().items()
+            for color, pixel_frequency in zip(self.colors, pixel_frequency_per_channel)
+            for pixel_value, n in zip(range(256), pixel_frequency)
         ]
         df = pd.DataFrame(data)
 
