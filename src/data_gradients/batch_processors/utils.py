@@ -1,4 +1,6 @@
+import numpy as np
 import torch
+from line_profiler_pycharm import profile
 
 
 def channels_last_to_first(tensors: torch.Tensor) -> torch.Tensor:
@@ -14,18 +16,20 @@ def channels_last_to_first(tensors: torch.Tensor) -> torch.Tensor:
 def check_all_integers(tensor: torch.Tensor) -> bool:
     return torch.all(torch.eq(tensor, tensor.to(torch.int))).item()
 
-
+@profile
 def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
     """Method gets label with the shape of [BS, N, H, W] where N is the number of classes.
+    This numpy implementation is much faster than Torch.nn.functional.one_hot.
     :param labels:      Tensor of shape [BS, H, W]
     :param n_classes:   Number of classes in the dataset.
     :return:            Labels tensor shaped as [BS, N, H, W]
     """
 
-    masks = []
     labels = labels.to(torch.int64)
-    for label in labels:
-        label = torch.nn.functional.one_hot(label, n_classes).byte()
-        masks.append(label)
-    labels = torch.concat(masks, dim=0).permute(0, -1, 1, 2)
+    labels_np = labels.numpy()
+    out = np.zeros((labels_np.size, n_classes), dtype=np.uint8)
+    out[np.arange(labels_np.size), labels_np.ravel()] = 1
+    out.shape = labels_np.shape + (n_classes,)
+    labels = torch.Tensor(out)
+    labels = labels.squeeze().permute(0, -1, 1, 2)
     return labels
