@@ -28,6 +28,6 @@ def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
     out = np.zeros((labels_np.size, n_classes), dtype=np.uint8)
     out[np.arange(labels_np.size), labels_np.ravel()] = 1
     out.shape = labels_np.shape + (n_classes,)
-    labels = torch.Tensor(out)
+    labels = torch.from_numpy(out)
     labels = labels.squeeze().permute(0, -1, 1, 2)
     return labels

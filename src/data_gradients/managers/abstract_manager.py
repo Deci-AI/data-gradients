@@ -18,6 +18,7 @@ logging.basicConfig(level=logging.WARNING)
 
 logger = getLogger(__name__)
 
+from line_profiler_pycharm import profile
 
 class AnalysisManagerAbstract(abc.ABC):
     """
@@ -71,6 +72,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         self.id_to_name = id_to_name
 
+    @profile
     def execute(self):
         """
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
