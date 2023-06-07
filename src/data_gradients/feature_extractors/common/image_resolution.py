@@ -71,7 +71,7 @@ class ImagesResolution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Extracts the distribution image Height and Width."
+        return "Image height and width distribution"
 
     @property
     def description(self) -> str:
