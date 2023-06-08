@@ -6,7 +6,7 @@ from .classes_per_image_count import SegmentationClassesPerImageCount
 from .components_convexity import SegmentationComponentsConvexity
 from .components_erosion import SegmentationComponentsErosion
 from .components_per_image_count import SegmentationComponentsPerImageCount
-
+from .sample_visualization import SegmentationSampleVisualization
 
 __all__ = [
     "SegmentationBoundingBoxArea",
@@ -17,4 +17,5 @@ __all__ = [
     "SegmentationComponentsConvexity",
     "SegmentationComponentsErosion",
     "SegmentationComponentsPerImageCount",
+    "SegmentationSampleVisualization",
 ]

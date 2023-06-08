@@ -2,6 +2,7 @@ import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
+from data_gradients.utils.common import LABELS_PALETTE
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.seaborn_renderer import Hist2DPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
@@ -18,7 +19,7 @@ class DetectionBoundingBoxSize(AbstractFeatureExtractor):
 
         height, width = sample.image.shape[:2]
         for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
-            class_name = sample.class_names.get(class_id, str(class_id))
+            class_name = sample.class_names[class_id]
             self.data.append(
                 {
                     "split": sample.split,
@@ -44,6 +45,7 @@ class DetectionBoundingBoxSize(AbstractFeatureExtractor):
             individual_plots_key="split",
             tight_layout=True,
             sharey=True,
+            labels_palette=LABELS_PALETTE,
         )
 
         description = df.describe()

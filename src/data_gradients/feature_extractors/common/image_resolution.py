@@ -2,6 +2,7 @@ import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.utils.common import LABELS_PALETTE
 from data_gradients.utils.data_classes.data_samples import ImageSample
 from data_gradients.visualize.plot_options import Hist2DPlotOptions, ScatterPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
@@ -39,6 +40,7 @@ class ImagesResolution(AbstractFeatureExtractor):
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
                 sharey=True,
+                labels_palette=LABELS_PALETTE
             )
         else:
             plot_options = Hist2DPlotOptions(
@@ -54,6 +56,7 @@ class ImagesResolution(AbstractFeatureExtractor):
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
                 sharey=True,
+                labels_palette=LABELS_PALETTE
             )
 
         description = df.describe()
@@ -68,7 +71,7 @@ class ImagesResolution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Extracts the distribution image Height and Width."
+        return "Image height and width distribution"
 
     @property
     def description(self) -> str:

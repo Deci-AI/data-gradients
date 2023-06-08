@@ -17,7 +17,7 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
         for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
                 class_id = contour.class_id
-                class_name = sample.class_names.get(class_id, str(class_id))
+                class_name = sample.class_names[class_id]
                 self.data.append(
                     {
                         "split": sample.split,
@@ -49,7 +49,7 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             labels_key="split",
         )
 
-        json = dict(df_class_count.n_appearance.describe())
+        json = dict(df_class_count["n_appearance"].describe())
 
         feature = Feature(
             data=df_class_count,

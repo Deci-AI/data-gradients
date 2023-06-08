@@ -22,7 +22,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
         for class_channel in sample.contours:
             for contour in class_channel:
                 class_id = contour.class_id
-                class_name = sample.class_names.get(class_id, str(class_id))
+                class_name = sample.class_names[class_id]
                 self.data.append(
                     {
                         "split": sample.split,
@@ -48,7 +48,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
             labels_key="split",
             bandwidth=0.4,
         )
-        json = dict(df.bbox_area.describe())
+        json = dict(df["bbox_area"].describe())
 
         feature = Feature(
             data=df,

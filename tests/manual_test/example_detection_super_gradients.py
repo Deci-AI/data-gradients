@@ -62,7 +62,6 @@ if __name__ == "__main__":
         train_data=train_loader,
         val_data=val_loader,
         n_classes=len(classes),
-        samples_to_visualize=3,
     )
 
     analyzer.run()

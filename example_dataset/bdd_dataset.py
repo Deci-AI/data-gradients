@@ -14,21 +14,28 @@ class BDDDataset(Dataset):
     The BDD100K data and annotations can be obtained at https://bdd-data.berkeley.edu/.
     """
 
-    CLASS_NAMES = {
-        0: "road",
-        7: "traffic sign",
-        8: "vegetation",
-        9: "terrain",
-        10: "sky",
-        11: "person",
-        12: "rider",
-        13: "car",
-        14: "truck",
-        15: "bus",
-        16: "train",
-        17: "motorcycle",
-        18: "bicycle",
-    }
+    CLASS_NAMES = [
+        "road",
+        "sidewalk",
+        "building",
+        "wall",
+        "fence",
+        "pole",
+        "traffic light",
+        "traffic sign",
+        "vegetation",
+        "terrain",
+        "sky",
+        "person",
+        "rider",
+        "car",
+        "truck",
+        "bus",
+        "train",
+        "motorcycle",
+        "bicycle",
+        "<?>",
+    ]
 
     def __init__(
         self,

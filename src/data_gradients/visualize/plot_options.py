@@ -270,16 +270,10 @@ class ScatterPlotOptions(CommonPlotOptions):
 
 
 @dataclasses.dataclass
-class ImageHeatmapPlotOptions(CommonPlotOptions):
-    """
-    Contains a set of options for displaying heatmaps.
+class FigureRenderer(CommonPlotOptions):
+    """Contains a set of options for displaying a pre-defined figure."""
 
-    :attr n_cols:   Number of columns, i.e. classes shown per row
-    :attr cmap:     Name of the colormap to use
-    """
-
-    n_cols: int = 2
-    cmap: Optional[str] = None
+    pass
 
 
 class PlotRenderer(ABC):

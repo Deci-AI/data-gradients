@@ -1,6 +1,6 @@
 import dataclasses
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import List
 
 import numpy as np
 
@@ -19,10 +19,9 @@ class ImageSample:
     """
     This is a dataclass that represents a single sample of the dataset where input to the model is a single image.
 
-    Properties:
-        sample_id: str - The unique identifier of the sample. Could be the image path or the image name.
-        split: str - The name of the dataset split. Could be "train", "val", "test", etc.
-        image: np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
+    :attr sample_id:The unique identifier of the sample. Could be the image path or the image name.
+    :attr split:    The name of the dataset split. Could be "train", "val", "test", etc.
+    :attr image:    np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
     """
 
     sample_id: str
@@ -40,18 +39,18 @@ class SegmentationSample(ImageSample):
     This is a dataclass that represents a single sample of the dataset where input to the model is a single image and
     the target is a semantic segmentation mask.
 
-    Properties:
-        sample_id: str - The unique identifier of the sample. Could be the image path or the image name.
-        split: str - The name of the dataset split. Could be "train", "val", "test", etc.
-        image: np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
-        mask: np.ndarray of shape [N, H, W] representing one-hot encoded mask for each class.
-        contours: List[List[Contour]] - A list of contours for each class in the mask.
+    :attr sample_id:        The unique identifier of the sample. Could be the image path or the image name.
+    :attr split:            The name of the dataset split. Could be "train", "val", "test", etc.
+    :attr image:            np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
+    :attr mask:             np.ndarray of shape [N, H, W] representing one-hot encoded mask for each class.
+    :attr contours:         A list of contours for each class in the mask.
+    :attr class_names:      List of all class names in the dataset. The index should represent the class_id.
     """
 
     mask: np.ndarray
 
     contours: List[List[Contour]]
-    class_names: Dict[int, str] = dataclasses.field(default_factory=dict)
+    class_names: List[str]
 
     def __repr__(self):
         return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
@@ -63,17 +62,17 @@ class DetectionSample(ImageSample):
     This is a dataclass that represents a single sample of the dataset where input to the model is a single image and
     the target is a semantic segmentation mask.
 
-    Properties:
-        sample_id: str - The unique identifier of the sample. Could be the image path or the image name.
-        split: str - The name of the dataset split. Could be "train", "val", "test", etc.
-        image: np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
-        bboxes_xyxy: np.ndarray of shape [N, 4] (X, Y, X, Y)
-        class_ids: np.ndarray of shape [N, ]
+    :attr sample_id:    The unique identifier of the sample. Could be the image path or the image name.
+    :attr split:        The name of the dataset split. Could be "train", "val", "test", etc.
+    :attr image:        np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
+    :attr bboxes_xyxy:  np.ndarray of shape [N, 4] (X, Y, X, Y)
+    :attr class_ids:    np.ndarray of shape [N, ]
+    :attr class_names:  List of all class names in the dataset. The index should represent the class_id.
     """
 
     bboxes_xyxy: np.ndarray
     class_ids: np.ndarray
-    class_names: Optional[List[str]] = None
+    class_names: List[str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, class_ids={self.class_ids.shape})"

@@ -47,9 +47,6 @@ class TensorExtractor:
                             e.g. ["field1", "field12", 0]  # objs["field1"]["field12"][0] = <object>
         """
 
-        if not (isinstance(objs, dict) or TensorExtractor.is_valid_json(objs)):
-            raise NotImplementedError(f"type{type(objs)} not currently supported")
-
         paths = []
         printable_mapping = TensorExtractor.objects_mapping(objs, path="", targets=paths)
         printable_mapping = json.dumps(printable_mapping, indent=4)
@@ -91,12 +88,26 @@ class TensorExtractor:
                 new_path = f"{path}.{k}" if path else k
                 printable_map[k] = TensorExtractor.objects_mapping(v, new_path, targets)
         elif isinstance(obj, Sequence) and not isinstance(obj, str):
-            printable_map = []
-            for i, v in enumerate(obj):
-                new_path = f"{path}[{i}]"
-                printable_map.append(TensorExtractor.objects_mapping(v, new_path, targets))
+            if all(isinstance(v, (int, float)) for v in obj):
+                printable_map = "List[float|int]"
+                targets.append((path, printable_map))
+            elif all(isinstance(v, str) for v in obj):
+                printable_map = "List[str]"
+                targets.append((path, printable_map))
+            else:
+                printable_map = []
+                for i, v in enumerate(obj):
+                    new_path = f"{path}[{i}]"
+                    printable_map.append(TensorExtractor.objects_mapping(v, new_path, targets))
+        elif isinstance(obj, int):
+            printable_map = "int"
+            targets.append((path, printable_map))
+        elif isinstance(obj, float):
+            printable_map = "float"
+            targets.append((path, printable_map))
         elif isinstance(obj, str):
-            return "string"
+            printable_map = "String"
+            targets.append((path, printable_map))
         elif isinstance(obj, torch.Tensor):
             printable_map = "Tensor"
             targets.append((path, printable_map))
