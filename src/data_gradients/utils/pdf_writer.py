@@ -46,7 +46,14 @@ class PDFWriter:
     The PDF file is generated based on HTML templates (document, section and feature templates).
     """
 
-    def __init__(self, title: str, subtitle: str, html_template: str = assets.html.doc_template, logo_path: str = assets.image.logo, palette="pastel"):
+    def __init__(
+        self,
+        title: str,
+        subtitle: str,
+        html_template: str = assets.html.doc_template,
+        logo_path: str = assets.image.logo,
+        palette="pastel",
+    ):
         """
         :param title: The title of the PDF document.
         :param subtitle: The subtitle of the PDF document.
