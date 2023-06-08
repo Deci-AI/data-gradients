@@ -31,4 +31,4 @@ class JsonLogger(ResultsLogger):
 
     def close(self) -> None:
         """Close the logger."""
-        self.save_as_json()
+        pass
