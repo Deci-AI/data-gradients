@@ -48,7 +48,7 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         # Static parameters
         if log_dir is None:
-            log_dir = os.path.join(os.getcwd(), "logs")
+            log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
 
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
