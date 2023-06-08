@@ -141,7 +141,6 @@ class VisualizationTests(unittest.TestCase):
             x_ticks_rotation=None,
             labels_key="split",
             log_scale=False,
-            orient="v",
         )
 
         sns = SeabornRenderer()
