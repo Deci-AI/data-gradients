@@ -41,11 +41,10 @@ setup(
     install_requires=get_requirements(),
     packages=find_packages(where="./src"),
     package_dir={"": "src"},
-    include_package_data=True,
     package_data={
         "data_gradients.config": ["*.yaml", "**/*.yaml"],
         "data_gradients": ["example.ipynb", "requirements.txt"],
-        "data_gradients.assets": ["assets/images/*.png", "assets/images/*.jpg", "assets/html/*.html", "assets/css/*.css"],
+        "data_gradients.assets": ["images/*.png", "html/*.html", "css/*.css", "text/*.txt"],
     },
     long_description=readme(),
     long_description_content_type="text/markdown",
