@@ -21,7 +21,7 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
         self.n_classes_to_show = n_classes_to_show
         self.n_cols = n_cols
 
-        self.heatmaps_per_split_per_cls = defaultdict(lambda: defaultdict(lambda: np.zeros(self.heatmap_dim, dtype=np.uint8)))
+        self.heatmaps_per_split_per_cls = defaultdict(lambda: defaultdict(lambda: np.zeros(self.heatmap_dim, dtype=np.int64)))
         self.count_class_appearance = defaultdict(lambda: 0)
 
     @abstractmethod
