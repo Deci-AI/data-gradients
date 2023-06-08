@@ -52,7 +52,6 @@ if __name__ == "__main__":
         images_extractor=None,
         labels_extractor=None,
         threshold_soft_labels=0.5,
-        batches_early_stop=75,
     )
 
     da.run()

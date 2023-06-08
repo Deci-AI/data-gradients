@@ -8,6 +8,7 @@ report_sections:
   - name: Segmentation Features
     features:
       - SegmentationSampleVisualization
+      - SegmentationClassHeatmap
       - SegmentationClassesCount
       - SegmentationClassesPerImageCount
       - SegmentationComponentsPerImageCount

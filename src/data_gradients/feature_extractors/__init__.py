@@ -20,6 +20,7 @@ from .object_detection import (
     DetectionBoundingBoxPerImageCount,
     DetectionBoundingBoxSize,
     DetectionClassesCount,
+    DetectionClassHeatmap,
     DetectionClassesPerImageCount,
     DetectionSampleVisualization,
 )
@@ -42,6 +43,7 @@ __all__ = [
     "DetectionBoundingBoxPerImageCount",
     "DetectionBoundingBoxSize",
     "DetectionClassesCount",
+    "DetectionClassHeatmap",
     "DetectionClassesPerImageCount",
     "DetectionSampleVisualization",
 ]
