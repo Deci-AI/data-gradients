@@ -3,7 +3,7 @@ from torchvision.transforms import Compose, ToTensor
 
 from data_gradients.example_dataset.bdd_dataset import BDDDataset
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
-from data_gradients.config.interactive_config import SegmentationInteractiveConfig
+from data_gradients.config.interactive_config import DetectionDataConfig
 
 
 if __name__ == "__main__":
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=8)
     val_loader = DataLoader(val_dataset, batch_size=8)
 
-    config = SegmentationInteractiveConfig(caching_path="BDDD_config.json", reset_cache=False)
+    config = DetectionDataConfig()
     da = SegmentationAnalysisManager(
         config=config,
         report_title="Testing Data-Gradients",

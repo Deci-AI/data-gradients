@@ -6,7 +6,7 @@ from torch import Tensor
 from data_gradients.batch_processors.utils import check_all_integers
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
-from data_gradients.config.interactive_config import DetectionInteractiveConfig
+from data_gradients.config.interactive_config import DetectionDataConfig
 
 
 class UnsupportedDetectionBatchFormatError(Exception):
@@ -23,7 +23,7 @@ class DetectionBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
-        config: DetectionInteractiveConfig,
+        config: DetectionDataConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int,
@@ -71,8 +71,8 @@ class DetectionBatchFormatter(BatchFormatter):
             "Here's a sample of how your labels look like:\n"
             f"Each line corresponds to a bounding box, with the format you specified earlier.\n{labels[0, :3, :]}"
         )
-        self.label_first = self.config.is_label_first(hint=first_targets_hint)
-        self.xyxy_converter = self.config.xyxy_converter(hint=first_targets_hint)
+        self.label_first = self.config.get_is_label_first(hint=first_targets_hint)
+        self.xyxy_converter = self.config.get_xyxy_converter(hint=first_targets_hint)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255

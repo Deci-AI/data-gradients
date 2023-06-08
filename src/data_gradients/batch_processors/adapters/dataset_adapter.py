@@ -6,7 +6,7 @@ import torch
 from torchvision.transforms import transforms
 
 from data_gradients.batch_processors.adapters.tensor_extractor import get_tensor_extractor_options
-from data_gradients.config.interactive_config import BaseInteractiveConfig, Question
+from data_gradients.config.interactive_config import DataConfig, Question
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
@@ -14,7 +14,7 @@ SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 class DatasetAdapter:
     """Class responsible to convert raw batch (coming from dataloader) into a batch of image and a batch of labels."""
 
-    def __init__(self, config: BaseInteractiveConfig):
+    def __init__(self, config: DataConfig):
         self.config = config
         self.images_extractor: Optional[Callable] = None
         self.labels_extractor: Optional[Callable] = None
@@ -38,9 +38,9 @@ class DatasetAdapter:
         if isinstance(data, (Tuple, List)) and len(data) == 2:
             if isinstance(data[0], (torch.Tensor, np.ndarray, PIL.Image.Image)):
                 # Save it in the config to include this information when logging the config
-                image_extractor = lambda x: self.to_torch(x[0])
-                self.config.set_images_extractor(image_extractor=image_extractor, path_description="[0]")
-                return image_extractor
+                self.config.image_extractor = lambda x: self.to_torch(x[0])
+                self.config.answers_cache["image_extractor"] = "[0]"  # For traceability
+                return self.config.image_extractor
 
         # If data != data == Tuple[Union[Tensor, np.ndarray, Image], ...] but we can still extract the image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
@@ -55,9 +55,9 @@ class DatasetAdapter:
         if isinstance(data, (Tuple, List)) and len(data) == 2:
             if isinstance(data[1], (torch.Tensor, np.ndarray, PIL.Image.Image)):
                 # Save it in the config to include this information when logging the config
-                labels_extractor = lambda x: self.to_torch(x[1])
-                self.config.set_labels_extractor(labels_extractor=labels_extractor, path_description="[1]")
-                return labels_extractor
+                self.config.labels_extractor = lambda x: self.to_torch(x[1])
+                self.config.answers_cache["labels_extractor"] = "[1]"  # For traceability
+                return self.config.labels_extractor
 
         # If data != data == Tuple[Union[Tensor, np.ndarray, Image], ...] but we can still extract the image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):

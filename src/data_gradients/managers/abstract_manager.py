@@ -13,7 +13,7 @@ from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
-from data_gradients.config.interactive_config import BaseInteractiveConfig
+from data_gradients.config.interactive_config import DataConfig
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -29,7 +29,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self,
         *,
         report_title: str,
-        config: BaseInteractiveConfig,
+        config: DataConfig,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
@@ -161,7 +161,7 @@ class AnalysisManagerAbstract(abc.ABC):
     def close(self):
         """Safe logging closing"""
         self._log_writer.close()
-        self.config.save_cache()
+        self.config.answers_cache  # TODO: Save locally.
         print(f'{"*" * 100}' f"\nWe have finished evaluating your dataset!" f"\nThe results can be seen in {self.output_folder}" f"\n")
 
     def run(self):

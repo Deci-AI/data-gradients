@@ -22,7 +22,7 @@ if __name__ == "__main__":
     images_extractor = lambda x: x[0]
     labels_extractor = lambda x: x[1]
     config = DetectionInteractiveConfig(
-        caching_path="coco2017_config.json", reset_cache=True
+        report_title="coco2017_config.json", load_cache=True
     )  # , images_extractor=images_extractor, labels_extractor=labels_extractor
 
     analyzer = DetectionAnalysisManager(
