@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, Callable, List
+from typing import Optional, Iterable, Dict, Callable, List
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
@@ -23,6 +23,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         report_subtitle: Optional[str] = None,
         config_name: str = "semantic_segmentation",
         log_dir: Optional[str] = None,
+        id_to_name: Optional[Dict] = None,
         batches_early_stop: int = 999,
         images_extractor: Callable = None,
         labels_extractor: Callable = None,
@@ -41,6 +42,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_name:             Name of the hydra configuration file
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
+        :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
         :param images_extractor:
         :param labels_extractor:
@@ -81,5 +83,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             batch_processor=batch_processor,
             grouped_feature_extractors=grouped_feature_extractors,
             log_dir=log_dir,
+            id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
         )

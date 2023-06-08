@@ -34,6 +34,7 @@ class AnalysisManagerAbstract(abc.ABC):
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
+        id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
     ):
         """
@@ -44,6 +45,7 @@ class AnalysisManagerAbstract(abc.ABC):
         :param log_dir:             Directory where to save the logs. By default uses the current working directory
         :param batch_processor:     Batch processor object to be used before extracting features
         :param grouped_feature_extractors:  List of feature extractors to be used
+        :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         """
         # Static parameters
