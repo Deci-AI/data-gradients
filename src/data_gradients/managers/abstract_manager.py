@@ -164,7 +164,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print("The results can be seen in:")
-        print(f"    - {self.log_dir})")
+        print(f"    - {self.log_dir}")
         print(f"    - {self.archive_dir}")
 
     def run(self):
