@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, ToTensor
 
-from example_dataset.bdd_dataset import BDDDataset
+from data_gradients.datasets.bdd_dataset import BDDDataset
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 
 
