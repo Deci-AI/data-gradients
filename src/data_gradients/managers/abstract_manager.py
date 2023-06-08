@@ -154,8 +154,8 @@ class AnalysisManagerAbstract(abc.ABC):
                 )
             summary.add_section(section)
 
-        self.html_writer.write(results_container=summary, output_dir=self.log_dir)
-        self.html_writer.write(results_container=summary, output_dir=self.archive_dir)
+        self.html_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))
+        self.html_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
 
         # Cleanup of generated images
         for image_created in images_created:

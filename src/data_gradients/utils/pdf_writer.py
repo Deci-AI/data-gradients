@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass
 
 import seaborn
@@ -46,14 +45,7 @@ class PDFWriter:
     The PDF file is generated based on HTML templates (document, section and feature templates).
     """
 
-    def __init__(
-        self,
-        title: str,
-        subtitle: str,
-        html_template: str = assets.html.doc_template,
-        logo_path: str = assets.image.logo,
-        palette="pastel",
-    ):
+    def __init__(self, title: str, subtitle: str, html_template: str = assets.html.doc_template, logo_path: str = assets.image.logo, palette="pastel"):
         """
         :param title: The title of the PDF document.
         :param subtitle: The subtitle of the PDF document.
@@ -68,12 +60,13 @@ class PDFWriter:
         self.train_color = palette[0]
         self.val_color = palette[1]
 
-    def write(self, results_container: ResultsContainer, output_dir: str):
+    def write(self, results_container: ResultsContainer, output_filename: str):
         """
         :param results_container: The results container containing the sections and features.
-        :param output_dir: Directory to write the PDF file to.
+        :param output_filename: The path to the output file.
         """
-        output_filename = os.path.join(output_dir, "report.pdf")
+        if not output_filename.endswith("pdf"):
+            raise RuntimeError("filename must end with .pdf")
 
         doc = self.template.render(
             title=self.title,
