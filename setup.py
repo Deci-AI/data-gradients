@@ -44,6 +44,7 @@ setup(
     package_data={
         "data_gradients.config": ["*.yaml", "**/*.yaml"],
         "data_gradients": ["example.ipynb", "requirements.txt"],
+        "data_gradients.assets": ["images/*.png", "html/*.html", "css/*.css", "text/*.txt"],
     },
     long_description=readme(),
     long_description_content_type="text/markdown",
