@@ -11,7 +11,7 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
     def update(self, sample: SegmentationSample):
 
         # Objects are resized to a fix size
-        mask = np.uint8(sample.mask.transpose((1, 2, 0)))
+        mask = sample.mask.transpose((1, 2, 0))
         resized_masks = cv2.resize(src=mask, dsize=self.heatmap_dim, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
         resized_masks = resized_masks.transpose((2, 0, 1))
 
