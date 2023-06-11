@@ -20,21 +20,12 @@ It automatically extracts features from your datasets and combines them all into
 
 
 ## Installation
-To install Data-Gradients, you first need to clone the repository
+You can install Data-Gradients directly from the Github repository.
 
 ```
-git clone https://github.com/Deci-AI/data-gradients
+pip install git+https://github.com/Deci-AI/data-gradients
 ```
 
-Move the local directory
-```
-cd data-gradients
-```
-
-Install Data-Gradients
-```
-pip install .
-```
 
 ## Quick Start
 
