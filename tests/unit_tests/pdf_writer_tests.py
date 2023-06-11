@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from data_gradients.utils.common.assets_container import assets
+from data_gradients.assets import assets
 from data_gradients.utils.pdf_writer import (
     ResultsContainer,
     Section,

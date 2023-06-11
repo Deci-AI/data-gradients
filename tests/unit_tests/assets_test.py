@@ -3,7 +3,7 @@ import unittest
 
 import pkg_resources
 
-from data_gradients.utils.common.assets_container import assets, AssetNotFoundException
+from data_gradients.assets import assets, AssetNotFoundException
 
 
 class TestAssets(unittest.TestCase):
