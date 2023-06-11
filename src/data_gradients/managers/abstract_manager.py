@@ -1,13 +1,13 @@
 import os
 import abc
 import logging
+import json
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 from datetime import datetime
 import tqdm
 
-from data_gradients.logging.log_writer import JsonWriter
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
@@ -62,8 +62,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         # WRITERS
         self.renderer = SeabornRenderer()
-        self.html_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
-        self.stats_writer = JsonWriter(filename="stats.json")
+        self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
 
         # DATA
         if batches_early_stop:
@@ -133,8 +132,9 @@ class AnalysisManagerAbstract(abc.ABC):
             for feature_extractor in feature_extractors:
                 feature = feature_extractor.aggregate()
 
-                self.stats_writer.write(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.log_dir)
-                self.stats_writer.write(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.archive_dir)
+                # Save in the main directory and in the archive directory
+                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.log_dir, filename="stats.json")
+                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.archive_dir, filename="stats.json")
 
                 f = self.renderer.render(feature.data, feature.plot_options)
                 if f is not None:
@@ -154,8 +154,9 @@ class AnalysisManagerAbstract(abc.ABC):
                 )
             summary.add_section(section)
 
-        self.html_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))
-        self.html_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
+        # Save in the main directory and in the archive directory
+        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))
+        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -193,3 +194,10 @@ class AnalysisManagerAbstract(abc.ABC):
         n_batches_available = max(self.train_size, self.val_size)
         n_batches_early_stop = self.batches_early_stop or float("inf")
         return min(n_batches_early_stop, n_batches_available)
+
+    @staticmethod
+    def write_json(data: Dict, output_dir: str, filename: str):
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, filename)
+        with open(output_path, "a") as f:
+            json.dump(data, f, indent=4)
