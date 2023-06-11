@@ -82,6 +82,10 @@ analyzer = SegmentationAnalysisManager(
 analyzer.run()
 ```
 
+### Example
+If you want to test it without having to download any datasets, you can check the following [segmentation example](https://github.com/Deci-AI/data-gradients/blob/master/examples/segmentation_example.py)
+
+
 ### Report
 Once the analysis is done, the path to your pdf report will be printed.
 
