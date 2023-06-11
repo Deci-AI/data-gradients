@@ -99,6 +99,7 @@ You can provide an Image Adapter function: `images_extractor(data: Any) -> torch
   - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image
     - With `C`: number of channels (3 for RGB)
 
+
 ### Label Adapter
 You can provide an Image Adapter function: `labels_extractor(data: Any) -> torch.Tensor`
 
@@ -131,6 +132,8 @@ annotation = [
 
 Because this dataset includes a very custom type of `annotation`, you will need to implement your own custom `labels_extractor` as below:
 ``` python
+from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
+
 def labels_extractor(data: Tuple[PIL.Image.Image, List[Dict]]) -> torch.Tensor:
     _image, annotations = data[:2]
     labels = []
@@ -139,6 +142,12 @@ def labels_extractor(data: Tuple[PIL.Image.Image, List[Dict]]) -> torch.Tensor:
         bbox = annotation["bbox_coordinates"]
         labels.append((class_id, *bbox))
     return torch.Tensor(labels)
+
+
+SegmentationAnalysisManager(
+    ...,
+    labels_extractor=labels_extractor
+)
 ```
 
 ## License
