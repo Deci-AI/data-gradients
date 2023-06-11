@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, ToTensor
 
-from data_gradients.example_dataset.bdd_dataset import BDDDataset
+from data_gradients.datasets.bdd_dataset import BDDDataset
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 from data_gradients.config.interactive_config import DetectionDataConfig
 
@@ -27,13 +27,13 @@ if __name__ == "__main__":
     """
     # Create torch DataSet
     train_dataset = BDDDataset(
-        data_folder="../src/data_gradients/example_dataset/bdd_example",
+        data_folder="../example_dataset/bdd_example",
         split="train",
         transform=Compose([ToTensor()]),
         target_transform=Compose([ToTensor()]),
     )
     val_dataset = BDDDataset(
-        data_folder="../src/data_gradients/example_dataset/bdd_example",
+        data_folder="../example_dataset/bdd_example",
         split="val",
         transform=Compose([ToTensor()]),
         target_transform=Compose([ToTensor()]),

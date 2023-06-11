@@ -1,6 +1,7 @@
 import os
 import abc
 import logging
+import json
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
@@ -8,7 +9,6 @@ from datetime import datetime
 import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
-from data_gradients.logging.log_writer import LogWriter
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
@@ -50,7 +50,24 @@ class AnalysisManagerAbstract(abc.ABC):
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         """
+        # Static parameters
+        if log_dir is None:
+            log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
+            logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
 
+        session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
+        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
+
+        self.report_title = report_title
+        self.report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
+
+        # WRITERS
+        self.renderer = SeabornRenderer()
+        self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
+        self.config = config
+
+        # DATA
         if batches_early_stop:
             logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
@@ -60,19 +77,9 @@ class AnalysisManagerAbstract(abc.ABC):
         self.train_iter = iter(train_data)
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
-        self.renderer = SeabornRenderer()
-        self.report_title = report_title
-        self.config = config
-
-        report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
-        self.html_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
-        self._log_writer = LogWriter(log_dir=log_dir)
-        self.output_folder = self._log_writer.log_dir
-
+        # FEATURES
         self.batch_processor = batch_processor
         self.grouped_feature_extractors = grouped_feature_extractors
-
-        self.id_to_name = id_to_name
 
     def execute(self):
         """
@@ -81,12 +88,13 @@ class AnalysisManagerAbstract(abc.ABC):
         """
 
         print(
-            f"Executing analysis with: \n"
-            f"batches_early_stop: {self.batches_early_stop} \n"
-            f"len(train_data): {self.train_size} \n"
-            f"len(val_data): {self.val_size} \n"
-            f"log directory: {self._log_writer.log_dir} \n"
-            f"feature extractor list: {self.grouped_feature_extractors}"
+            f"  - Executing analysis with: \n"
+            f"  - batches_early_stop: {self.batches_early_stop} \n"
+            f"  - len(train_data): {self.train_size} \n"
+            f"  - len(val_data): {self.val_size} \n"
+            f"  - log directory: {self.log_dir} \n"
+            f"  - Archive directory: {self.archive_dir} \n"
+            f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
         datasets_tqdm = tqdm.tqdm(
@@ -127,12 +135,14 @@ class AnalysisManagerAbstract(abc.ABC):
             for feature_extractor in feature_extractors:
                 feature = feature_extractor.aggregate()
 
-                self._log_writer.log_json(title=feature_extractor.title, data=feature.json)
+                # Save in the main directory and in the archive directory
+                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.log_dir, filename="stats.json")
+                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.archive_dir, filename="stats.json")
 
                 f = self.renderer.render(feature.data, feature.plot_options)
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
-                    image_path = os.path.join(self.output_folder, image_name)
+                    image_path = os.path.join(self.archive_dir, image_name)
                     f.savefig(image_path)
                     images_created.append(image_path)
                 else:
@@ -147,22 +157,21 @@ class AnalysisManagerAbstract(abc.ABC):
                 )
             summary.add_section(section)
 
-        output_path = os.path.join(self.output_folder, "report.pdf")
-        logger.info(f"Writing the result of the Data Analysis into: {output_path}")
-        self.html_writer.write(results_container=summary, output_filename=output_path)
+        # Save in the main directory and in the archive directory
+        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))
+        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
 
         # Cleanup of generated images
         for image_created in images_created:
             os.remove(image_created)
 
-        # Write all text data to json file
-        self._log_writer.save_as_json()
-
     def close(self):
         """Safe logging closing"""
-        self._log_writer.close()
-        self.config.answers_cache  # TODO: Save locally.
-        print(f'{"*" * 100}' f"\nWe have finished evaluating your dataset!" f"\nThe results can be seen in {self.output_folder}" f"\n")
+        print(f'{"*" * 100}')
+        print("We have finished evaluating your dataset!")
+        print("The results can be seen in:")
+        print(f"    - {self.log_dir}")
+        print(f"    - {self.archive_dir}")
 
     def run(self):
         """
@@ -188,3 +197,10 @@ class AnalysisManagerAbstract(abc.ABC):
         n_batches_available = max(self.train_size, self.val_size)
         n_batches_early_stop = self.batches_early_stop or float("inf")
         return min(n_batches_early_stop, n_batches_available)
+
+    @staticmethod
+    def write_json(data: Dict, output_dir: str, filename: str):
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, filename)
+        with open(output_path, "a") as f:
+            json.dump(data, f, indent=4)

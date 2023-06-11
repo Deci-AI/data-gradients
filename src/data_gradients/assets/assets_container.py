@@ -102,5 +102,3 @@ class Assets:
     def html(self):
         return self._html_assets
 
-
-assets = Assets(pkg_resources.resource_filename("assets", ""))

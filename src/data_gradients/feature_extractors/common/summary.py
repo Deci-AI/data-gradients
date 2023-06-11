@@ -7,7 +7,7 @@ from jinja2 import Template
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
-from data_gradients.utils.common.assets_container import assets
+from data_gradients.assets import assets
 from data_gradients.utils.data_classes.data_samples import ImageSample, SegmentationSample, DetectionSample
 
 
@@ -93,8 +93,8 @@ class SummaryStats(AbstractFeatureExtractor):
             basic_stats.med_image_resolution = self.format_resolution(basic_stats.images_resolutions[index_of_med][0])
 
             basic_stats.annotations_per_image = basic_stats.annotation_count / basic_stats.image_count
-            basic_stats.image_count = f'{basic_stats.image_count:,}'
-            basic_stats.annotation_count = f'{basic_stats.annotation_count:,}'
+            basic_stats.image_count = f"{basic_stats.image_count:,}"
+            basic_stats.annotation_count = f"{basic_stats.annotation_count:,}"
 
             # To support JSON - delete arrays
             basic_stats.classes = None
