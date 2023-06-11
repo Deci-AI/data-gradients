@@ -41,7 +41,8 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
             labels_palette=LABELS_PALETTE
         )
 
-        json = dict(df_class_count["n_components"].describe())
+        json = dict(train=dict(df_class_count[df_class_count["split"] == "train"]["n_components"].describe()),
+                    val=dict(df_class_count[df_class_count["split"] == "val"]["n_components"].describe()))
 
         feature = Feature(data=df_class_count, plot_options=plot_options, json=json)
         return feature

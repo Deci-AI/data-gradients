@@ -48,9 +48,13 @@ class DetectionBoundingBoxSize(AbstractFeatureExtractor):
             labels_palette=LABELS_PALETTE
         )
 
-        description = df.describe()
-        json = {"relative_width": dict(description["relative_width"]), "relative_height": dict(description["relative_height"])}
+        train_description = df[df["split"]=="train"].describe()
+        train_json = {"relative_width": dict(train_description["relative_width"]), "relative_height": dict(train_description["relative_height"])}
 
+        val_description = df[df["split"]=="val"].describe()
+        val_json = {"relative_width": dict(val_description["relative_width"]), "relative_height": dict(val_description["relative_height"])}
+
+        json = {"train": train_json, "val": val_json}
         feature = Feature(
             data=df,
             plot_options=plot_options,
