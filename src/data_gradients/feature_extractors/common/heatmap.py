@@ -34,23 +34,15 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
         most_used_classes = [class_name for (class_name, n_used_pixels) in most_used_heatmaps_tuples][: self.n_classes_to_show]
 
         # Normalize (0-1)
-        cleaned_heatmaps_per_split_per_cls = {}
+        normalized_heatmaps_per_split_per_cls = {}
         for class_name, heatmaps_per_split in self.heatmaps_per_split_per_cls.items():
             if class_name in most_used_classes:
-                cleaned_heatmaps_per_split_per_cls[class_name] = {}
+                normalized_heatmaps_per_split_per_cls[class_name] = {}
                 for split, heatmap in heatmaps_per_split.items():
-                    cleaned_heatmaps_per_split_per_cls[class_name][split] = (255 * (heatmap / heatmap.max())).astype(np.uint8)
+                    normalized_heatmaps_per_split_per_cls[class_name][split] = (255 * (heatmap / (heatmap.max() + 1e-6))).astype(np.uint8)
 
-        fig = combine_images_per_split_per_class(images_per_split_per_class=cleaned_heatmaps_per_split_per_cls, n_cols=self.n_cols)
+        fig = combine_images_per_split_per_class(images_per_split_per_class=normalized_heatmaps_per_split_per_cls, n_cols=self.n_cols)
         plot_options = FigureRenderer(title=self.title)
-        json = {class_name: "No Data" for class_name in cleaned_heatmaps_per_split_per_cls.keys()}
+        json = {class_name: "No Data" for class_name in normalized_heatmaps_per_split_per_cls.keys()}
 
         return Feature(data=fig, plot_options=plot_options, json=json)
-
-    @property
-    def title(self) -> str:
-        return "Heatmap of Objects"
-
-    @property
-    def description(self) -> str:
-        return "Show the areas of high density of components. This can be useful to understand if the objects are positioned in the right area."

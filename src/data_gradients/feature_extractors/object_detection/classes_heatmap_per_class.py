@@ -16,3 +16,15 @@ class DetectionClassHeatmap(BaseClassHeatmap):
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             self.heatmaps_per_split_per_cls[class_name][sample.split][y1:y2, x1:x2] += 1
             self.count_class_appearance[class_name] += 1
+
+    @property
+    def title(self) -> str:
+        return "Heatmap of Bounding Boxes"
+
+    @property
+    def description(self) -> str:
+        return (
+            "Show the areas of high density of Bounding Boxes. This can be useful to understand if the objects are positioned in the right area.\n"
+            f"Note that only top {self.n_classes_to_show} classes are shown. "
+            f" You can increase the number of classes by setting `DetectionClassHeatmap` with `n_classes_to_show`"
+        )
