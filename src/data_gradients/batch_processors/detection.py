@@ -11,13 +11,15 @@ class DetectionBatchProcessor(BatchProcessor):
     def __init__(
         self,
         *,
-        config: DetectionInteractiveConfig,
+        data_config: DetectionInteractiveConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int = 3,
     ):
-        dataset_adapter = DatasetAdapter(config=config)
-        formatter = DetectionBatchFormatter(config=config, class_names=class_names, class_names_to_use=class_names_to_use, n_image_channels=n_image_channels)
+        dataset_adapter = DatasetAdapter(data_config=data_config)
+        formatter = DetectionBatchFormatter(
+            data_config=data_config, class_names=class_names, class_names_to_use=class_names_to_use, n_image_channels=n_image_channels
+        )
         preprocessor = DetectionBatchPreprocessor(class_names=class_names)
 
         super().__init__(dataset_adapter=dataset_adapter, batch_formatter=formatter, batch_preprocessor=preprocessor)

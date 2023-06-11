@@ -23,7 +23,7 @@ class DetectionBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
-        config: DetectionDataConfig,
+        data_config: DetectionDataConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int,
@@ -37,7 +37,7 @@ class DetectionBatchFormatter(BatchFormatter):
         :param xyxy_converter:      Function to convert the bboxes to the `xyxy` format.
         :param label_first:         Whether the annotated_bboxes states with labels, or with the bboxes. (typically label_xyxy vs xyxy_label)
         """
-        self.config = config
+        self.data_config = data_config
 
         class_names_to_use = set(class_names_to_use)
         self.class_ids_to_use = [class_id for class_id, class_name in enumerate(class_names) if class_name in class_names_to_use]
@@ -71,8 +71,8 @@ class DetectionBatchFormatter(BatchFormatter):
             "Here's a sample of how your labels look like:\n"
             f"Each line corresponds to a bounding box, with the format you specified earlier.\n{labels[0, :3, :]}"
         )
-        self.label_first = self.config.get_is_label_first(hint=first_targets_hint)
-        self.xyxy_converter = self.config.get_xyxy_converter(hint=first_targets_hint)
+        self.label_first = self.data_config.get_is_label_first(hint=first_targets_hint)
+        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=first_targets_hint)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255

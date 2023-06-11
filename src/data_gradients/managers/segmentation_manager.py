@@ -16,7 +16,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        config: SegmentationDataConfig,
+        data_config: SegmentationDataConfig,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
@@ -65,7 +65,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         class_names_to_use = class_names_to_use or class_names
 
         batch_processor = SegmentationBatchProcessor(
-            config=config,
+            data_config=data_config,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
             n_image_channels=num_image_channels,
@@ -75,7 +75,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         grouped_feature_extractors = load_report_feature_extractors(config_name=config_name)
 
         super().__init__(
-            config=config,
+            data_config=data_config,
             report_title=report_title,
             report_subtitle=report_subtitle,
             train_data=train_data,

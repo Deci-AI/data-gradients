@@ -15,7 +15,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        config: DetectionInteractiveConfig,
+        data_config: DetectionInteractiveConfig,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
@@ -61,7 +61,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         class_names_to_use = class_names_to_use or class_names
 
         batch_processor = DetectionBatchProcessor(
-            config=config,
+            data_config=data_config,
             n_image_channels=n_image_channels,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
@@ -70,7 +70,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         feature_extractors = load_report_feature_extractors(config_name=config_name)
 
         super().__init__(
-            config=config,
+            data_config=data_config,
             report_title=report_title,
             report_subtitle=report_subtitle,
             train_data=train_data,

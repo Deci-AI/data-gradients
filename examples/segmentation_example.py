@@ -43,9 +43,9 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_dataset, batch_size=8)
     val_loader = DataLoader(val_dataset, batch_size=8)
 
-    config = DetectionDataConfig()
+    data_config = DetectionDataConfig()
     da = SegmentationAnalysisManager(
-        config=config,
+        data_config=data_config,
         report_title="Testing Data-Gradients",
         train_data=train_loader,
         val_data=val_loader,

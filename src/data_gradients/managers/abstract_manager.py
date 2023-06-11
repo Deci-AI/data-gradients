@@ -29,7 +29,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self,
         *,
         report_title: str,
-        config: DataConfig,
+        data_config: DataConfig,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
@@ -65,7 +65,7 @@ class AnalysisManagerAbstract(abc.ABC):
         # WRITERS
         self.renderer = SeabornRenderer()
         self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
-        self.config = config
+        self.data_config = data_config
 
         # DATA
         if batches_early_stop:

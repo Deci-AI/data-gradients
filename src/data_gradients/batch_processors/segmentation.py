@@ -11,14 +11,14 @@ class SegmentationBatchProcessor(BatchProcessor):
     def __init__(
         self,
         *,
-        config: SegmentationDataConfig,
+        data_config: SegmentationDataConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int = 3,
         threshold_value: float = 0.5,
     ):
 
-        dataset_adapter = DatasetAdapter(config=config)
+        dataset_adapter = DatasetAdapter(data_config=data_config)
         formatter = SegmentationBatchFormatter(
             class_names=class_names,
             class_names_to_use=class_names_to_use,
