@@ -48,7 +48,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
             labels_key="split",
             bandwidth=0.4,
         )
-        json = dict(df["bbox_area"].describe())
+        json = dict(train=dict(df[df["split"] == "train"]["bbox_area"].describe()), val=dict(df[df["split"] == "val"]["bbox_area"].describe()))
 
         feature = Feature(
             data=df,

@@ -22,6 +22,7 @@ class ImageFeatures(Enum):
     ImageMaxBrightness: float - The maximum brightness of the image pixels. To calculate this, the image is converted to grayscale.
 
     """
+
     DatasetSplit = "DatasetSplit"
     ImageId = "ImageId"
 
@@ -61,6 +62,7 @@ class BoundingBoxFeatures(Enum):
     BoundingBoxMaxOverlap: float - The maximum overlap of the bounding box with any other bounding box in the image.
 
     """
+
     DatasetSplit = "DatasetSplit"
     ImageId = "ImageId"
 
