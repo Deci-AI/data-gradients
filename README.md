@@ -43,24 +43,19 @@ First, prepare your `train_data` and `val_data`.
 This can be a pytorch dataset, dataloader or any type of data iterable.
 
 **Example**
-```
+``` python
 from torchvision.datasets import CocoDetection
 
 train_data = CocoDetection(...)
 ```
 
 **Good to know:**
-
-The output of the data iterables can be anything. 
-
-Data-Gradients will try to find out how you stored your image and labels.
-
-If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
-In some extreme cases, the process will crash and invite you to implement a custom dataset adapter.
+Data-Gradients will try to find out how the dataset returns images and labels.
+- If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
+- In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
 
 
-#### Object Detection Analyzer
-If your train_data/val_data returns targets/labels 
+### Object Detection Analyzer
 ```python
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
@@ -78,7 +73,7 @@ analyzer = DetectionAnalysisManager(
 analyzer.run()
 ```
 
-#### Segmentation Analyzer
+### Segmentation Analyzer
 ```python
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager 
 
