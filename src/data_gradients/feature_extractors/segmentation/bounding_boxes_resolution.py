@@ -45,12 +45,12 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
             individual_plots_key="split",
             tight_layout=True,
             sharey=True,
-            labels_palette=LABELS_PALETTE
+            labels_palette=LABELS_PALETTE,
         )
 
         train_description = df[df["split"] == "train"].describe()
         train_json = {"width": dict(train_description["width"]), "height": dict(train_description["height"])}
-        
+
         val_description = df[df["split"] == "val"].describe()
         val_json = {"width": dict(val_description["width"]), "height": dict(val_description["height"])}
 

@@ -47,8 +47,10 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
             labels_key="split",
         )
 
-        json = dict(train=dict(df_class_count[df_class_count["split"] == "train"]["n_appearance"].describe()),
-                    val=dict(df_class_count[df_class_count["split"] == "val"]["n_appearance"].describe()))
+        json = dict(
+            train=dict(df_class_count[df_class_count["split"] == "train"]["n_appearance"].describe()),
+            val=dict(df_class_count[df_class_count["split"] == "val"]["n_appearance"].describe()),
+        )
 
         feature = Feature(
             data=df_class_count,

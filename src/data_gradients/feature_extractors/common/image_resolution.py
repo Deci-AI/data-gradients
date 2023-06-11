@@ -40,7 +40,7 @@ class ImagesResolution(AbstractFeatureExtractor):
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
                 sharey=True,
-                labels_palette=LABELS_PALETTE
+                labels_palette=LABELS_PALETTE,
             )
         else:
             plot_options = Hist2DPlotOptions(
@@ -56,7 +56,7 @@ class ImagesResolution(AbstractFeatureExtractor):
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
                 sharey=True,
-                labels_palette=LABELS_PALETTE
+                labels_palette=LABELS_PALETTE,
             )
 
         train_description = df[df["split"] == "train"].describe()

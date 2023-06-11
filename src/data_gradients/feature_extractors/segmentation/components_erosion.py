@@ -51,8 +51,10 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
             sharey=True,
         )
 
-        json = dict(train=dict(df[df["split"] == "train"]["percent_change_of_n_components"].describe()),
-                    val=dict(df[df["split"] == "val"]["percent_change_of_n_components"].describe()))
+        json = dict(
+            train=dict(df[df["split"] == "train"]["percent_change_of_n_components"].describe()),
+            val=dict(df[df["split"] == "val"]["percent_change_of_n_components"].describe()),
+        )
 
         return Feature(data=df, plot_options=plot_options, json=json)
 

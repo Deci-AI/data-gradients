@@ -43,9 +43,9 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             bandwidth=0.4,
         )
 
-        json = dict(train=dict(df[df["split"] == "train"]["relative_bbox_area"].describe()),
-                    val=dict(df[df["split"] == "val"]["relative_bbox_area"].describe()))
-
+        json = dict(
+            train=dict(df[df["split"] == "train"]["relative_bbox_area"].describe()), val=dict(df[df["split"] == "val"]["relative_bbox_area"].describe())
+        )
 
         feature = Feature(
             data=df,

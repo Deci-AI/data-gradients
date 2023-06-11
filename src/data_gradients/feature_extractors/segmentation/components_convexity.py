@@ -40,8 +40,7 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
             sharey=True,
         )
 
-        json = dict(train=dict(df[df["split"] == "train"]["convexity_measure"].describe()),
-                    val=dict(df[df["split"] == "val"]["convexity_measure"].describe()))
+        json = dict(train=dict(df[df["split"] == "train"]["convexity_measure"].describe()), val=dict(df[df["split"] == "val"]["convexity_measure"].describe()))
 
         feature = Feature(
             data=df,
