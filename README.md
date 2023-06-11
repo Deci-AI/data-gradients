@@ -1,4 +1,4 @@
-# Data-Gradients
+# DataGradients
 <div align="center">
 <p align="center">
   <a href="https://github.com/Deci-AI/super-gradients#prerequisites"><img src="https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue" /></a>
@@ -8,19 +8,19 @@
 </p>   
 </div>
 
-Data-Gradients is an open-source python based library specifically designed for computer vision dataset analysis. 
+DataGradients is an open-source python based library specifically designed for computer vision dataset analysis. 
 
 It automatically extracts features from your datasets and combines them all into a single user-friendly report. 
 
 ## Features
-- Image-Level Evaluation: Data-Gradients evaluates key image features such as resolution, color distribution, and average brightness.
+- Image-Level Evaluation: DataGradients evaluates key image features such as resolution, color distribution, and average brightness.
 - Class Distribution: The library extracts stats allowing to know which classes are the most used, how many objects do you have per image, how many image without any label, ...
-- Heatmap Generation: Data-Gradients produces heatmaps of bounding boxes or masks allowing you to understand if the objects are positioned in the right area.
+- Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks allowing you to understand if the objects are positioned in the right area.
 - And many more!
 
 
 ## Installation
-You can install Data-Gradients directly from the Github repository.
+You can install DataGradients directly from the Github repository.
 
 ```
 pip install git+https://github.com/Deci-AI/data-gradients
@@ -41,7 +41,7 @@ train_data = CocoDetection(...)
 ```
 
 **Good to know:**
-Data-Gradients will try to find out how the dataset returns images and labels.
+DataGradients will try to find out how the dataset returns images and labels.
 - If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
 - In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
 
@@ -109,31 +109,59 @@ Once the analysis is done, the path to your pdf report will be printed.
 
 
 ## Dataset Adapters
-Dataset Adapters are useful when your dataset does not return a standard batch/sample.
-You can first try to run without, and only implement an adapter (`images_extractor` or `labels_extractor`) if you get an exception telling you to do so.  
+Before implementing a Dataset Adapter try running without it, in many cases DataGradient will support your dataset without any code.
+
+Two type of Dataset Adapters are available: `images_extractor` and `labels_extractor`. These functions should be passed to the main Analyzer function init.
+
+```python
+from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
+
+train_data = ...
+val_data = ...
+
+# Let Assume that in this case, the  train_data and val_data return data in this format:
+# (image, {"masks", "bboxes"})
+images_extractor = lambda data: data[0]             # Extract the image
+labels_extractor = lambda data: data[1]['masks']    # Extract the masks
+
+# In case of segmentation. 
+SegmentationAnalysisManager(
+    report_title="Test with Adapters",
+    train_data=train_data,
+    val_data=val_data,
+    images_extractor=images_extractor, 
+    labels_extractor=labels_extractor, 
+)
+
+# For Detection, just change the Manager and the label_extractor definition.
+```
 
 ### Image Adapter
-You can provide an Image Adapter function: `images_extractor(data: Any) -> torch.Tensor:`
+Image Adapter functions should follow the following:
+
+`images_extractor(data: Any) -> torch.Tensor`
 
 - `data` being the output of the dataset/dataloader that you provided.
-- The function should return a Tensor representing your image(s):
+- The function should return a Tensor representing your image(s). One of:
   - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch
   - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image
     - With `C`: number of channels (3 for RGB)
 
 
 ### Label Adapter
-You can provide an Image Adapter function: `labels_extractor(data: Any) -> torch.Tensor`
+Label Adapter functions should follow the following: 
+
+`labels_extractor(data: Any) -> torch.Tensor`
 
 - `data` being the output of the dataset/dataloader that you provided.
 - The function should return a Tensor representing your labels(s):
-  - **Segmentation**
+  - For **Segmentation**, one of: 
     - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch
     - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image
       - `BS`: Batch Size
       - `C`: number of channels - 3 for RGB
       - `H`, `W`: Height and Width
-  - **Detection**
+  - For **Detection**, one of:
     - `(BS, N, 5)`, `(N, 6)` for batch
     - `(N, 5)` for single image
       - `BS`: Batch Size
