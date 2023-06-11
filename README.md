@@ -1,4 +1,185 @@
+# <Your Library Name>
+
+Data-Gradients is an open-source Exploratory Data Analysis (EDA) library specifically designed for computer vision applications. 
+It automatically extracts features from your datasets and combines them all into a single user-friendly report. 
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+
+## Features
+
+Here, list out the features of your library. If there are many, consider using bullet points for each one. For example:
+
+- Feature 1: Description of feature 1
+- Feature 2: Description of feature 2
+- etc.
+
+## Installation
+
+Provide clear instructions on how to install your library. For example:
+
+To install Data-Gradients, you first need to clone the repository
+
+```
+git clone https://github.com/Deci-AI/data-gradients
+```
+
+Move the local directory
+```
+cd data-gradients
+```
+
+Install Data-Gradients
+```
+pip install .
+```
+
+## Quick Start
+
+First, prepare your train_data and val_data.
+This can be a pytorch dataset, dataloader or any type of data iterable.
+
+The output of these data iterables can be anything. 
+Data-Gradients will try to find out how you stored your image and labels.
+If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
+In some extreme cases, the process will crash and ask you to provide a clear adapter.
+
+### Image Adapter
+You can provide an Image Adapter function: `images_extractor(data: Any) -> torch.Tensor:`
+
+- `data` being the output of the dataset/dataloader that you provided.
+- The function should return a Tensor representing your image(s):
+  - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch, with `C`: number of channels (3 for RGB)
+  - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image, with `C`: number of channels (3 for RGB)
+
+
+---
+class LabelsExtractorError(Exception):
+    def __init__(self):
+        msg = (
+            "\n\nERROR: Something went wrong when extracting Labels!\n"
+            "Please implement and pass to the config the following function `labels_extractor(data: Any) -> torch.Tensor:`\n"
+            "Make sure to:\n"
+            "     - `data` being the output of the dataset/dataloader that you provided.\n"
+            "     - The function should return a Tensor representing your label(s). Possible formats are:\n"
+            "             - (BS, C, H, W), (BS, H, W, C), (BS, H, W) for batch in segmentation.\n"
+            "             - (C, H, W), (H, W, C), (H, W) for single image in segmentation.\n"
+        )
+        super().__init__(msg)
+
+#### Object Detection
+If your train_data/val_data returns targets/labels 
+```python
+from data_gradients.managers.detection_manager import DetectionAnalysisManager
+
+train_loader = ...
+val_loader = ...
+class_names = ...
+
+analyzer = DetectionAnalysisManager(
+    report_title="Testing Data-Gradients",
+    train_data=train_loader,
+    val_data=val_loader,
+    class_names=class_names,
+)
+
+analyzer.run()
+```
+
+#### Segmentation
+```python
+from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager 
+
+train_loader = ...
+val_loader = ...
+class_names = ...
+
+analyzer = SegmentationAnalysisManager(
+    report_title="Testing Data-Gradients",
+    train_data=train_loader,
+    val_data=val_loader,
+    class_names=class_names,
+)
+
+analyzer.run()
+```
+
+## Examples
+
+Provide or link to more extensive examples if they're too long to fit within the ReadMe. For example:
+
+Check out these more detailed examples to get a sense of what you can do with <Your Library Name>:
+
+- [Example 1](link to example 1)
+- [Example 2](link to example 2)
+
+## Contributing
+
+Encourage others to contribute to your project. Describe how they can do that. For example:
+
+Contributions to <Your Library Name> are very welcome! If you have a feature request, bug report, or have written code you want to contribute, please first read our [Contributing Guide](link to contributing guide) and then [open an issue](link to new issue page on your GitHub).
+
+## License
+
+Specify the license under which you're releasing your code. For example:
+
+<Your Library Name> is licensed under the [MIT License](link to the license).
+
+## Acknowledgements
+
+Here, acknowledge the people who helped you and/or inspired you to create this library.
+
+- [Name 1](link to their GitHub or website)
+- [Name 2](link to their GitHub or website)
+- etc.
+
+```
+
+Remember to replace the placeholders `<Your Library Name>`, `function1`, `function2`, etc., with actual content. Additionally, the template assumes you're distributing your library via pip and that your project is hosted on GitHub, so adjust those details as needed.
+
+
 # Data Gradients
+
+Pyhon based open source project
+- EDA tool
+- Extract features from Computer Vision datasets
+  - Segmentation
+  - Detection
+
+
+- Designed to help Practitioners to better understand their data
+    - See if anything is wrong in the dataset
+    - See if the train/validation splits make sense (For instance if a cass is not represented in the training we won't be able to learn it)
+    - Evaluate dataset quality - If you are looking for a dataset to train on
+    - Find proxy datasets - that includes similar features to the original dataset
+
+
+# How to use
+- Designed to run in a few clicks
+  - Works with datasets, dataloaders and any data iterator 
+  
+
+- Generate a PDF report with
+  - Graph representing the feature (distribution, violinplot, heatmap, etc)
+  - Short description of what can be seen in that feature
+
+
+
+
+
+
+
+
+
+
+
 ## What is this?
 A Python-based repository that extracts meta data from your data loaders and visualizes it.
 #### The benefits of Data Gradients
