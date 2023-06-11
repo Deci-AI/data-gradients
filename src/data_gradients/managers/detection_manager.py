@@ -1,9 +1,9 @@
-from typing import Optional, Iterable, Dict, List
+from typing import Optional, Iterable, List
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.detection import DetectionBatchProcessor
-from data_gradients.config.interactive_config import DetectionInteractiveConfig
+from data_gradients.config.data_config import DetectionDataConfig
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -15,7 +15,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        data_config: DetectionInteractiveConfig,
+        data_config: Optional[DetectionDataConfig] = None,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
@@ -24,7 +24,6 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         n_classes: Optional[int] = None,
         config_name: str = "detection",
         log_dir: Optional[str] = None,
-        id_to_name: Optional[Dict] = None,
         batches_early_stop: int = 999,
         n_image_channels: int = 3,
     ):
@@ -41,10 +40,9 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
         :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
-        :param images_extractor:
-        :param labels_extractor:
         :param n_image_channels:      Number of channels for each image in the dataset
         """
+        data_config = data_config or DetectionDataConfig()
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
@@ -78,6 +76,5 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             batch_processor=batch_processor,
             grouped_feature_extractors=feature_extractors,
             log_dir=log_dir,
-            id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
         )

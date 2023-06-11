@@ -1,7 +1,6 @@
 import os
 import abc
 import logging
-import json
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
@@ -10,12 +9,13 @@ import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
+from data_gradients.utils.json_writer import JsonWriter
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
-
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
-from data_gradients.config.interactive_config import DataConfig
+from data_gradients.config.data_config import DataConfig
 
-logging.basicConfig(level=logging.WARNING)
+
+logging.basicConfig(level=logging.INFO)
 
 logger = getLogger(__name__)
 
@@ -36,7 +36,6 @@ class AnalysisManagerAbstract(abc.ABC):
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
-        id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
     ):
         """
@@ -65,7 +64,10 @@ class AnalysisManagerAbstract(abc.ABC):
         # WRITERS
         self.renderer = SeabornRenderer()
         self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
+        self.json_writer = JsonWriter(source_path=os.path.join(self.log_dir, "summary.json"))
+
         self.data_config = data_config
+        self.data_config.answers_cache = self.json_writer.cache
 
         # DATA
         if batches_early_stop:
@@ -136,13 +138,12 @@ class AnalysisManagerAbstract(abc.ABC):
                 feature = feature_extractor.aggregate()
 
                 # Save in the main directory and in the archive directory
-                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.log_dir, filename="stats.json")
-                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.archive_dir, filename="stats.json")
+                self.json_writer.log_data(title=feature_extractor.title, data=feature.json)
 
                 f = self.renderer.render(feature.data, feature.plot_options)
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
-                    image_path = os.path.join(self.archive_dir, image_name)
+                    image_path = os.path.join(self.log_dir, image_name)
                     f.savefig(image_path)
                     images_created.append(image_path)
                 else:
@@ -158,6 +159,9 @@ class AnalysisManagerAbstract(abc.ABC):
             summary.add_section(section)
 
         # Save in the main directory and in the archive directory
+        self.json_writer.cache = self.data_config.answers_cache
+        self.json_writer.write(output_path=os.path.join(self.log_dir, "Summary.json"))
+        self.json_writer.write(output_path=os.path.join(self.archive_dir, "Summary.json"))
         self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))
         self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
 
@@ -197,10 +201,3 @@ class AnalysisManagerAbstract(abc.ABC):
         n_batches_available = max(self.train_size, self.val_size)
         n_batches_early_stop = self.batches_early_stop or float("inf")
         return min(n_batches_early_stop, n_batches_available)
-
-    @staticmethod
-    def write_json(data: Dict, output_dir: str, filename: str):
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, filename)
-        with open(output_path, "a") as f:
-            json.dump(data, f, indent=4)

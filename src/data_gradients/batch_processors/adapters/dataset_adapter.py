@@ -6,7 +6,7 @@ import torch
 from torchvision.transforms import transforms
 
 from data_gradients.batch_processors.adapters.tensor_extractor import get_tensor_extractor_options
-from data_gradients.config.interactive_config import DataConfig, Question
+from data_gradients.config.data_config import DataConfig, Question
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
@@ -38,9 +38,9 @@ class DatasetAdapter:
         if isinstance(data, (Tuple, List)) and len(data) == 2:
             if isinstance(data[0], (torch.Tensor, np.ndarray, PIL.Image.Image)):
                 # Save it in the data_config to include this information when logging the data_config
-                self.data_config.image_extractor = lambda x: self.to_torch(x[0])
-                self.data_config.answers_cache["image_extractor"] = "[0]"  # For traceability
-                return self.data_config.image_extractor
+                self.data_config.images_extractor = lambda x: self.to_torch(x[0])
+                self.data_config.answers_cache["images_extractor"] = "[0]"  # For traceability
+                return self.data_config.images_extractor
 
         # If data != data == Tuple[Union[Tensor, np.ndarray, Image], ...] but we can still extract the image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):

@@ -4,14 +4,14 @@ from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
 from data_gradients.batch_processors.formatters.detection import DetectionBatchFormatter
 from data_gradients.batch_processors.preprocessors.detection import DetectionBatchPreprocessor
-from data_gradients.config.interactive_config import DetectionInteractiveConfig
+from data_gradients.config.data_config import DetectionDataConfig
 
 
 class DetectionBatchProcessor(BatchProcessor):
     def __init__(
         self,
         *,
-        data_config: DetectionInteractiveConfig,
+        data_config: DetectionDataConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int = 3,

@@ -1,9 +1,9 @@
-from typing import Optional, Iterable, Dict, List
+from typing import Optional, Iterable, List
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
-from data_gradients.config.interactive_config import SegmentationDataConfig
+from data_gradients.config.data_config import SegmentationDataConfig
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -16,7 +16,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        data_config: SegmentationDataConfig,
+        data_config: Optional[SegmentationDataConfig] = None,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
@@ -25,7 +25,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         report_subtitle: Optional[str] = None,
         config_name: str = "semantic_segmentation",
         log_dir: Optional[str] = None,
-        id_to_name: Optional[Dict] = None,
         batches_early_stop: int = 999,
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
@@ -49,6 +48,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
         """
+        data_config = data_config or SegmentationDataConfig()
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
@@ -83,6 +83,5 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             batch_processor=batch_processor,
             grouped_feature_extractors=grouped_feature_extractors,
             log_dir=log_dir,
-            id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
         )

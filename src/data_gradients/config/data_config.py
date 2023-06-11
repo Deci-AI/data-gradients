@@ -62,11 +62,10 @@ class DataConfig(ABC):
         :param hint:        Hint to display to the user. This is only displayed when asking a question to the user, and aims at providing extra context,
                                 such as showing a sample of data, to help the user answer the question.
         """
-
         if caching_key not in self.answers_cache:
             self.answers_cache[caching_key] = ask_user(question.question, options=list(question.options.keys()), optional_description=hint)
         cached_answer = self.answers_cache[caching_key]
-        return question.options[cached_answer]
+        return question.options.get(cached_answer)
 
     def get_images_extractor(self, question: Question, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
         if self.images_extractor is None:
