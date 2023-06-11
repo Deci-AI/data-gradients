@@ -89,6 +89,24 @@ If you want to test it without having to download any datasets, you can check th
 ### Report
 Once the analysis is done, the path to your pdf report will be printed.
 
+**Example of features**
+
+<details markdown="1">
+  <summary>Image stats</summary>
+  <img src="assets/report_image_stats.png">
+</details>
+
+<details markdown="1">
+  <summary>Image and Mask Visualization</summary>
+  <img src="assets/report_mask_sample.png">
+</details>
+
+<details markdown="1">
+  <summary>Classes Distribution</summary>
+  <img src="assets/report_classes_distribution.png">
+</details>
+
+
 
 ## Dataset Adapters
 Dataset Adapters are useful when your dataset does not return a standard batch/sample.
