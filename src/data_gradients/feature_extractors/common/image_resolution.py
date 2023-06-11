@@ -40,7 +40,7 @@ class ImagesResolution(AbstractFeatureExtractor):
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
                 sharey=True,
-                labels_palette=LABELS_PALETTE
+                labels_palette=LABELS_PALETTE,
             )
         else:
             plot_options = Hist2DPlotOptions(
@@ -56,11 +56,16 @@ class ImagesResolution(AbstractFeatureExtractor):
                 individual_plots_key="split",
                 individual_plots_max_cols=2,
                 sharey=True,
-                labels_palette=LABELS_PALETTE
+                labels_palette=LABELS_PALETTE,
             )
 
-        description = df.describe()
-        json = {"width": dict(description["width"]), "height": dict(description["height"])}
+        train_description = df[df["split"] == "train"].describe()
+        train_json = {"width": dict(train_description["width"]), "height": dict(train_description["height"])}
+
+        val_description = df[df["split"] == "val"].describe()
+        val_json = {"width": dict(val_description["width"]), "height": dict(val_description["height"])}
+
+        json = {"train": train_json, "val": val_json}
 
         feature = Feature(
             data=df,

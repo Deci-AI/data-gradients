@@ -74,7 +74,13 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             labels_palette=self.palette,
             sharey=True,
         )
-        json = {color: dict(df[df["Color"] == color]["n"].describe()) for color in self.colors}
+        df_train = df[df["split"] == "train"]
+        train_json = {color: dict(df_train[df_train["Color"] == color]["n"].describe()) for color in self.colors}
+
+        df_val = df[df["split"] == "val"]
+        val_json = {color: dict(df_val[df_val["Color"] == color]["n"].describe()) for color in self.colors}
+
+        json = {"train": train_json, "val": val_json}
 
         feature = Feature(
             data=df,
