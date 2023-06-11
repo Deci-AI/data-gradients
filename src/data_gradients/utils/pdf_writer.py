@@ -5,7 +5,7 @@ from jinja2 import Template
 from xhtml2pdf import pisa
 
 import data_gradients
-from data_gradients.utils.common.assets_container import assets
+from data_gradients.assets import assets
 
 
 @dataclass
