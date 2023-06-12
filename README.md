@@ -22,6 +22,7 @@ It automatically extracts features from your datasets and combines them all into
   <img src="assets/report_image_stats.png" width="250px">
   <img src="assets/report_mask_sample.png" width="250px">
   <img src="assets/report_classes_distribution.png" width="250px">
+  <p><em>Example of pages from the Report</em>
 </div>
 
 ## Installation
