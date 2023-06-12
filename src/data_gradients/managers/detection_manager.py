@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Iterable, Dict, Callable, List
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
@@ -20,7 +21,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
-        config_name: str = "detection",
+        config_path: Optional[str] = None,
         log_dir: Optional[str] = None,
         id_to_name: Optional[Dict] = None,
         batches_early_stop: int = 999,
@@ -37,7 +38,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
-        :param config_name:             Name of the hydra configuration file
+        :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used.
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
         :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
@@ -60,6 +61,13 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         class_names_to_use = class_names_to_use or class_names
 
+        # Resolve `config_dir` and `config_name` defining the feature extractors.
+        if config_path is None:
+            config_dir, config_name = None, "detection"
+        else:
+            config_path = os.path.abspath(config_path)
+            config_dir, config_name = os.path.dirname(config_path), os.path.basename(config_path).split(".")[0]
+
         batch_processor = DetectionBatchProcessor(
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
@@ -68,7 +76,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             class_names_to_use=class_names_to_use,
         )
 
-        feature_extractors = load_report_feature_extractors(config_name=config_name)
+        feature_extractors = load_report_feature_extractors(config_name=config_name, config_dir=config_dir)
 
         super().__init__(
             report_title=report_title,
