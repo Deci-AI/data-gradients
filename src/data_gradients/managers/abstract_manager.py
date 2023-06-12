@@ -154,9 +154,9 @@ class AnalysisManagerAbstract(abc.ABC):
 
                 f = self.renderer.render(feature.data, feature.plot_options)
                 if f is not None:
-                    image_name = feature_extractor.__class__.__name__ + ".png"
+                    image_name = feature_extractor.__class__.__name__ + ".svg"
                     image_path = os.path.join(self.archive_dir, image_name)
-                    f.savefig(image_path)
+                    f.savefig(image_path, dpi=1200)
                     images_created.append(image_path)
                 else:
                     image_path = None
