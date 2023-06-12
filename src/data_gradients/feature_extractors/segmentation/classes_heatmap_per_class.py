@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from data_gradients.common.registry.registry import register_feature_extractor
+from data_gradients.utils.image_processing import resize_in_chunks
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.feature_extractors.common.heatmap import BaseClassHeatmap
 
@@ -17,7 +18,7 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
 
         # Objects are resized to a fix size
         mask = sample.mask.transpose((1, 2, 0))
-        resized_masks = cv2.resize(src=mask, dsize=self.heatmap_dim, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
+        resized_masks = resize_in_chunks(img=mask, size=self.heatmap_dim, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
         resized_masks = resized_masks.transpose((2, 0, 1))
 
         split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_dim)))
