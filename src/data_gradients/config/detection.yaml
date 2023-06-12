@@ -1,16 +1,16 @@
 report_sections:
   - name: Image Features
     features:
-      - SummaryStats
-      - ImagesResolution
-      - ImageColorDistribution
+#      - SummaryStats
+#      - ImagesResolution
+#      - ImageColorDistribution
       - ImagesAverageBrightness
   - name: Object Detection Features
     features:
-      - DetectionSampleVisualization
+#      - DetectionSampleVisualization
       - DetectionClassHeatmap
-      - DetectionBoundingBoxArea
-      - DetectionBoundingBoxPerImageCount
-      - DetectionBoundingBoxSize
-      - DetectionClassesCount
-      - DetectionClassesPerImageCount
+#      - DetectionBoundingBoxArea
+#      - DetectionBoundingBoxPerImageCount
+#      - DetectionBoundingBoxSize
+#      - DetectionClassesCount
+#      - DetectionClassesPerImageCount

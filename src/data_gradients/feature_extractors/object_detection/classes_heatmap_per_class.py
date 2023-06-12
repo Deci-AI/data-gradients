@@ -18,9 +18,8 @@ class DetectionClassHeatmap(BaseClassHeatmap):
         split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_dim)))
 
         for class_id, (x1, y1, x2, y2) in zip(sample.class_ids, bboxes_xyxy):
-            class_name = sample.class_names[class_id]
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-            split_heatmap[class_name:, y1:y2, x1:x2] += 1
+            split_heatmap[class_id, y1:y2, x1:x2] += 1
 
         self.heatmaps_per_split[sample.split] = split_heatmap
 
