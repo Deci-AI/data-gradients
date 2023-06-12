@@ -233,7 +233,7 @@ class AnalysisManagerAbstract(abc.ABC):
             portion_train = ""
         else:
             total_train_samples = self.train_size * self._train_batch_size
-            portion_train = f" ({self._train_iters_done/total_train_samples:.1%})."
+            portion_train = f" ({self._train_iters_done/total_train_samples:.1%})"
 
         if self.val_size is None or self._val_batch_size is None:
             total_val_samples = "unknown amount of "
@@ -241,7 +241,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         else:
             total_val_samples = self.val_size * self._val_batch_size
-            portion_val = f" ({self._val_iters_done/total_val_samples:.1%})."
+            portion_val = f" ({self._val_iters_done/total_val_samples:.1%})"
 
         msg_head = "The results presented in this report cover only a subset of the data.\n"
         msg_train = f"Train set: {self._train_iters_done} out of {total_train_samples} samples were analyzed{portion_train}.\n"
