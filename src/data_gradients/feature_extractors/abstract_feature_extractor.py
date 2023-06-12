@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -37,6 +37,14 @@ class AbstractFeatureExtractor(ABC):
     @property
     def title(self) -> str:
         raise NotImplementedError()
+
+    @property
+    def notice(self) -> Optional[str]:
+        return None
+
+    @property
+    def warning(self) -> Optional[str]:
+        return None
 
     def __repr__(self):
         return self.__class__.__name__

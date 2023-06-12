@@ -5,26 +5,27 @@ import cv2
 import numpy as np
 
 
-def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, class_names: np.ndarray) -> np.ndarray:
+def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, bboxes_ids: np.ndarray, class_names: List[str]) -> np.ndarray:
     """Draw annotated bboxes on an image.
 
     :param image:       Input image tensor.
     :param bboxes_xyxy: BBoxes, in [N, 4].
-    :param class_names: Labels [N].
+    :param bboxes_ids:  Class ids [N].
+    :param class_names: List of class names. (unique, not per bbox)
     :return:            Image with annotated bboxes.
     """
-    if len(class_names) == 0:
+    if len(bboxes_ids) == 0:
         return image
-    unique_class_names = list(set(class_names))
-    colors = generate_color_mapping(len(unique_class_names) + 1)
+    colors = generate_color_mapping(len(class_names) + 1)
 
-    for (x1, y1, x2, y2), class_name in zip(bboxes_xyxy, class_names):
-
+    for (x1, y1, x2, y2), class_id in zip(bboxes_xyxy, bboxes_ids):
+        class_name = class_names[class_id]
         title = class_name if not class_name.isdigit() else f"class_id={class_name}"
+
         image = draw_bbox(
             image=image,
             title=title,
-            color=colors[unique_class_names.index(class_name)],
+            color=colors[class_names.index(class_name)],
             box_thickness=2,
             x1=x1,
             y1=y1,
