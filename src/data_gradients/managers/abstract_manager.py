@@ -140,6 +140,8 @@ class AnalysisManagerAbstract(abc.ABC):
                         name=feature_extractor.title,
                         description=feature_extractor.description,
                         image_path=image_path,
+                        warning=feature_extractor.warning,
+                        notice=feature_extractor.notice
                     )
                 )
             summary.add_section(section)

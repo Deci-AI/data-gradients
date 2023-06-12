@@ -200,6 +200,30 @@
         font-size: 18px;
     }
 
+    .alert-box {
+        color: #555;
+        border-radius: 10px;
+        font-family: Tahoma, Geneva, Arial, sans-serif;
+        font-size: 11px;
+        padding: 10px 10px 10px 10px;
+        margin: 10px;
+    }
+
+    .alert-box span {
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .warning {
+        background: #fff8c4 url('images/warning.png') no-repeat 10px 50%;
+        border: 1px solid #f2c779;
+    }
+
+    .notice {
+        background: #e3f7fc url('images/notice.png') no-repeat 10px 50%;
+        border: 1px solid #8ed9f6;
+    }
+
     @page {
         size: a4 portrait;
         @frame header_frame_first { /* Static Frame */
@@ -283,6 +307,18 @@
                 <p class="feature_class"><span class="c4">{{feature.description}}</span>
                 <p class="feature_separator">&nbsp;
                 <p class="c0 c2"><span class="c1"></span></p>
+                {% if feature.notice is not none %}
+                <div class="alert-box notice">
+                    <span><img  src="{{assets.image.info}}" width="40pt" height="25pt">Notice: </span>
+                    {{feature.notice}}
+                </div>
+                {% endif %}
+                {% if feature.warning is not none %}
+                <div class="alert-box warning">
+                    <span><img  src="{{assets.image.warning}}" width="40pt" height="25pt">Warning: </span>
+                    {{feature.warning}}
+                </div>
+                {% endif %}
             {% endfor %}
         <p class="c0 c2"><span class="c1"></span></p>
         <p class="c0 c2"><span class="c1"></span></p>

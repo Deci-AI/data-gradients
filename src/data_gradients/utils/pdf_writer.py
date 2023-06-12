@@ -13,6 +13,8 @@ class FeatureSummary:
     name: str
     description: str
     image_path: str
+    notice: str = None
+    warning: str = None
 
 
 class Section:
@@ -76,7 +78,7 @@ class PDFWriter:
             raise RuntimeError("filename must end with .pdf")
 
         doc = self.template.render(title=self.title, subtitle=self.subtitle, results=results_container, version=data_gradients.__version__,
-                                   train_color=self.train_color, val_color=self.val_color, logo=assets.image.logo)
+                                   train_color=self.train_color, val_color=self.val_color, logo=assets.image.logo, assets=assets)
 
         with open(output_filename, "w+b") as result_file:
             pisa.CreatePDF(doc, dest=result_file)
