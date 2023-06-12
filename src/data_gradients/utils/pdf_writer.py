@@ -13,6 +13,8 @@ class FeatureSummary:
     name: str
     description: str
     image_path: str
+    notice: str = None
+    warning: str = None
 
 
 class Section:
@@ -76,6 +78,7 @@ class PDFWriter:
             train_color=self.train_color,
             val_color=self.val_color,
             logo=assets.image.logo,
+            assets=assets,
         )
 
         with open(output_filename, "w+b") as result_file:
