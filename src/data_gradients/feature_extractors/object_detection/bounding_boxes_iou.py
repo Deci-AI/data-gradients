@@ -74,7 +74,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
 
             # Add "All classes" label
             counts = np.concatenate([counts, np.sum(counts, axis=0, keepdims=True)], axis=0)
-            normalized_counts = counts / np.clip(counts[:, 0:1], a_min=1, a_max=None)
+            normalized_counts = (100 * counts / np.clip(counts[:, 0:1], a_min=1, a_max=None)).astype(int)
 
             data[split] = normalized_counts
 
@@ -84,7 +84,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             x_label_name="IoU range",
             y_label_name="Class",
             cbar=True,
-            fmt=".2f",
+            fmt="d",
             cmap="rocket_r",
             annot=True,
             title=self.title,
