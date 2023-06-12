@@ -125,7 +125,7 @@ SegmentationAnalysisManager(
 ```
 
 ### Image Adapter
-Image Adapter functions should follow the following:
+Image Adapter functions should respect the following:
 
 `images_extractor(data: Any) -> torch.Tensor`
 
@@ -137,7 +137,7 @@ Image Adapter functions should follow the following:
 
 
 ### Label Adapter
-Label Adapter functions should follow the following: 
+Label Adapter functions should respect the following: 
 
 `labels_extractor(data: Any) -> torch.Tensor`
 
