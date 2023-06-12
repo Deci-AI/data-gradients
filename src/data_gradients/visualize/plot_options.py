@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import dataclasses
-from typing import Mapping, Optional, Tuple, Union
+from typing import Mapping, Optional, Tuple, Union, List
 
 import pandas as pd
 
@@ -268,6 +268,20 @@ class ScatterPlotOptions(CommonPlotOptions):
 
     sharey: Union[bool, str] = False
 
+
+@dataclasses.dataclass
+class HeatmapOptions(CommonPlotOptions):
+    x_label_name: str
+    y_label_name: str
+    xticklabels: Union[bool, List[str]]
+    yticklabels: Union[bool, List[str]]
+    cbar:bool
+    cmap: str
+    annot:bool
+    square: bool
+    tight_layout: bool = False
+    figsize: Optional[Tuple[int, int]] = (10, 6)
+    fmt: str = None
 
 @dataclasses.dataclass
 class FigureRenderer(CommonPlotOptions):
