@@ -2,17 +2,17 @@ report_sections:
   - name: Image Features
     features:
       - SummaryStats
-      - ImagesResolution
-      - ImageColorDistribution
-      - ImagesAverageBrightness
+#      - ImagesResolution
+#      - ImageColorDistribution
+#      - ImagesAverageBrightness
   - name: Segmentation Features
     features:
-      - SegmentationSampleVisualization
+#      - SegmentationSampleVisualization
       - SegmentationClassHeatmap
-      - SegmentationClassesCount
-      - SegmentationClassesPerImageCount
-      - SegmentationComponentsPerImageCount
-      - SegmentationBoundingBoxResolution
-      - SegmentationBoundingBoxArea
-      - SegmentationComponentsConvexity
-      - SegmentationComponentsErosion
+#      - SegmentationClassesCount
+#      - SegmentationClassesPerImageCount
+#      - SegmentationComponentsPerImageCount
+#      - SegmentationBoundingBoxResolution
+#      - SegmentationBoundingBoxArea
+#      - SegmentationComponentsConvexity
+#      - SegmentationComponentsErosion
