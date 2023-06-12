@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 import pandas as pd
 import torch
@@ -45,18 +47,25 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
                 }
             )
 
+    def _compute_cumulative_counts_at_thresholds(self, df: pd.DataFrame, class_names: List[str], num_bins: int) -> np.ndarray:
+        """
+        Compute the number of boxes per each class that is above a certain IoU threshold.
+        """
+        counts = np.zeros((len(class_names), self.num_bins), dtype=int)
+        for i, class_name in enumerate(class_names):
+            for j in range(num_bins):
+                counts[i, j] = len(df[(df["class_name"] == class_name) & (df["iou_bins"] == j + 1)])
+
+        counts = np.cumsum(counts[:, ::-1], axis=1)[:, ::-1].astype(np.float32)
+        return counts
+
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data).sort_values(by="class_id")
 
-        num_classes = len(df["class_name"].unique())
-
         bins = np.linspace(0, 1, self.num_bins + 1)
         df["iou_bins"] = np.digitize(df["iou"].values, bins=bins)
-        iou_bin_names = [f"[0..{bins[x]:.2f})" for x in range(1, len(bins))]
-        iou_bin_names = [f"IoU < {bins[x]:.2f}" for x in range(1, len(bins))]
 
         class_names = list(df["class_name"].unique())
-        splits = df["split"].unique()
 
         if not self.class_agnostic:
             df = df[df["class_id"] == df["other_class_id"]]
@@ -64,23 +73,25 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         data = {}
         json = {}
 
+        splits = df["split"].unique()
         for split in splits:
-            counts = np.zeros((num_classes, self.num_bins), dtype=int)
-            for i, class_name in enumerate(class_names):
-                for j, iou_bin_name in enumerate(iou_bin_names):
-                    counts[i, j] = len(df[(df["class_name"] == class_name) & (df["iou_bins"] == j + 1) & (df["split"] == split)])
+            counts = self._compute_cumulative_counts_at_thresholds(df[df["split"] == split], class_names, self.num_bins)
 
-            counts = np.cumsum(counts[:, ::-1], axis=1)[:, ::-1].astype(np.float32)
             json[split] = counts.tolist()
 
             # Add "All classes" label
             counts = np.concatenate([counts, np.sum(counts, axis=0, keepdims=True)], axis=0)
+
+            # Normalize counts to display them as percentage
             normalized_counts = (100 * counts / np.clip(counts[:, 0:1], a_min=1, a_max=None)).astype(int)
 
             data[split] = normalized_counts
 
+        num_classes = len(class_names)
+        xticklabels = [f"IoU < {bins[x]:.2f}" for x in range(1, len(bins))]
+
         plot_options = HeatmapOptions(
-            xticklabels=iou_bin_names,
+            xticklabels=xticklabels,
             yticklabels=class_names + ["All classes"],
             x_label_name="IoU range",
             y_label_name="Class",
@@ -90,6 +101,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             annot=True,
             title=self.title,
             square=True,
+            # Height of the plot is proportional to the number of classes
             figsize=(10, (int(num_classes * 0.3) + 4) * len(splits)),
             tight_layout=True,
             x_ticks_rotation=90,
