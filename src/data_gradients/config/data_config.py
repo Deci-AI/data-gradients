@@ -26,26 +26,6 @@ class Question:
     options: Dict[str, Any]
 
 
-# Questions That don't change based on the data
-STATIC_QUESTIONS = {
-    "is_label_first": Question(
-        question="Which comes first in your annotations, the class id or the bounding box?",
-        options={
-            "Label comes first (e.g. [class_id, x1, y1, x2, y2])": True,
-            "Bounding box comes first (e.g. [x1, y1, x2, y2, class_id])": False,
-        },
-    ),
-    "xyxy_converter": Question(
-        question="What is the format of the bounding boxes?",
-        options={
-            "xyxy: x- left, y-top, x-right, y-bottom": lambda x: x,
-            "xywh: x-left, y-top, width, height": xywh_to_xyxy,
-            "cxcywh: x-center, y-center, width, height": cxcywh_to_xyxy,
-        },
-    ),
-}
-
-
 @dataclass
 class DataConfig(ABC):
     images_extractor: Optional[Callable[[SupportedData], torch.Tensor]] = None
