@@ -47,14 +47,7 @@ class PDFWriter:
     The PDF file is generated based on HTML templates (document, section and feature templates).
     """
 
-    def __init__(
-        self,
-        title: str,
-        subtitle: str,
-        html_template: str = assets.html.doc_template,
-        logo_path: str = assets.image.logo,
-        palette="pastel"
-    ):
+    def __init__(self, title: str, subtitle: str, html_template: str = assets.html.doc_template, logo_path: str = assets.image.logo, palette="pastel"):
         """
         :param title: The title of the PDF document.
         :param subtitle: The subtitle of the PDF document.
@@ -77,8 +70,16 @@ class PDFWriter:
         if not output_filename.endswith("pdf"):
             raise RuntimeError("filename must end with .pdf")
 
-        doc = self.template.render(title=self.title, subtitle=self.subtitle, results=results_container, version=data_gradients.__version__,
-                                   train_color=self.train_color, val_color=self.val_color, logo=assets.image.logo, assets=assets)
+        doc = self.template.render(
+            title=self.title,
+            subtitle=self.subtitle,
+            results=results_container,
+            version=data_gradients.__version__,
+            train_color=self.train_color,
+            val_color=self.val_color,
+            logo=assets.image.logo,
+            assets=assets,
+        )
 
         with open(output_filename, "w+b") as result_file:
             pisa.CreatePDF(doc, dest=result_file)
