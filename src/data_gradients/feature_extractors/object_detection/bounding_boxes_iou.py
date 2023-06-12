@@ -53,6 +53,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         bins = np.linspace(0, 1, self.num_bins + 1)
         df["iou_bins"] = np.digitize(df["iou"].values, bins=bins)
         iou_bin_names = [f"[0..{bins[x]:.2f})" for x in range(1, len(bins))]
+        iou_bin_names = [f"IoU < {bins[x]:.2f}" for x in range(1, len(bins))]
 
         class_names = list(df["class_name"].unique())
         splits = df["split"].unique()
@@ -91,6 +92,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             square=True,
             figsize=(10, (int(num_classes * 0.3) + 4) * len(splits)),
             tight_layout=True,
+            x_ticks_rotation=90,
         )
 
         feature = Feature(

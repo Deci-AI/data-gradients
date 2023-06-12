@@ -275,13 +275,16 @@ class HeatmapOptions(CommonPlotOptions):
     y_label_name: str
     xticklabels: Union[bool, List[str]]
     yticklabels: Union[bool, List[str]]
-    cbar:bool
+    cbar: bool
     cmap: str
-    annot:bool
+    annot: bool
     square: bool
     tight_layout: bool = False
     figsize: Optional[Tuple[int, int]] = (10, 6)
     fmt: str = None
+    x_ticks_rotation: int = 0
+    y_ticks_rotation: int = 0
+
 
 @dataclasses.dataclass
 class FigureRenderer(CommonPlotOptions):

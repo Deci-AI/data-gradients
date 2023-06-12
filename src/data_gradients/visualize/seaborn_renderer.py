@@ -393,6 +393,9 @@ class SeabornRenderer(PlotRenderer):
             ax.set_xlabel(options.x_label_name)
             ax.set_title(key)
 
+            self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
+
+        # fig.autofmt_xdate()
         return fig
 
     def _render_figure(self, fig: plt.Figure, options: FigureRenderer) -> plt.Figure:
