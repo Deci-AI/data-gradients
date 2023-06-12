@@ -36,5 +36,5 @@ class DetectionSampleVisualization(AbstractSampleVisualization):
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")
 
-        result = draw_bboxes(image=image, class_names=sample.class_names, bboxes_xyxy=sample.bboxes_xyxy)
+        result = draw_bboxes(image=image, bboxes_xyxy=sample.bboxes_xyxy, bboxes_ids=sample.class_ids, class_names=sample.class_names)
         return result.astype(np.uint8)
