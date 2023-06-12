@@ -6,10 +6,10 @@ import numpy as np
 def resize_in_chunks(img: np.ndarray, size: Tuple[int, int], interpolation=cv2.INTER_LINEAR) -> np.ndarray:
     """Resize an image by chunks. This function support any number of channels, while `cv2.resize` only supports up to 512 channels.
 
-    :param img:             The image to resize.
+    :param img:             The image to resize. (H, W, C) or (H, W) expected.
     :param size:            The size to resize to.
     :param interpolation:   The interpolation method to use.
-    :return: The resized image.
+    :return: The resized image, in (H, W, C) or (H, W).
     """
     num_channels = img.shape[2] if len(img.shape) == 3 else 1
 
