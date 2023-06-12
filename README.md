@@ -18,6 +18,11 @@ It automatically extracts features from your datasets and combines them all into
 - Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks allowing you to understand if the objects are positioned in the right area.
 - And many more!
 
+<div align="center">
+  <img src="assets/report_image_stats.png" width="200px">
+  <img src="assets/report_mask_sample.png" width="200px">
+  <img src="assets/report_classes_distribution.png" width="200px">
+</div>
 
 ## Installation
 You can install DataGradients directly from the Github repository.
@@ -88,24 +93,6 @@ If you want to test it without having to download any datasets, you can check th
 
 ### Report
 Once the analysis is done, the path to your pdf report will be printed.
-
-**Example of features**
-
-<details markdown="1">
-  <summary>Image stats</summary>
-  <img src="assets/report_image_stats.png">
-</details>
-
-<details markdown="1">
-  <summary>Image and Mask Visualization</summary>
-  <img src="assets/report_mask_sample.png">
-</details>
-
-<details markdown="1">
-  <summary>Classes Distribution</summary>
-  <img src="assets/report_classes_distribution.png">
-</details>
-
 
 
 ## Dataset Adapters
