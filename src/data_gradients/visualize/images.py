@@ -66,3 +66,62 @@ def fig_to_array(fig: plt.Figure) -> np.ndarray:
     image = Image.open(buf)
     plt.close(fig)
     return np.asarray(image)
+
+
+def combine_images_per_split_per_class(images_per_split_per_class: Dict[str, Dict[str, np.ndarray]], n_cols: int) -> plt.Figure:
+    """For each class, combine split images. Then, combine all the resulting images into one plot.
+
+    Example:
+    |------------------------|------------------------|
+    | Class1: (train & test) | Class2: (train & test) |
+    | Class3: (train & test) | Class4: (train & test) |
+    | Class5: (train & test) | Class5: (train & test) |
+    |------------------------|------------------------|
+
+
+    class1:  [train | test]    class2:  [train | test]
+    class3:  [train | test]    class4:  [train | test]
+    class5:  [train | test]    class6:  [train | test]
+
+    :param images_per_split_per_class:  Mapping of class names and splits to images. e.g. {"class1": {"train": np.ndarray, "valid": np.ndarray},...}
+    :param n_cols:                      Number of images per row
+    :return:                            Resulting figure
+    """
+    n_classes = len(images_per_split_per_class)
+    n_rows = n_classes // n_cols + n_classes % n_cols
+
+    # Generate one image per class
+    images: List[np.ndarray] = []
+    for i, (class_name, images_per_split) in enumerate(images_per_split_per_class.items()):
+
+        # This plot is for a single class, which is made of at least 1 split
+        class_fig, class_axs = plt.subplots(nrows=1, ncols=len(images_per_split), figsize=(10, 6))
+        class_fig.subplots_adjust(top=0.9)
+        class_fig.suptitle(f"Class: {class_name}", fontsize=36)
+
+        for (split, split_image), split_ax in zip(images_per_split.items(), class_axs):
+
+            split_ax.imshow(split_image)
+
+            # Write the split name for the first row
+            if i < n_cols:
+                split_ax.set_xticks([])
+                split_ax.set_yticks([])
+                split_ax.spines["top"].set_visible(False)
+                split_ax.spines["right"].set_visible(False)
+                split_ax.spines["bottom"].set_visible(False)
+                split_ax.spines["left"].set_visible(False)
+                split_ax.set_title(split, fontsize=48)
+            else:
+                split_ax.set_axis_off()
+
+        class_image = fig_to_array(class_fig)
+        images.append(class_image)
+
+    fig, axs = plt.subplots(n_rows, n_cols, figsize=(10, 2.5 * n_rows))
+    for ax, img in zip_longest(axs.flatten(), images, fillvalue=None):
+        ax.axis("off")
+        if img is not None:
+            ax.imshow(img)
+    plt.tight_layout()
+    return fig

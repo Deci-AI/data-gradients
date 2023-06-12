@@ -15,6 +15,7 @@ def channels_last_to_first(tensors: torch.Tensor) -> torch.Tensor:
 def check_all_integers(tensor: torch.Tensor) -> bool:
     return torch.all(torch.eq(tensor, tensor.to(torch.int))).item()
 
+
 def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
     """Method gets label with the shape of [BS, N, H, W] where N is the number of classes.
     This numpy implementation is much faster than Torch.nn.functional.one_hot.

@@ -10,6 +10,7 @@ import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
+from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
@@ -78,6 +79,11 @@ class AnalysisManagerAbstract(abc.ABC):
         self.batch_processor = batch_processor
         self.grouped_feature_extractors = grouped_feature_extractors
 
+        self._train_iters_done = 0
+        self._val_iters_done = 0
+        self._train_batch_size = None
+        self._val_batch_size = None
+
     def execute(self):
         """
         Execute method take batch from train & val data iterables, submit a thread to it and runs the extractors.
@@ -100,6 +106,8 @@ class AnalysisManagerAbstract(abc.ABC):
             total=self.n_batches,
         )
 
+        self._train_iters_done, self._val_iters_done = 0, 0
+
         for i, (train_batch, val_batch) in enumerate(datasets_tqdm):
 
             if i == self.batches_early_stop:
@@ -110,14 +118,22 @@ class AnalysisManagerAbstract(abc.ABC):
                     for feature_extractors in self.grouped_feature_extractors.values():
                         for feature_extractor in feature_extractors:
                             feature_extractor.update(sample)
+                    self._train_iters_done += 1
+
+            if self._train_batch_size is None:
+                self._train_batch_size = self._train_iters_done
 
             if val_batch is not None:
                 for sample in self.batch_processor.process(val_batch, split="val"):
                     for feature_extractors in self.grouped_feature_extractors.values():
                         for feature_extractor in feature_extractors:
                             feature_extractor.update(sample)
+                    self._val_iters_done += 1
 
-    def post_process(self):
+            if self._val_batch_size is None:
+                self._val_batch_size = self._val_iters_done
+
+    def post_process(self, interrupted=False):
         """
         Post process method runs on all feature extractors, concurrently on valid and train extractors, send each
         of them a matplotlib ax(es) and gets in return the ax filled with the feature extractor information.
@@ -138,20 +154,25 @@ class AnalysisManagerAbstract(abc.ABC):
 
                 f = self.renderer.render(feature.data, feature.plot_options)
                 if f is not None:
-                    image_name = feature_extractor.__class__.__name__ + ".png"
+                    image_name = feature_extractor.__class__.__name__ + ".svg"
                     image_path = os.path.join(self.archive_dir, image_name)
-                    f.savefig(image_path)
+                    f.savefig(image_path, dpi=1200)
                     images_created.append(image_path)
                 else:
                     image_path = None
+
+                if isinstance(feature_extractor, SummaryStats) and (interrupted or self.batches_early_stop):
+                    warning = self._create_samples_iterated_warning()
+                else:
+                    warning = feature_extractor.warning
 
                 section.add_feature(
                     FeatureSummary(
                         name=feature_extractor.title,
                         description=feature_extractor.description,
                         image_path=image_path,
-                        warning=feature_extractor.warning,
-                        notice=feature_extractor.notice
+                        warning=warning,
+                        notice=feature_extractor.notice,
                     )
                 )
             summary.add_section(section)
@@ -176,15 +197,17 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         Run method activating build, execute, post process and close the manager.
         """
+        interrupted = False
         try:
             self.execute()
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             logger.info(
                 "[EXECUTION HAS BEEN INTERRUPTED]... "
                 "Please wait until SOFT-TERMINATION process finishes and saves the report and log files before terminating..."
             )
             logger.info("For HARD Termination - Stop the process again")
-        self.post_process()
+            interrupted = e is not None
+        self.post_process(interrupted=interrupted)
         self.close()
 
     @property
@@ -203,3 +226,24 @@ class AnalysisManagerAbstract(abc.ABC):
         output_path = os.path.join(output_dir, filename)
         with open(output_path, "a") as f:
             json.dump(data, f, indent=4)
+
+    def _create_samples_iterated_warning(self) -> str:
+        if self.train_size is None or self._train_batch_size is None:
+            total_train_samples = "unknown amount of "
+            portion_train = ""
+        else:
+            total_train_samples = self.train_size * self._train_batch_size
+            portion_train = f" ({self._train_iters_done/total_train_samples:.1%})"
+
+        if self.val_size is None or self._val_batch_size is None:
+            total_val_samples = "unknown amount of "
+            portion_val = ""
+
+        else:
+            total_val_samples = self.val_size * self._val_batch_size
+            portion_val = f" ({self._val_iters_done/total_val_samples:.1%})"
+
+        msg_head = "The results presented in this report cover only a subset of the data.\n"
+        msg_train = f"Train set: {self._train_iters_done} out of {total_train_samples} samples were analyzed{portion_train}.\n"
+        msg_val = f"Validation set: {self._val_iters_done} out of {total_val_samples} samples were analyzed{portion_val}.\n "
+        return msg_head + msg_train + msg_val

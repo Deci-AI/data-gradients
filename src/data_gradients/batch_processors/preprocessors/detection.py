@@ -23,7 +23,7 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         :param split:       Name of the split (train, val, test)
         :return:            Iterable of ready to analyse detection samples.
         """
-        images = np.transpose(images.cpu().numpy(), (0, 2, 3, 1))
+        images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
         for image, target in zip(images, labels):
             target = target.cpu().numpy().astype(np.int)
