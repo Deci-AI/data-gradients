@@ -19,9 +19,9 @@ It automatically extracts features from your datasets and combines them all into
 - And many more!
 
 <div align="center">
-  <img src="assets/report_image_stats.png" width="200px">
-  <img src="assets/report_mask_sample.png" width="200px">
-  <img src="assets/report_classes_distribution.png" width="200px">
+  <img src="assets/report_image_stats.png" width="250px">
+  <img src="assets/report_mask_sample.png" width="250px">
+  <img src="assets/report_classes_distribution.png" width="250px">
 </div>
 
 ## Installation
