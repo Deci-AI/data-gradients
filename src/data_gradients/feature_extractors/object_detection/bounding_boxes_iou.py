@@ -76,7 +76,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             counts = np.concatenate([counts, np.sum(counts, axis=0, keepdims=True)], axis=0)
             normalized_counts = counts / np.clip(counts[:, 0:1], a_min=1, a_max=None)
 
-            data["Split: " + split] = normalized_counts
+            data[split] = normalized_counts
 
         plot_options = HeatmapOptions(
             xticklabels=iou_bin_names,
