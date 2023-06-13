@@ -13,22 +13,22 @@ from data_gradients.visualize.images import stack_split_images_to_fig, combine_i
 
 @register_feature_extractor()
 class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
-    def __init__(self, n_samples_per_split: int = 9, n_cols_per_split: int = 3, stack_splits_vertically: bool = True):
+    def __init__(self, n_rows: int = 3, n_cols: int = 3, stack_splits_vertically: bool = True):
         """
-        :param n_samples_per_split:     Number of samples to visualize per split
-        :param n_cols_per_split:        Number of columns to use per split
+        :param n_rows:                  Number of rows to use per split
+        :param n_cols:                  Number of columns to use per split
         :param stack_splits_vertically: Specifies whether to display the splits vertically stacked.
                                         If set to False, the splits will be shown side by side
         """
-        self.n_samples_per_split = n_samples_per_split
-        self.n_cols_per_split = n_cols_per_split
+        self.n_rows = n_rows
+        self.n_cols = n_cols
         self.stack_splits_vertically = stack_splits_vertically
         self.images_per_split: Dict[str, List[np.ndarray]] = defaultdict(list)
 
     def update(self, sample: ImageSample):
         split_images = self.images_per_split[sample.split]
 
-        if len(split_images) < self.n_samples_per_split:
+        if len(split_images) < self.n_rows * self.n_cols:
             image = self._prepare_sample_visualization(sample=sample)
             split_images.append(image)
 
@@ -46,7 +46,7 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
 
         # Generate a single image per split
         combined_images_per_split = {
-            split: combine_images(split_images, n_cols=self.n_cols_per_split, row_figsize=(10, 2.5)) for split, split_images in self.images_per_split.items()
+            split: combine_images(split_images, n_cols=self.n_cols, row_figsize=(10, 2.5)) for split, split_images in self.images_per_split.items()
         }
 
         # Generate a single figure
@@ -67,7 +67,7 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
     @property
     def description(self) -> str:
         return (
-            f"Visualization of {self.n_samples_per_split} samples per split. "
+            f"Visualization of {self.n_rows * self.n_cols} samples per split. "
             f"This can be useful to make sure the mapping of class_names to class_ids is done correctly, "
             f"but also to get a better understanding of what your dataset is made of.."
         )

@@ -10,17 +10,18 @@ from data_gradients.visualize.images import combine_images_per_split_per_class
 
 
 class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
-    def __init__(self, n_classes_to_show: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
+    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_shape: Tuple[int, int] = (200, 200)):
         """
-        :param n_classes_to_show:   The `n_classes_to_show` classes that are the most represented in the dataset will be shown.
-        :param heatmap_dim:         Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed
+        :param n_rows:          How many rows per split.
+        :param n_cols:          How many columns per split.
+        :param heatmap_shape:   Heatmap, in (H, W) format. Increase for more resolution, at the expense of processing speed.
         """
-        self.heatmap_dim = heatmap_dim
-        self.n_classes_to_show = n_classes_to_show
+        self.heatmap_shape = heatmap_shape
+        self.n_rows = n_rows
         self.n_cols = n_cols
 
         self.class_names = []
-        self.heatmaps_per_split: Dict[str, np.ndarray] = {}  # Each heatmap should be of shape (n_class, heatmap_dim[0], heatmap_dim[1])
+        self.heatmaps_per_split: Dict[str, np.ndarray] = {}  # Each heatmap should be of shape (n_class, heatmap_shape[0], heatmap_shape[1])
 
     @abstractmethod
     def update(self, sample: SegmentationSample):
@@ -29,7 +30,7 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
     def aggregate(self) -> Feature:
         # Select top k heatmaps by appearance
         split_count = sum(split_heatmap.sum(axis=(1, 2)) for split_heatmap in self.heatmaps_per_split.values())
-        most_used_class_ids = (-split_count).argsort()[: self.n_classes_to_show]
+        most_used_class_ids = (-split_count).argsort()[: self.n_rows * self.n_cols]
 
         # Normalize (0-1)
         normalized_heatmaps_per_split_per_cls = defaultdict(dict)
