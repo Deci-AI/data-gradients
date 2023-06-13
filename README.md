@@ -70,14 +70,14 @@ You are now ready to go, chose the relevant analyzer for your task and run it ov
 ```python
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
-train_loader = ...
-val_loader = ...
+train_data = ...
+val_data = ...
 class_names = ...
 
 analyzer = DetectionAnalysisManager(
-    report_title="Testing Data-Gradients",
-    train_data=train_loader,
-    val_data=val_loader,
+    report_title="Testing Data-Gradients Object Detection",
+    train_data=train_data,
+    val_data=val_data,
     class_names=class_names,
 )
 
@@ -89,14 +89,14 @@ analyzer.run()
 ```python
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager 
 
-train_loader = ...
-val_loader = ...
+train_data = ...
+val_data = ...
 class_names = ...
 
 analyzer = SegmentationAnalysisManager(
-    report_title="Testing Data-Gradients",
-    train_data=train_loader,
-    val_data=val_loader,
+    report_title="Testing Data-Gradients Segmentation",
+    train_data=train_data,
+    val_data=val_data,
     class_names=class_names,
 )
 
