@@ -24,7 +24,8 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
 
         # Objects are resized to a fix size
         mask = sample.mask.transpose((1, 2, 0))
-        resized_masks = resize_in_chunks(img=mask, size=self.heatmap_shape, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
+        target_size = self.heatmap_shape[1], self.heatmap_shape[0]
+        resized_masks = resize_in_chunks(img=mask, size=target_size, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
         resized_masks = resized_masks.transpose((2, 0, 1))
 
         split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_shape)))
