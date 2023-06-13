@@ -3,14 +3,17 @@ import pandas as pd
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
+from data_gradients.feature_extractors.utils import keep_most_frequent
 from data_gradients.visualize.plot_options import ViolinPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
 class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
-    def __init__(self):
+    def __init__(self, top_k: int = 30):
         self.data = []
+        self.top_k = top_k
+        self.n_classes = None
 
     def update(self, sample: SegmentationSample):
 
@@ -29,10 +32,11 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
+        self.n_classes = len(df["class_name"].unique())
 
-        # Include ("class_name", "class_id", "split", "n_appearance")
-        # For each class, image, split, I want to know how many bbox I have
-        df_class_count = df.groupby(["class_name", "class_id", "sample_id", "split"]).size().reset_index(name="n_appearance")
+        # Include ("split", "sample_id", "class_name", "class_id", "n_appearance")
+        # For each split, image, class, I want to know how many bbox I have
+        df_class_count = df.groupby(["split", "sample_id", "class_name", "class_id"]).size().reset_index(name="n_appearance")
 
         max_n_appearance = df_class_count["n_appearance"].max()
 
@@ -54,8 +58,9 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             val=dict(df_class_count[df_class_count["split"] == "val"]["n_appearance"].describe()),
         )
 
+        df_to_plot = keep_most_frequent(df_class_count, filtering_key="class_name", frequency_key="n_appearance", top_k=self.top_k)
         feature = Feature(
-            data=df_class_count,
+            data=df_to_plot,
             plot_options=plot_options,
             json=json,
         )
@@ -72,3 +77,11 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             "If the average number of components per image is too high, it might be due to image noise or the "
             "presence of many segmentation blobs."
         )
+
+    @property
+    def notice(self) -> str:
+        if self.top_k is not None and self.n_classes is not None and self.n_classes > self.top_k:
+            return (
+                f"Only the <b>{self.top_k}/{self.n_classes}</b> most relevant features for this graph were shown.<br/>"
+                f"You can increase/decrease the number of classes to plot by setting the parameter <b>`top_k`</b> in the configuration file."
+            )
