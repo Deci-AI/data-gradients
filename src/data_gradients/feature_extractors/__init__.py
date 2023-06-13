@@ -23,6 +23,7 @@ from .object_detection import (
     DetectionClassHeatmap,
     DetectionClassesPerImageCount,
     DetectionSampleVisualization,
+    DetectionBoundingBoxIoU,
 )
 
 __all__ = [
@@ -46,4 +47,5 @@ __all__ = [
     "DetectionClassHeatmap",
     "DetectionClassesPerImageCount",
     "DetectionSampleVisualization",
+    "DetectionBoundingBoxIoU",
 ]

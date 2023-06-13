@@ -5,6 +5,7 @@ from .classes_count import DetectionClassesCount
 from .classes_heatmap_per_class import DetectionClassHeatmap
 from .classes_per_image_count import DetectionClassesPerImageCount
 from .sample_visualization import DetectionSampleVisualization
+from .bounding_boxes_iou import DetectionBoundingBoxIoU
 
 __all__ = [
     "DetectionBoundingBoxArea",
@@ -14,4 +15,5 @@ __all__ = [
     "DetectionClassHeatmap",
     "DetectionClassesPerImageCount",
     "DetectionSampleVisualization",
+    "DetectionBoundingBoxIoU",
 ]
