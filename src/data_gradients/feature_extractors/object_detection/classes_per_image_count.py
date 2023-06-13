@@ -13,7 +13,7 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
     """Feature Extractor to show the distribution of number of instance of each class per image.
     This gives information like "The class 'Human' usually appears 2 to 20 times per image."""
 
-    def __init__(self, top_k: int = 8):
+    def __init__(self, top_k: int = 30):
         self.data = []
         self.top_k = top_k
         self.n_classes = None

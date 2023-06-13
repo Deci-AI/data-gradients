@@ -12,7 +12,7 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     """Feature Extractor to compute the area covered Bounding Boxes."""
 
-    def __init__(self, top_k: int = 8):
+    def __init__(self, top_k: int = 30):
         self.data = []
         self.top_k = top_k
         self.n_classes = None

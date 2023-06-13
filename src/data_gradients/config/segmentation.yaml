@@ -10,9 +10,11 @@ report_sections:
       - SegmentationSampleVisualization
       - SegmentationClassHeatmap
       - SegmentationClassesCount
-      - SegmentationClassesPerImageCount
+      - SegmentationClassesPerImageCount:
+          top_k: 30
       - SegmentationComponentsPerImageCount
       - SegmentationBoundingBoxResolution
-      - SegmentationBoundingBoxArea
+      - SegmentationBoundingBoxArea:
+          top_k: 30
       - SegmentationComponentsConvexity
       - SegmentationComponentsErosion

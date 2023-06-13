@@ -9,8 +9,10 @@ report_sections:
     features:
       - DetectionSampleVisualization
       - DetectionClassHeatmap
-      - DetectionBoundingBoxArea
+      - DetectionBoundingBoxArea:
+          top_k: 30
       - DetectionBoundingBoxPerImageCount
       - DetectionBoundingBoxSize
       - DetectionClassesCount
-      - DetectionClassesPerImageCount
+      - DetectionClassesPerImageCount:
+          top_k: 30

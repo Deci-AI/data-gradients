@@ -15,7 +15,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     Get all Bounding Boxes areas and plot them as a percentage of the whole image.
     """
 
-    def __init__(self, top_k: int = 3):
+    def __init__(self, top_k: int = 30):
         self.data = []
         self.top_k = top_k
         self.n_classes = None
