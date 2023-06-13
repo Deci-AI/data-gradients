@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import seaborn
-from typing import Union, Optional
+from typing import Union, Optional, Mapping
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
@@ -15,6 +15,7 @@ from data_gradients.visualize.plot_options import (
     ViolinPlotOptions,
     KDEPlotOptions,
     FigureRenderer,
+    HeatmapOptions,
 )
 
 __all__ = ["SeabornRenderer"]
@@ -45,6 +46,8 @@ class SeabornRenderer(PlotRenderer):
             return self._render_kdeplot(data, options)
         if isinstance(options, FigureRenderer):
             return self._render_figure(data, options)
+        if isinstance(options, HeatmapOptions):
+            return self._render_heatmap(data, options)
 
         raise ValueError(f"Unknown options type: {type(options)}")
 
@@ -362,6 +365,37 @@ class SeabornRenderer(PlotRenderer):
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        return fig
+
+    def _render_heatmap(self, data: Mapping[str, np.ndarray], options: HeatmapOptions) -> plt.Figure:
+
+        fig, axes = plt.subplots(nrows=len(data), ncols=1, figsize=options.figsize, tight_layout=options.tight_layout)
+        fig.subplots_adjust()
+
+        for i, (key, heatmap) in enumerate(data.items()):
+            ax = axes[i] if len(data) > 1 else axes
+            heatmap_args = dict(
+                data=heatmap,
+                xticklabels=options.xticklabels,
+                yticklabels=options.yticklabels,
+                annot=options.annot,
+                cbar=options.cbar,
+                cbar_kws={"shrink": 0.5},
+                square=options.square,
+                cmap=options.cmap,
+                linewidths=0.5,
+                fmt=options.fmt,
+                ax=ax,
+            )
+
+            ax = seaborn.heatmap(**heatmap_args)
+            ax.set_ylabel(options.y_label_name)
+            ax.set_xlabel(options.x_label_name)
+            ax.set_title(key)
+
+            self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
+
+        # fig.autofmt_xdate()
         return fig
 
     def _render_figure(self, fig: plt.Figure, options: FigureRenderer) -> plt.Figure:
