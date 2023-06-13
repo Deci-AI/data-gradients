@@ -83,6 +83,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self._val_iters_done = 0
         self._train_batch_size = None
         self._val_batch_size = None
+        self._stopped_early = None
 
     def execute(self):
         """
@@ -107,10 +108,12 @@ class AnalysisManagerAbstract(abc.ABC):
         )
 
         self._train_iters_done, self._val_iters_done = 0, 0
+        self._stopped_early = False
 
         for i, (train_batch, val_batch) in enumerate(datasets_tqdm):
 
             if i == self.batches_early_stop:
+                self._stopped_early = True
                 break
 
             if train_batch is not None:
@@ -154,14 +157,14 @@ class AnalysisManagerAbstract(abc.ABC):
 
                 f = self.renderer.render(feature.data, feature.plot_options)
                 if f is not None:
-                    image_name = feature_extractor.__class__.__name__ + ".png"
+                    image_name = feature_extractor.__class__.__name__ + ".svg"
                     image_path = os.path.join(self.archive_dir, image_name)
-                    f.savefig(image_path)
+                    f.savefig(image_path, dpi=1200)
                     images_created.append(image_path)
                 else:
                     image_path = None
 
-                if isinstance(feature_extractor, SummaryStats) and (interrupted or self.batches_early_stop):
+                if isinstance(feature_extractor, SummaryStats) and (interrupted or (self.batches_early_stop and self._stopped_early)):
                     warning = self._create_samples_iterated_warning()
                 else:
                     warning = feature_extractor.warning
