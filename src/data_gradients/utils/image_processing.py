@@ -7,7 +7,7 @@ def resize_in_chunks(img: np.ndarray, size: Tuple[int, int], interpolation=cv2.I
     """Resize an image by chunks. This function supports any number of channels, while `cv2.resize` only supports up to 512 channels.
 
     :param img:             The image to resize. (H, W, C) or (H, W) expected.
-    :param size:            The shape to resize to, (W, H).
+    :param size:            The size to resize to, (H, W).
     :param interpolation:   The interpolation method to use.
     :return: The resized image, in (H, W, C) or (H, W).
     """
