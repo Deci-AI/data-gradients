@@ -35,17 +35,23 @@ pip install git+https://github.com/Deci-AI/data-gradients
 
 ## Quick Start
 
-### Requirements
+### Prerequisites
 
-- A **Dataset** including a **train** and a **validation** or a **test** set.
-- The list of **classes names** of your dataset.
-- An **iterable** that iterates over your Dataset. This can be, but is not limited to:
+- **Dataset**: Includes a **Train** set and a **Validation** or a **Test** set.
+- **Class Names**: A list of the unique categories present in your dataset.
+- **Iterable**: A method to iterate over your Dataset providing images and labels. Can be any of the following:
   - PyTorch Dataloader
   - PyTorch Dataset
-  - Generator yielding image/label 
-  - Any iterable that you are using train/validate a model
+  - Generator that yields image/label pairs
+  - Any other iterable you use for model training/validation
 
-**Note:** We currently don't provide out-of-the-box dataset/dataloader implementation. 
+Please ensure all the points above are checked before you proceed with **DataGradients**.
+
+**Good to Know**: DataGradients will try to find out how the dataset returns images and labels.
+- If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
+- In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
+
+**Heads up**: We currently don't provide out-of-the-box dataset/dataloader implementation. 
 You can find multiple dataset implementations in [PyTorch](https://pytorch.org/vision/stable/datasets.html) 
 or [SuperGradients](https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
 
@@ -57,10 +63,6 @@ train_data = CocoDetection(...)
 val_data = CocoDetection(...)
 class_names = ["person", "bicycle", "car", "motorcycle", ...]
 ```
-
-**Good to know:** DataGradients will try to find out how the dataset returns images and labels.
-- If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
-- In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
 
 
 ### Dataset Analysis
