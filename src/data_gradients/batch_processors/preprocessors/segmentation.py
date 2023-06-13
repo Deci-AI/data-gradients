@@ -25,8 +25,8 @@ class SegmentationBatchPreprocessor(BatchPreprocessor):
         :param split:       Name of the split (train, val, test)
         :return:            Ready to analyse segmentation batch object.
         """
-        images = np.transpose(images.cpu().numpy(), (0, 2, 3, 1))
-        labels = labels.cpu().numpy()
+        images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
+        labels = np.uint8(labels.cpu().numpy())
 
         for image, mask in zip(images, labels):
             contours = get_contours(mask)

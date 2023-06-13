@@ -9,14 +9,14 @@ from data_gradients.visualize.detection import draw_bboxes
 
 @register_feature_extractor()
 class DetectionSampleVisualization(AbstractSampleVisualization):
-    def __init__(self, n_samples_per_split: int = 8, n_cols_per_split: int = 2, stack_splits_vertically: bool = True):
+    def __init__(self, n_rows: int = 4, n_cols: int = 2, stack_splits_vertically: bool = True):
         """
-        :param n_samples_per_split:     Number of samples to visualize per split
-        :param n_cols_per_split:        Number of columns to use per split
+        :param n_rows:     Number of rows to use per split
+        :param n_cols:                  Number of columns to use per split
         :param stack_splits_vertically: Specifies whether to display the splits vertically stacked.
                                         If set to False, the splits will be shown side by side
         """
-        super().__init__(n_samples_per_split=n_samples_per_split, n_cols_per_split=n_cols_per_split, stack_splits_vertically=stack_splits_vertically)
+        super().__init__(n_rows=n_rows, n_cols=n_cols, stack_splits_vertically=stack_splits_vertically)
 
     def _prepare_sample_visualization(self, sample: DetectionSample) -> np.ndarray:
         """Combine image and label to a single image.
@@ -36,5 +36,5 @@ class DetectionSampleVisualization(AbstractSampleVisualization):
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")
 
-        result = draw_bboxes(image=image, class_names=sample.class_names, bboxes_xyxy=sample.bboxes_xyxy)
+        result = draw_bboxes(image=image, bboxes_xyxy=sample.bboxes_xyxy, bboxes_ids=sample.class_ids, class_names=sample.class_names)
         return result.astype(np.uint8)

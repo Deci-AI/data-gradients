@@ -7,7 +7,15 @@ report_sections:
       - ImagesAverageBrightness
   - name: Segmentation Features
     features:
-      - SegmentationSampleVisualization
+      - SegmentationSampleVisualization:
+          n_rows: 3
+          n_cols: 3
+          stack_splits_vertically: True
+          stack_mask_vertically: True
+      - SegmentationClassHeatmap:
+          n_rows: 6
+          n_cols: 2
+          heatmap_shape: [200, 200]
       - SegmentationClassesCount
       - SegmentationClassesPerImageCount
       - SegmentationComponentsPerImageCount
@@ -15,4 +23,3 @@ report_sections:
       - SegmentationBoundingBoxArea
       - SegmentationComponentsConvexity
       - SegmentationComponentsErosion
-      - SegmentationComponentCenterOfMass
