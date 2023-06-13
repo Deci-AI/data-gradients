@@ -10,18 +10,18 @@ from data_gradients.visualize.images import combine_images_per_split_per_class
 
 
 class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
-    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
+    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_shape: Tuple[int, int] = (200, 200)):
         """
-        :param n_rows:      How many rows per split.
-        :param n_cols:      How many columns per split.
-        :param heatmap_dim: Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed.
+        :param n_rows:          How many rows per split.
+        :param n_cols:          How many columns per split.
+        :param heatmap_shape:   Heatmap, in (H, W) format. Increase for more resolution, at the expense of processing speed.
         """
-        self.heatmap_dim = heatmap_dim
+        self.heatmap_shape = heatmap_shape
         self.n_rows = n_rows
         self.n_cols = n_cols
 
         self.class_names = []
-        self.heatmaps_per_split: Dict[str, np.ndarray] = {}  # Each heatmap should be of shape (n_class, heatmap_dim[0], heatmap_dim[1])
+        self.heatmaps_per_split: Dict[str, np.ndarray] = {}  # Each heatmap should be of shape (n_class, heatmap_shape[0], heatmap_shape[1])
 
     @abstractmethod
     def update(self, sample: SegmentationSample):

@@ -9,13 +9,13 @@ from data_gradients.feature_extractors.common.heatmap import BaseClassHeatmap
 
 @register_feature_extractor()
 class SegmentationClassHeatmap(BaseClassHeatmap):
-    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
+    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_shape: Tuple[int, int] = (200, 200)):
         """
-        :param n_rows:      How many rows per split.
-        :param n_cols:      How many columns per split.
-        :param heatmap_dim: Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed.
+        :param n_rows:          How many rows per split.
+        :param n_cols:          How many columns per split.
+        :param heatmap_shape:   Heatmap, in (H, W) format. Increase for more resolution, at the expense of processing speed.
         """
-        super().__init__(n_rows=n_rows, n_cols=n_cols, heatmap_dim=heatmap_dim)
+        super().__init__(n_rows=n_rows, n_cols=n_cols, heatmap_shape=heatmap_shape)
 
     def update(self, sample: SegmentationSample):
 
@@ -24,10 +24,10 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
 
         # Objects are resized to a fix size
         mask = sample.mask.transpose((1, 2, 0))
-        resized_masks = resize_in_chunks(img=mask, size=self.heatmap_dim, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
+        resized_masks = resize_in_chunks(img=mask, size=self.heatmap_shape, interpolation=cv2.INTER_LINEAR).astype(np.uint8)
         resized_masks = resized_masks.transpose((2, 0, 1))
 
-        split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_dim)))
+        split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_shape)))
         split_heatmap += resized_masks
         self.heatmaps_per_split[sample.split] = split_heatmap
 

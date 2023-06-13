@@ -8,13 +8,13 @@ from data_gradients.utils.detection import scale_bboxes
 
 @register_feature_extractor()
 class DetectionClassHeatmap(BaseClassHeatmap):
-    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
+    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_shape: Tuple[int, int] = (200, 200)):
         """
-        :param n_rows:      How many rows per split.
-        :param n_cols:      How many columns per split.
-        :param heatmap_dim: Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed.
+        :param n_rows:          How many rows per split.
+        :param n_cols:          How many columns per split.
+        :param heatmap_shape:   Heatmap, in (H, W) format. Increase for more resolution, at the expense of processing speed.
         """
-        super().__init__(n_rows=n_rows, n_cols=n_cols, heatmap_dim=heatmap_dim)
+        super().__init__(n_rows=n_rows, n_cols=n_cols, heatmap_shape=heatmap_shape)
 
     def update(self, sample: DetectionSample):
 
@@ -22,9 +22,9 @@ class DetectionClassHeatmap(BaseClassHeatmap):
             self.class_names = sample.class_names
 
         original_size = sample.image.shape[:2]
-        bboxes_xyxy = scale_bboxes(old_size=original_size, new_size=self.heatmap_dim, bboxes_xyxy=sample.bboxes_xyxy)
+        bboxes_xyxy = scale_bboxes(old_size=original_size, new_size=self.heatmap_shape, bboxes_xyxy=sample.bboxes_xyxy)
 
-        split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_dim)))
+        split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_shape)))
 
         for class_id, (x1, y1, x2, y2) in zip(sample.class_ids, bboxes_xyxy):
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
