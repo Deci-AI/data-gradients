@@ -20,5 +20,5 @@ report_sections:
       - DetectionBoundingBoxSize
       - DetectionClassesCount
       - DetectionClassesPerImageCount
-      - DetectionBoundingBoxIoU:
-          num_bins: 10
+#      - DetectionBoundingBoxIoU:
+#          num_bins: 10

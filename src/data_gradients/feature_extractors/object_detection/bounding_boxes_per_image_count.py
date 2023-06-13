@@ -29,12 +29,12 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
 
         # Include ("sample_id", "split", "n_components")
         df_class_count = df.groupby(["sample_id", "split"]).size().reset_index(name="n_components")
-
+        multiple_values = len(set(df_class_count.n_components)) > 1
         plot_options = Hist2DPlotOptions(
             x_label_key="n_components",
             x_label_name="Number of bounding box per Image",
             title=self.title,
-            kde=True,
+            kde=True if multiple_values else False,
             labels_key="split",
             individual_plots_key="split",
             x_ticks_rotation=None,

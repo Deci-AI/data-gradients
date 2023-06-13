@@ -74,7 +74,11 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         json = {}
 
         splits = df["split"].unique()
+        print(df)
+        print("=============================================")
+        print("splits")
         for split in splits:
+            print(split)
             counts = self._compute_cumulative_counts_at_thresholds(df[df["split"] == split], class_names, self.num_bins)
 
             json[split] = counts.tolist()
@@ -86,6 +90,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             normalized_counts = (100 * counts / np.clip(counts[:, 0:1], a_min=1, a_max=None)).astype(int)
 
             data[split] = normalized_counts
+            print(normalized_counts)
 
         num_classes = len(class_names)
         xticklabels = [f"IoU < {bins[x]:.2f}" for x in range(1, len(bins))]
@@ -106,7 +111,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             tight_layout=True,
             x_ticks_rotation=90,
         )
-
+        print(data)
         feature = Feature(
             data=data,
             plot_options=plot_options,

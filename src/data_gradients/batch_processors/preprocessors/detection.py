@@ -26,7 +26,7 @@ class DetectionBatchPreprocessor(BatchPreprocessor):
         images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
         for image, target in zip(images, labels):
-            target = target.cpu().numpy().astype(np.int)
+            target = target.cpu().numpy().astype(int)
             class_ids, bboxes_xyxy = target[:, 0], target[:, 1:]
 
             # TODO: image_format is hard-coded here, but it should be refactored afterwards
