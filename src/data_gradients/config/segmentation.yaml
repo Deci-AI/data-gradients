@@ -8,12 +8,12 @@ report_sections:
   - name: Segmentation Features
     features:
       - SegmentationSampleVisualization:
-          n_samples_per_split: 9
-          n_cols_per_split: 3
+          n_rows: 3
+          n_cols: 3
           stack_splits_vertically: True
           stack_mask_vertically: True
       - SegmentationClassHeatmap:
-          n_classes_to_show: 12
+          n_rows: 6
           n_cols: 2
           heatmap_dim: [200, 200]
       - SegmentationClassesCount

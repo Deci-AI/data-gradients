@@ -8,11 +8,11 @@ report_sections:
   - name: Object Detection Features
     features:
       - DetectionSampleVisualization:
-          n_samples_per_split: 8
-          n_cols_per_split: 2
+          n_rows: 6
+          n_cols: 2
           stack_splits_vertically: True
       - DetectionClassHeatmap:
-          n_classes_to_show: 12
+          n_rows: 6
           n_cols: 2
           heatmap_dim: [200, 200]
       - DetectionBoundingBoxArea

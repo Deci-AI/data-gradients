@@ -8,16 +8,16 @@ from data_gradients.utils.data_classes.data_samples import SegmentationSample, I
 
 @register_feature_extractor()
 class SegmentationSampleVisualization(AbstractSampleVisualization):
-    def __init__(self, n_samples_per_split: int = 9, n_cols_per_split: int = 3, stack_splits_vertically: bool = True, stack_mask_vertically: bool = True):
+    def __init__(self, n_rows: int = 9, n_cols: int = 3, stack_splits_vertically: bool = True, stack_mask_vertically: bool = True):
         """
-        :param n_samples_per_split:     Number of samples to visualize per split
-        :param n_cols_per_split:        Number of columns to use per split
+        :param n_rows:                  Number of rows to use per split
+        :param n_cols:                  Number of columns to use per split
         :param stack_splits_vertically: Specifies whether to display the splits vertically stacked.
                                         If set to False, the splits will be shown side by side
         :param stack_mask_vertically:   Specifies whether to display the image and the mask vertically stacked.
                                         If set to False, the mask will be shown side by side
         """
-        super().__init__(n_samples_per_split=n_samples_per_split, n_cols_per_split=n_cols_per_split, stack_splits_vertically=stack_splits_vertically)
+        super().__init__(n_rows=n_rows, n_cols=n_cols, stack_splits_vertically=stack_splits_vertically)
         self.stack_mask_vertically = stack_mask_vertically
 
     def _prepare_sample_visualization(self, sample: SegmentationSample) -> np.ndarray:

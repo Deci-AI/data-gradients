@@ -8,13 +8,13 @@ from data_gradients.utils.detection import scale_bboxes
 
 @register_feature_extractor()
 class DetectionClassHeatmap(BaseClassHeatmap):
-    def __init__(self, n_classes_to_show: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
+    def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
         """
-        :param n_classes_to_show:   The `n_classes_to_show` classes that are the most represented in the dataset will be shown.
-        :param n_cols:              Number of columns to use to display the heatmap.
-        :param heatmap_dim:         Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed.
+        :param n_rows:      How many rows per split.
+        :param n_cols:      How many columns per split.
+        :param heatmap_dim: Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed.
         """
-        super().__init__(n_classes_to_show=n_classes_to_show, n_cols=n_cols, heatmap_dim=heatmap_dim)
+        super().__init__(n_rows=n_rows, n_cols=n_cols, heatmap_dim=heatmap_dim)
 
     def update(self, sample: DetectionSample):
 
@@ -40,6 +40,6 @@ class DetectionClassHeatmap(BaseClassHeatmap):
     def description(self) -> str:
         return (
             "Show the areas of high density of Bounding Boxes. This can be useful to understand if the objects are positioned in the right area.\n"
-            f"Note that only top {self.n_classes_to_show} classes are shown. "
+            f"Note that only top {self.n_cols * self.n_rows} classes are shown. "
             f" You can increase the number of classes by setting `DetectionClassHeatmap` with `n_classes_to_show`"
         )
