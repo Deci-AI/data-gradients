@@ -20,4 +20,4 @@ report_sections:
       - DetectionBoundingBoxSize
       - DetectionClassesCount
       - DetectionClassesPerImageCount
-      - DetectionBoundingBoxIoU
+#      - DetectionBoundingBoxIoU

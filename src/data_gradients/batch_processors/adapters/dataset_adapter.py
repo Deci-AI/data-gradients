@@ -46,7 +46,7 @@ class DatasetAdapter:
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
             options = get_tensor_extractor_options(data)
             question = Question(question="Which tensor represents your Images ?", options=options)
-            return self.data_config.get_images_extractor(question=question)
+            return self.data_config.set_images_extractor(question=question)
 
         raise NotImplementedError(f"Got object {type(data)} from Data Iterator - supporting (Tuple, List, Mapping, Tuple, List) only!")
 
