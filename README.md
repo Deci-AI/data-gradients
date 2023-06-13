@@ -35,61 +35,80 @@ pip install git+https://github.com/Deci-AI/data-gradients
 
 ## Quick Start
 
-### Prepare your Data
-First, prepare your `train_data` and `val_data`.
-This can be a pytorch dataset, dataloader or any type of data iterable.
+### Prerequisites
+
+- **Dataset**: Includes a **Train** set and a **Validation** or a **Test** set.
+- **Class Names**: A list of the unique categories present in your dataset.
+- **Iterable**: A method to iterate over your Dataset providing images and labels. Can be any of the following:
+  - PyTorch Dataloader
+  - PyTorch Dataset
+  - Generator that yields image/label pairs
+  - Any other iterable you use for model training/validation
+
+Please ensure all the points above are checked before you proceed with **DataGradients**.
+
+**Good to Know**: DataGradients will try to find out how the dataset returns images and labels.
+- If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
+- In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
+
+**Heads up**: We currently don't provide out-of-the-box dataset/dataloader implementation. 
+You can find multiple dataset implementations in [PyTorch](https://pytorch.org/vision/stable/datasets.html) 
+or [SuperGradients](https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
 
 **Example**
 ``` python
 from torchvision.datasets import CocoDetection
 
 train_data = CocoDetection(...)
+val_data = CocoDetection(...)
+class_names = ["person", "bicycle", "car", "motorcycle", ...]
 ```
 
-**Good to know:**
-DataGradients will try to find out how the dataset returns images and labels.
-- If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
-- In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
 
+### Dataset Analysis
+You are now ready to go, chose the relevant analyzer for your task and run it over your datasets!
 
-### Object Detection Analyzer
+**Object Detection**
 ```python
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
-train_loader = ...
-val_loader = ...
+train_data = ...
+val_data = ...
 class_names = ...
 
 analyzer = DetectionAnalysisManager(
-    report_title="Testing Data-Gradients",
-    train_data=train_loader,
-    val_data=val_loader,
+    report_title="Testing Data-Gradients Object Detection",
+    train_data=train_data,
+    val_data=val_data,
     class_names=class_names,
 )
 
 analyzer.run()
 ```
 
-### Segmentation Analyzer
+
+**Semantic Segmentation**
 ```python
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager 
 
-train_loader = ...
-val_loader = ...
+train_data = ...
+val_data = ...
 class_names = ...
 
 analyzer = SegmentationAnalysisManager(
-    report_title="Testing Data-Gradients",
-    train_data=train_loader,
-    val_data=val_loader,
+    report_title="Testing Data-Gradients Segmentation",
+    train_data=train_data,
+    val_data=val_data,
     class_names=class_names,
 )
 
 analyzer.run()
 ```
 
-### Example
-If you want to test it without having to download any datasets, you can check the following [segmentation example](https://github.com/Deci-AI/data-gradients/blob/master/examples/segmentation_example.py)
+**Example**
+
+You can test the segmentation analysis tool in the following [example](https://github.com/Deci-AI/data-gradients/blob/master/examples/segmentation_example.py)
+which does not require you to download any additional data.
 
 
 ### Report
