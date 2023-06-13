@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.data_classes import DetectionSample
@@ -7,6 +8,14 @@ from data_gradients.utils.detection import scale_bboxes
 
 @register_feature_extractor()
 class DetectionClassHeatmap(BaseClassHeatmap):
+    def __init__(self, n_classes_to_show: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
+        """
+        :param n_classes_to_show:   The `n_classes_to_show` classes that are the most represented in the dataset will be shown.
+        :param n_cols:              Number of columns to use to display the heatmap.
+        :param heatmap_dim:         Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed.
+        """
+        super().__init__(n_classes_to_show=n_classes_to_show, n_cols=n_cols, heatmap_dim=heatmap_dim)
+
     def update(self, sample: DetectionSample):
 
         if not self.class_names:

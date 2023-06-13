@@ -13,7 +13,8 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
     def __init__(self, n_classes_to_show: int = 12, n_cols: int = 2, heatmap_dim: Tuple[int, int] = (200, 200)):
         """
         :param n_classes_to_show:   The `n_classes_to_show` classes that are the most represented in the dataset will be shown.
-        :param heatmap_dim:         Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed
+        :param n_cols:              Number of columns to use to display the heatmap.
+        :param heatmap_dim:         Dimensions of the heatmap. Increase for more resolution, at the expense of processing speed.
         """
         self.heatmap_dim = heatmap_dim
         self.n_classes_to_show = n_classes_to_show
