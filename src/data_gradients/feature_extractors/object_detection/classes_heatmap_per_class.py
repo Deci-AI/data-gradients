@@ -21,8 +21,8 @@ class DetectionClassHeatmap(BaseClassHeatmap):
         if not self.class_names:
             self.class_names = sample.class_names
 
-        original_size = sample.image.shape[:2]
-        bboxes_xyxy = scale_bboxes(old_size=original_size, new_size=self.heatmap_shape, bboxes_xyxy=sample.bboxes_xyxy)
+        original_shape = sample.image.shape[:2]
+        bboxes_xyxy = scale_bboxes(old_shape=original_shape, new_shape=self.heatmap_shape, bboxes_xyxy=sample.bboxes_xyxy)
 
         split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_shape)))
 
