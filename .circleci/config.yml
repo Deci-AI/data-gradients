@@ -3,7 +3,7 @@ version: 2.1
 parameters:
   skip_md_files:
     type: boolean
-    default: true
+    default: false
   remote_docker_version:
     type: string
     description: remote docker version
