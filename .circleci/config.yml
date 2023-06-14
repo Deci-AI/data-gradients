@@ -167,20 +167,22 @@ jobs:
           command: |
             echo $CIRCLE_TAG > version.txt
 
+      - deci-common/pip_upload_package_codeartifact_all_accounts:
+          codeartifact_repository: "deci-packages"
 
-#      - deci-common/pip_test_package_installation_codeartifact_dev:  #todo
-#          package_name: "data-gradients"
-#          version: $CIRCLE_TAG
-#          venv_name: << parameters.dev_venv_name >>
+      - deci-common/pip_test_package_installation_codeartifact_dev:
+          package_name: "data-gradients"
+          version: $CIRCLE_TAG
+          venv_name: << parameters.dev_venv_name >>
       - run:
           name: verify that the output of __version__ is what we expect
           command: |
             . << parameters.dev_venv_name >>-data-gradients-$CIRCLE_TAG/bin/activate
             python3 tests/verify_version.py $CIRCLE_TAG
 #
-#      - deci-common/pip_test_package_installation_codeartifact_prod: #todo
-#          package_name: "data-gradients"
-
+      - deci-common/pip_test_package_installation_codeartifact_prod:
+          package_name: "data-gradients"
+          version: $CIRCLE_TAG
 
       - deci-common/git_commit_and_tag:
           version: $CIRCLE_TAG
@@ -207,22 +209,22 @@ workflows:
       - deci-common/persist_version_info:
           version_override: $CIRCLE_TAG
           <<: *release_tag_filter
-      - deci-common/codeartifact_login:
-          name: "login_to_codeartifact_release"
-          repo_name: "deci-packages"
-          <<: *release_tag_filter
       - build:
           name: "build3.8"
           py_version: "3.8"
           package_name: "data-gradients"
           requires:
             - deci-common/persist_version_info
-            - login_to_codeartifact_release
           <<: *release_tag_filter
       - release_version:
           py_version: "3.8"
           requires:
             - "build3.8"
+          context:
+            - aws-dev
+            - aws-prod
+            - aws-master
+            - github-token
           <<: *release_tag_filter
       - deci-common/pip_upload_package_from_codeartifact_to_global_pypi:
           package_name: "data-gradients"
@@ -243,7 +245,6 @@ workflows:
       - deci-common/persist_version_info:
           use_rc: true
           use_beta: false
-          version_override: ""
 
       - build:
           name: "build3.8"
@@ -254,6 +255,9 @@ workflows:
 
       - deci-common/codeartifact_login:
           repo_name: "deci-packages"
+          context:
+            - aws-dev
+            - aws-master
           <<: *release_candidate_filter
 
       - release_candidate: # happens on merge
@@ -261,5 +265,8 @@ workflows:
           requires:
             - "build3.8"
             - deci-common/codeartifact_login
+          context:
+            - aws-dev
+            - aws-master
           <<: *release_candidate_filter
 
