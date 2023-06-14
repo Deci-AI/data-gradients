@@ -15,6 +15,9 @@ from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
 
+
+import shutil
+
 logging.basicConfig(level=logging.WARNING)
 
 logger = getLogger(__name__)
@@ -55,6 +58,7 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
 
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.report_name = "Report.pdf"
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
         self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
 
@@ -151,8 +155,6 @@ class AnalysisManagerAbstract(abc.ABC):
             for feature_extractor in feature_extractors:
                 feature = feature_extractor.aggregate()
 
-                # Save in the main directory and in the archive directory
-                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.log_dir, filename="stats.json")
                 self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.archive_dir, filename="stats.json")
 
                 f = self.renderer.render(feature.data, feature.plot_options)
@@ -181,8 +183,11 @@ class AnalysisManagerAbstract(abc.ABC):
             summary.add_section(section)
 
         # Save in the main directory and in the archive directory
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))
         self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
+
+        print("Features extracted successfully!")
+        print("Now writting the report, this may take a dozen of seconds...")
+        copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=["stats.json", self.report_name])
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -250,3 +255,18 @@ class AnalysisManagerAbstract(abc.ABC):
         msg_train = f"Train set: {self._train_iters_done} out of {total_train_samples} samples were analyzed{portion_train}.\n"
         msg_val = f"Validation set: {self._val_iters_done} out of {total_val_samples} samples were analyzed{portion_val}.\n "
         return msg_head + msg_train + msg_val
+
+
+def copy_files_by_list(file_list: List[str], source_dir: str, dest_dir: str) -> None:
+    """Copy a list of files from the source directory to the destination directory.
+
+    :param file_list:   List of filenames to be copied.
+    :param source_dir:  Path of the source directory.
+    :param dest_dir:    Path of the destination directory.
+    """
+    for file_name in file_list:
+        source_file_path = os.path.join(source_dir, file_name)
+        os.makedirs(dest_dir, exist_ok=True)
+        if os.path.isfile(source_file_path):
+            dest_file_path = os.path.join(dest_dir, file_name)
+            shutil.copy(source_file_path, dest_file_path)
