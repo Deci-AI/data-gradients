@@ -234,6 +234,8 @@ workflows:
             - "release_version"
           context:
             - pypi-datagradients
+            - aws-prod
+            - aws-master
           <<: *release_tag_filter
 
   build_and_deploy:
