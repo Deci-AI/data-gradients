@@ -11,12 +11,10 @@ import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
+from data_gradients.utils.utils import copy_files_by_list
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
-
-
-import shutil
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -267,18 +265,3 @@ class AnalysisManagerAbstract(abc.ABC):
         msg_train = f"Train set: {self._train_iters_done} out of {total_train_samples} samples were analyzed{portion_train}.\n"
         msg_val = f"Validation set: {self._val_iters_done} out of {total_val_samples} samples were analyzed{portion_val}.\n "
         return msg_head + msg_train + msg_val
-
-
-def copy_files_by_list(file_list: List[str], source_dir: str, dest_dir: str) -> None:
-    """Copy a list of files from the source directory to the destination directory.
-
-    :param file_list:   List of filenames to be copied.
-    :param source_dir:  Path of the source directory.
-    :param dest_dir:    Path of the destination directory.
-    """
-    for file_name in file_list:
-        source_file_path = os.path.join(source_dir, file_name)
-        os.makedirs(dest_dir, exist_ok=True)
-        if os.path.isfile(source_file_path):
-            dest_file_path = os.path.join(dest_dir, file_name)
-            shutil.copy(source_file_path, dest_file_path)
