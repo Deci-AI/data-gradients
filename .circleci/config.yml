@@ -255,6 +255,7 @@ workflows:
 
       - deci-common/codeartifact_login:
           repo_name: "deci-packages"
+          dev_account: true
           context:
             - aws-dev
             - aws-master
