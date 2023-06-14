@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
+JSONValue = Union[str, int, float, bool, None, Dict[str, Union["JSONValue", List["JSONValue"]]]]
+JSONDict = Dict[str, JSONValue]
+
 
 @dataclass
 class Question:
@@ -42,29 +45,68 @@ def ask_question(question: Optional[Question], hint: str = "") -> Any:
 
 
 @dataclass
+class CachableParam:
+    value: Optional[Any]
+    name: Optional[str]
+
+
+class CachableTensorExtractor:
+    @staticmethod
+    def resolve(tensor_extractor: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
+        if tensor_extractor is None:
+            return CachableParam(value=None, name=None)
+        elif isinstance(tensor_extractor, str):
+            return CachableParam(NestedDataLookup(tensor_extractor), tensor_extractor)
+        elif isinstance(tensor_extractor, Callable):
+            return CachableParam(value=tensor_extractor, name=str(tensor_extractor))
+        else:
+            raise TypeError(f"Extractor type `{type(tensor_extractor)}` not supported!")
+
+
+class CachableXYXYConverter:
+    @staticmethod
+    def resolve(xyxy_converter: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
+        if xyxy_converter is None:
+            return CachableParam(value=None, name=None)
+        elif isinstance(xyxy_converter, str):
+            return CachableParam(XYXYConverter(xyxy_converter), xyxy_converter)
+        elif isinstance(xyxy_converter, Callable):
+            return CachableParam(value=xyxy_converter, name=str(xyxy_converter))
+        else:
+            raise TypeError(f"`xyxy_converter` type `{type(xyxy_converter)}` not supported!")
+
+
+@dataclass
 class DataConfig(ABC):
-    images_extractor: Optional[Union[str, Callable[[SupportedData], torch.Tensor]]] = None
-    labels_extractor: Optional[Union[str, Callable[[SupportedData], torch.Tensor]]] = None
+    images_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
+    labels_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
 
-    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
-        if self.images_extractor is None:
-            self.images_extractor = ask_question(question=question, hint=hint)
+    @classmethod
+    def from_json(cls, json_dict: JSONDict) -> "DataConfig":
+        try:
+            return cls(**json_dict)
+        except TypeError as e:
+            raise TypeError(f"{e}\n\t => Could not instantiate `{cls.__name__}` from json.") from e
 
-        if isinstance(self.images_extractor, str):
-            return NestedDataLookup(self.images_extractor)
-        else:
-            return self.images_extractor
+    def to_json(self) -> JSONDict:
+        json_dict = {
+            "images_extractor": CachableTensorExtractor.resolve(self.images_extractor).name,
+            "labels_extractor": CachableTensorExtractor.resolve(self.labels_extractor).name,
+        }
+        return json_dict
 
-    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
-        if self.labels_extractor is None:
-            self.labels_extractor = ask_question(question=question, hint=hint)
+    @classmethod
+    def load_from_json(cls, path: str) -> "DataConfig":
 
-        if isinstance(self.labels_extractor, str):
-            return NestedDataLookup(self.labels_extractor)
-        else:
-            return self.labels_extractor
+        if not path.endswith(".json"):
+            raise ValueError(f"`{path}` should end with `.json`")
 
-    def save_to_json(self, path: str):
+        with open(path, "r") as f:
+            json_dict = json.load(f)
+
+        return cls.from_json(json_dict)
+
+    def save_to_json(self, path: str) -> None:
 
         if not path.endswith(".json"):
             raise ValueError(f"`{path}` should end with `.json`")
@@ -72,34 +114,21 @@ class DataConfig(ABC):
         with open(path, "r") as f:
             json.dump(self.to_json(), f)
 
-    # @classmethod
-    # def load_from_json(cls, path: str):
-    #     if not path.endswith(".json"):
-    #         raise ValueError(f"`{path}` should end with `.json`")
-    #
-    #     # with open(path, "r") as f:
-    #     #     data = json.load(f)
-    #     #
-    #     return cls
-
-    # @classmethod
-    # def from_json(cls, json_dict: Dict) -> "DataConfig":
-    #     return cls(**json_dict)
-
-    def to_json(self) -> Dict[str, Union[str, bool, None]]:
-        json_dict = {
-            "images_extractor": self.images_extractor if isinstance(self.images_extractor, str) else None,
-            "labels_extractor": self.labels_extractor if isinstance(self.labels_extractor, str) else None,
-        }
-        return json_dict
-
-    def overwrite_missing_params(self, data: Dict):
-        # TODO: add Checks
+    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
         if self.images_extractor is None:
-            self.images_extractor = data.get("images_extractor")
+            self.images_extractor = ask_question(question=question, hint=hint)
+        return CachableTensorExtractor.resolve(tensor_extractor=self.images_extractor).value
 
+    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
         if self.labels_extractor is None:
-            self.labels_extractor = data.get("labels_extractor")
+            self.labels_extractor = ask_question(question=question, hint=hint)
+        return CachableTensorExtractor.resolve(tensor_extractor=self.labels_extractor).value
+
+    def overwrite_missing_params(self, data: JSONDict):
+        if self.images_extractor is None:
+            self.images_extractor = CachableTensorExtractor.resolve(data.get("images_extractor")).value
+        if self.labels_extractor is None:
+            self.labels_extractor = CachableTensorExtractor.resolve(data.get("labels_extractor")).value
 
 
 @dataclass
@@ -109,8 +138,8 @@ class SegmentationDataConfig(DataConfig):
 
 @dataclass
 class DetectionDataConfig(DataConfig):
-    is_label_first: Optional[bool] = None
-    xyxy_converter: Optional[Union[str, Callable[[torch.Tensor], torch.Tensor]]] = None
+    is_label_first: Union[None, bool] = None
+    xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]] = None
 
     def get_is_label_first(self, hint: str = "") -> bool:
         if self.is_label_first is None:
@@ -131,23 +160,19 @@ class DetectionDataConfig(DataConfig):
                 options=XYXYConverter.get_available_options(),
             )
             self.xyxy_converter = ask_question(question=question, hint=hint)
+        return CachableTensorExtractor.resolve(self.xyxy_converter).value
 
-        if isinstance(self.xyxy_converter, str):
-            return XYXYConverter(self.xyxy_converter)
-        else:
-            return self.xyxy_converter
-
-    def to_json(self) -> Dict[str, Union[str, bool, None]]:
+    def to_json(self) -> JSONDict:
         json_dict = {
             **super().to_json(),
             "is_label_first": self.is_label_first,
-            "xyxy_converter": self.xyxy_converter if isinstance(self.xyxy_converter, str) else None,
+            "xyxy_converter": CachableTensorExtractor.resolve(self.xyxy_converter).name,
         }
         return json_dict
 
-    def overwrite_missing_params(self, data: Dict):
+    def overwrite_missing_params(self, data: JSONDict) -> None:
         super().overwrite_missing_params(data)
         if self.is_label_first is None:
             self.is_label_first = data.get("is_label_first")
         if self.xyxy_converter is None:
-            self.xyxy_converter = data.get("xyxy_converter")
+            self.xyxy_converter = CachableXYXYConverter.resolve(data.get("xyxy_converter")).value
