@@ -159,8 +159,8 @@ class AnalysisManagerAbstract(abc.ABC):
                     f = None
                     feature_json = {"error": str(e)}
                     feature_error = (
-                        f"Feature extraction error.<br/>Check out the log file for more details:<br/>"
-                        f"<code>{os.path.join(self.archive_dir, self.log_filename)}</code>"
+                        f"Feature extraction error. Check out the log file for more details:<br/>"
+                        f"<em>{os.path.join(self.archive_dir, self.log_filename)}</em>"
                     )
 
                 if f is not None:
