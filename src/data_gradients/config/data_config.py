@@ -72,19 +72,19 @@ class DataConfig(ABC):
         with open(path, "r") as f:
             json.dump(self.to_json(), f)
 
-    @classmethod
-    def load_from_json(cls, path: str):
-        if not path.endswith(".json"):
-            raise ValueError(f"`{path}` should end with `.json`")
+    # @classmethod
+    # def load_from_json(cls, path: str):
+    #     if not path.endswith(".json"):
+    #         raise ValueError(f"`{path}` should end with `.json`")
+    #
+    #     # with open(path, "r") as f:
+    #     #     data = json.load(f)
+    #     #
+    #     return cls
 
-        # with open(path, "r") as f:
-        #     data = json.load(f)
-        #
-        return cls
-
-    @classmethod
-    def from_json(cls, json_dict: Dict) -> "DataConfig":
-        return cls(**json_dict)
+    # @classmethod
+    # def from_json(cls, json_dict: Dict) -> "DataConfig":
+    #     return cls(**json_dict)
 
     def to_json(self) -> Dict[str, Union[str, bool, None]]:
         json_dict = {

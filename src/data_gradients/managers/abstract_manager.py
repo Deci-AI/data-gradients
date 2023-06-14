@@ -182,7 +182,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     image_path = None
 
-                self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.log_filename)
+                self.json_writer.log_data(title=feature_extractor.title, data=feature_json)
 
                 if feature_error:
                     warning = feature_error
@@ -205,6 +205,8 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
 
+        self.json_writer.cache = self.data_config.to_json()
+        self.json_writer.write(output_path=os.path.join(self.archive_dir, self.log_filename))
         self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, self.report_name))
         copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
 

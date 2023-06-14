@@ -18,9 +18,12 @@ class JsonWriter:
     def _load_cache(cache_path: str) -> Dict:
         if os.path.exists(cache_path):
             with open(cache_path, "r") as f:
-                previous_data = json.load(f)
-                if previous_data.get("__version__") == data_gradients.__version__:
-                    return previous_data.get("cache", {})
+                try:
+                    previous_data = json.load(f)
+                    if previous_data.get("__version__") == data_gradients.__version__:
+                        return previous_data.get("cache", {})
+                except json.decoder.JSONDecodeError:
+                    return {}
         return {}
 
     @property
