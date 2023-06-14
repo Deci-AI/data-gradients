@@ -59,6 +59,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.report_name = "Report.pdf"
+        self.log_filename = "summary.json"
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
         self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
 
@@ -153,11 +154,19 @@ class AnalysisManagerAbstract(abc.ABC):
         for section_name, feature_extractors in self.grouped_feature_extractors.items():
             section = Section(section_name)
             for feature_extractor in feature_extractors:
-                feature = feature_extractor.aggregate()
+                try:
+                    feature = feature_extractor.aggregate()
+                    f = self.renderer.render(feature.data, feature.plot_options)
+                    feature_json = feature.json
+                    feature_error = ""
+                except Exception as e:
+                    f = None
+                    feature_json = {"error": str(e)}
+                    feature_error = (
+                        f"Feature extraction error. Check out the log file for more details:<br/>"
+                        f"<em>{os.path.join(self.archive_dir, self.log_filename)}</em>"
+                    )
 
-                self.write_json(data=dict(title=feature_extractor.title, data=feature.json), output_dir=self.archive_dir, filename="stats.json")
-
-                f = self.renderer.render(feature.data, feature.plot_options)
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".svg"
                     image_path = os.path.join(self.archive_dir, image_name)
@@ -166,7 +175,11 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     image_path = None
 
-                if isinstance(feature_extractor, SummaryStats) and (interrupted or (self.batches_early_stop and self._stopped_early)):
+                self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.log_filename)
+
+                if feature_error:
+                    warning = feature_error
+                elif isinstance(feature_extractor, SummaryStats) and (interrupted or (self.batches_early_stop and self._stopped_early)):
                     warning = self._create_samples_iterated_warning()
                 else:
                     warning = feature_extractor.warning
@@ -182,12 +195,11 @@ class AnalysisManagerAbstract(abc.ABC):
                 )
             summary.add_section(section)
 
-        # Save in the main directory and in the archive directory
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
-
         print("Features extracted successfully!")
-        print("Now writting the report, this may take a dozen of seconds...")
-        copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=["stats.json", self.report_name])
+        print("Now writing the report, this may take around 10 seconds...")
+
+        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
+        copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
 
         # Cleanup of generated images
         for image_created in images_created:
