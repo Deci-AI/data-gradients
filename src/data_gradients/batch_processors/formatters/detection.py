@@ -206,12 +206,13 @@ class DetectionBatchFormatter(BatchFormatter):
         filtered_bbox_tensors = []
         class_ids_to_use_tensor = torch.tensor(class_ids_to_use)
 
-        for bbox_tensor in bboxes:
-            valid_indices = torch.nonzero(torch.isin(bbox_tensor[:, 0], class_ids_to_use_tensor)).squeeze()
-            filtered_bbox = bbox_tensor[valid_indices]
+        for sample_bboxes in bboxes:  # sample_bboxes of shape [padding_size, 5]
+            sample_class_ids = sample_bboxes[:, 0]
+            valid_indices = torch.nonzero(torch.isin(sample_class_ids, class_ids_to_use_tensor)).squeeze(-1)
+            filtered_bbox = sample_bboxes[valid_indices]  # Shape [?, 5]
 
             non_zero_indices = torch.any(filtered_bbox[:, 1:] != 0, dim=1)
-            filtered_bbox = filtered_bbox[non_zero_indices]
+            filtered_bbox = filtered_bbox[non_zero_indices]  # Shape [?, 5]
 
             filtered_bbox_tensors.append(filtered_bbox)
 
