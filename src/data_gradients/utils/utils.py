@@ -1,4 +1,6 @@
+import os
 import re
+import shutil
 from typing import Dict, Mapping, List
 
 
@@ -79,3 +81,18 @@ def ask_user(main_question: str, options: List[str], optional_description: str =
     print(f"Great! You chose: {selected_option}\n")
 
     return selected_option
+
+
+def copy_files_by_list(file_list: List[str], source_dir: str, dest_dir: str) -> None:
+    """Copy a list of files from the source directory to the destination directory.
+
+    :param file_list:   List of filenames to be copied.
+    :param source_dir:  Path of the source directory.
+    :param dest_dir:    Path of the destination directory.
+    """
+    for file_name in file_list:
+        source_file_path = os.path.join(source_dir, file_name)
+        os.makedirs(dest_dir, exist_ok=True)
+        if os.path.isfile(source_file_path):
+            dest_file_path = os.path.join(dest_dir, file_name)
+            shutil.copy(source_file_path, dest_file_path)

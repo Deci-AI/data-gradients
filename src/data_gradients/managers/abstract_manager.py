@@ -11,6 +11,7 @@ import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
+from data_gradients.utils.utils import copy_files_by_list
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
@@ -55,6 +56,7 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
 
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.report_name = "Report.pdf"
         self.log_filename = "summary.json"
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
         self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
@@ -171,8 +173,6 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     image_path = None
 
-                # Save in the main directory and in the archive directory
-                self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.log_dir, filename=self.log_filename)
                 self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.log_filename)
 
                 if feature_error:
@@ -193,9 +193,11 @@ class AnalysisManagerAbstract(abc.ABC):
                 )
             summary.add_section(section)
 
-        # Save in the main directory and in the archive directory
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
+        print("Dataset successfully analyzed!")
+        print("Starting to write the report, this may take around 10 seconds...")
+
+        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, self.report_name))
+        copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
 
         # Cleanup of generated images
         for image_created in images_created:
