@@ -196,7 +196,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Features extracted successfully!")
         print("Now writing the report, this may take around 10 seconds...")
 
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, "Report.pdf"))
+        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, self.report_name))
         copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
 
         # Cleanup of generated images
