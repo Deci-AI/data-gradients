@@ -193,8 +193,8 @@ class AnalysisManagerAbstract(abc.ABC):
                 )
             summary.add_section(section)
 
-        print("Features extracted successfully!")
-        print("Now writing the report, this may take around 10 seconds...")
+        print("Dataset successfully analyzed!")
+        print("Starting to write the report, this may take around 10 seconds...")
 
         self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, self.report_name))
         copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
