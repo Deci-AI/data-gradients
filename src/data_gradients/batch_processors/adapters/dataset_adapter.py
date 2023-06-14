@@ -49,6 +49,9 @@ class DatasetAdapter:
         raise NotImplementedError(f"Got object {type(data)} from Data Iterator - supporting (Tuple, List, Mapping, Tuple, List) only!")
 
     def _get_labels_extractor(self, data: SupportedData) -> Callable[[SupportedData], torch.Tensor]:
+        if self.data_config.labels_extractor is not None:
+            return self.data_config.get_labels_extractor()
+
         # If data == Tuple[Union[Tensor, np.ndarray, Image], ...]
         if isinstance(data, (Tuple, List)) and len(data) == 2:
             if isinstance(data[1], (torch.Tensor, np.ndarray, PIL.Image.Image)):

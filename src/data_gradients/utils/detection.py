@@ -39,18 +39,21 @@ XYXY_CONVERTERS = {
 }
 
 
+class XYXYConvertError(Exception):
+    ...
+
+
 class XYXYConverter:
     def __init__(self, format_name: str):
-        if format_name not in self.get_converters():
-            raise ValueError(f"`{format_name}` is not a valid format. Should be one of {list(XYXY_CONVERTERS.keys())}")
+        if format_name not in XYXY_CONVERTERS:
+            raise ValueError(f"`{format_name}` is not a valid format. It should be one of {list(XYXY_CONVERTERS.keys())}")
         self.converter = XYXY_CONVERTERS[format_name]["function"]
 
     def __call__(self, bboxes: torch.Tensor) -> torch.Tensor:
-        return self.converter(bboxes)
-
-    @staticmethod
-    def get_converters():
-        return {"xyxy": lambda x: x, "xywh": xywh_to_xyxy, "cxcywh": cxcywh_to_xyxy}
+        try:
+            return self.converter(bboxes)
+        except Exception as e:
+            raise XYXYConvertError(f"{e}:\n \t => Error happened when converting tensors to xyxy format.") from e
 
     @staticmethod
     def get_available_options():

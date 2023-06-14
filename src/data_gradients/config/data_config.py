@@ -50,15 +50,32 @@ class CachableParam:
     name: Optional[str]
 
 
+NON_CACHABLE_PREFIX = "[Non-cachable]"
+
+
+class CacheLoadingError(Exception):
+    def __init__(self, key: str, value: str):
+        message = (
+            f"Error while trying to load `{key}` from cache... with value `{value}`.\n"
+            f"It seems that this object was passed to the `DataConfig` in the previous run.\n"
+            f"Please:\n"
+            f"     - Either pass the same `{key}` to the `DataConfig`.\n"
+            f"     - Or disable loading config from cache.\n"
+        )
+        super().__init__(message)
+
+
 class CachableTensorExtractor:
     @staticmethod
     def resolve(tensor_extractor: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
         if tensor_extractor is None:
             return CachableParam(value=None, name=None)
         elif isinstance(tensor_extractor, str):
+            if tensor_extractor.startswith(NON_CACHABLE_PREFIX):
+                raise CacheLoadingError(key="tensor_extractor", value=tensor_extractor)
             return CachableParam(NestedDataLookup(tensor_extractor), tensor_extractor)
         elif isinstance(tensor_extractor, Callable):
-            return CachableParam(value=tensor_extractor, name=str(tensor_extractor))
+            return CachableParam(value=tensor_extractor, name=f"{NON_CACHABLE_PREFIX} - {tensor_extractor}")
         else:
             raise TypeError(f"Extractor type `{type(tensor_extractor)}` not supported!")
 
@@ -69,9 +86,11 @@ class CachableXYXYConverter:
         if xyxy_converter is None:
             return CachableParam(value=None, name=None)
         elif isinstance(xyxy_converter, str):
+            if xyxy_converter.startswith(NON_CACHABLE_PREFIX):
+                raise CacheLoadingError(key="xyxy_converter", value=xyxy_converter)
             return CachableParam(XYXYConverter(xyxy_converter), xyxy_converter)
         elif isinstance(xyxy_converter, Callable):
-            return CachableParam(value=xyxy_converter, name=str(xyxy_converter))
+            return CachableParam(value=xyxy_converter, name=f"{NON_CACHABLE_PREFIX} - {xyxy_converter}")
         else:
             raise TypeError(f"`xyxy_converter` type `{type(xyxy_converter)}` not supported!")
 
@@ -126,9 +145,9 @@ class DataConfig(ABC):
 
     def overwrite_missing_params(self, data: JSONDict):
         if self.images_extractor is None:
-            self.images_extractor = CachableTensorExtractor.resolve(data.get("images_extractor")).value
+            self.images_extractor = data.get("images_extractor")
         if self.labels_extractor is None:
-            self.labels_extractor = CachableTensorExtractor.resolve(data.get("labels_extractor")).value
+            self.labels_extractor = data.get("labels_extractor")
 
 
 @dataclass
@@ -150,7 +169,7 @@ class DetectionDataConfig(DataConfig):
                     "Bounding box comes first (e.g. [x1, y1, x2, y2, class_id])": False,
                 },
             )
-            self.is_label_first = ask_question(question=question, hint=hint)
+            self.is_label_first: bool = ask_question(question=question, hint=hint)
         return self.is_label_first
 
     def get_xyxy_converter(self, hint: str = "") -> Callable[[torch.Tensor], torch.Tensor]:
@@ -160,13 +179,13 @@ class DetectionDataConfig(DataConfig):
                 options=XYXYConverter.get_available_options(),
             )
             self.xyxy_converter = ask_question(question=question, hint=hint)
-        return CachableTensorExtractor.resolve(self.xyxy_converter).value
+        return CachableXYXYConverter.resolve(self.xyxy_converter).value
 
     def to_json(self) -> JSONDict:
         json_dict = {
             **super().to_json(),
             "is_label_first": self.is_label_first,
-            "xyxy_converter": CachableTensorExtractor.resolve(self.xyxy_converter).name,
+            "xyxy_converter": CachableXYXYConverter.resolve(self.xyxy_converter).name,
         }
         return json_dict
 
@@ -175,4 +194,4 @@ class DetectionDataConfig(DataConfig):
         if self.is_label_first is None:
             self.is_label_first = data.get("is_label_first")
         if self.xyxy_converter is None:
-            self.xyxy_converter = CachableXYXYConverter.resolve(data.get("xyxy_converter")).value
+            self.xyxy_converter = data.get("xyxy_converter")

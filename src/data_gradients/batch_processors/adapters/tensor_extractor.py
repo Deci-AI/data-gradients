@@ -84,7 +84,7 @@ class NestedDataLookup:
         try:
             return traverse_nested_data_structure(data=data, keys=self.keys_to_reach_object)
         except Exception as e:
-            raise DataLookupError(e)
+            raise DataLookupError(f"{e}:\n \t => Error happened during tensor mapping between dataset and DataGradients.") from e
 
 
 def extract_keys_from_path(object_path: str) -> List[Union[str, int]]:
