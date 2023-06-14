@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -25,6 +25,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         self.data = []
         self.num_bins = num_bins
         self.class_agnostic = class_agnostic
+        self._show_plot = True  # If there is nothing to show, self.show_plot will be set to False.
 
     def update(self, sample: DetectionSample):
         if len(sample.bboxes_xyxy) == 0:
@@ -90,6 +91,10 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         num_classes = len(class_names)
         xticklabels = [f"IoU < {bins[x]:.2f}" for x in range(1, len(bins))]
 
+        if not data:
+            self._show_plot = False
+            return Feature(data=None, plot_options=None, json={})
+
         plot_options = HeatmapOptions(
             xticklabels=xticklabels,
             yticklabels=class_names + ["All classes"],
@@ -129,3 +134,12 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         else:
             description += "Only intersection of boxes of same class are considered."
         return description
+
+    @property
+    def notice(self) -> Optional[str]:
+        if not self._show_plot:
+            description = "Nothing to show.<br/>"
+            if self.class_agnostic:
+                return description + "This indicates that you have at most 1 class per image, so no IoU can be computed."
+            else:
+                return description + "This indicates that there are no overlapping bounding boxes of the same class in your dataset."
