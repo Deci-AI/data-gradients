@@ -32,6 +32,31 @@ def xywh_to_xyxy(bboxes: torch.Tensor) -> torch.Tensor:
     return torch.stack([x1, y1, x2, y2], dim=-1)
 
 
+XYXY_CONVERTERS = {
+    "xyxy": {"function": lambda x: x, "description": "xyxy: x- left, y-top, x-right, y-bottom"},
+    "xywh": {"function": xywh_to_xyxy, "description": "xywh: x-left, y-top, width, height"},
+    "cxcywh": {"function": cxcywh_to_xyxy, "description": "cxcywh: x-center, y-center, width, height"},
+}
+
+
+class XYXYConverter:
+    def __init__(self, format_name: str):
+        if format_name not in self.get_converters():
+            raise ValueError(f"`{format_name}` is not a valid format. Should be one of {list(XYXY_CONVERTERS.keys())}")
+        self.converter = XYXY_CONVERTERS[format_name]["function"]
+
+    def __call__(self, bboxes: torch.Tensor) -> torch.Tensor:
+        return self.converter(bboxes)
+
+    @staticmethod
+    def get_converters():
+        return {"xyxy": lambda x: x, "xywh": xywh_to_xyxy, "cxcywh": cxcywh_to_xyxy}
+
+    @staticmethod
+    def get_available_options():
+        return {info["description"]: key for key, info in XYXY_CONVERTERS.items()}
+
+
 def scale_bboxes(old_shape: Tuple[float, float], new_shape: Tuple[float, float], bboxes_xyxy: np.ndarray):
     """Scale bounding boxes to a new shape.
     :param old_shape:   Old shape of the image, (H, W) format

@@ -58,6 +58,7 @@ class AnalysisManagerAbstract(abc.ABC):
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
         self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
+        os.makedirs(self.archive_dir, exist_ok=True)
 
         self.report_title = report_title
         self.report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
@@ -65,10 +66,13 @@ class AnalysisManagerAbstract(abc.ABC):
         # WRITERS
         self.renderer = SeabornRenderer()
         self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
-        self.json_writer = JsonWriter(source_path=os.path.join(self.log_dir, "summary.json"))
+        self.json_writer = JsonWriter(source_path=os.path.join(self.log_dir, "Summary.json"))
 
+        print(self.json_writer)
+        print(self.json_writer.cache)
+        data_config.overwrite_missing_params(data=self.json_writer.cache)
+        print(data_config.to_json())
         self.data_config = data_config
-        self.data_config.answers_cache = self.json_writer.cache
 
         # DATA
         if batches_early_stop:
@@ -185,7 +189,8 @@ class AnalysisManagerAbstract(abc.ABC):
             summary.add_section(section)
 
         # Save in the main directory and in the archive directory
-        self.json_writer.cache = self.data_config.answers_cache
+        print(self.data_config.to_json())
+        self.json_writer.cache = self.data_config.to_json()
         self.json_writer.write(output_path=os.path.join(self.log_dir, "Summary.json"))
         self.json_writer.write(output_path=os.path.join(self.archive_dir, "Summary.json"))
         self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.log_dir, "Report.pdf"))

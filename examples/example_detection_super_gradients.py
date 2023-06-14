@@ -17,7 +17,7 @@ from data_gradients.config.data_config import DetectionDataConfig
 if __name__ == "__main__":
 
     train_loader = coco2017_train()
-    val_loader = coco2017_val()
+    val_loader = coco2017_val(dataset_params={"max_num_samples": 1000})
 
     images_extractor = lambda x: x[0]
     labels_extractor = lambda x: x[1]
@@ -29,7 +29,7 @@ if __name__ == "__main__":
         train_data=val_loader,
         val_data=val_loader,
         class_names=val_loader.dataset.classes,
-        batches_early_stop=20,
+        batches_early_stop=5,
     )
 
     analyzer.run()
