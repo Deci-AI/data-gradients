@@ -6,8 +6,8 @@ import torch
 import json
 
 from data_gradients.batch_processors.adapters.tensor_extractor import NestedDataLookup
+from data_gradients.config.data.questions import Question, ask_question
 from data_gradients.utils.detection import XYXYConverter
-from data_gradients.utils.utils import ask_user
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -18,30 +18,6 @@ SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
 JSONValue = Union[str, int, float, bool, None, Dict[str, Union["JSONValue", List["JSONValue"]]]]
 JSONDict = Dict[str, JSONValue]
-
-
-@dataclass
-class Question:
-    """Model a Question with its options
-    :attr question: The question string
-    :attr options: The options for the question
-    """
-
-    question: str
-    options: Dict[str, Any]
-
-
-def ask_question(question: Optional[Question], hint: str = "") -> Any:
-    """Method responsible for the whole logic of the class. Read class description for more information.
-
-    :param question:    Question to ask the user for the parameter. This is only used when the parameter was not set in the `__init__` and was
-                            not found in the cache.
-    :param hint:        Hint to display to the user. This is only displayed when asking a question to the user, and aims at providing extra context,
-                            such as showing a sample of data, to help the user answer the question.
-    """
-    if question is not None:
-        answer = ask_user(question.question, options=list(question.options.keys()), optional_description=hint)
-        return question.options[answer]
 
 
 @dataclass
@@ -66,14 +42,21 @@ class CacheLoadingError(Exception):
 
 
 class CachableTensorExtractor:
+    """Static class"""
+
     @staticmethod
     def resolve(tensor_extractor: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
         if tensor_extractor is None:
             return CachableParam(value=None, name=None)
+
         elif isinstance(tensor_extractor, str):
             if tensor_extractor.startswith(NON_CACHABLE_PREFIX):
+                # The value corresponds to the cache of a custom function. THis means that the function was cached by user in previous run,
+                # but he did not provide a function for this run.
+                # Since we cannot build back the original function, we raise an informative exception.
                 raise CacheLoadingError(key="tensor_extractor", value=tensor_extractor)
             return CachableParam(NestedDataLookup(tensor_extractor), tensor_extractor)
+
         elif isinstance(tensor_extractor, Callable):
             return CachableParam(value=tensor_extractor, name=f"{NON_CACHABLE_PREFIX} - {tensor_extractor}")
         else:
@@ -85,10 +68,15 @@ class CachableXYXYConverter:
     def resolve(xyxy_converter: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
         if xyxy_converter is None:
             return CachableParam(value=None, name=None)
+
         elif isinstance(xyxy_converter, str):
             if xyxy_converter.startswith(NON_CACHABLE_PREFIX):
+                # The value corresponds to the cache of a custom function. THis means that the function was cached by user in previous run,
+                # but he did not provide a function for this run.
+                # Since we cannot build back the original function, we raise an informative exception.
                 raise CacheLoadingError(key="xyxy_converter", value=xyxy_converter)
             return CachableParam(XYXYConverter(xyxy_converter), xyxy_converter)
+
         elif isinstance(xyxy_converter, Callable):
             return CachableParam(value=xyxy_converter, name=f"{NON_CACHABLE_PREFIX} - {xyxy_converter}")
         else:
@@ -97,17 +85,31 @@ class CachableXYXYConverter:
 
 @dataclass
 class DataConfig(ABC):
+    """Data class for handling Dataset/Dataloader configuration.
+
+    Works as a regular dataclass, but with some additional features:
+        - Getter functions that ask the user for information if this information was not provided yet.
+        - Caching system, that supports saving and loading of any non-callable attribute.
+            Also supports saving and loading from callable defined within DataGradients.
+    """
+
     images_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
 
     @classmethod
     def from_json(cls, json_dict: JSONDict) -> "DataConfig":
+        """Create a new instance of the dataclass from a JSON representation.
+        :param json_dict: JSON like dictionary.
+        """
         try:
             return cls(**json_dict)
         except TypeError as e:
             raise TypeError(f"{e}\n\t => Could not instantiate `{cls.__name__}` from json.") from e
 
     def to_json(self) -> JSONDict:
+        """Convert the dataclass into a serializable representation that can be saved and loaded safely.
+        :return: JSON like dictionary, that can be used to create a new instance of the object.
+        """
         json_dict = {
             "images_extractor": CachableTensorExtractor.resolve(self.images_extractor).name,
             "labels_extractor": CachableTensorExtractor.resolve(self.labels_extractor).name,
@@ -116,6 +118,8 @@ class DataConfig(ABC):
 
     @classmethod
     def load_from_json(cls, path: str) -> "DataConfig":
+        """Load the representation of the class from a .json file.
+        :param path: Path where the file is, should include ".json" extension."""
 
         if not path.endswith(".json"):
             raise ValueError(f"`{path}` should end with `.json`")
@@ -125,7 +129,9 @@ class DataConfig(ABC):
 
         return cls.from_json(json_dict)
 
-    def save_to_json(self, path: str) -> None:
+    def save_to_json(self, path: str):
+        """Save the serializable representation of the class to a .json file.
+        :param path: Output path of the file, should include ".json" extension."""
 
         if not path.endswith(".json"):
             raise ValueError(f"`{path}` should end with `.json`")
@@ -143,11 +149,16 @@ class DataConfig(ABC):
             self.labels_extractor = ask_question(question=question, hint=hint)
         return CachableTensorExtractor.resolve(tensor_extractor=self.labels_extractor).value
 
-    def overwrite_missing_params(self, data: JSONDict):
+    def overwrite_missing_params(self, json_dict: JSONDict):
+        """Overwrite every attribute that is equal to `None`.
+        This is the safe way of loading cache, since it will prioritize attributes already set by the user.
+
+        :param json_dict: JSON like dictionary. It's values will overwrite the attributes if these attributes are None
+        """
         if self.images_extractor is None:
-            self.images_extractor = data.get("images_extractor")
+            self.images_extractor = json_dict.get("images_extractor")
         if self.labels_extractor is None:
-            self.labels_extractor = data.get("labels_extractor")
+            self.labels_extractor = json_dict.get("labels_extractor")
 
 
 @dataclass
@@ -189,7 +200,7 @@ class DetectionDataConfig(DataConfig):
         }
         return json_dict
 
-    def overwrite_missing_params(self, data: JSONDict) -> None:
+    def overwrite_missing_params(self, data: JSONDict):
         super().overwrite_missing_params(data)
         if self.is_label_first is None:
             self.is_label_first = data.get("is_label_first")
