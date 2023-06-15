@@ -1,6 +1,6 @@
 from .bounding_boxes_area import SegmentationBoundingBoxArea
 from .bounding_boxes_resolution import SegmentationBoundingBoxResolution
-from .classes_count import SegmentationClassesCount
+from .classes_count import SegmentationClassFrequency
 from .classes_heatmap_per_class import SegmentationClassHeatmap
 from .classes_per_image_count import SegmentationClassesPerImageCount
 from .components_convexity import SegmentationComponentsConvexity
@@ -11,7 +11,7 @@ from .sample_visualization import SegmentationSampleVisualization
 __all__ = [
     "SegmentationBoundingBoxArea",
     "SegmentationBoundingBoxResolution",
-    "SegmentationClassesCount",
+    "SegmentationClassFrequency",
     "SegmentationClassHeatmap",
     "SegmentationClassesPerImageCount",
     "SegmentationComponentsConvexity",
