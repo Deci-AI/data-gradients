@@ -4,7 +4,7 @@ from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
 from data_gradients.batch_processors.preprocessors.segmentation import SegmentationBatchPreprocessor
 from data_gradients.batch_processors.formatters.segmentation import SegmentationBatchFormatter
-from data_gradients.config.data_config import SegmentationDataConfig
+from data_gradients.config.data.data_config import SegmentationDataConfig
 
 
 class SegmentationBatchProcessor(BatchProcessor):

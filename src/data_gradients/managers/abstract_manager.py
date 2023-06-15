@@ -14,7 +14,7 @@ from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import copy_files_by_list
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
-from data_gradients.config.data_config import DataConfig
+from data_gradients.config.data.data_config import DataConfig
 
 
 logging.basicConfig(level=logging.INFO)

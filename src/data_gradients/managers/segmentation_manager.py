@@ -4,7 +4,7 @@ from typing import Optional, Iterable, List
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
-from data_gradients.config.data_config import SegmentationDataConfig
+from data_gradients.config.data.data_config import SegmentationDataConfig
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):

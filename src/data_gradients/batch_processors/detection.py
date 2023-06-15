@@ -4,7 +4,7 @@ from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
 from data_gradients.batch_processors.formatters.detection import DetectionBatchFormatter
 from data_gradients.batch_processors.preprocessors.detection import DetectionBatchPreprocessor
-from data_gradients.config.data_config import DetectionDataConfig
+from data_gradients.config.data.data_config import DetectionDataConfig
 
 
 class DetectionBatchProcessor(BatchProcessor):
