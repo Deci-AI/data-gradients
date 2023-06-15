@@ -31,9 +31,12 @@ class SegmentationClassesCount(AbstractFeatureExtractor):
         # Include ("class_name", "class_id", "split", "n_appearance")
         df_class_count = df.groupby(["class_name", "class_id", "split"]).size().reset_index(name="n_appearance")
 
+        split_sums = df_class_count.groupby("split")["n_appearance"].sum()
+        df_class_count["normalized_n_appearance"] = 100 * (df_class_count["n_appearance"] / df_class_count["split"].map(split_sums))
+
         plot_options = BarPlotOptions(
-            x_label_key="n_appearance",
-            x_label_name="Number of Appearance",
+            x_label_key="normalized_n_appearance",
+            x_label_name="Number of Appearance (in % of the split)",
             y_label_key="class_name",
             y_label_name="Class Names",
             order_key="class_id",
