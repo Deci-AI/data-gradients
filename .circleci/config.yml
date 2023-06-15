@@ -11,7 +11,7 @@ parameters:
   orb_version:
     type: string
     description: Deci ai ORB version https://circleci.com/developer/orbs/orb/deci-ai/circleci-common-orb
-    default: "10.5.1"
+    default: "11.0.0"
 #    default: "dev:alpha"
   ad_hoc_container_build:
     type: boolean
@@ -43,6 +43,37 @@ release_candidate_tag_filter: &release_candidate_tag_filter
     tags:
       only: /^\d+\.\d+\.\d+rc\d+/
 
+
+commands:
+
+  verify_that_package_version_is_aligned_with_code:
+    parameters:
+      version:
+        type: string
+      venv_name:
+        type: string
+    steps:
+      - run:
+          name: verify that the output of __version__ is what we expect
+          command: |
+            . << parameters.venv_name >>/bin/activate
+            python3 tests/verify_version.py << parameters.version >>
+
+  handle_version_files:
+    parameters:
+      version:
+        type: string
+    steps:
+      - deci-common/git_config_automation_user
+      - run:
+          name: edit package version assisting files
+          command: |
+            echo << parameters.version >> > version.txt
+            sed -i 's/^__version__.*/__version__ = "<< parameters.version >>"/g' src/data_gradients/__init__.py
+      - run:
+          name: commit package version assisting files
+          command: |
+            git commit -m "Deci Services - Changed version to << parameters.version >>" version.txt src/data_gradients/__init__.py
 
 jobs:
   build:
@@ -118,6 +149,9 @@ jobs:
     parameters:
       py_version:
         type: string
+      dev_venv_name:
+        type: string
+        default: "dev-data_gradients-${CIRCLE_BUILD_NUM}"
     docker:
       - image: cimg/python:<< parameters.py_version >>
     steps:
@@ -126,27 +160,32 @@ jobs:
           skip_md_files: << pipeline.parameters.skip_md_files >>
 
       - deci-common/get_persisted_version_info
-      - run:
-          name: edit package version
-          command: |
-            echo $NEW_VERSION > version.txt
+
+      - handle_version_files:
+          version: $NEW_VERSION
+
       - deci-common/pip_upload_package_codeartifact_dev:
           codeartifact_repository: "deci-packages"
+
       - deci-common/pip_test_package_installation_codeartifact_dev:
           package_name: "data-gradients"
           version: $NEW_VERSION
-      - deci-common/git_config_automation_user
-      - run:
-          name: "commit version file"
-          command: |
-            git commit version.txt -m "Deci Services - Changed version to $NEW_VERSION"
+          venv_name: << parameters.dev_venv_name >>
+
+      - verify_that_package_version_is_aligned_with_code:
+          version: $NEW_VERSION
+          venv_name: << parameters.dev_venv_name >>
+
       - deci-common/git_commit_and_tag:
           version: $NEW_VERSION
+          config_automation_user: false #already configured earlier
 
   release_version:
     environment:
       CIRCLE_COMPARE_URL: << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<<pipeline.git.revision>>
     parameters:
+      version:
+        type: string
       py_version:
         type: string
       dev_venv_name:
@@ -162,31 +201,29 @@ jobs:
           name: add requirements.txt a to source code
           command: |
             cp requirements.txt src/data_gradients/requirements.txt
-      - run:
-          name: edit package version
-          command: |
-            echo $CIRCLE_TAG > version.txt
 
-      - deci-common/pip_upload_package_codeartifact_all_accounts:
+      - handle_version_files:
+          version: << parameters.version >>
+
+      - deci-common/pip_upload_package_codeartifact_dev:
           codeartifact_repository: "deci-packages"
 
-      - deci-common/pip_test_package_installation_codeartifact_dev:
+      - deci-common/pip_test_package_installation_codeartifact_dev: # we are testing dev only. so we won't publish trash to prod
           package_name: "data-gradients"
-          version: $CIRCLE_TAG
+          version: << parameters.version >>
           venv_name: << parameters.dev_venv_name >>
-      - run:
-          name: verify that the output of __version__ is what we expect
-          command: |
-            . << parameters.dev_venv_name >>-data-gradients-$CIRCLE_TAG/bin/activate
-            python3 tests/verify_version.py $CIRCLE_TAG
-#
-      - deci-common/pip_test_package_installation_codeartifact_prod:
-          package_name: "data-gradients"
-          version: $CIRCLE_TAG
+
+      - verify_that_package_version_is_aligned_with_code:
+          venv_name: << parameters.dev_venv_name >>
+          version: << parameters.version >>
+
+      - deci-common/pip_upload_package_codeartifact_prod:
+          codeartifact_repository: "deci-packages"
 
       - deci-common/git_commit_and_tag:
-          version: $CIRCLE_TAG
+          version: << parameters.version >>
           delete_remote_tag_before_tagging: true
+          config_automation_user: false #already configured earlier
 
       - deci-common/tag_as:
           tag_name: "stable"
@@ -195,9 +232,8 @@ jobs:
       - deci-common/github_create_release:
           github_cli_token: $GITHUB_CLI_TOKEN
           directory_to_cd_into: "."
-          tag: $CIRCLE_TAG
-          notes: "This GitHub Release was done automatically by CircleCI"
-
+          tag: << parameters.version >>
+          generate_notes: true
 
 workflows:
   release:
@@ -218,6 +254,7 @@ workflows:
           <<: *release_tag_filter
       - release_version:
           py_version: "3.8"
+          version: $CIRCLE_TAG
           requires:
             - "build3.8"
           context:
