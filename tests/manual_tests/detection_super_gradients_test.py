@@ -7,7 +7,7 @@ from data_gradients.feature_extractors.common.image_average_brightness import Im
 from data_gradients.feature_extractors.common.image_color_distribution import ImageColorDistribution
 from data_gradients.feature_extractors.object_detection.bounding_boxes_area import DetectionBoundingBoxArea
 from data_gradients.feature_extractors.object_detection.bounding_boxes_resolution import DetectionBoundingBoxSize
-from data_gradients.feature_extractors.object_detection.classes_count import DetectionClassesCount
+from data_gradients.feature_extractors.object_detection.classes_count import DetectionObjectsPerClass
 from data_gradients.feature_extractors.object_detection.classes_per_image_count import DetectionClassesPerImageCount
 from data_gradients.feature_extractors.object_detection.bounding_boxes_per_image_count import DetectionBoundingBoxPerImageCount
 
@@ -66,7 +66,7 @@ feature_extractors = [
     DetectionBoundingBoxPerImageCount(),
     DetectionBoundingBoxArea(),
     DetectionBoundingBoxSize(),
-    DetectionClassesCount(),
+    DetectionObjectsPerClass(),
     DetectionClassesPerImageCount(),
 ]
 

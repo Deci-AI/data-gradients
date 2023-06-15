@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 
 @register_feature_extractor()
-class DetectionClassesCount(AbstractFeatureExtractor):
+class DetectionObjectsPerClass(AbstractFeatureExtractor):
     """Feature Extractor to count the number of instance of each class."""
 
     def __init__(self):
@@ -36,7 +36,7 @@ class DetectionClassesCount(AbstractFeatureExtractor):
 
         plot_options = BarPlotOptions(
             x_label_key="normalized_n_appearance",
-            x_label_name="Number of Appearance (in % of the split)",
+            x_label_name="Objects per class (in % of the split)",
             y_label_key="class_name",
             y_label_name="Class Names",
             order_key="class_id",
@@ -60,7 +60,7 @@ class DetectionClassesCount(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Number of classes."
+        return "Objects Per Class"
 
     @property
     def description(self) -> str:
