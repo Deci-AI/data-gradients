@@ -213,7 +213,7 @@ workflows:
         - << pipeline.parameters.ad_hoc_container_build_code_only >>
     jobs:
       - deci-common/persist_version_info:
-          version_override: 0.0.6 #todo: rtemove
+          version_override: 0.0.7 #todo: rtemove
 #          version_override: $CIRCLE_TAG
 #          <<: *release_tag_filter
 #      - build:
@@ -225,7 +225,7 @@ workflows:
 #          <<: *release_tag_filter
       - release_version:
           py_version: "3.8"
-          version: 0.0.6 #todo: rtemove
+          version: 0.0.7 #todo: rtemove
 #          version: $CIRCLE_TAG
 #          requires:
 #            - "build3.8"
@@ -238,7 +238,7 @@ workflows:
       - deci-common/pip_upload_package_from_codeartifact_to_global_pypi:
           package_name: "data-gradients"
           name: "upload_data_gradients_to_pypi"
-          version: 0.0.6 #todo: rtemove
+          version: 0.0.7 #todo: rtemove
 #          version: $CIRCLE_TAG
           requires:
             - "release_version"
