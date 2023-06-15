@@ -52,7 +52,7 @@ class DatasetAdapter:
 
     def _get_tensor_extractor(self, objs: Any, tuple_idx: int) -> Union[Callable, TensorExtractor]:
         if self._tensor_extractor[tuple_idx] is None:
-            self._tensor_extractor[tuple_idx] = TensorExtractor(objs=objs, name="images" if (tuple_idx == 0) else "labels")
+            self._tensor_extractor[tuple_idx] = TensorExtractor(objs=objs, name="image(s)" if (tuple_idx == 0) else "label(s)")
         return self._tensor_extractor[tuple_idx]
 
     @property
