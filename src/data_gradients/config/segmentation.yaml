@@ -16,7 +16,7 @@ report_sections:
           n_rows: 6
           n_cols: 2
           heatmap_shape: [200, 200]
-      - SegmentationClassesCount
+      - SegmentationClassFrequency
       - SegmentationClassesPerImageCount
       - SegmentationComponentsPerImageCount
       - SegmentationBoundingBoxResolution

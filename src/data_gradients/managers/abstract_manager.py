@@ -6,7 +6,7 @@ from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 from datetime import datetime
-import tqdm
+from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
@@ -104,7 +104,7 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
-        datasets_tqdm = tqdm.tqdm(
+        datasets_tqdm = tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
             desc="Analyzing... ",
             total=self.n_batches,
@@ -149,7 +149,7 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
-        for section_name, feature_extractors in self.grouped_feature_extractors.items():
+        for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
                 try:
@@ -166,9 +166,9 @@ class AnalysisManagerAbstract(abc.ABC):
                     )
 
                 if f is not None:
-                    image_name = feature_extractor.__class__.__name__ + ".svg"
+                    image_name = feature_extractor.__class__.__name__ + ".png"
                     image_path = os.path.join(self.archive_dir, image_name)
-                    f.savefig(image_path, dpi=1200)
+                    f.savefig(image_path, dpi=300)
                     images_created.append(image_path)
                 else:
                     image_path = None
@@ -242,8 +242,17 @@ class AnalysisManagerAbstract(abc.ABC):
     def write_json(data: Dict, output_dir: str, filename: str):
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, filename)
-        with open(output_path, "a") as f:
-            json.dump(data, f, indent=4)
+
+        if os.path.exists(output_path):
+            with open(output_path, "r") as f:
+                json_dict = json.load(f)
+        else:
+            json_dict = {}
+
+        json_dict["features"] = json_dict.get("features", []) + [data]
+
+        with open(output_path, "w") as f:
+            json.dump(json_dict, f, indent=4)
 
     def _create_samples_iterated_warning(self) -> str:
         if self.train_size is None or self._train_batch_size is None:

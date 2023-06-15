@@ -50,11 +50,15 @@ class TensorExtractor:
         paths = []
         printable_mapping = TensorExtractor.objects_mapping(objs, path="", targets=paths)
         printable_mapping = json.dumps(printable_mapping, indent=4)
-        main_question = f"Which element is the {name} ?"
+        printable_mapping = "This is the structure of your data: \ndata = " + printable_mapping
+        main_question = f"Which object maps to your {name} ?"
 
-        options = [f"{k}: {v}" for k, v in paths]
+        options = [f"- {name} = data{k}: {v}" for k, v in paths]
         selected_option = ask_user(main_question=main_question, options=options, optional_description=printable_mapping)
-        selected_path = selected_option.split(":")[0]
+
+        start_index = selected_option.find("data") + len("data")
+        end_index = selected_option.find(":", start_index)
+        selected_path = selected_option[start_index:end_index].strip()
 
         keys = TensorExtractor.parse_path(selected_path)
         return keys
