@@ -164,12 +164,12 @@ jobs:
           name: add requirements.txt a to source code
           command: |
             cp requirements.txt src/data_gradients/requirements.txt
+      - deci-common/git_config_automation_user
       - run:
           name: edit package version assisting files
           command: |
             echo << parameters.version >> > version.txt
             sed -i 's/^__version__.*/__version__ = "<< parameters.version >>"/g' src/data_gradients/__init__.py
-
       - run:
           name: commit package version assisting files
           command: |
@@ -194,6 +194,7 @@ jobs:
       - deci-common/git_commit_and_tag:
           version: << parameters.version >>
           delete_remote_tag_before_tagging: true
+          config_automation_user: false #already configured earlier
 
       - deci-common/tag_as:
           tag_name: "stable"
@@ -204,7 +205,6 @@ jobs:
           directory_to_cd_into: "."
           tag: << parameters.version >>
           generate_notes: true
-
 
 workflows:
   release:
