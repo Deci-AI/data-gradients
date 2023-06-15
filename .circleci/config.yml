@@ -169,6 +169,11 @@ jobs:
           command: |
             echo << parameters.version >> > version.txt
 
+      - run:
+          name: edit __version__ value
+          command: |
+            sed -i 's/^__version__.*/__version__ = "<< parameters.version >>"/g' src/data_gradients/__init__.py
+
       - deci-common/pip_upload_package_codeartifact_dev:
           codeartifact_repository: "deci-packages"
 
