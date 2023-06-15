@@ -165,14 +165,15 @@ jobs:
           command: |
             cp requirements.txt src/data_gradients/requirements.txt
       - run:
-          name: edit package version
+          name: edit package version assisting files
           command: |
             echo << parameters.version >> > version.txt
+            sed -i 's/^__version__.*/__version__ = "<< parameters.version >>"/g' src/data_gradients/__init__.py
 
       - run:
-          name: edit __version__ value
+          name: commit package version assisting files
           command: |
-            sed -i 's/^__version__.*/__version__ = "<< parameters.version >>"/g' src/data_gradients/__init__.py
+            git commit version.txt src/data_gradients/__init__.py
 
       - deci-common/pip_upload_package_codeartifact_dev:
           codeartifact_repository: "deci-packages"
