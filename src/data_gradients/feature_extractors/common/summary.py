@@ -92,7 +92,7 @@ class SummaryStats(AbstractFeatureExtractor):
             index_of_med = np.argsort(areas)[len(areas) // 2]
             basic_stats.med_image_resolution = self.format_resolution(basic_stats.images_resolutions[index_of_med][0])
 
-            basic_stats.annotations_per_image = basic_stats.annotation_count / basic_stats.image_count
+            basic_stats.annotations_per_image = f"{basic_stats.annotation_count / basic_stats.image_count:.2f}"
             basic_stats.image_count = f"{basic_stats.image_count:,}"
             basic_stats.annotation_count = f"{basic_stats.annotation_count:,}"
 
