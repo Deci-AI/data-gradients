@@ -69,7 +69,7 @@ commands:
           name: edit package version assisting files
           command: |
             echo << parameters.version >> > version.txt
-            sed -i 's/^__version__.*/__version__ = "<< parameters.version >>"/g' src/data_gradients/__init__.py
+            sed -i "s/^__version__.*/__version__ = \"<< parameters.version >>\"/g" src/data_gradients/__init__.py
       - run:
           name: commit package version assisting files
           command: |
