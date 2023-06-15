@@ -149,6 +149,9 @@ jobs:
     parameters:
       py_version:
         type: string
+      dev_venv_name:
+        type: string
+        default: "dev-data_gradients-${CIRCLE_BUILD_NUM}"
     docker:
       - image: cimg/python:<< parameters.py_version >>
     steps:
