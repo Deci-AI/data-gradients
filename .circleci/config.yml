@@ -44,6 +44,9 @@ release_candidate_tag_filter: &release_candidate_tag_filter
       only: /^\d+\.\d+\.\d+rc\d+/
 
 
+#commands:
+#  handle_version_
+
 jobs:
   build:
     environment:
@@ -173,7 +176,7 @@ jobs:
       - run:
           name: commit package version assisting files
           command: |
-            git commit version.txt src/data_gradients/__init__.py
+            git commit -m "Edited by Circleci" version.txt src/data_gradients/__init__.py
 
       - deci-common/pip_upload_package_codeartifact_dev:
           codeartifact_repository: "deci-packages"
