@@ -18,7 +18,7 @@ report_sections:
       - DetectionBoundingBoxArea
       - DetectionBoundingBoxPerImageCount
       - DetectionBoundingBoxSize
-      - DetectionObjectsPerClass
+      - DetectionClassFrequency
       - DetectionClassesPerImageCount
       - DetectionBoundingBoxIoU:
           num_bins: 10
