@@ -65,7 +65,18 @@ class CachableTensorExtractor:
 
 class CachableXYXYConverter:
     @staticmethod
-    def resolve(xyxy_converter: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
+    def resolve(xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
+        """Translate the input `xyxy_converter` into both:
+            - value: Value of the `xyxy_converter` that will be used in the code.
+            - name:  String representation of `xyxy_converter` when it comes to caching.
+
+        For example:
+            >> CachableXYXYConverter.resolve("xywh")                    # CachableParam(value=XYXYConverter("xywh"), name="xyxy")
+            >> CachableXYXYConverter.resolve(my_custom_xyxy_comverter)  # CachableParam(value=my_custom_xyxy_comverter, name="[Non-cachable] - lambda ...")
+
+        :param xyxy_converter: Either None, a string representation (e.g. `xywh`) or a custom callable.
+        :return: Dataclass including both the value (used in the code) and the name (used in the cache).
+        """
         if xyxy_converter is None:
             return CachableParam(value=None, name=None)
 
