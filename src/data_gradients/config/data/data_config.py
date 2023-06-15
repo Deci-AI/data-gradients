@@ -22,6 +22,13 @@ JSONDict = Dict[str, JSONValue]
 
 @dataclass
 class CachableParam:
+    """Dataclass representing a parameter that can be cached.
+    This combines the value of any parameter, as used in the code, and the name of the parameter that will be used in the cache.
+
+    :attr value:    The value of the parameter, will be used in the code.
+    :attr name:     The name of the parameter, will be used to load/save cache.
+    """
+
     value: Optional[Any]
     name: Optional[str]
 
