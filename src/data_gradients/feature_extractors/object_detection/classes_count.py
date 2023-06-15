@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 
 @register_feature_extractor()
-class DetectionObjectsPerClass(AbstractFeatureExtractor):
+class DetectionClassFrequency(AbstractFeatureExtractor):
     """Feature Extractor to count the number of instance of each class."""
 
     def __init__(self):
@@ -32,13 +32,13 @@ class DetectionObjectsPerClass(AbstractFeatureExtractor):
         df_class_count = df.groupby(["class_name", "class_id", "split"]).size().reset_index(name="n_appearance")
 
         split_sums = df_class_count.groupby("split")["n_appearance"].sum()
-        df_class_count["normalized_n_appearance"] = 100 * (df_class_count["n_appearance"] / df_class_count["split"].map(split_sums))
+        df_class_count["frequency"] = 100 * (df_class_count["n_appearance"] / df_class_count["split"].map(split_sums))
 
         plot_options = BarPlotOptions(
-            x_label_key="normalized_n_appearance",
-            x_label_name="Objects per class (in % of the split)",
+            x_label_key="frequency",
+            x_label_name="Frequency",
             y_label_key="class_name",
-            y_label_name="Class Names",
+            y_label_name="Class",
             order_key="class_id",
             title=self.title,
             x_ticks_rotation=None,
@@ -60,7 +60,7 @@ class DetectionObjectsPerClass(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Objects Per Class"
+        return "Class Frequency"
 
     @property
     def description(self) -> str:
