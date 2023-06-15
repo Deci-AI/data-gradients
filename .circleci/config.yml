@@ -169,12 +169,12 @@ jobs:
 
       - deci-common/pip_test_package_installation_codeartifact_dev:
           package_name: "data-gradients"
-          version: << parameters.version >>
+          version: $NEW_VERSION
           venv_name: << parameters.dev_venv_name >>
 
       - verify_that_package_version_is_aligned_with_code:
+          version: $NEW_VERSION
           venv_name: << parameters.dev_venv_name >>
-          version: << parameters.version >>
 
       - deci-common/git_commit_and_tag:
           version: $NEW_VERSION
