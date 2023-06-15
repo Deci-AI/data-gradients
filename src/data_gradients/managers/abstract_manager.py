@@ -149,7 +149,7 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
-        for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summing... "):
+        for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
                 try:
