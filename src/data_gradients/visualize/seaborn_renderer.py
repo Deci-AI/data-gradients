@@ -350,12 +350,13 @@ class SeabornRenderer(PlotRenderer):
             ax.legend(title=options.labels_name)
 
         # Write the values on the graph
+        y_ticklabels_fontsize = ax.get_yticklabels()[0].get_fontsize()
         for container in ax.containers:
             for bar in container:
                 width = bar.get_width()
                 height = bar.get_y() + bar.get_height() / 2
                 width_rounded = round(width, 1) if width >= 0.1 else float(f"{width:.1e}")
-                ax.text(width + 0.5, height, f"{width_rounded}%", ha="left", va="center")
+                ax.text(width + 0.5, height, f"{width_rounded}%", ha="left", va="center", fontsize=y_ticklabels_fontsize)
 
         if options.log_scale is True:
             ax.set_yscale("log")
