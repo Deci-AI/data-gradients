@@ -216,19 +216,19 @@ workflows:
           version_override: 0.0.6 #todo: rtemove
 #          version_override: $CIRCLE_TAG
 #          <<: *release_tag_filter
-      - build:
-          name: "build3.8"
-          py_version: "3.8"
-          package_name: "data-gradients"
-          requires:
-            - deci-common/persist_version_info
+#      - build:
+#          name: "build3.8"
+#          py_version: "3.8"
+#          package_name: "data-gradients"
+#          requires:
+#            - deci-common/persist_version_info
 #          <<: *release_tag_filter
       - release_version:
           py_version: "3.8"
           version: 0.0.6 #todo: rtemove
 #          version: $CIRCLE_TAG
-          requires:
-            - "build3.8"
+#          requires:
+#            - "build3.8"
           context:
             - aws-dev
             - aws-prod
