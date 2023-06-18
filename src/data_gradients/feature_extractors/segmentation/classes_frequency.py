@@ -65,7 +65,8 @@ class SegmentationClassFrequency(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "Frequency of appearance of each class. This may highlight class distribution gap between training and validation splits."
+            "This bar plot represents the frequency of appearance of each class. "
+            "This may highlight class distribution gap between training and validation splits. "
             "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
             "learn to predict that class."
         )

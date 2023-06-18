@@ -39,7 +39,7 @@ class DetectionClassHeatmap(BaseClassHeatmap):
     @property
     def description(self) -> str:
         return (
-            "The heatmap visually represents areas of high object density within the images, providing insights into the spatial distribution of objects. "
+            "The heatmap represents areas of high object density within the images, providing insights into the spatial distribution of objects. "
             "By examining the heatmap, you can quickly identify if objects are predominantly concentrated in specific regions or if they are evenly "
             "distributed throughout the scene. This information can serve as a heuristic to assess if the objects are positioned appropriately "
             "within the expected areas of interest."

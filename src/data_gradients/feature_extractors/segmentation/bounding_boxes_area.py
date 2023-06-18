@@ -64,7 +64,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "Histogram showing the distribution of object area for each class. \n"
+            "This graph shows the distribution of object area for each class. "
             "This can highlight distribution gap in object size between the training and validation splits, which can harm the model performance. \n"
             "Another thing to keep in mind is that having too many very small objects may indicate that your are down sizing your original image to a "
             "low resolution that is not appropriate for your objects."

@@ -81,8 +81,7 @@ class ImagesResolution(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "These histograms display the distributions of image width and height. "
-            "They provide insights into the size characteristics of the dataset after any rescaling or padding operations. "
-            "Analyzing the height and width distributions helps identify potential variations in image sizes and understand "
-            "how they might impact model training."
+            "These histograms depict the distributions of image height and width. "
+            "It's important to note that if certain images have been rescaled or padded, the histograms will represent the size after "
+            "the rescaling and padding operations."
         )
