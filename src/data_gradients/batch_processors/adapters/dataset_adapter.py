@@ -43,9 +43,9 @@ class DatasetAdapter:
 
         # If data != data == Tuple[Union[Tensor, np.ndarray, Image], ...] but we can still extract the image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
-            options = get_tensor_extractor_options(data)
+            description, options = get_tensor_extractor_options(data, object_name="Image(s)")
             question = Question(question="Which tensor represents your Images ?", options=options)
-            return self.data_config.get_images_extractor(question=question)
+            return self.data_config.get_images_extractor(question=question, hint=description)
 
         raise NotImplementedError(f"Got object {type(data)} from Data Iterator - supporting (Tuple, List, Mapping, Tuple, List) only!")
 
@@ -61,9 +61,9 @@ class DatasetAdapter:
 
         # If data != data == Tuple[Union[Tensor, np.ndarray, Image], ...] but we can still extract the image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
-            options = get_tensor_extractor_options(data)
+            description, options = get_tensor_extractor_options(data, object_name="Labels(s)")
             question = Question(question="Which tensor represents your Labels ?", options=options)
-            return self.data_config.get_labels_extractor(question=question)
+            return self.data_config.get_labels_extractor(question=question, hint=description)
 
         raise NotImplementedError(f"Got object {type(data)} from Data Iterator - supporting (Tuple, List, Mapping, Tuple, List) only!")
 

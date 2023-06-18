@@ -1,21 +1,26 @@
 from typing import Mapping, Dict, Any, List, Tuple, Sequence, Union
 import re
+import json
 
 from PIL import Image
 import torch
 from numpy import ndarray
 
 
-def get_tensor_extractor_options(objs: Any) -> Dict[str, str]:
+def get_tensor_extractor_options(objs: Any, object_name: str) -> Tuple[str, Dict[str, str]]:
     """Extract out of objs all the potential fields of type [torch.Tensor, np.ndarray, PIL.Image], and then
     asks the user to input which of the above keys mapping is the right one in order to retrieve the correct data (either images or labels).
 
+    :param object_name: Name of the object you want to extract ("image", "label", ...)
     :param objs: Dictionary following the pattern: {"path.to.object: object_type": "path.to.object"}
     """
     objects_mapping: List[Tuple[str, str]] = []  # Placeholder for list of (path.to.object, object_type)
-    extract_object_mapping(objs, current_path="", objects_mapping=objects_mapping)
-    options = {f"{path_to_object}: {object_type}": path_to_object for path_to_object, object_type in objects_mapping}
-    return options
+    printable_mapping = extract_object_mapping(objs, current_path="", objects_mapping=objects_mapping)
+    printable_mapping = json.dumps(printable_mapping, indent=4)
+    description = "This is the structure of your data: \ndata = " + printable_mapping
+
+    options = {f"- {object_name} = data{path_to_object}: {object_type}": path_to_object for path_to_object, object_type in objects_mapping}
+    return description, options
 
 
 def extract_object_mapping(current_object: Any, current_path: str, objects_mapping: List[Tuple[str, str]]) -> Any:
