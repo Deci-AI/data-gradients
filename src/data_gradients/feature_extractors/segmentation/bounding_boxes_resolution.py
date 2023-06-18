@@ -43,7 +43,7 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
             x_ticks_rotation=None,
             labels_key="split",
             individual_plots_key="split",
-            tight_layout=True,
+            tight_layout=False,
             sharey=True,
             labels_palette=LABELS_PALETTE,
         )
