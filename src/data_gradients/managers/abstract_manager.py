@@ -71,7 +71,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
         self.json_writer = JsonWriter(source_path=os.path.join(self.log_dir, "Summary.json"))
 
-        data_config.overwrite_missing_params(data=self.json_writer.cache)
+        data_config.overwrite_missing_params(json_dict=self.json_writer.cache)
         self.data_config = data_config
 
         # DATA
