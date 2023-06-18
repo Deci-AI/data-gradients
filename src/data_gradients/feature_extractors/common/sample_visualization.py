@@ -74,6 +74,6 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
     @property
     def notice(self) -> str:
         return (
-            f"Only {self.n_cols * self.n_rows} random samples are shown. "
+            f"Only {self.n_cols * self.n_rows} random samples are shown.<br/>"
             f"You can increase the number of classes by changing `n_cols` and `n_rows` in the configuration file."
         )
