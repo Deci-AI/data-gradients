@@ -68,8 +68,7 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
     def description(self) -> str:
         return (
             "The sample visualization feature provides a visual representation of images and labels. "
-            "This visualization aids in the verification of the accurate mapping of class names to IDs and "
-            "enables a better understanding of the composition of the dataset."
+            "This visualization aids in understanding of the composition of the dataset."
         )
 
     @property
