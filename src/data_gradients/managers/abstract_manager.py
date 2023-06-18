@@ -5,7 +5,7 @@ from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 from datetime import datetime
-import tqdm
+from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
@@ -110,7 +110,7 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
-        datasets_tqdm = tqdm.tqdm(
+        datasets_tqdm = tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
             desc="Analyzing... ",
             total=self.n_batches,
@@ -155,7 +155,7 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
-        for section_name, feature_extractors in self.grouped_feature_extractors.items():
+        for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
                 try:
@@ -172,9 +172,9 @@ class AnalysisManagerAbstract(abc.ABC):
                     )
 
                 if f is not None:
-                    image_name = feature_extractor.__class__.__name__ + ".svg"
+                    image_name = feature_extractor.__class__.__name__ + ".png"
                     image_path = os.path.join(self.archive_dir, image_name)
-                    f.savefig(image_path, dpi=1200)
+                    f.savefig(image_path, dpi=300)
                     images_created.append(image_path)
                 else:
                     image_path = None
