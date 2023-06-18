@@ -56,12 +56,13 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Bounding Boxes Area per Class."
+        return "Distribution of Bounding Box Area"
 
     @property
     def description(self) -> str:
         return (
-            "The distribution of the areas of the boxes of the different classes.\n"
-            "The size of the objects can significantly affect the performance of your model. "
-            "If certain classes tend to have smaller objects, the model might struggle to segment them, especially if the resolution of the images is low "
+            "Histogram showing the distribution of bounding box area for each class. \n"
+            "This can highlight distribution gap in object size between the training and validation splits, which can harm the model performance. \n"
+            "Another thing to keep in mind is that having too many very small objects may indicate that your are down sizing your original image to a "
+            "low resolution that is not appropriate for your objects."
         )

@@ -65,12 +65,12 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Average Brightness of Images."
+        return "Image Brightness Distribution"
 
     @property
     def description(self) -> str:
         return (
-            "Distribution of the average 'lightness' of images (as L channel pixel value distribution in CIELAB color). \n"
-            "Image brightness distribution can reveal differences between the train and validation set. I.e. if "
-            "the train set contains only day images while the validation set contains night images. "
+            "This graph shows the distribution of the image brightness of each dataset. \n"
+            "It can uncover differences between the training and validation sets, "
+            "such as the presence of exclusively daytime images in the training set and nighttime images in the validation set."
         )
