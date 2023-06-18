@@ -19,9 +19,9 @@ It automatically extracts features from your datasets and combines them all into
 - And many more!
 
 <div align="center">
-  <img src="assets/report_image_stats.png" width="250px">
-  <img src="assets/report_mask_sample.png" width="250px">
-  <img src="assets/report_classes_distribution.png" width="250px">
+  <img src="documentation/assets/report_image_stats.png" width="250px">
+  <img src="documentation/assets/report_mask_sample.png" width="250px">
+  <img src="documentation/assets/report_classes_distribution.png" width="250px">
   <p><em>Example of pages from the Report</em>
 </div>
 
@@ -116,48 +116,9 @@ Once the analysis is done, the path to your pdf report will be printed.
 
 
 ## Feature Configuration
-By default, all the features available for the selected task will be used.
-To run on a subset, or to change the parameter of existing features, you should create a `.yaml` config file like this one:
-```yaml
-report_sections:
-  - name: Image Features
-    features:
-      - SummaryStats
-      - ImagesResolution
-      - ImageColorDistribution
-  - name: Object Detection Features
-    features:
-      - DetectionSampleVisualization:
-          n_rows: 6
-          n_cols: 2
-          stack_splits_vertically: True
-      - DetectionBoundingBoxArea
-      - DetectionBoundingBoxPerImageCount
-      - DetectionBoundingBoxSize
-```
-#### - `report_sections`
-As you can see in this example, `report_sections` regroups a list of sections.
-These sections will be reflected in the final `.pdf` report, so feel free to create a new section if you think this would increase the report clarity.
-
-Each section is made of two fields
-- `name`: The names of the section
-- `features`: The list of features that will appear in the section
-
-#### - `features`
-Each feature should exactly match the name of the feature you want to add.
-Some features also provide some additional arguments you can tune. 
-In the example below, you can customize the number of rows or columns to use to display your samples.
-```yaml
-DetectionSampleVisualization:
-  n_rows: 6
-  n_cols: 2
-  stack_splits_vertically: True # Show train/test either one on top of the other, or side by side
-```
-
-### Available Features
-You can find all available features in the default configuration files.
-- [Object Detection features](src/data_gradients/config/detection.yaml)
-- [Semantic Segmentation features](src/data_gradients/config/segmentation.yaml)
+ 
+The feature configuration allows you to run the analysis on a subset of features or adjust the parameters of existing features. 
+If you are interested in customizing this configuration, you can check out the [documentation](documentation/feature_configuration.md) on that topic.
 
 
 ## Dataset Adapters
