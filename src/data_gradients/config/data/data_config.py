@@ -8,8 +8,9 @@ import json
 from data_gradients.batch_processors.adapters.tensor_extractor import NestedDataLookup
 from data_gradients.config.data.questions import Question, ask_question
 from data_gradients.utils.detection import XYXYConverter
+from data_gradients.utils.json_writer import load_cache
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +112,16 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
+    use_cache: bool = True
     images_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
+
+    @classmethod
+    def from_cache(cls, path: str) -> "DataConfig":
+        try:
+            return cls(**load_cache(path=path))
+        except TypeError as e:
+            raise TypeError(f"{e}\n\t => Could not load `{cls.__name__}` from cache.") from e
 
     @classmethod
     def from_json(cls, json_dict: JSONDict) -> "DataConfig":
@@ -168,15 +177,22 @@ class DataConfig(ABC):
         return CachableTensorExtractor.resolve(tensor_extractor=self.labels_extractor).value
 
     def overwrite_missing_params(self, json_dict: JSONDict):
-        """Overwrite every attribute that is equal to `None`.
+        """Overwrite every attribute that is equal to `None`, but only if cache was enabled.
         This is the safe way of loading cache, since it will prioritize attributes already set by the user.
 
         :param json_dict: JSON like dictionary. It's values will overwrite the attributes if these attributes are None
         """
-        if self.images_extractor is None:
-            self.images_extractor = json_dict.get("images_extractor")
-        if self.labels_extractor is None:
-            self.labels_extractor = json_dict.get("labels_extractor")
+        if self.use_cache:
+            logger.info(
+                f"Overwriting `{self.__class__.__name__}` attributes with cache values (if relevant). "
+                f"If you don't want to use cache, please set `load_cache=False`."
+            )
+            if self.images_extractor is None:
+                self.images_extractor = json_dict.get("images_extractor")
+            if self.labels_extractor is None:
+                self.labels_extractor = json_dict.get("labels_extractor")
+        else:
+            logger.info(f"No cache will be used to set `{self.__class__.__name__}` attributes. If you want to use cache, please set `load_cache=True`")
 
 
 @dataclass
@@ -218,9 +234,19 @@ class DetectionDataConfig(DataConfig):
         }
         return json_dict
 
-    def overwrite_missing_params(self, data: JSONDict):
-        super().overwrite_missing_params(data)
-        if self.is_label_first is None:
-            self.is_label_first = data.get("is_label_first")
-        if self.xyxy_converter is None:
-            self.xyxy_converter = data.get("xyxy_converter")
+    def overwrite_missing_params(self, json_dict: JSONDict):
+        if self.use_cache:
+            logger.info(
+                f"Overwriting `{self.__class__.__name__}` attributes with cache values (if relevant). "
+                f"If you don't want to use cache, please set `load_cache=False`."
+            )
+            if self.images_extractor is None:
+                self.images_extractor = json_dict.get("images_extractor")
+            if self.labels_extractor is None:
+                self.labels_extractor = json_dict.get("labels_extractor")
+            if self.is_label_first is None:
+                self.is_label_first = json_dict.get("is_label_first")
+            if self.xyxy_converter is None:
+                self.xyxy_converter = json_dict.get("xyxy_converter")
+        else:
+            logger.info(f"No cache will be used to set `{self.__class__.__name__}` attributes. If you want to use cache, please set `load_cache=True`")

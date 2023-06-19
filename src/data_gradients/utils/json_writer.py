@@ -1,43 +1,58 @@
 import json
 import os
-from typing import Dict
+import logging
+import appdirs
+from typing import Dict, List, Union
 
 import data_gradients
 
 
-class JsonWriter:
-    def __init__(self, source_path: str):
-        """
-        :param source_path: Path where to load the cache from, if it exists.
-        """
-        os.makedirs(os.path.dirname(source_path), exist_ok=True)
-        self.source = source_path
-        self.data = {"__version__": data_gradients.__version__, "cache": self._load_cache(cache_path=source_path), "stats": {}}
+logger = logging.getLogger(__name__)
 
-    @staticmethod
-    def _load_cache(cache_path: str) -> Dict:
-        if os.path.exists(cache_path):
-            with open(cache_path, "r") as f:
-                try:
-                    previous_data = json.load(f)
-                    if previous_data.get("__version__") == data_gradients.__version__:
-                        return previous_data.get("cache", {})
-                except json.decoder.JSONDecodeError:
-                    return {}
+MAIN_CACHE_DIR = appdirs.user_cache_dir("DataGradients", "Deci")
+
+
+def _safe_load_json(path: str, require_version: bool = False) -> Dict:
+    try:
+        if os.path.exists(path):
+            with open(path, "r") as f:
+                json_dict = json.load(f)
+                if json_dict.get("__version__") == data_gradients.__version__ or not require_version:
+                    return json_dict
+                else:
+                    logger.info(
+                        f"{path} was not loaded from cache due to data-gradients missmatch between cache and current version"
+                        f"cache={json_dict.get('__version__')}!={data_gradients.__version__}=installed"
+                    )
+        return {}
+    except json.decoder.JSONDecodeError:
         return {}
 
-    @property
-    def cache(self):
-        return self.data["cache"]
 
-    @cache.setter
-    def cache(self, cache: Dict):
-        self.data["cache"] = cache
+def load_cache(path: str) -> Dict:
+    json_dict = _safe_load_json(path, require_version=True)
+    return json_dict.get("cache", {})
 
-    def log_data(self, title: str, data: Dict):
-        self.data["stats"][title] = data
 
-    def write(self, output_path: str):
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, "w") as f:
-            json.dump(self.data, f, indent=4)
+def load_features(path: str, require_version: bool) -> List[Dict]:
+    json_dict = _safe_load_json(path, require_version=require_version)
+    return json_dict.get("features", [])
+
+
+def _log(title: str, data: Union[List, Dict], path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    json_dict = _safe_load_json(path)
+    json_dict["__version__"] = data_gradients.__version__
+    json_dict[title] = data
+
+    with open(path, "w") as f:
+        json.dump(json_dict, f, indent=4)
+
+
+def log_features(features_data: List[Dict], path: str):
+    _log(title="features", data=features_data, path=path)
+
+
+def log_cache(cache_data: Dict, path: str):
+    _log(title="cache", data=cache_data, path=path)

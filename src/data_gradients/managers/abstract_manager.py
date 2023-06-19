@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
-from data_gradients.utils.json_writer import JsonWriter
+from data_gradients.utils.json_writer import MAIN_CACHE_DIR, load_cache, log_cache, log_features
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import copy_files_by_list
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
@@ -57,22 +57,23 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
 
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.report_name = "Report.pdf"
-        self.log_filename = "summary.json"
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
-        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
+        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be archived here as well
         os.makedirs(self.archive_dir, exist_ok=True)
 
-        self.report_title = report_title
-        self.report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
+        self.report_archive_path = os.path.join(self.archive_dir, "Report.pdf")
+        self.log_archive_path = os.path.join(self.archive_dir, "summary.json")
+        self.cache_path = os.path.join(MAIN_CACHE_DIR, report_title.replace(" ", "_") + ".json")
+
+        # We don't want a new data_config object, because this instance was already injected in different parts of the code
+        # So we instead overwrite the existing one directly.
+        data_config.overwrite_missing_params(json_dict=load_cache(self.cache_path))
+        self.data_config = data_config
 
         # WRITERS
         self.renderer = SeabornRenderer()
+        report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
         self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
-        self.json_writer = JsonWriter(source_path=os.path.join(self.log_dir, "Summary.json"))
-
-        data_config.overwrite_missing_params(json_dict=self.json_writer.cache)
-        self.data_config = data_config
 
         # DATA
         if batches_early_stop:
@@ -155,6 +156,7 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
+        features_stats = []
         for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
@@ -179,7 +181,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     image_path = None
 
-                self.json_writer.log_data(title=feature_extractor.title, data=feature_json)
+                features_stats.append(dict(title=feature_extractor.title, data=feature_json))
 
                 if feature_error:
                     warning = feature_error
@@ -202,10 +204,20 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
 
-        self.json_writer.cache = self.data_config.to_json()
-        self.json_writer.write(output_path=os.path.join(self.archive_dir, self.log_filename))
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, self.report_name))
-        copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
+        # Save to cache dir
+        log_cache(cache_data=self.data_config.to_json(), path=self.cache_path)
+
+        # Save to archive dir
+        log_cache(cache_data=self.data_config.to_json(), path=self.log_archive_path)
+        log_features(features_data=features_stats, path=self.log_archive_path)
+        self.pdf_writer.write(results_container=summary, output_filename=self.report_archive_path)
+
+        # Copy all from archive dir to log dir
+        copy_files_by_list(
+            source_dir=self.archive_dir,
+            dest_dir=self.log_dir,
+            file_list=[os.path.basename(self.log_archive_path), os.path.basename(self.report_archive_path)],
+        )
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -215,6 +227,10 @@ class AnalysisManagerAbstract(abc.ABC):
         """Safe logging closing"""
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
+        print()
+        print("The cache of your DataConfig object can be found in:")
+        print(f"    - {self.cache_path}")
+        print()
         print("The results can be seen in:")
         print(f"    - {self.log_dir}")
         print(f"    - {self.archive_dir}")
