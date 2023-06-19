@@ -5,17 +5,15 @@ import traceback
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
-from datetime import datetime
 from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
-from data_gradients.utils.json_writer import MAIN_CACHE_DIR, log_features, log_errors
 from data_gradients.feature_extractors.common import SummaryStats
-from data_gradients.utils.utils import copy_files_by_list
+from data_gradients.utils.log_manager import LogManager
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
-from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
+from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -51,25 +49,8 @@ class AnalysisManagerAbstract(abc.ABC):
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         """
-        # Static parameters
-        if log_dir is None:
-            log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
-            logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
-
-        session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
-        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be archived here as well
-        os.makedirs(self.archive_dir, exist_ok=True)
-
-        self.report_archive_path = os.path.join(self.archive_dir, "Report.pdf")
-        self.log_archive_path = os.path.join(self.archive_dir, "summary.json")
-        self.log_errors_path = os.path.join(self.archive_dir, "errors.json")
-        self.cache_path = os.path.join(MAIN_CACHE_DIR, report_title.replace(" ", "_") + ".json")
-
-        # WRITERS
         self.renderer = SeabornRenderer()
-        report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
-        self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
+        self.log_manager = LogManager(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
         # DATA
         if batches_early_stop:
@@ -102,8 +83,8 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - batches_early_stop: {self.batches_early_stop} \n"
             f"  - len(train_data): {self.train_size} \n"
             f"  - len(val_data): {self.val_size} \n"
-            f"  - log directory: {self.log_dir} \n"
-            f"  - Archive directory: {self.archive_dir} \n"
+            f"  - log directory: {self.log_manager.log_dir} \n"
+            f"  - Archive directory: {self.log_manager.archive_dir} \n"
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
@@ -166,12 +147,12 @@ class AnalysisManagerAbstract(abc.ABC):
                     f = None
                     error_description = traceback.format_exception(type(e), e, e.__traceback__)
                     feature_json = {"error": error_description}
-                    feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.log_errors_path}</em>"
+                    feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.log_manager.log_errors_path}</em>"
                     errors.append(dict(title=feature_extractor.title, error=error_description))
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
-                    image_path = os.path.join(self.archive_dir, image_name)
+                    image_path = os.path.join(self.log_manager.archive_dir, image_name)
                     f.savefig(image_path, dpi=300)
                     images_created.append(image_path)
                 else:
@@ -200,24 +181,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
 
-        if errors:  # Log errors in a specific file, if any were found
-            logger.warning(
-                f"{len(errors)}/{len(features_stats)} features could not be processed.\n"
-                f"You can find more information about what happened in {self.log_errors_path}"
-            )
-            log_errors(errors_data=errors, path=self.log_errors_path)
-
-        # Save to archive dir
-        log_errors(errors_data=errors, path=self.log_archive_path)
-        log_features(features_data=features_stats, path=self.log_archive_path)
-        self.pdf_writer.write(results_container=summary, output_filename=self.report_archive_path)
-
-        # Copy all from archive dir to log dir
-        copy_files_by_list(
-            source_dir=self.archive_dir,
-            dest_dir=self.log_dir,
-            file_list=[os.path.basename(self.log_archive_path), os.path.basename(self.report_archive_path)],
-        )
+        self.log_manager.log(pdf_summary=summary, features_stats=features_stats, errors=errors)
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -228,8 +192,8 @@ class AnalysisManagerAbstract(abc.ABC):
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print("The results can be seen in:")
-        print(f"    - {self.log_dir}")
-        print(f"    - {self.archive_dir}")
+        print(f"    - {self.log_manager.log_dir}")
+        print(f"    - {self.log_manager.archive_dir}")
 
     def run(self):
         """
