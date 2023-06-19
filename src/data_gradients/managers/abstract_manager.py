@@ -10,7 +10,7 @@ from tqdm import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
-from data_gradients.utils.log_manager import LogManager
+from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
@@ -50,7 +50,7 @@ class AnalysisManagerAbstract(abc.ABC):
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         """
         self.renderer = SeabornRenderer()
-        self.log_manager = LogManager(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+        self.summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
         # DATA
         if batches_early_stop:
@@ -83,8 +83,8 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - batches_early_stop: {self.batches_early_stop} \n"
             f"  - len(train_data): {self.train_size} \n"
             f"  - len(val_data): {self.val_size} \n"
-            f"  - log directory: {self.log_manager.log_dir} \n"
-            f"  - Archive directory: {self.log_manager.archive_dir} \n"
+            f"  - log directory: {self.summary_writer.log_dir} \n"
+            f"  - Archive directory: {self.summary_writer.archive_dir} \n"
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
@@ -145,18 +145,18 @@ class AnalysisManagerAbstract(abc.ABC):
                     f = None
                     error_description = traceback.format_exception(type(e), e, e.__traceback__)
                     feature_json = {"error": error_description}
-                    feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.log_manager.log_errors_path}</em>"
-                    self.log_manager.add_error(title=feature_extractor.title, error=error_description)
+                    feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.summary_writer.errors_path}</em>"
+                    self.summary_writer.add_error(title=feature_extractor.title, error=error_description)
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
-                    image_path = os.path.join(self.log_manager.archive_dir, image_name)
+                    image_path = os.path.join(self.summary_writer.archive_dir, image_name)
                     f.savefig(image_path, dpi=300)
                     images_created.append(image_path)
                 else:
                     image_path = None
 
-                self.log_manager.add_feature_stats(title=feature_extractor.title, stats=feature_json)
+                self.summary_writer.add_feature_stats(title=feature_extractor.title, stats=feature_json)
 
                 if feature_error:
                     warning = feature_error
@@ -178,8 +178,8 @@ class AnalysisManagerAbstract(abc.ABC):
 
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
-        self.log_manager.set_pdf_summary(pdf_summary=summary)
-        self.log_manager.write()
+        self.summary_writer.set_pdf_summary(pdf_summary=summary)
+        self.summary_writer.write()
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -190,8 +190,8 @@ class AnalysisManagerAbstract(abc.ABC):
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print("The results can be seen in:")
-        print(f"    - {self.log_manager.log_dir}")
-        print(f"    - {self.log_manager.archive_dir}")
+        print(f"    - {self.summary_writer.log_dir}")
+        print(f"    - {self.summary_writer.archive_dir}")
 
     def run(self):
         """
