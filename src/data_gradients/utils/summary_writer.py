@@ -15,14 +15,14 @@ class SummaryWriter:
     """Manager responsible for logging the Report (e.g. PDF), feature stats, errors and config cache."""
 
     def __init__(self, report_title: str, report_subtitle: Optional[str] = None, log_dir: Optional[str] = None):
-        session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 
         # DIRECTORIES
         if log_dir is None:
             log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
-        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be archived here as well
+        self.archive_dir = os.path.join(log_dir, "archive_" + timestamp)  # A duplicate of the results will be archived here as well
         os.makedirs(self.archive_dir, exist_ok=True)
 
         # OUTPUT PATH
@@ -34,7 +34,7 @@ class SummaryWriter:
         self._pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
 
         # DATA TO SAVE
-        self._metadata = {"__version__": data_gradients.__version__, "report_title": report_title, "report_subtitle": report_subtitle}
+        self._metadata = {"__version__": data_gradients.__version__, "report_title": report_title, "report_subtitle": report_subtitle, "timestamp": timestamp}
         self._data_config_dict = {}
         self._pdf_summary = ResultsContainer()
         self._features_stats: List[Dict[str, Dict]] = []
