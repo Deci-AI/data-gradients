@@ -12,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class LogManager:
+    """Manager responsible for logging the results, errors and cache."""
+
     def __init__(self, report_title: str, report_subtitle: Optional[str] = None, log_dir: Optional[str] = None):
-        # Static parameters
         if log_dir is None:
             log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
