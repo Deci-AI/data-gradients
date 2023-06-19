@@ -91,13 +91,12 @@ class ImageColorDistribution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Colors"
+        return "Color Distribution"
 
     @property
     def description(self) -> str:
         return (
-            "Distribution of RBG or Grayscale intensity (0-255) over the whole dataset."
-            "Assumes RGB Channel ordering: \n"
-            "Can reveal differences in the nature of the images in the two datasets or in the augmentation. I.e., if the mean "
-            "of one of the colors is shifted between the datasets, it might indicate wrong augmentation. "
+            "Here's a comparison of RGB or grayscale intensity intensity (0-255) distributions across the entire dataset, assuming RGB channel ordering. \n"
+            "It can reveal discrepancies in the image characteristics between the two datasets, as well as potential flaws in the augmentation process. \n"
+            "E.g., a notable difference in the mean value of a specific color between the two datasets may indicate an issue with augmentation."
         )

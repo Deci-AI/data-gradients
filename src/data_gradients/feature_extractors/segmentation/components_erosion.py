@@ -60,12 +60,12 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Components Stability to Erosion."
+        return "Objects Stability to Erosion"
 
     @property
     def description(self) -> str:
         return (
-            "An assessment of object stability under morphological opening - erosion followed by dilation. "
+            "Assessment of object stability under morphological opening - erosion followed by dilation. "
             "When a lot of components are small then the number of components decrease which means we might have "
             "noise in our annotations (i.e 'sprinkles')."
         )

@@ -67,7 +67,13 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
     @property
     def description(self) -> str:
         return (
-            f"Visualization of {self.n_rows * self.n_cols} samples per split. "
-            f"This can be useful to make sure the mapping of class_names to class_ids is done correctly, "
-            f"but also to get a better understanding of what your dataset is made of.."
+            "The sample visualization feature provides a visual representation of images and labels. "
+            "This visualization aids in understanding of the composition of the dataset."
+        )
+
+    @property
+    def notice(self) -> str:
+        return (
+            f"Only {self.n_cols * self.n_rows} random samples are shown.<br/>"
+            f"You can increase the number of classes by changing `n_cols` and `n_rows` in the configuration file."
         )
