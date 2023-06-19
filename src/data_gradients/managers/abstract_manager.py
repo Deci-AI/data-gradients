@@ -170,12 +170,10 @@ class AnalysisManagerAbstract(abc.ABC):
                     feature_error = ""
                 except Exception as e:
                     f = None
-                    feature_json = {"error": traceback.format_exception(type(e), e, e.__traceback__)}
-                    feature_error = (
-                        f"Feature extraction error. Check out the log file for more details:<br/>"
-                        f"<em>{os.path.join(self.archive_dir, self.log_filename)}</em>"
-                    )
-                    errors.append(dict(title=feature_extractor.title, data=feature_json))
+                    error_description = traceback.format_exception(type(e), e, e.__traceback__)
+                    feature_json = {"error": error_description}
+                    feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.log_errors_path}</em>"
+                    errors.append(dict(title=feature_extractor.title, error=error_description))
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
@@ -212,6 +210,10 @@ class AnalysisManagerAbstract(abc.ABC):
         log_cache(cache_data=self.data_config.to_json(), path=self.cache_path)
 
         if errors:  # Log errors in a specific file, if any were found
+            logger.warning(
+                f"{len(errors)}/{len(features_stats)} features could not be processed.\n"
+                f"You can find more information about what happened in {self.log_errors_path}"
+            )
             log_errors(errors_data=errors, path=self.log_errors_path)
 
         # Save to archive dir
