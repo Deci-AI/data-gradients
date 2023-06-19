@@ -9,7 +9,7 @@ import data_gradients
 
 logger = logging.getLogger(__name__)
 
-MAIN_CACHE_DIR = appdirs.user_cache_dir("DataGradients", "Deci")
+CACHE_DIR = appdirs.user_cache_dir("DataGradients", "Deci")
 
 
 def _safe_load_json(path: str, require_version: bool = False) -> Dict:

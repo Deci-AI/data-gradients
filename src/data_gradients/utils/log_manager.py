@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List, Dict
 
 from data_gradients.assets import assets
-from data_gradients.utils.json_writer import MAIN_CACHE_DIR, log_errors, log_features
+from data_gradients.utils.json_writer import CACHE_DIR, log_errors, log_features
 from data_gradients.utils.pdf_writer import PDFWriter, ResultsContainer
 from data_gradients.utils.utils import copy_files_by_list
 
@@ -26,7 +26,7 @@ class LogManager:
         self.report_archive_path = os.path.join(self.archive_dir, "Report.pdf")
         self.log_archive_path = os.path.join(self.archive_dir, "summary.json")
         self.log_errors_path = os.path.join(self.archive_dir, "errors.json")
-        self.cache_path = os.path.join(MAIN_CACHE_DIR, report_title.replace(" ", "_") + ".json")
+        self.cache_path = os.path.join(CACHE_DIR, report_title.replace(" ", "_") + ".json")
 
         self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
 
