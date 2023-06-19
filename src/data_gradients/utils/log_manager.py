@@ -20,15 +20,17 @@ class LogManager:
     """Manager responsible for logging the Report (e.g. PDF), feature stats, errors and config cache."""
 
     def __init__(self, report_title: str, report_subtitle: Optional[str] = None, log_dir: Optional[str] = None):
+        session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        # DIRECTORIES
         if log_dir is None:
             log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
-
-        session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
         self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be archived here as well
         os.makedirs(self.archive_dir, exist_ok=True)
 
+        # OUTPUT PATH
         self.report_archive_path = os.path.join(self.archive_dir, "Report.pdf")
         self.log_archive_path = os.path.join(self.archive_dir, "summary.json")
         self.log_errors_path = os.path.join(self.archive_dir, "errors.json")
@@ -37,6 +39,7 @@ class LogManager:
         report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
         self._pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
 
+        # DATA TO SAVE
         self._metadata = {"__version__": data_gradients.__version__, "report_title": report_title, "report_subtitle": report_subtitle}
         self._data_config_dict = {}
         self._pdf_summary = ResultsContainer()
