@@ -1,7 +1,6 @@
 import os
 import abc
 import logging
-import json
 import traceback
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
@@ -11,6 +10,7 @@ from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
+from data_gradients.utils.json_writer import MAIN_CACHE_DIR, log_features, log_errors
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import copy_files_by_list
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
@@ -57,17 +57,18 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
 
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.report_name = "Report.pdf"
-        self.log_filename = "summary.json"
-        self.errors_filename = "errors.json"
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
-        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
+        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be archived here as well
+        os.makedirs(self.archive_dir, exist_ok=True)
 
-        self.report_title = report_title
-        self.report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
+        self.report_archive_path = os.path.join(self.archive_dir, "Report.pdf")
+        self.log_archive_path = os.path.join(self.archive_dir, "summary.json")
+        self.log_errors_path = os.path.join(self.archive_dir, "errors.json")
+        self.cache_path = os.path.join(MAIN_CACHE_DIR, report_title.replace(" ", "_") + ".json")
 
         # WRITERS
         self.renderer = SeabornRenderer()
+        report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
         self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
 
         # DATA
@@ -151,6 +152,8 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
+        features_stats = []
+        errors = []
         for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
@@ -161,12 +164,10 @@ class AnalysisManagerAbstract(abc.ABC):
                     feature_error = ""
                 except Exception as e:
                     f = None
-                    feature_json = {"error": traceback.format_exception(type(e), e, e.__traceback__)}
-                    feature_error = (
-                        f"Feature extraction error. Check out the log file for more details:<br/>"
-                        f"<em>{os.path.join(self.archive_dir, self.log_filename)}</em>"
-                    )
-                    self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.errors_filename)
+                    error_description = traceback.format_exception(type(e), e, e.__traceback__)
+                    feature_json = {"error": error_description}
+                    feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.log_errors_path}</em>"
+                    errors.append(dict(title=feature_extractor.title, error=error_description))
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
@@ -176,7 +177,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     image_path = None
 
-                self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.log_filename)
+                features_stats.append(dict(title=feature_extractor.title, data=feature_json))
 
                 if feature_error:
                     warning = feature_error
@@ -199,8 +200,24 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
 
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, self.report_name))
-        copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
+        if errors:  # Log errors in a specific file, if any were found
+            logger.warning(
+                f"{len(errors)}/{len(features_stats)} features could not be processed.\n"
+                f"You can find more information about what happened in {self.log_errors_path}"
+            )
+            log_errors(errors_data=errors, path=self.log_errors_path)
+
+        # Save to archive dir
+        log_errors(errors_data=errors, path=self.log_archive_path)
+        log_features(features_data=features_stats, path=self.log_archive_path)
+        self.pdf_writer.write(results_container=summary, output_filename=self.report_archive_path)
+
+        # Copy all from archive dir to log dir
+        copy_files_by_list(
+            source_dir=self.archive_dir,
+            dest_dir=self.log_dir,
+            file_list=[os.path.basename(self.log_archive_path), os.path.basename(self.report_archive_path)],
+        )
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -240,22 +257,6 @@ class AnalysisManagerAbstract(abc.ABC):
         n_batches_available = max(self.train_size, self.val_size)
         n_batches_early_stop = self.batches_early_stop or float("inf")
         return min(n_batches_early_stop, n_batches_available)
-
-    @staticmethod
-    def write_json(data: Dict, output_dir: str, filename: str):
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, filename)
-
-        if os.path.exists(output_path):
-            with open(output_path, "r") as f:
-                json_dict = json.load(f)
-        else:
-            json_dict = {}
-
-        json_dict["features"] = json_dict.get("features", []) + [data]
-
-        with open(output_path, "w") as f:
-            json.dump(json_dict, f, indent=4)
 
     def _create_samples_iterated_warning(self) -> str:
         if self.train_size is None or self._train_batch_size is None:
