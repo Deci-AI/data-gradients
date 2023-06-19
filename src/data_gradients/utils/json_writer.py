@@ -56,3 +56,7 @@ def log_features(features_data: List[Dict], path: str):
 
 def log_cache(cache_data: Dict, path: str):
     _log(title="cache", data=cache_data, path=path)
+
+
+def log_errors(errors_data: List[Dict[str, List[str]]], path: str):
+    _log(title="errors", data=errors_data, path=path)

@@ -1,6 +1,7 @@
 import os
 import abc
 import logging
+import traceback
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
@@ -9,7 +10,7 @@ from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
-from data_gradients.utils.json_writer import MAIN_CACHE_DIR, load_cache, log_cache, log_features
+from data_gradients.utils.json_writer import MAIN_CACHE_DIR, load_cache, log_cache, log_features, log_errors
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import copy_files_by_list
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
@@ -63,6 +64,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         self.report_archive_path = os.path.join(self.archive_dir, "Report.pdf")
         self.log_archive_path = os.path.join(self.archive_dir, "summary.json")
+        self.log_errors_path = os.path.join(self.archive_dir, "errors.json")
         self.cache_path = os.path.join(MAIN_CACHE_DIR, report_title.replace(" ", "_") + ".json")
 
         # We don't want a new data_config object, because this instance was already injected in different parts of the code
@@ -157,6 +159,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         summary = ResultsContainer()
         features_stats = []
+        errors = []
         for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
@@ -167,11 +170,12 @@ class AnalysisManagerAbstract(abc.ABC):
                     feature_error = ""
                 except Exception as e:
                     f = None
-                    feature_json = {"error": str(e)}
+                    feature_json = {"error": traceback.format_exception(type(e), e, e.__traceback__)}
                     feature_error = (
                         f"Feature extraction error. Check out the log file for more details:<br/>"
                         f"<em>{os.path.join(self.archive_dir, self.log_filename)}</em>"
                     )
+                    errors.append(dict(title=feature_extractor.title, data=feature_json))
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
@@ -207,8 +211,12 @@ class AnalysisManagerAbstract(abc.ABC):
         # Save to cache dir
         log_cache(cache_data=self.data_config.to_json(), path=self.cache_path)
 
+        if errors:  # Log errors in a specific file, if any were found
+            log_errors(errors_data=errors, path=self.log_errors_path)
+
         # Save to archive dir
         log_cache(cache_data=self.data_config.to_json(), path=self.log_archive_path)
+        log_errors(errors_data=errors, path=self.log_archive_path)
         log_features(features_data=features_stats, path=self.log_archive_path)
         self.pdf_writer.write(results_container=summary, output_filename=self.report_archive_path)
 

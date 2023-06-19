@@ -35,12 +35,20 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
 
     @property
     def title(self) -> str:
-        return "Heatmap of Segmentation Masks"
+        return "Objects Density"
 
     @property
     def description(self) -> str:
         return (
-            "Show the areas of high density of Bounding Boxes. This can be useful to understand if the objects are positioned in the right area.\n"
-            f"Note that only top {self.n_cols * self.n_rows} classes are shown. "
-            f" You can increase the number of classes by setting `SegmentationClassHeatmap` with `n_classes_to_show`"
+            "The heatmap represents areas of high object density within the images, providing insights into the spatial distribution of objects. "
+            "By examining the heatmap, you can quickly identify if objects are predominantly concentrated in specific regions or if they are evenly "
+            "distributed throughout the scene. This information can serve as a heuristic to assess if the objects are positioned appropriately "
+            "within the expected areas of interest."
+        )
+
+    @property
+    def notice(self) -> str:
+        return (
+            f"Only the {self.n_cols * self.n_rows} classes with highest density are shown.<br/>"
+            f"You can increase the number of classes by changing `n_cols` and `n_rows` in the configuration file."
         )
