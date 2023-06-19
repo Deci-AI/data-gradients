@@ -2,6 +2,7 @@ import os
 import abc
 import logging
 import json
+import traceback
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
@@ -58,6 +59,7 @@ class AnalysisManagerAbstract(abc.ABC):
         session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.report_name = "Report.pdf"
         self.log_filename = "summary.json"
+        self.errors_filename = "errors.json"
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
         self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
 
@@ -159,11 +161,12 @@ class AnalysisManagerAbstract(abc.ABC):
                     feature_error = ""
                 except Exception as e:
                     f = None
-                    feature_json = {"error": str(e)}
+                    feature_json = {"error": traceback.format_exception(type(e), e, e.__traceback__)}
                     feature_error = (
                         f"Feature extraction error. Check out the log file for more details:<br/>"
                         f"<em>{os.path.join(self.archive_dir, self.log_filename)}</em>"
                     )
+                    self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.errors_filename)
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
