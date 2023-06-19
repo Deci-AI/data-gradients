@@ -34,6 +34,7 @@ class LogManager:
         self.log_errors_path = os.path.join(self.archive_dir, "errors.json")
         self.data_config_cache_path = os.path.join(CACHE_DIR, report_title.replace(" ", "_") + ".json")
 
+        report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
         self._pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
 
         self._metadata = {"__version__": data_gradients.__version__, "report_title": report_title, "report_subtitle": report_subtitle}
