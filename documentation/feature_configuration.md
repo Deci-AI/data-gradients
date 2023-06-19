@@ -1,6 +1,6 @@
 ## Feature Configuration
  
-The feature configuration allows you chose what feature to use, and to adjust their parameters to your needs. 
+The feature configuration allows you to chose what feature to use, and to adjust their parameters to your needs. 
 Follow the steps below to create a YAML configuration file
 
 ### 1. YAML Configuration Structure
