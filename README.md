@@ -19,9 +19,9 @@ It automatically extracts features from your datasets and combines them all into
 - And many more!
 
 <div align="center">
-  <img src="assets/report_image_stats.png" width="250px">
-  <img src="assets/report_mask_sample.png" width="250px">
-  <img src="assets/report_classes_distribution.png" width="250px">
+  <img src="documentation/assets/report_image_stats.png" width="250px">
+  <img src="documentation/assets/report_mask_sample.png" width="250px">
+  <img src="documentation/assets/report_classes_distribution.png" width="250px">
   <p><em>Example of pages from the Report</em>
 </div>
 
@@ -115,6 +115,12 @@ which does not require you to download any additional data.
 Once the analysis is done, the path to your pdf report will be printed.
 
 
+## Feature Configuration
+ 
+The feature configuration allows you to run the analysis on a subset of features or adjust the parameters of existing features. 
+If you are interested in customizing this configuration, you can check out the [documentation](documentation/feature_configuration.md) on that topic.
+
+
 ## Dataset Adapters
 Before implementing a Dataset Adapter try running without it, in many cases DataGradient will support your dataset without any code.
 
@@ -206,6 +212,7 @@ SegmentationAnalysisManager(
     labels_extractor=labels_extractor
 )
 ```
+
 
 ## License
 
