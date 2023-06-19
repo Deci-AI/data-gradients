@@ -52,8 +52,12 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Number of bounding box per image."
+        return "Distribution of Bounding Box per image"
 
     @property
     def description(self) -> str:
-        return "The total number of bounding box per image. This helps understanding how many bounding boxes an image typically includes."
+        return (
+            "These graphs shows how many bounding boxes appear in images. \n"
+            "This can typically be valuable to know when you observe a very high number of bounding boxes per image, "
+            "as some models include a parameter to filter the top k results."
+        )

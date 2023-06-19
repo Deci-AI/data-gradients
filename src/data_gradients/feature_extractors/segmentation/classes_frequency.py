@@ -2,33 +2,33 @@ import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
-from data_gradients.utils.data_classes import DetectionSample
+from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.seaborn_renderer import BarPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
-class DetectionClassFrequency(AbstractFeatureExtractor):
-    """Feature Extractor to count the number of instance of each class."""
-
+class SegmentationClassFrequency(AbstractFeatureExtractor):
     def __init__(self):
         self.data = []
 
-    def update(self, sample: DetectionSample):
-        for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
-            class_name = sample.class_names[class_id]
-            self.data.append(
-                {
-                    "split": sample.split,
-                    "class_id": class_id,
-                    "class_name": class_name,
-                }
-            )
+    def update(self, sample: SegmentationSample):
+        for j, class_channel in enumerate(sample.contours):
+            for contour in class_channel:
+                class_id = contour.class_id
+                class_name = sample.class_names[class_id]
+                self.data.append(
+                    {
+                        "split": sample.split,
+                        "class_id": class_id,
+                        "class_name": class_name,
+                    }
+                )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        # Include ("class_name", "split", "n_appearance")
+        # Include ("class_name", "class_id", "split", "n_appearance")
         df_class_count = df.groupby(["class_name", "class_id", "split"]).size().reset_index(name="n_appearance")
 
         split_sums = df_class_count.groupby("split")["n_appearance"].sum()
@@ -64,4 +64,9 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
 
     @property
     def description(self) -> str:
-        return "The total number of bounding boxes for each class, across all images."
+        return (
+            "This bar plot represents the frequency of appearance of each class. "
+            "This may highlight class distribution gap between training and validation splits. "
+            "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
+            "learn to predict that class."
+        )

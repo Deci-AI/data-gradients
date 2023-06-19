@@ -121,13 +121,13 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Intersection of bounding boxes"
+        return "Intersection of Bounding Boxes"
 
     @property
     def description(self) -> str:
         description = (
-            "The distribution of the box IoU with respect to other boxes in the sample. "
-            "The heatmap shows the percentage of boxes with IoU in range [0..T] for each class. "
+            "The distribution of the box Intersection over Union (IoU) with respect to other boxes in the sample. "
+            "The heatmap shows the percentage of boxes overlap with IoU in range [0..T] for each class. "
         )
         if self.class_agnostic:
             description += "Intersection of all boxes are considered (Regardless of classes of corresponding bboxes)."

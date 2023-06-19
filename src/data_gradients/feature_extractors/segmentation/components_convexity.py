@@ -51,13 +51,11 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Components Convexity."
+        return "Objects Convexity"
 
     @property
     def description(self) -> str:
         return (
-            "Mean of the convexity measure across all components VS Class ID.\n"
-            "Convexity measure of a component is defined by ("
-            "component_perimeter-convex_hull_perimeter)/convex_hull_perimeter.\n"
-            "High values can imply complex structures which might be difficult to segment."
+            "This graph depicts the convexity distribution of objects in both training and validation sets. \n"
+            "Higher convexity values suggest complex structures that may pose challenges for accurate segmentation."
         )
