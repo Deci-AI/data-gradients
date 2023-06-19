@@ -12,10 +12,23 @@ DataGradients is an open-source python based library specifically designed for c
 
 It automatically extracts features from your datasets and combines them all into a single user-friendly report. 
 
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+   - [Prerequisites](#prerequisites)
+   - [Dataset Analysis](#dataset-analysis)
+   - [Report](#report)
+- [Feature Configuration](#feature-configuration)
+- [Dataset Adapters](#dataset-adapters)
+   - [Image Adapter](#image-adapter)
+   - [Label Adapter](#label-adapter)
+   - [Example](#example)
+- [License](#license)
+
 ## Features
 - Image-Level Evaluation: DataGradients evaluates key image features such as resolution, color distribution, and average brightness.
-- Class Distribution: The library extracts stats allowing to know which classes are the most used, how many objects do you have per image, how many image without any label, ...
-- Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks allowing you to understand if the objects are positioned in the right area.
+- Class Distribution: The library extracts stats allowing you to know which classes are the most used, how many objects do you have per image, how many image without any label, ...
+- Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks, allowing you to understand if the objects are positioned in the right area.
 - And many more!
 
 <div align="center">
@@ -25,8 +38,9 @@ It automatically extracts features from your datasets and combines them all into
   <p><em>Example of pages from the Report</em>
 </div>
 
+
 ## Installation
-You can install DataGradients directly from the Github repository.
+You can install DataGradients directly from the GitHub repository.
 
 ```
 pip install git+https://github.com/Deci-AI/data-gradients

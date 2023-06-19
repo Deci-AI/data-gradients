@@ -1,6 +1,6 @@
 ## Feature Configuration
  
-The feature configuration allows you to run the analysis on a subset of features or adjust the parameters of existing features. 
+The feature configuration allows you to chose what feature to use, and to adjust their parameters to your needs. 
 Follow the steps below to create a YAML configuration file
 
 ### 1. YAML Configuration Structure
@@ -46,9 +46,10 @@ report_sections:
 - `n_rows`, `n_cols`: The number of rows and columns to use for displaying samples.
 - `stack_splits_vertically`: Whether to show train/test samples vertically or side by side.
 
-### 4. Implementing the Configuration
+### 4. Using the Configuration
 
-To implement the configuration, pass the YAML file to the relevant analysis manager. For example, for object detection analysis:
+To use the configuration, provide the path of your YAML file to the relevant analysis manager. 
+For example, for object detection analysis:
 
 ```python
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
