@@ -133,8 +133,6 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
-        features_stats = []
-        errors = []
         for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
@@ -148,7 +146,7 @@ class AnalysisManagerAbstract(abc.ABC):
                     error_description = traceback.format_exception(type(e), e, e.__traceback__)
                     feature_json = {"error": error_description}
                     feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.log_manager.log_errors_path}</em>"
-                    errors.append(dict(title=feature_extractor.title, error=error_description))
+                    self.log_manager.add_error(title=feature_extractor.title, error=error_description)
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
@@ -158,7 +156,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     image_path = None
 
-                features_stats.append(dict(title=feature_extractor.title, data=feature_json))
+                self.log_manager.add_feature_stats(title=feature_extractor.title, stats=feature_json)
 
                 if feature_error:
                     warning = feature_error
@@ -180,8 +178,8 @@ class AnalysisManagerAbstract(abc.ABC):
 
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
-
-        self.log_manager.log(pdf_summary=summary, features_stats=features_stats, errors=errors)
+        self.log_manager.set_pdf_summary(pdf_summary=summary)
+        self.log_manager.write()
 
         # Cleanup of generated images
         for image_created in images_created:
