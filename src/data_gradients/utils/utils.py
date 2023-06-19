@@ -1,7 +1,13 @@
 import os
 import re
 import shutil
+import json
 from typing import Dict, Mapping, List
+
+
+def write_json(path: str, json_dict: Dict):
+    with open(path, "w") as f:
+        json.dump(json_dict, f, indent=4)
 
 
 def class_id_to_name(mapping, hist: Dict):

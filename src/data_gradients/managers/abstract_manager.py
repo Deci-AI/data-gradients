@@ -1,21 +1,19 @@
 import os
 import abc
 import logging
-import json
 import traceback
 from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
-from datetime import datetime
 from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
-from data_gradients.utils.utils import copy_files_by_list
+from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
-from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary, PDFWriter, assets
+from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -51,24 +49,8 @@ class AnalysisManagerAbstract(abc.ABC):
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         """
-        # Static parameters
-        if log_dir is None:
-            log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
-            logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
-
-        session_id = datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.report_name = "Report.pdf"
-        self.log_filename = "summary.json"
-        self.errors_filename = "errors.json"
-        self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
-        self.archive_dir = os.path.join(log_dir, "archive_" + session_id)  # A duplicate of the results will be saved here as well.
-
-        self.report_title = report_title
-        self.report_subtitle = report_subtitle or datetime.strftime(datetime.now(), "%m:%H %B %d, %Y")
-
-        # WRITERS
         self.renderer = SeabornRenderer()
-        self.pdf_writer = PDFWriter(title=report_title, subtitle=report_subtitle, html_template=assets.html.doc_template)
+        self.summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
         # DATA
         if batches_early_stop:
@@ -101,8 +83,8 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - batches_early_stop: {self.batches_early_stop} \n"
             f"  - len(train_data): {self.train_size} \n"
             f"  - len(val_data): {self.val_size} \n"
-            f"  - log directory: {self.log_dir} \n"
-            f"  - Archive directory: {self.archive_dir} \n"
+            f"  - log directory: {self.summary_writer.log_dir} \n"
+            f"  - Archive directory: {self.summary_writer.archive_dir} \n"
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
@@ -161,22 +143,20 @@ class AnalysisManagerAbstract(abc.ABC):
                     feature_error = ""
                 except Exception as e:
                     f = None
-                    feature_json = {"error": traceback.format_exception(type(e), e, e.__traceback__)}
-                    feature_error = (
-                        f"Feature extraction error. Check out the log file for more details:<br/>"
-                        f"<em>{os.path.join(self.archive_dir, self.log_filename)}</em>"
-                    )
-                    self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.errors_filename)
+                    error_description = traceback.format_exception(type(e), e, e.__traceback__)
+                    feature_json = {"error": error_description}
+                    feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.summary_writer.errors_path}</em>"
+                    self.summary_writer.add_error(title=feature_extractor.title, error=error_description)
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
-                    image_path = os.path.join(self.archive_dir, image_name)
+                    image_path = os.path.join(self.summary_writer.archive_dir, image_name)
                     f.savefig(image_path, dpi=300)
                     images_created.append(image_path)
                 else:
                     image_path = None
 
-                self.write_json(data=dict(title=feature_extractor.title, data=feature_json), output_dir=self.archive_dir, filename=self.log_filename)
+                self.summary_writer.add_feature_stats(title=feature_extractor.title, stats=feature_json)
 
                 if feature_error:
                     warning = feature_error
@@ -198,9 +178,8 @@ class AnalysisManagerAbstract(abc.ABC):
 
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
-
-        self.pdf_writer.write(results_container=summary, output_filename=os.path.join(self.archive_dir, self.report_name))
-        copy_files_by_list(source_dir=self.archive_dir, dest_dir=self.log_dir, file_list=[self.log_filename, self.report_name])
+        self.summary_writer.set_pdf_summary(pdf_summary=summary)
+        self.summary_writer.write()
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -211,8 +190,8 @@ class AnalysisManagerAbstract(abc.ABC):
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print("The results can be seen in:")
-        print(f"    - {self.log_dir}")
-        print(f"    - {self.archive_dir}")
+        print(f"    - {self.summary_writer.log_dir}")
+        print(f"    - {self.summary_writer.archive_dir}")
 
     def run(self):
         """
@@ -240,22 +219,6 @@ class AnalysisManagerAbstract(abc.ABC):
         n_batches_available = max(self.train_size, self.val_size)
         n_batches_early_stop = self.batches_early_stop or float("inf")
         return min(n_batches_early_stop, n_batches_available)
-
-    @staticmethod
-    def write_json(data: Dict, output_dir: str, filename: str):
-        os.makedirs(output_dir, exist_ok=True)
-        output_path = os.path.join(output_dir, filename)
-
-        if os.path.exists(output_path):
-            with open(output_path, "r") as f:
-                json_dict = json.load(f)
-        else:
-            json_dict = {}
-
-        json_dict["features"] = json_dict.get("features", []) + [data]
-
-        with open(output_path, "w") as f:
-            json.dump(json_dict, f, indent=4)
 
     def _create_samples_iterated_warning(self) -> str:
         if self.train_size is None or self._train_batch_size is None:
