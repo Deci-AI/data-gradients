@@ -65,11 +65,11 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Distribution of Bounding Boxes Height and Width."
+        return "Distribution of Object Width and Height"
 
     @property
     def description(self) -> str:
         return (
-            "Width, Height of the bounding-boxes surrounding every object across all images. Plotted per-class on a heat-map.\n"
-            "A large variation in object sizes within a class can make it harder for the model to recognize the objects."
+            "These heat maps illustrate the distribution of objects width and height per class. \n"
+            "Large variations in object size can affect the model's ability to accurately recognize objects."
         )

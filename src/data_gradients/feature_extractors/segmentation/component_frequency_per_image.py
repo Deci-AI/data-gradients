@@ -51,8 +51,12 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Number of component per image."
+        return "Distribution of Objects per Image"
 
     @property
     def description(self) -> str:
-        return "The total number of connected components per image. This helps understanding how many components images typically includes. "
+        return (
+            "These graphs shows how many different objects appear in images. \n"
+            "This can typically be valuable to know when you observe a very high number of objects per image, "
+            "as some models include a parameter to filter the top k results."
+        )
