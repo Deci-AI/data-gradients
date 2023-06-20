@@ -1,7 +1,13 @@
 import os
 import re
 import shutil
+import json
 from typing import Dict, Mapping, List
+
+
+def write_json(path: str, json_dict: Dict):
+    with open(path, "w") as f:
+        json.dump(json_dict, f, indent=4)
 
 
 def class_id_to_name(mapping, hist: Dict):
@@ -59,3 +65,13 @@ def copy_files_by_list(file_list: List[str], source_dir: str, dest_dir: str) -> 
         if os.path.isfile(source_file_path):
             dest_file_path = os.path.join(dest_dir, file_name)
             shutil.copy(source_file_path, dest_file_path)
+
+
+def safe_json_load(path: str) -> Dict:
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except json.decoder.JSONDecodeError:
+        return {}

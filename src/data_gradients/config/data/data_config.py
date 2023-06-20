@@ -1,105 +1,20 @@
+import os
 import logging
-from dataclasses import dataclass
-from typing import Dict, Any, Optional, Callable, Union, Tuple, Mapping, List
-from abc import ABC
 import torch
-import json
+import appdirs
+from abc import ABC
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Callable, Union
 
-from data_gradients.batch_processors.adapters.tensor_extractor import NestedDataLookup
+import data_gradients
 from data_gradients.config.data.questions import Question, ask_question
+from data_gradients.config.data.caching_utils import TensorExtractorResolver, XYXYConverterResolver
+from data_gradients.config.data.typing import SupportedData, JSONDict
 from data_gradients.utils.detection import XYXYConverter
-from data_gradients.utils.json_writer import load_cache
+from data_gradients.utils.utils import safe_json_load, write_json
 
 logging.basicConfig(level=logging.INFO)
-
 logger = logging.getLogger(__name__)
-
-
-SupportedData = Union[Tuple, List, Mapping, Tuple, List]
-
-JSONValue = Union[str, int, float, bool, None, Dict[str, Union["JSONValue", List["JSONValue"]]]]
-JSONDict = Dict[str, JSONValue]
-
-
-@dataclass
-class CachableParam:
-    """Dataclass representing a parameter that can be cached.
-    This combines the value of any parameter, as used in the code, and the name of the parameter that will be used in the cache.
-
-    :attr value:    The value of the parameter, will be used in the code.
-    :attr name:     The name of the parameter, will be used to load/save cache.
-    """
-
-    value: Optional[Any]
-    name: Optional[str]
-
-
-NON_CACHABLE_PREFIX = "[Non-cachable]"
-
-
-class CacheLoadingError(Exception):
-    def __init__(self, key: str, value: str):
-        message = (
-            f"Error while trying to load `{key}` from cache... with value `{value}`.\n"
-            f"It seems that this object was passed to the `DataConfig` in the previous run.\n"
-            f"Please:\n"
-            f"     - Either pass the same `{key}` to the `DataConfig`.\n"
-            f"     - Or disable loading config from cache.\n"
-        )
-        super().__init__(message)
-
-
-class CachableTensorExtractor:
-    """Static class"""
-
-    @staticmethod
-    def resolve(tensor_extractor: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
-        if tensor_extractor is None:
-            return CachableParam(value=None, name=None)
-
-        elif isinstance(tensor_extractor, str):
-            if tensor_extractor.startswith(NON_CACHABLE_PREFIX):
-                # The value corresponds to the cache of a custom function. THis means that the function was cached by user in previous run,
-                # but he did not provide a function for this run.
-                # Since we cannot build back the original function, we raise an informative exception.
-                raise CacheLoadingError(key="tensor_extractor", value=tensor_extractor)
-            return CachableParam(NestedDataLookup(tensor_extractor), tensor_extractor)
-
-        elif isinstance(tensor_extractor, Callable):
-            return CachableParam(value=tensor_extractor, name=f"{NON_CACHABLE_PREFIX} - {tensor_extractor}")
-        else:
-            raise TypeError(f"Extractor type `{type(tensor_extractor)}` not supported!")
-
-
-class CachableXYXYConverter:
-    @staticmethod
-    def resolve(xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
-        """Translate the input `xyxy_converter` into both:
-            - value: Value of the `xyxy_converter` that will be used in the code.
-            - name:  String representation of `xyxy_converter` when it comes to caching.
-
-        For example:
-            >> CachableXYXYConverter.resolve("xywh")                    # CachableParam(value=XYXYConverter("xywh"), name="xyxy")
-            >> CachableXYXYConverter.resolve(my_custom_xyxy_comverter)  # CachableParam(value=my_custom_xyxy_comverter, name="[Non-cachable] - lambda ...")
-
-        :param xyxy_converter: Either None, a string representation (e.g. `xywh`) or a custom callable.
-        :return: Dataclass including both the value (used in the code) and the name (used in the cache).
-        """
-        if xyxy_converter is None:
-            return CachableParam(value=None, name=None)
-
-        elif isinstance(xyxy_converter, str):
-            if xyxy_converter.startswith(NON_CACHABLE_PREFIX):
-                # The value corresponds to the cache of a custom function. THis means that the function was cached by user in previous run,
-                # but he did not provide a function for this run.
-                # Since we cannot build back the original function, we raise an informative exception.
-                raise CacheLoadingError(key="xyxy_converter", value=xyxy_converter)
-            return CachableParam(XYXYConverter(xyxy_converter), xyxy_converter)
-
-        elif isinstance(xyxy_converter, Callable):
-            return CachableParam(value=xyxy_converter, name=f"{NON_CACHABLE_PREFIX} - {xyxy_converter}")
-        else:
-            raise TypeError(f"`xyxy_converter` type `{type(xyxy_converter)}` not supported!")
 
 
 @dataclass
@@ -116,83 +31,100 @@ class DataConfig(ABC):
     images_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
 
+    DEFAULT_CACHE_DIR: str = field(default=appdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+
     @classmethod
-    def from_cache(cls, path: str) -> "DataConfig":
+    def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
+        """Load an instance of DataConfig directly from a cache file.
+        :param filename: Name of the cache file. This should include ".json" extension.
+        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :return: An instance of DataConfig loaded from the cache file.
+        """
+        dir_path = dir_path or cls.DEFAULT_CACHE_DIR
+        path = os.path.join(dir_path, filename)
         try:
-            return cls(**load_cache(path=path))
+            return cls(**cls._load_json_dict(path=path))
         except TypeError as e:
             raise TypeError(f"{e}\n\t => Could not load `{cls.__name__}` from cache.") from e
 
-    @classmethod
-    def from_json(cls, json_dict: JSONDict) -> "DataConfig":
-        """Create a new instance of the dataclass from a JSON representation.
-        :param json_dict: JSON like dictionary.
+    @staticmethod
+    def _load_json_dict(path: str) -> Dict:
+        """Load cache if available."""
+        json_dict = safe_json_load(path=path)
+        metadata = json_dict.get("metadata", {})
+        if not json_dict:
+            return {}
+        elif metadata.get("__version__") == data_gradients.__version__:
+            return json_dict.get("attributes", {})
+        else:
+            logger.info(
+                f"{path} was not loaded from cache due to data-gradients missmatch between cache and current version"
+                f"cache={json_dict.get('__version__')}!={data_gradients.__version__}=installed"
+            )
+            return {}
+
+    def write_to_json(self, filename: str, dir_path: Optional[str] = None):
+        """Save the serializable representation of the class to a .json file.
+        :param filename: Name of the cache file. This should include ".json" extension.
+        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
         """
-        try:
-            return cls(**json_dict)
-        except TypeError as e:
-            raise TypeError(f"{e}\n\t => Could not instantiate `{cls.__name__}` from json.") from e
+        dir_path = dir_path or self.DEFAULT_CACHE_DIR
+        path = os.path.join(dir_path, filename)
+        if not path.endswith(".json"):
+            raise ValueError(f"`{path}` should end with `.json`")
+
+        json_dict = {"metadata": {"__version__": data_gradients.__version__}, "attributes": self.to_json()}
+        write_json(json_dict=json_dict, path=path)
 
     def to_json(self) -> JSONDict:
         """Convert the dataclass into a serializable representation that can be saved and loaded safely.
         :return: JSON like dictionary, that can be used to create a new instance of the object.
         """
         json_dict = {
-            "images_extractor": CachableTensorExtractor.resolve(self.images_extractor).name,
-            "labels_extractor": CachableTensorExtractor.resolve(self.labels_extractor).name,
+            "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
+            "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
         }
         return json_dict
 
-    @classmethod
-    def load_from_json(cls, path: str) -> "DataConfig":
-        """Load the representation of the class from a .json file.
-        :param path: Path where the file is, should include ".json" extension."""
+    def fill_missing_params_with_cache(self, cache_filename: str, cache_dir_path: Optional[str] = None):
+        """Load an instance of DataConfig directly from a cache file.
+        :param cache_filename: Name of the cache file. This should include ".json" extension.
+        :param cache_dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :return: An instance of DataConfig loaded from the cache file.
+        """
+        dir_path = cache_dir_path or self.DEFAULT_CACHE_DIR
+        path = os.path.join(dir_path, cache_filename)
+        if self.use_cache:
+            cache_dict = self._load_json_dict(path=path)
+            if cache_dict:
+                logger.info(
+                    f"Overwriting `{self.__class__.__name__}` attributes with cache values (if relevant). "
+                    f"If you don't want to use cache, please set `load_cache=False`."
+                )
+                self._fill_missing_params(json_dict=cache_dict)
+        else:
+            logger.info(f"No cache will be used to set `{self.__class__.__name__}` attributes. If you want to use cache, please set `use_cache=True`")
 
-        if not path.endswith(".json"):
-            raise ValueError(f"`{path}` should end with `.json`")
-
-        with open(path, "r") as f:
-            json_dict = json.load(f)
-
-        return cls.from_json(json_dict)
-
-    def save_to_json(self, path: str):
-        """Save the serializable representation of the class to a .json file.
-        :param path: Output path of the file, should include ".json" extension."""
-
-        if not path.endswith(".json"):
-            raise ValueError(f"`{path}` should end with `.json`")
-
-        with open(path, "r") as f:
-            json.dump(self.to_json(), f)
-
-    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
-        if self.images_extractor is None:
-            self.images_extractor = ask_question(question=question, hint=hint)
-        return CachableTensorExtractor.resolve(tensor_extractor=self.images_extractor).value
-
-    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
-        if self.labels_extractor is None:
-            self.labels_extractor = ask_question(question=question, hint=hint)
-        return CachableTensorExtractor.resolve(tensor_extractor=self.labels_extractor).value
-
-    def overwrite_missing_params(self, json_dict: JSONDict):
-        """Overwrite every attribute that is equal to `None`, but only if cache was enabled.
+    def _fill_missing_params(self, json_dict: JSONDict):
+        """Overwrite every attribute that is equal to `None`.
         This is the safe way of loading cache, since it will prioritize attributes already set by the user.
 
         :param json_dict: JSON like dictionary. It's values will overwrite the attributes if these attributes are None
         """
-        if self.use_cache:
-            logger.info(
-                f"Overwriting `{self.__class__.__name__}` attributes with cache values (if relevant). "
-                f"If you don't want to use cache, please set `load_cache=False`."
-            )
-            if self.images_extractor is None:
-                self.images_extractor = json_dict.get("images_extractor")
-            if self.labels_extractor is None:
-                self.labels_extractor = json_dict.get("labels_extractor")
-        else:
-            logger.info(f"No cache will be used to set `{self.__class__.__name__}` attributes. If you want to use cache, please set `load_cache=True`")
+        if self.images_extractor is None:
+            self.images_extractor = json_dict.get("images_extractor")
+        if self.labels_extractor is None:
+            self.labels_extractor = json_dict.get("labels_extractor")
+
+    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
+        if self.images_extractor is None:
+            self.images_extractor = ask_question(question=question, hint=hint)
+        return TensorExtractorResolver.to_callable(tensor_extractor=self.images_extractor)
+
+    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
+        if self.labels_extractor is None:
+            self.labels_extractor = ask_question(question=question, hint=hint)
+        return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
 
 
 @dataclass
@@ -204,6 +136,21 @@ class SegmentationDataConfig(DataConfig):
 class DetectionDataConfig(DataConfig):
     is_label_first: Union[None, bool] = None
     xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]] = None
+
+    def to_json(self) -> JSONDict:
+        json_dict = {
+            **super().to_json(),
+            "is_label_first": self.is_label_first,
+            "xyxy_converter": XYXYConverterResolver.to_string(self.xyxy_converter),
+        }
+        return json_dict
+
+    def _fill_missing_params(self, json_dict: JSONDict):
+        super()._fill_missing_params(json_dict=json_dict)
+        if self.is_label_first is None:
+            self.is_label_first = json_dict.get("is_label_first")
+        if self.xyxy_converter is None:
+            self.xyxy_converter = json_dict.get("xyxy_converter")
 
     def get_is_label_first(self, hint: str = "") -> bool:
         if self.is_label_first is None:
@@ -224,29 +171,4 @@ class DetectionDataConfig(DataConfig):
                 options=XYXYConverter.get_available_options(),
             )
             self.xyxy_converter = ask_question(question=question, hint=hint)
-        return CachableXYXYConverter.resolve(self.xyxy_converter).value
-
-    def to_json(self) -> JSONDict:
-        json_dict = {
-            **super().to_json(),
-            "is_label_first": self.is_label_first,
-            "xyxy_converter": CachableXYXYConverter.resolve(self.xyxy_converter).name,
-        }
-        return json_dict
-
-    def overwrite_missing_params(self, json_dict: JSONDict):
-        if self.use_cache:
-            logger.info(
-                f"Overwriting `{self.__class__.__name__}` attributes with cache values (if relevant). "
-                f"If you don't want to use cache, please set `load_cache=False`."
-            )
-            if self.images_extractor is None:
-                self.images_extractor = json_dict.get("images_extractor")
-            if self.labels_extractor is None:
-                self.labels_extractor = json_dict.get("labels_extractor")
-            if self.is_label_first is None:
-                self.is_label_first = json_dict.get("is_label_first")
-            if self.xyxy_converter is None:
-                self.xyxy_converter = json_dict.get("xyxy_converter")
-        else:
-            logger.info(f"No cache will be used to set `{self.__class__.__name__}` attributes. If you want to use cache, please set `load_cache=True`")
+        return XYXYConverterResolver.to_callable(self.xyxy_converter)

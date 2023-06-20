@@ -46,7 +46,7 @@ class XYXYConvertError(Exception):
 class XYXYConverter:
     def __init__(self, format_name: str):
         if format_name not in XYXY_CONVERTERS:
-            raise ValueError(f"`{format_name}` is not a valid format. It should be one of {list(XYXY_CONVERTERS.keys())}")
+            raise ValueError(f"`{format_name}` is not a supported bounding box format. It should be one of {list(XYXY_CONVERTERS.keys())}")
         self.converter = XYXY_CONVERTERS[format_name]["function"]
 
     def __call__(self, bboxes: torch.Tensor) -> torch.Tensor:
