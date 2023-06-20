@@ -13,12 +13,13 @@ class ImageExtractorError(Exception):
         msg = (
             "\n\nERROR: Something went wrong when extracting Images!\n\n"
             "Please implement and pass to the config the following function\n"
-            "images_extractor(data: Any) -> torch.Tensor\n\n"
+            "`images_extractor(data: Any) -> torch.Tensor`\n\n"
             "- `data` being the output of the dataset/dataloader that you provided.\n"
             "- The function should return a Tensor representing your image(s). One of:\n"
             "  - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch\n"
             "  - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image\n"
-            "    - With `C`: number of channels (3 for RGB)\n"
+            "    - With `C`: number of channels (3 for RGB)\n\n"
+            "You can find more information about `images_extractor` in the documentation: https://github.com/Deci-AI/data-gradients\n"
         )
         super().__init__(msg)
 
@@ -28,7 +29,7 @@ class LabelsExtractorError(Exception):
         msg = (
             "\n\nERROR: Something went wrong when extracting Labels!\n\n"
             "Please implement and pass to the config the following function:\n"
-            "labels_extractor(data: Any) -> torch.Tensor\n\n"
+            "`labels_extractor(data: Any) -> torch.Tensor`\n\n"
             "- `data` being the output of the dataset/dataloader that you provided.\n"
             "- The function should return a Tensor representing your labels(s):\n"
             "  - For **Segmentation**, one of:\n"
@@ -42,7 +43,8 @@ class LabelsExtractorError(Exception):
             "    - `(N, 5)` for single image\n"
             "      - `BS`: Batch Size\n"
             "      - `N`: Padding size\n"
-            "      - The last dimension should include your `class_id` and `bbox` - `class_id, x, y, x, y` for instance\n"
+            "      - The last dimension should include your `class_id` and `bbox` - `class_id, x, y, x, y` for instance\n\n"
+            "You can find more information about `labels_extractors` in the documentation: https://github.com/Deci-AI/data-gradients\n"
         )
         super().__init__(msg)
 
