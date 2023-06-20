@@ -7,8 +7,21 @@ from data_gradients.batch_processors.adapters.tensor_extractor import NestedData
 from data_gradients.config.data.typing import SupportedData
 from data_gradients.utils.detection import XYXYConverter
 
-# This is used as a prefix to name parameters that are not cachable.
+# This is used as a prefix to recognize parameters that are not cachable.
 NON_CACHABLE_PREFIX = "[Non-cachable]"
+
+
+class CacheLoadingError(Exception):
+    def __init__(self, key: str, value: str):
+        self.key, self.value = key, value
+        message = (
+            f"Error while trying to load attribute `{key}` from cache... (with value `{value}`).\n"
+            f"It seems that this object was passed to the `DataConfig` in the previous run, but not this time.\n"
+            f"Please:\n"
+            f"     - Either pass the same `{key}` to the `DataConfig`.\n"
+            f"     - Or disable loading config from cache when instantiating `DataConfig`.\n"
+        )
+        super().__init__(message)
 
 
 @dataclass
@@ -24,23 +37,10 @@ class CachableParam:
     name: Optional[str]
 
 
-class CacheLoadingError(Exception):
-    def __init__(self, key: str, value: str):
-        self.key, self.value = key, value
-        message = (
-            f"Error while trying to load attribute `{key}` from cache... (with value `{value}`).\n"
-            f"It seems that this object was passed to the `DataConfig` in the previous run, but not this time.\n"
-            f"Please:\n"
-            f"     - Either pass the same `{key}` to the `DataConfig`.\n"
-            f"     - Or disable loading config from cache.\n"
-        )
-        super().__init__(message)
-
-
 class TensorExtractorResolver:
     @staticmethod
     def to_callable(tensor_extractor: Union[str, Callable[[SupportedData], torch.Tensor]]) -> Callable[[SupportedData], torch.Tensor]:
-        """Convert the input `tensor_extractor` into a callable.
+        """Ensures the input `tensor_extractor` to be a callable.
 
         For example:
             >> TensorExtractorResolver.to_callable("[1].bbox")
@@ -49,16 +49,19 @@ class TensorExtractorResolver:
             >> TensorExtractorResolver.to_callable(lambda x: x[1]["bbox"])
             # lambda x: x[1]["bbox"]
 
-        :param tensor_extractor: Either None, a string representation (e.g. `[1].bbox`) or a custom callable (e.g. lambda x: x[1]["bbox"])
+        :param tensor_extractor: Either a string representation (e.g. `[1].bbox`) or a custom callable (e.g. lambda x: x[1]["bbox"])
         :return: Tensor extractor, extracting a specific tensor from the dataset outputs.
         """
         return TensorExtractorResolver._resolve(tensor_extractor).value
 
     @staticmethod
-    def to_string(tensor_extractor: Union[str, Callable[[SupportedData], torch.Tensor]]) -> str:
-        """Convert the input `tensor_extractor` into a string.
+    def to_string(tensor_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]]) -> str:
+        """Ensures the input `tensor_extractor` to be a string.
 
         For example:
+            >> TensorExtractorResolver.to_string(None)
+            # "None"
+
             >> TensorExtractorResolver.to_string("[1].bbox")
             # "[1].bbox"
 
@@ -71,7 +74,7 @@ class TensorExtractorResolver:
         return TensorExtractorResolver._resolve(tensor_extractor).name
 
     @staticmethod
-    def _resolve(tensor_extractor: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
+    def _resolve(tensor_extractor: Union[None, str, Callable[[torch.Tensor], torch.Tensor]]) -> CachableParam:
         """Translate the input `tensor_extractor` into both:
             - value: Callable that extract a specific tensor (e.g. Image(s) or Label(s)) form a dataset output, which will be used in the code.
             - name:  String representing this function, to support loading/saving this function into cache.
@@ -89,7 +92,7 @@ class TensorExtractorResolver:
         :return: Dataclass including both the value (used in the code) and the name (used in the cache) of this function.
         """
         if tensor_extractor is None:
-            return CachableParam(value=None, name=None)
+            return CachableParam(value=None, name="None")
 
         elif isinstance(tensor_extractor, str):
             if tensor_extractor.startswith(NON_CACHABLE_PREFIX):
@@ -107,8 +110,8 @@ class TensorExtractorResolver:
 
 class XYXYConverterResolver:
     @staticmethod
-    def to_callable(xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]]) -> Callable[[torch.Tensor], torch.Tensor]:
-        """Convert the input `xyxy_converter` into a callable.
+    def to_callable(xyxy_converter: Union[str, Callable[[torch.Tensor], torch.Tensor]]) -> Callable[[torch.Tensor], torch.Tensor]:
+        """Ensures the input `xyxy_converter` to be a callable.
 
         For example:
             >> XYXYConverterResolver.to_callable("xywh")
@@ -117,16 +120,19 @@ class XYXYConverterResolver:
             >> XYXYConverterResolver.to_callable(custom_xywh2xyxy)
             # custom_xywh2xyxy
 
-        :param xyxy_converter: Either None, a string representation (e.g. `xywh`) or a custom callable (e.g. custom_xywh2xyxy or lambda bbox: ...)
+        :param xyxy_converter: Either a string representation (e.g. `xywh`) or a custom callable (e.g. custom_xywh2xyxy or lambda bbox: ...)
         :return: Callable converting bboxes into xyxy.
         """
         return XYXYConverterResolver._resolve(xyxy_converter).value
 
     @staticmethod
     def to_string(xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]]) -> str:
-        """Convert the input `xyxy_converter` into a string.
+        """Ensures the input `xyxy_converter` to be a string.
 
         For example:
+            >> XYXYConverterResolver.to_string(None)
+            # "None"
+
             >> XYXYConverterResolver.to_string("xywh")
             # "xyxy"
 
@@ -155,7 +161,7 @@ class XYXYConverterResolver:
         :return: Dataclass including both the value (used in the code) and the name (used in the cache) of this function.
         """
         if xyxy_converter is None:
-            return CachableParam(value=None, name=None)
+            return CachableParam(value=None, name="None")
 
         elif isinstance(xyxy_converter, str):
             if xyxy_converter.startswith(NON_CACHABLE_PREFIX):
