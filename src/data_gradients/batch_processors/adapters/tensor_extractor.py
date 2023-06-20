@@ -15,9 +15,9 @@ def get_tensor_extractor_options(objs: Any, object_name: str) -> Tuple[str, Dict
     :param objs: Dictionary following the pattern: {"path.to.object: object_type": "path.to.object"}
     """
     objects_mapping: List[Tuple[str, str]] = []  # Placeholder for list of (path.to.object, object_type)
-    printable_mapping = extract_object_mapping(objs, current_path="", objects_mapping=objects_mapping)
-    printable_mapping = json.dumps(printable_mapping, indent=4)
-    description = "This is the structure of your data: \ndata = " + printable_mapping
+    nested_object_mapping = extract_object_mapping(objs, current_path="", objects_mapping=objects_mapping)
+    description = "This is how your data is structured: \n"
+    description += f"data = {json.dumps(nested_object_mapping, indent=4)}"
 
     options = {f"- {object_name} = data{path_to_object}: {object_type}": path_to_object for path_to_object, object_type in objects_mapping}
     return description, options
@@ -75,8 +75,12 @@ def extract_object_mapping(current_object: Any, current_path: str, objects_mappi
 
 
 class DataLookupError(Exception):
-    def __init__(self, e):
-        super().__init__(e)
+    def __init__(self, excption: Exception, keys_to_reach_object: List[Union[str, int]]):
+        self.keys_to_reach_object = keys_to_reach_object
+        err_msg = "\n     => Error happened during tensor mapping between dataset and DataGradients.\n"
+        err_msg += f'It seems that the key mapping to access to the tensor is incorrect: key_mapping="{self.keys_to_reach_object}".\n'
+        err_msg += f'Failed with error "{excption}"'
+        super().__init__(err_msg)
 
 
 class NestedDataLookup:
@@ -89,7 +93,7 @@ class NestedDataLookup:
         try:
             return traverse_nested_data_structure(data=data, keys=self.keys_to_reach_object)
         except Exception as e:
-            raise DataLookupError(f"{e}:\n \t => Error happened during tensor mapping between dataset and DataGradients.") from e
+            raise DataLookupError(excption=e, keys_to_reach_object=self.keys_to_reach_object) from e
 
 
 def extract_keys_from_path(object_path: str) -> List[Union[str, int]]:
