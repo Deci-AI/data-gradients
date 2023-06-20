@@ -8,6 +8,45 @@ from torchvision.transforms import transforms
 from data_gradients.batch_processors.adapters.tensor_extractor import TensorExtractor
 
 
+class ImageExtractorError(Exception):
+    def __init__(self):
+        msg = (
+            "\n\nERROR: Something went wrong when extracting Images!\n\n"
+            "Please implement and pass to the config the following function\n"
+            "images_extractor(data: Any) -> torch.Tensor\n\n"
+            "- `data` being the output of the dataset/dataloader that you provided.\n"
+            "- The function should return a Tensor representing your image(s). One of:\n"
+            "  - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch\n"
+            "  - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image\n"
+            "    - With `C`: number of channels (3 for RGB)\n"
+        )
+        super().__init__(msg)
+
+
+class LabelsExtractorError(Exception):
+    def __init__(self):
+        msg = (
+            "\n\nERROR: Something went wrong when extracting Labels!\n\n"
+            "Please implement and pass to the config the following function:\n"
+            "labels_extractor(data: Any) -> torch.Tensor\n\n"
+            "- `data` being the output of the dataset/dataloader that you provided.\n"
+            "- The function should return a Tensor representing your labels(s):\n"
+            "  - For **Segmentation**, one of:\n"
+            "    - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch\n"
+            "    - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image\n"
+            "      - `BS`: Batch Size\n"
+            "      - `C`: number of channels - 3 for RGB\n"
+            "      - `H`, `W`: Height and Width\n"
+            "  - For **Detection**, one of:\n"
+            "    - `(BS, N, 5)`, `(N, 6)` for batch\n"
+            "    - `(N, 5)` for single image\n"
+            "      - `BS`: Batch Size\n"
+            "      - `N`: Padding size\n"
+            "      - The last dimension should include your `class_id` and `bbox` - `class_id, x, y, x, y` for instance\n"
+        )
+        super().__init__(msg)
+
+
 class DatasetAdapter:
     """Class responsible to convert raw batch (coming from dataloader) into a batch of image and a batch of labels."""
 
