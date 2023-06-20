@@ -7,7 +7,7 @@ from data_gradients.batch_processors.adapters.tensor_extractor import NestedData
 from data_gradients.config.data.typing import SupportedData
 from data_gradients.utils.detection import XYXYConverter
 
-
+# This is used as a prefix to name parameters that are not cachable.
 NON_CACHABLE_PREFIX = "[Non-cachable]"
 
 

@@ -68,12 +68,9 @@ class DetectionBatchFormatter(BatchFormatter):
         images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(annotated_bboxes=labels)
 
-        first_targets_hint = (
-            "Here's a sample of how your labels look like:\n"
-            f"Each line corresponds to a bounding box, with the format you specified earlier.\n{labels[0, :3, :]}"
-        )
-        self.label_first = self.data_config.get_is_label_first(hint=first_targets_hint)
-        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=first_targets_hint)
+        targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
+        self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
+        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255

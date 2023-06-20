@@ -27,7 +27,7 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
-    use_cache: bool = True
+    use_cache: bool = False  # To avoid user facing unexpected errors asking for nothing. Examples should set it to True.
     images_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
 
