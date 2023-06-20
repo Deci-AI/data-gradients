@@ -98,12 +98,12 @@ class DataConfig(ABC):
             cache_dict = self._load_json_dict(path=path)
             if cache_dict:
                 logger.info(
-                    f"Overwriting `{self.__class__.__name__}` attributes with cache values (if relevant). "
-                    f"If you don't want to use cache, please set `load_cache=False`."
+                    f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
+                    f"Please set `load_cache=False` if you want to deactivate it."
                 )
                 self._fill_missing_params(json_dict=cache_dict)
         else:
-            logger.info(f"No cache will be used to set `{self.__class__.__name__}` attributes. If you want to use cache, please set `use_cache=True`")
+            logger.info(f"Cache deactivated for `{self.__class__.__name__}`. Please set `load_cache=True` if you want to activate it.")
 
     def _fill_missing_params(self, json_dict: JSONDict):
         """Overwrite every attribute that is equal to `None`.
