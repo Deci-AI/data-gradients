@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional, Callable, Union
 
 import data_gradients
-from data_gradients.config.data.questions import Question, ask_question
+from data_gradients.config.data.questions import Question, ask_question, text_to_yellow
 from data_gradients.config.data.caching_utils import TensorExtractorResolver, XYXYConverterResolver
 from data_gradients.config.data.typing import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
@@ -155,7 +155,7 @@ class DetectionDataConfig(DataConfig):
     def get_is_label_first(self, hint: str = "") -> bool:
         if self.is_label_first is None:
             question = Question(
-                question="Which comes first in your annotations, the class id or the bounding box?",
+                question=f"{text_to_yellow('Which comes first')} in your annotations, the class id or the bounding box?",
                 options={
                     "Label comes first (e.g. [class_id, x1, y1, x2, y2])": True,
                     "Bounding box comes first (e.g. [x1, y1, x2, y2, class_id])": False,
@@ -167,7 +167,7 @@ class DetectionDataConfig(DataConfig):
     def get_xyxy_converter(self, hint: str = "") -> Callable[[torch.Tensor], torch.Tensor]:
         if self.xyxy_converter is None:
             question = Question(
-                question="What is the format of the bounding boxes?",
+                question=f"What is the {text_to_yellow('bounding box format')}?",
                 options=XYXYConverter.get_available_options(),
             )
             self.xyxy_converter = ask_question(question=question, hint=hint)
