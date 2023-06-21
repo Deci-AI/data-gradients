@@ -4,6 +4,10 @@ from torch import Tensor
 from data_gradients.batch_processors.utils import channels_last_to_first
 
 
+class DatasetFormatError(Exception):
+    ...
+
+
 def drop_nan(tensor: Tensor) -> Tensor:
     """Remove rows containing NaN values from a given PyTorch tensor.
 

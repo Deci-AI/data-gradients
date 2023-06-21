@@ -6,10 +6,11 @@ from torch import Tensor
 from data_gradients.batch_processors.utils import check_all_integers
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
-from data_gradients.utils.utils import ask_user
+from data_gradients.config.data.data_config import DetectionDataConfig
+from data_gradients.batch_processors.formatters.utils import DatasetFormatError
 
 
-class UnsupportedDetectionBatchFormatError(Exception):
+class UnsupportedDetectionBatchFormatError(DatasetFormatError):
     def __init__(self, batch_format: tuple):
         grouped_batch_format = "(Batch_size x padding_size x 5) with 5: (class_id + 4 bbox coordinates))"
         flat_batch_format = "(N, 6) with 6: (image_id + class_id + 4 bbox coordinates)"
@@ -23,6 +24,7 @@ class DetectionBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
+        data_config: DetectionDataConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int,
@@ -36,6 +38,8 @@ class DetectionBatchFormatter(BatchFormatter):
         :param xyxy_converter:      Function to convert the bboxes to the `xyxy` format.
         :param label_first:         Whether the annotated_bboxes states with labels, or with the bboxes. (typically label_xyxy vs xyxy_label)
         """
+        self.data_config = data_config
+
         class_names_to_use = set(class_names_to_use)
         self.class_ids_to_use = [class_id for class_id, class_name in enumerate(class_names) if class_name in class_names_to_use]
 
@@ -64,14 +68,9 @@ class DetectionBatchFormatter(BatchFormatter):
         images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(annotated_bboxes=labels)
 
-        if self.label_first is None or self.xyxy_converter is None:
-            self.show_annotated_bboxes(annotated_bboxes=labels)
-
-        if self.label_first is None:
-            self.label_first = self.ask_user_is_label_first()
-
-        if self.xyxy_converter is None:
-            self.xyxy_converter = self.ask_user_xyxy_converter()
+        targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
+        self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
+        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
@@ -129,70 +128,6 @@ class DetectionBatchFormatter(BatchFormatter):
             bboxes[..., 1::2] *= h
 
         return torch.cat([labels, xyxy_bboxes], dim=-1)
-
-    @staticmethod
-    def show_annotated_bboxes(annotated_bboxes: Tensor) -> None:
-        """Show an example of the annotated bounding boxes."""
-        print("\n========================================================================")
-        print("SAMPLE BOUNDING BOXES")
-        print("========================================================================")
-        print("Here's a sample of how your labels look like:")
-        print("Each line corresponds to a bounding box, with the format you specified earlier.")
-        print(annotated_bboxes[0, :3, :])
-        print("")
-
-    @staticmethod
-    def ask_user_is_label_first() -> bool:
-        is_label_first_descriptions = {
-            "Label comes first (e.g. [class_id, x1, y1, x2, y2])": True,
-            "Bounding box comes first (e.g. [x1, y1, x2, y2, class_id])": False,
-        }
-        selected_option = ask_user(
-            main_question="Which comes first in your annotations, the class id or the bounding box?",
-            options=list(is_label_first_descriptions.keys()),
-        )
-        return is_label_first_descriptions[selected_option]
-
-    @staticmethod
-    def ask_user_xyxy_converter() -> Callable[[Tensor], Tensor]:
-        xyxy_converter_descriptions = {
-            "xyxy: x- left, y-top, x-right, y-bottom": lambda x: x,
-            "xywh: x-left, y-top, width, height": DetectionBatchFormatter.xywh_to_xyxy,
-            "cxcywh: x-center, y-center, width, height": DetectionBatchFormatter.cxcywh_to_xyxy,
-        }
-        selected_option = ask_user(
-            main_question="What is the format of the bounding boxes?",
-            options=list(xyxy_converter_descriptions.keys()),
-        )
-        return xyxy_converter_descriptions[selected_option]
-
-    @staticmethod
-    def cxcywh_to_xyxy(bboxes: Tensor) -> Tensor:
-        """Transform bboxes from CX-CY-W-H format to XYXY format.
-
-        :param bboxes:  BBoxes of shape (..., 4) in CX-CY-W-H format
-        :return:        BBoxes of shape (..., 4) in XYXY format
-        """
-        cx, cy, w, h = bboxes[..., 0], bboxes[..., 1], bboxes[..., 2], bboxes[..., 3]
-        x1 = cx - 0.5 * w
-        y1 = cy - 0.5 * h
-        x2 = x1 + w
-        y2 = y1 + h
-
-        return torch.stack([x1, y1, x2, y2], dim=-1)
-
-    @staticmethod
-    def xywh_to_xyxy(bboxes: Tensor) -> Tensor:
-        """Transform bboxes from XYWH format to XYXY format.
-
-        :param bboxes:  BBoxes of shape (..., 4) in XYWH format
-        :return:        BBoxes of shape (..., 4) in XYXY format
-        """
-        x1, y1, w, h = bboxes[..., 0], bboxes[..., 1], bboxes[..., 2], bboxes[..., 3]
-        x2 = x1 + w
-        y2 = y1 + h
-
-        return torch.stack([x1, y1, x2, y2], dim=-1)
 
     @staticmethod
     def filter_non_relevant_annotations(bboxes: torch.Tensor, class_ids_to_use: List[int]) -> List[torch.Tensor]:

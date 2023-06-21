@@ -16,10 +16,11 @@ class SummaryWriter:
 
     def __init__(self, report_title: str, report_subtitle: Optional[str] = None, log_dir: Optional[str] = None):
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.run_name = report_title.replace(" ", "_")
 
         # DIRECTORIES
         if log_dir is None:
-            log_dir = os.path.join(os.getcwd(), "logs", report_title.replace(" ", "_"))
+            log_dir = os.path.join(os.getcwd(), "logs", self.run_name)
             logger.info(f"`log_dir` was not set, so the logs will be saved in {log_dir}")
         self.log_dir = log_dir  # Main logging directory. Latest run results will be saved here.
         self.archive_dir = os.path.join(log_dir, "archive_" + timestamp)  # A duplicate of the results will be archived here as well

@@ -1,9 +1,12 @@
 import os
-from typing import Optional, Iterable, Dict, Callable, List
+from typing import Optional, Iterable, Callable, List
+import torch
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.detection import DetectionBatchProcessor
+from data_gradients.config.data.data_config import DetectionDataConfig
+from data_gradients.config.data.typing import SupportedDataType
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -18,16 +21,18 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
+        config_path: Optional[str] = None,
+        log_dir: Optional[str] = None,
+        use_cache: bool = False,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
-        config_path: Optional[str] = None,
-        log_dir: Optional[str] = None,
-        id_to_name: Optional[Dict] = None,
-        batches_early_stop: int = 999,
-        images_extractor: Callable = None,
-        labels_extractor: Callable = None,
+        images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        is_label_first: Optional[bool] = None,
+        bbox_format: Optional[str] = None,
         n_image_channels: int = 3,
+        batches_early_stop: int = 999,
     ):
         """
         Constructor of detection manager which controls the analyzer
@@ -40,12 +45,22 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used.
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
-        :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
-        :param images_extractor:
-        :param labels_extractor:
-        :param n_image_channels:      Number of channels for each image in the dataset
+        :param use_cache:               Whether to use cache or not for the configuration of the data.
+        :param images_extractor:        Function extracting the image(s) out of the data output.
+        :param labels_extractor:        Function extracting the label(s) out of the data output.
+        :param is_label_first:          Whether the labels are in the first dimension or not.
+                                            > (class_id, x, y, w, h) for instance, as opposed to (x, y, w, h, class_id)
+        :param bbox_format:             Format of the bounding boxes. 'xyxy', 'xywh' or 'cxcywh'
+        :param n_image_channels:        Number of channels for each image in the dataset
         """
+        data_config = DetectionDataConfig(
+            use_cache=use_cache,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            is_label_first=is_label_first,
+            xyxy_converter=bbox_format,
+        )
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
@@ -69,8 +84,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             config_dir, config_name = os.path.dirname(config_path), os.path.basename(config_path).split(".")[0]
 
         batch_processor = DetectionBatchProcessor(
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
+            data_config=data_config,
             n_image_channels=n_image_channels,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
@@ -79,6 +93,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         feature_extractors = load_report_feature_extractors(config_name=config_name, config_dir=config_dir)
 
         super().__init__(
+            data_config=data_config,
             report_title=report_title,
             report_subtitle=report_subtitle,
             train_data=train_data,
@@ -86,6 +101,5 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             batch_processor=batch_processor,
             grouped_feature_extractors=feature_extractors,
             log_dir=log_dir,
-            id_to_name=id_to_name,
             batches_early_stop=batches_early_stop,
         )
