@@ -6,10 +6,10 @@ def section_name_to_md_link(name):
     return name.lower().replace(" ", "-").replace(".", "")
 
 
-tasks = ["Image", "Object Detection", "Segmentation"]
+tasks = ["Image Features", "Object Detection Features", "Segmentation Features"]
 modules = [common, object_detection, segmentation]
 
-feature_descriptions = "## Features Descriptions\n\n"
+feature_descriptions = ""
 table_of_contents = "## List of Features\n\n"
 
 
@@ -20,15 +20,16 @@ for task, module in zip(tasks, modules):
     table_of_contents += f"- [{task}](#{section_name_to_md_link(task)})\n"
 
     # Add module title
-    feature_descriptions += f"### {task}\n\n"
+    feature_descriptions += f"## {task}\n\n"
 
     # Iterate over classes in module
     class_objects = inspect.getmembers(module, inspect.isclass)
     for i, (_, class_obj) in enumerate(class_objects):
         feature = class_obj()
 
-        table_of_contents += f"    - [{feature.title}](#{section_name_to_md_link(f'{i}. {feature.title}')})\n"
-        feature_descriptions += f"#### {i}. {feature.title}\n\n"
+        feature_title = f"{i}. {feature.title}"
+        table_of_contents += f"    - [{feature_title}](#{section_name_to_md_link(f'{feature_title}')})\n"
+        feature_descriptions += f"### {feature_title}\n\n"
         feature_descriptions += f"{feature.description}\n\n"
 
     # Add empty line between modules
