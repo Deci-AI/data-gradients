@@ -3,7 +3,7 @@ import inspect
 
 
 def section_name_to_md_link(name):
-    return name.lower().replace(" ", "-")
+    return name.lower().replace(" ", "-").replace(".", "")
 
 
 tasks = ["Image", "Object Detection", "Segmentation"]
