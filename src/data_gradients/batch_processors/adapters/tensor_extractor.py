@@ -74,11 +74,18 @@ def extract_object_mapping(current_object: Any, current_path: str, objects_mappi
 
 
 class DataLookupError(Exception):
-    def __init__(self, excption: Exception, keys_to_reach_object: List[Union[str, int]]):
+    def __init__(self, exception: Exception, keys_to_reach_object: List[Union[str, int]]):
         self.keys_to_reach_object = keys_to_reach_object
-        err_msg = "\n     => Error happened during tensor mapping between dataset and DataGradients.\n"
-        err_msg += f'It seems that the key mapping to access to the tensor is incorrect: key_mapping="{self.keys_to_reach_object}".\n'
-        err_msg += f'Failed with error "{excption}"'
+        err_msg = (
+            "\n     => Error happened during tensor mapping between dataset and DataGradients.\n"
+            f'It seems that the key mapping to access to the tensor is incorrect: key_mapping="{self.keys_to_reach_object}".\n'
+            f'Failed with exception: "{exception}"\n\n'
+            f"Possible source of the error:\n"
+            f"    1. You are using the same cache as a previous run that used a different dataset.\n"
+            f"       -> In that case you should use a different report title, or deactivate the cache.\n"
+            f"    2. You passed a non-valid key mapping when defining `images_extractor` or `labels_extractor`.\n"
+            f"       -> Please go over your key mapping and make sure it respects the format defined in the documentation.\n\n"
+        )
         super().__init__(err_msg)
 
 
@@ -92,7 +99,7 @@ class NestedDataLookup:
         try:
             return traverse_nested_data_structure(data=data, keys=self.keys_to_reach_object)
         except Exception as e:
-            raise DataLookupError(excption=e, keys_to_reach_object=self.keys_to_reach_object) from e
+            raise DataLookupError(exception=e, keys_to_reach_object=self.keys_to_reach_object) from e
 
 
 def extract_keys_from_path(object_path: str) -> List[Union[str, int]]:
