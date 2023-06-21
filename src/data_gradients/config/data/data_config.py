@@ -9,7 +9,7 @@ from typing import Dict, Optional, Callable, Union
 import data_gradients
 from data_gradients.config.data.questions import Question, ask_question
 from data_gradients.config.data.caching_utils import TensorExtractorResolver, XYXYConverterResolver
-from data_gradients.config.data.typing import SupportedData, JSONDict
+from data_gradients.config.data.typing import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
 
@@ -28,8 +28,8 @@ class DataConfig(ABC):
     """
 
     use_cache: bool = False  # To avoid user facing unexpected errors asking for nothing. Examples should set it to True.
-    images_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
-    labels_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]] = None
+    images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
+    labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
     DEFAULT_CACHE_DIR: str = field(default=appdirs.user_cache_dir("DataGradients", "Deci"), init=False)
 
@@ -116,12 +116,12 @@ class DataConfig(ABC):
         if self.labels_extractor is None:
             self.labels_extractor = json_dict.get("labels_extractor")
 
-    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
+    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
             self.images_extractor = ask_question(question=question, hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.images_extractor)
 
-    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedData], torch.Tensor]:
+    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.labels_extractor is None:
             self.labels_extractor = ask_question(question=question, hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)

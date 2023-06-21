@@ -4,7 +4,7 @@ from typing import Optional, Any, Union, Callable
 import torch
 
 from data_gradients.batch_processors.adapters.tensor_extractor import NestedDataLookup
-from data_gradients.config.data.typing import SupportedData
+from data_gradients.config.data.typing import SupportedDataType
 from data_gradients.utils.detection import XYXYConverter
 
 # This is used as a prefix to recognize parameters that are not cachable.
@@ -39,7 +39,7 @@ class CachableParam:
 
 class TensorExtractorResolver:
     @staticmethod
-    def to_callable(tensor_extractor: Union[str, Callable[[SupportedData], torch.Tensor]]) -> Callable[[SupportedData], torch.Tensor]:
+    def to_callable(tensor_extractor: Union[str, Callable[[SupportedDataType], torch.Tensor]]) -> Callable[[SupportedDataType], torch.Tensor]:
         """Ensures the input `tensor_extractor` to be a callable.
 
         For example:
@@ -55,7 +55,7 @@ class TensorExtractorResolver:
         return TensorExtractorResolver._resolve(tensor_extractor).value
 
     @staticmethod
-    def to_string(tensor_extractor: Union[None, str, Callable[[SupportedData], torch.Tensor]]) -> str:
+    def to_string(tensor_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]]) -> str:
         """Ensures the input `tensor_extractor` to be a string.
 
         For example:
