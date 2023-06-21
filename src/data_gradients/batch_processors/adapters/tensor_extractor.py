@@ -66,10 +66,8 @@ def extract_object_mapping(current_object: Any, current_path: str, objects_mappi
         printable_map = "PIL Image"
         objects_mapping.append((current_path, printable_map))
     else:
-        raise RuntimeError(
-            f"Unsupported object! Object found has a type of {type(current_object)} which is not supported for now.\n"
-            f"Supported types: [Mapping, Sequence, String, Tensor, Numpy array, PIL Image]"
-        )
+        printable_map = f"Unsupported object: '{current_object.__name__}'"
+        objects_mapping.append((current_path, printable_map))
     return printable_map
 
 
