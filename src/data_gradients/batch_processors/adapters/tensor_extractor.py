@@ -79,10 +79,13 @@ class DataLookupError(Exception):
             f'It seems that the key mapping to access to the tensor is incorrect: key_mapping="{self.keys_to_reach_object}".\n'
             f'Failed with exception: "{exception}"\n\n'
             f"Possible source of the error:\n"
-            f"    1. You are using the same cache as a previous run that used a different dataset.\n"
-            f"       -> In that case you should use a different report title, or deactivate the cache.\n"
-            f"    2. You passed a non-valid key mapping when defining `images_extractor` or `labels_extractor`.\n"
-            f"       -> Please go over your key mapping and make sure it respects the format defined in the documentation.\n\n"
+            f"      1. You are using the same cache as a previous run that used a different dataset.\n"
+            f"          -> In that case you should use a different report title, or deactivate the cache.\n"
+            f"      2. Your training and validation provide data that is structured differently\n"
+            "           e.g. train_data returns data={'image': ..., 'labels'}, valid_data returns data={'images', 'all_labels'}.\n"
+            "           -> This case is not supported by DataGradients, so you need to implement a unique dataset/loader class and use it.\n"
+            f"      3. You passed a non-valid key mapping when defining `images_extractor` or `labels_extractor`.\n"
+            f"          -> Please go over your key mapping and make sure it respects the format defined in the documentation.\n\n"
         )
         super().__init__(err_msg)
 
