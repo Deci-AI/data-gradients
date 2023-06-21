@@ -33,7 +33,7 @@ def extract_object_mapping(current_object: Any, current_path: str, objects_mappi
     if isinstance(current_object, Mapping):
         printable_map = {}
         for k, v in current_object.items():
-            new_path = f"{current_path}.{k}" if current_path else k
+            new_path = f"{current_path}.{k}" if current_path else f".{k}"
             printable_map[k] = extract_object_mapping(v, new_path, objects_mapping)
     elif isinstance(current_object, Sequence) and not isinstance(current_object, str):
         if all(isinstance(v, (int, float)) for v in current_object):
@@ -103,7 +103,7 @@ class NestedDataLookup:
 def extract_keys_from_path(object_path: str) -> List[Union[str, int]]:
     """Parse the path to an object into a list of indexes.
 
-
+    >> extract_keys_from_path("['field1']['field12'][0]") # Which originally represents {"field1": {"field12": [<object>, ...], ...}, ...}
     >> extract_keys_from_path("field1.field12[0]") # Which originally represents {"field1": {"field12": [<object>, ...], ...}, ...}
     ["field1", "field12", 0]  # Can be used like this: data["field1"]["field12"][0] = <object>
 
