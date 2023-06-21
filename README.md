@@ -29,7 +29,7 @@ It automatically extracts features from your datasets and combines them all into
 - Image-Level Evaluation: DataGradients evaluates key image features such as resolution, color distribution, and average brightness.
 - Class Distribution: The library extracts stats allowing you to know which classes are the most used, how many objects do you have per image, how many image without any label, ...
 - Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks, allowing you to understand if the objects are positioned in the right area.
-- And many more!
+- And [many more](feature_description.md)!
 
 <div align="center">
   <img src="documentation/assets/report_image_stats.png" width="250px">
