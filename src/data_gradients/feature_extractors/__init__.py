@@ -1,9 +1,5 @@
 from .abstract_feature_extractor import AbstractFeatureExtractor
-from .common import (
-    ImagesAverageBrightness,
-    ImageColorDistribution,
-    ImagesResolution,
-)
+from .common import ImagesAverageBrightness, ImageColorDistribution, ImagesResolution, SummaryStats
 from .segmentation import (
     SegmentationBoundingBoxArea,
     SegmentationBoundingBoxResolution,
@@ -31,6 +27,7 @@ __all__ = [
     "ImagesAverageBrightness",
     "ImageColorDistribution",
     "ImagesResolution",
+    "SummaryStats",
     "SegmentationBoundingBoxArea",
     "SegmentationBoundingBoxResolution",
     "SegmentationClassFrequency",
