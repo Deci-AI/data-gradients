@@ -1,10 +1,12 @@
 import os
-from typing import Optional, Iterable, List
+from typing import Optional, Iterable, Callable, List
+import torch
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
 from data_gradients.config.data.data_config import SegmentationDataConfig
+from data_gradients.config.data.typing import SupportedDataType
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -17,18 +19,20 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        data_config: Optional[SegmentationDataConfig] = None,
-        class_names: Optional[List[str]] = None,
-        class_names_to_use: Optional[List[str]] = None,
-        n_classes: Optional[int] = None,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
         log_dir: Optional[str] = None,
-        batches_early_stop: int = 999,
+        use_cache: bool = False,
+        class_names: Optional[List[str]] = None,
+        class_names_to_use: Optional[List[str]] = None,
+        n_classes: Optional[int] = None,
+        images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
+        batches_early_stop: int = 999,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -44,12 +48,13 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
         :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
-        :param images_extractor:
-        :param labels_extractor:
+        :param use_cache:               Whether to use cache or not for the configuration of the data.
+        :param images_extractor:        Function extracting the image(s) out of the data output.
+        :param labels_extractor:        Function extracting the label(s) out of the data output.
         :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
         """
-        data_config = data_config or SegmentationDataConfig()
+        data_config = SegmentationDataConfig(use_cache=use_cache, images_extractor=images_extractor, labels_extractor=labels_extractor)
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
