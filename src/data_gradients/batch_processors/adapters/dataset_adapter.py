@@ -26,10 +26,17 @@ class DatasetAdapter:
             - images: Batch of images
             - labels: Batch of labels
         """
-        images_extractor = self._get_images_extractor(data)
-        labels_extractor = self._get_labels_extractor(data)
-        images, labels = images_extractor(data), labels_extractor(data)
+        images = self._extract_images(data)
+        labels = self._extract_labels(data)
         return self._to_torch(images), self._to_torch(labels)
+
+    def _extract_images(self, data: SupportedData) -> torch.Tensor:
+        images_extractor = self._get_images_extractor(data)
+        return images_extractor(data)
+
+    def _extract_labels(self, data: SupportedData) -> torch.Tensor:
+        labels_extractor = self._get_labels_extractor(data)
+        return labels_extractor(data)
 
     def _get_images_extractor(self, data: SupportedData) -> Callable[[SupportedData], torch.Tensor]:
         if self.data_config.images_extractor is not None:
