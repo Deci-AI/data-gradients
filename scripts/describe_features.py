@@ -26,7 +26,7 @@ CLASSES_TO_IGNORE = ["SummaryStats"]
 
 # Placeholders for the text
 feature_descriptions = ""
-table_of_contents = "## List of Features\n\n"
+table_of_contents = "### List of Features\n\n"
 
 # Iterate over modules
 for task, module in zip(tasks, modules):
@@ -35,7 +35,7 @@ for task, module in zip(tasks, modules):
     table_of_contents += f"- {section_name_to_md_link(task)}\n"
 
     # Add module title
-    feature_descriptions += f"## {task}\n\n"
+    feature_descriptions += f"### {task}\n\n"
 
     # Iterate over classes in module
     class_objects = inspect.getmembers(module, inspect.isclass)
@@ -45,7 +45,7 @@ for task, module in zip(tasks, modules):
 
         feature_title = f"{i+1}. {feature.title}"
         table_of_contents += f"    - {section_name_to_md_link(feature_title)}\n"
-        feature_descriptions += f"### {feature_title}\n\n"
+        feature_descriptions += f"#### {feature_title}\n\n"
         feature_descriptions += f"{feature.description}\n"
         feature_descriptions += f"*[source code]({class_to_github_url(class_obj)})*\n\n"
 
@@ -53,7 +53,15 @@ for task, module in zip(tasks, modules):
     feature_descriptions += "\n"
 
 # Combine table of contents and summary
-summary = f"# Features\n\n{table_of_contents}\n\n{feature_descriptions}"
+summary = f"""## Features Description
 
-with open("features.md", "w") as f:
+This page focuses on the description of features.
+
+If you are interested in using these features, there is a tutorial specifically about [Features Configuration](feature_configuration.md).
+
+{table_of_contents}
+
+{feature_descriptions}"""
+
+with open("../documentation/feature_description.md", "w") as f:
     f.write(summary)

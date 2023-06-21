@@ -1,4 +1,4 @@
-## Feature Configuration
+## Features Configuration
  
 The feature configuration allows you to chose what feature to use, and to adjust their parameters to your needs. 
 Follow the steps below to create a YAML configuration file
