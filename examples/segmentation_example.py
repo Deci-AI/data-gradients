@@ -51,6 +51,7 @@ if __name__ == "__main__":
         # Optionals
         images_extractor=None,
         labels_extractor=None,
+        use_cache=True,
         threshold_soft_labels=0.5,
         batches_early_stop=75,
     )
