@@ -7,11 +7,10 @@ import torch
 from numpy import ndarray
 
 
-def get_tensor_extractor_options(objs: Any, object_name: str) -> Tuple[str, Dict[str, str]]:
+def get_tensor_extractor_options(objs: Any) -> Tuple[str, Dict[str, str]]:
     """Extract out of objs all the potential fields of type [torch.Tensor, np.ndarray, PIL.Image], and then
     asks the user to input which of the above keys mapping is the right one in order to retrieve the correct data (either images or labels).
 
-    :param object_name: Name of the object you want to extract ("image", "label", ...)
     :param objs: Dictionary following the pattern: {"path.to.object: object_type": "path.to.object"}
     """
     objects_mapping: List[Tuple[str, str]] = []  # Placeholder for list of (path.to.object, object_type)
@@ -19,7 +18,7 @@ def get_tensor_extractor_options(objs: Any, object_name: str) -> Tuple[str, Dict
     description = "This is how your data is structured: \n"
     description += f"data = {json.dumps(nested_object_mapping, indent=4)}"
 
-    options = {f"- {object_name} = data{path_to_object}: {object_type}": path_to_object for path_to_object, object_type in objects_mapping}
+    options = {f"data{path_to_object}: {object_type}": path_to_object for path_to_object, object_type in objects_mapping}
     return description, options
 
 

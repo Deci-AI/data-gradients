@@ -2,6 +2,14 @@ from dataclasses import dataclass
 from typing import Dict, Any, Optional, List
 
 
+def text_to_blue(text: str) -> str:
+    return f"\033[34;1m{text}\033[0m"
+
+
+def text_to_yellow(text: str):
+    return f"\033[33;1m{text}\033[0m"
+
+
 @dataclass
 class Question:
     """Model a Question with its options
@@ -35,7 +43,7 @@ def ask_user(main_question: str, options: List[str], optional_description: str =
     """
     numbers_to_chose_from = range(len(options))
 
-    options_formatted = "\n".join([f"[{number}] {option_description}" for number, option_description in zip(numbers_to_chose_from, options)])
+    options_formatted = "\n".join([f"[{text_to_blue(number)}] | {option_description}" for number, option_description in zip(numbers_to_chose_from, options)])
 
     user_answer = None
     while user_answer not in numbers_to_chose_from:
@@ -49,15 +57,15 @@ def ask_user(main_question: str, options: List[str], optional_description: str =
         print("")
 
         try:
-            user_answer = input("Your selection (Enter the corresponding number) >>> ")
+            user_answer = input(f"Your selection (Enter the {text_to_blue('corresponding number')}) >>> ")
             user_answer = int(user_answer)
         except Exception:
             user_answer = None
 
         if user_answer not in numbers_to_chose_from:
-            print(f'Oops! "{user_answer}" is not a valid choice. Let\'s try again.')
+            print(f'Oops! "{text_to_blue(str(user_answer))}" is not a valid choice. Let\'s try again.')
 
     selected_option = options[user_answer]
-    print(f"Great! You chose: {selected_option}\n")
+    print(f"Great! You chose: {text_to_yellow(selected_option)}\n")
 
     return selected_option
