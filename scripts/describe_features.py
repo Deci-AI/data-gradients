@@ -6,6 +6,9 @@ def section_name_to_md_link(name):
     return name.lower().replace(" ", "-").replace(".", "")
 
 
+github_base_url = "https://github.com/Deci-AI/data-gradients/blob/master/src/"
+
+
 tasks = ["Image Features", "Object Detection Features", "Segmentation Features"]
 modules = [common, object_detection, segmentation]
 
@@ -24,13 +27,16 @@ for task, module in zip(tasks, modules):
 
     # Iterate over classes in module
     class_objects = inspect.getmembers(module, inspect.isclass)
-    for i, (_, class_obj) in enumerate(class_objects):
+    for i, (class_name, class_obj) in enumerate(class_objects):
         feature = class_obj()
+        class_path = inspect.getmodule(class_obj).__name__
+        class_github_url = github_base_url + class_path.replace(".", "/") + ".py"
 
-        feature_title = f"{i}. {feature.title}"
+        feature_title = f"{i+1}. {feature.title}"
         table_of_contents += f"    - [{feature_title}](#{section_name_to_md_link(f'{feature_title}')})\n"
         feature_descriptions += f"### {feature_title}\n\n"
-        feature_descriptions += f"{feature.description}\n\n"
+        feature_descriptions += f"{feature.description}\n"
+        feature_descriptions += f"*[source code]({class_github_url})*\n\n"
 
     # Add empty line between modules
     feature_descriptions += "\n"
