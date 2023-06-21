@@ -24,6 +24,7 @@ if __name__ == "__main__":
         val_data=val_loader,
         class_names=train_loader.dataset.classes,
         batches_early_stop=20,
+        use_cache=True,  # With this we will be asked about the dataset information only once
     )
 
     analyzer.run()

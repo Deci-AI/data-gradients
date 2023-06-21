@@ -10,12 +10,13 @@ from tqdm import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
-from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
-
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
+from data_gradients.utils.summary_writer import SummaryWriter
+from data_gradients.config.data.data_config import DataConfig
 
-logging.basicConfig(level=logging.WARNING)
+
+logging.basicConfig(level=logging.INFO)
 
 logger = getLogger(__name__)
 
@@ -29,13 +30,13 @@ class AnalysisManagerAbstract(abc.ABC):
         self,
         *,
         report_title: str,
+        data_config: DataConfig,
         train_data: Iterable,
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
-        id_to_name: Dict,
         batches_early_stop: Optional[int] = None,
     ):
         """
@@ -51,6 +52,10 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         self.renderer = SeabornRenderer()
         self.summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+
+        self.data_config_cache_name = f"{self.summary_writer.run_name}.json"
+        self.data_config = data_config
+        self.data_config.fill_missing_params_with_cache(cache_filename=self.data_config_cache_name)
 
         # DATA
         if batches_early_stop:
@@ -179,7 +184,11 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
         self.summary_writer.set_pdf_summary(pdf_summary=summary)
+        self.summary_writer.set_data_config(data_config_dict=self.data_config.to_json())
         self.summary_writer.write()
+
+        # Save cache in a specific Folder
+        self.data_config.write_to_json(filename=self.data_config_cache_name)
 
         # Cleanup of generated images
         for image_created in images_created:
@@ -189,6 +198,10 @@ class AnalysisManagerAbstract(abc.ABC):
         """Safe logging closing"""
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
+        print()
+        print("The cache of your DataConfig object can be found in:")
+        print(f"    - {os.path.join(self.data_config.DEFAULT_CACHE_DIR, self.data_config_cache_name)}")
+        print()
         print("The results can be seen in:")
         print(f"    - {self.summary_writer.log_dir}")
         print(f"    - {self.summary_writer.archive_dir}")
