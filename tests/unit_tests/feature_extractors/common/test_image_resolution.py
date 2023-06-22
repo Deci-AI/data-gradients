@@ -84,7 +84,7 @@ class ImageResolutionTest(unittest.TestCase):
         }
 
         for col in ("width", "height"):
-            for key in output_json[col].keys():
+            for key in output_json[col].keys_to_reach_object():
                 self.assertEqual(round(output_json[col][key], 4), round(expected_json[col][key], 4))
 
     def test_plot(self):

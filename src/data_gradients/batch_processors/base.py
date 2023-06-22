@@ -28,11 +28,3 @@ class BatchProcessor(ABC):
         images, labels = self.batch_formatter.format(images, labels)
         for sample in self.batch_preprocessor.preprocess(images, labels, split):
             yield sample
-
-    @property
-    def images_route(self) -> List[str]:
-        return self.dataset_adapter.images_route
-
-    @property
-    def labels_route(self) -> List[str]:
-        return self.dataset_adapter.labels_route

@@ -3,10 +3,10 @@ from typing import Optional, List, Tuple
 import torch
 from torch import Tensor
 
-from data_gradients.utils.utils import ask_user
+from data_gradients.config.data.questions import ask_user
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.utils import check_all_integers, to_one_hot
-from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
+from data_gradients.batch_processors.formatters.utils import DatasetFormatError, ensure_images_shape, ensure_channel_first, drop_nan
 
 
 class SegmentationBatchFormatter(BatchFormatter):
@@ -106,7 +106,7 @@ class SegmentationBatchFormatter(BatchFormatter):
             return labels * 255
         else:
             if n_classes > 1:
-                raise NotImplementedError(f"Not supporting soft-labeling for number of classes > 1!\nGot {n_classes} classes.")
+                raise DatasetFormatError(f"Not supporting soft-labeling for number of classes > 1!\nGot {n_classes} classes.")
             labels = SegmentationBatchFormatter.binary_mask_above_threshold(labels=labels, threshold_value=threshold_value)
         return labels
 
@@ -140,13 +140,13 @@ class SegmentationBatchFormatter(BatchFormatter):
             valid_n_classes = (total_n_classes, 1)
             input_n_classes = labels.shape[1]
             if input_n_classes not in valid_n_classes and labels.shape[-1] not in valid_n_classes:
-                raise ValueError(
+                raise DatasetFormatError(
                     f"Labels batch shape should be [BS, N, W, H] where N is either 1 or n_classes + len(ignore_labels)"
                     f" ({total_n_classes}). Got: {input_n_classes}"
                 )
             return labels
         else:
-            raise ValueError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
+            raise DatasetFormatError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
 
     @staticmethod
     def binary_mask_above_threshold(labels: Tensor, threshold_value: float) -> Tensor:
