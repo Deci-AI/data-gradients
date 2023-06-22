@@ -22,3 +22,4 @@ report_sections:
       - DetectionClassesPerImageCount
       - DetectionBoundingBoxIoU:
           num_bins: 10
+          class_agnostic: true
