@@ -37,6 +37,7 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
             kde=False,
             labels_key="split",
             individual_plots_key="split",
+            stat="percent",
             x_ticks_rotation=None,
             sharey=True,
             labels_palette=LABELS_PALETTE,

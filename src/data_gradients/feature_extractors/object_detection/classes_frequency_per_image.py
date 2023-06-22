@@ -42,6 +42,7 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
             y_label_name="Class Names",
             order_key="class_id",
             title=self.title,
+            x_lim=(0, df_class_count["n_appearance"].max() * 1.2),
             bandwidth=0.4,
             x_ticks_rotation=None,
             labels_key="split",
