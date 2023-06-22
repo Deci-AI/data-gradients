@@ -6,7 +6,7 @@ from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.detection import DetectionBatchProcessor
 from data_gradients.config.data.data_config import DetectionDataConfig
-from data_gradients.config.data.typing import SupportedDataType
+from data_gradients.config.data.types import SupportedDataType
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):

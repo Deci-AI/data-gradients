@@ -91,7 +91,7 @@ class DatasetAdapter:
                 self.data_config.images_extractor = "[0]"  # We save it for later use
                 return self.data_config.get_images_extractor()  # This will return a callable
 
-        elif self.auto_extractor.find_extractor(data=data):
+        if self.auto_extractor.find_extractor(data=data):
             dataset_extractor = self.auto_extractor.find_extractor(data=data)
             self.data_config.images_extractor = dataset_extractor.images_extractor(data)
             return self.data_config.get_images_extractor()  # This will return a callable
@@ -118,10 +118,10 @@ class DatasetAdapter:
                 self.data_config.labels_extractor = "[1]"  # We save it for later use
                 return self.data_config.get_labels_extractor()  # This will return a callable
 
-        elif self.auto_extractor.find_extractor(data=data):
+        if self.auto_extractor.find_extractor(data=data):
             dataset_extractor = self.auto_extractor.find_extractor(data=data)
-            self.data_config.images_extractor = dataset_extractor.images_extractor(data)
-            return self.data_config.get_images_extractor()  # This will return a callable
+            self.data_config.labels_extractor = dataset_extractor.labels_extractor
+            return self.data_config.get_labels_extractor()  # This will return a callable
 
         # Otherwise, we ask the user how to map data -> labels
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):

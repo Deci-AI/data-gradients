@@ -4,7 +4,7 @@ from typing import Optional, Any, Union, Callable
 import torch
 
 from data_gradients.batch_processors.adapters.tensor_extractor import NestedDataLookup
-from data_gradients.config.data.typing import SupportedDataType
+from data_gradients.config.data.types import SupportedDataType
 from data_gradients.utils.detection import XYXYConverter
 
 # This is used as a prefix to recognize parameters that are not cachable.
