@@ -1,0 +1,6 @@
+site_name: data-gradients
+nav:
+- Welcome:
+  - Intro: .README.md
+  - Feature Description: ./documentation/feature_description.md
+  - Feature Configuration: ./documentation/feature_configuration.md

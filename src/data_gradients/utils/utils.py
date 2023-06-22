@@ -6,6 +6,8 @@ from typing import Dict, Mapping, List
 
 
 def write_json(path: str, json_dict: Dict):
+    dirname = os.path.dirname(path)
+    os.makedirs(dirname, exist_ok=True)
     with open(path, "w") as f:
         json.dump(json_dict, f, indent=4)
 
