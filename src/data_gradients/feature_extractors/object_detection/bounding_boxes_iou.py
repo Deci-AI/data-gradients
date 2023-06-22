@@ -17,7 +17,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
     """Feature Extractor to compute the pairwise IoU of bounding boxes per image.
     This feature extractor helps to identify duplicate/highly overlapping bounding boxes."""
 
-    def __init__(self, num_bins: int = 10, class_agnostic: bool = False):
+    def __init__(self, num_bins: int = 10, class_agnostic: bool = True):
         """
         :param num_bins: Number of bins to use for the heatmap plot.
         :param class_agnostic: If True, only check IoU of bounding boxes of the same class.

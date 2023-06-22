@@ -31,6 +31,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
+        max_area = min(100, df["relative_bbox_area"].max())
         plot_options = ViolinPlotOptions(
             x_label_key="relative_bbox_area",
             x_label_name="Bounding Box Area (in % of image)",
@@ -40,6 +41,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
+            x_lim=(0, max_area),
             bandwidth=0.4,
         )
 
