@@ -22,10 +22,12 @@ report_sections:
 
 ### 2. Available Features
 
-Refer to the default configuration files to explore the available features and their names:
+Please refer to the default configuration files to explore the available features and their names.
 
 - [Object Detection features](src/data_gradients/config/detection.yaml)
 - [Semantic Segmentation features](src/data_gradients/config/segmentation.yaml)
+
+For a more in-depth explanation of each feature, please check out [this page](feature_description.md).
 
 ### 3. Feature Customization
 
