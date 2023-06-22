@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Mapping, Union, List, Tuple, Iterable
 
 from data_gradients.utils.data_classes import ImageSample
-from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
+from data_gradients.batch_processors.adapters.base import DatasetAdapter
 from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 

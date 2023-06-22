@@ -3,11 +3,12 @@ from typing import Callable, Union, Tuple, List, Mapping
 import PIL
 import numpy as np
 import torch
-from torchvision.transforms import transforms
 
 from data_gradients.batch_processors.adapters.tensor_extractor import get_tensor_extractor_options
+from data_gradients.batch_processors.adapters.utils import to_torch
 from data_gradients.config.data.data_config import DataConfig
 from data_gradients.config.data.questions import Question, text_to_yellow
+from data_gradients.batch_processors.adapters.common_extractors.base import BaseDatasetExtractor, AutoExtractor
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
@@ -56,8 +57,9 @@ class LabelsExtractorError(Exception):
 class DatasetAdapter:
     """Class responsible to convert raw batch (coming from dataloader) into a batch of image and a batch of labels."""
 
-    def __init__(self, data_config: DataConfig):
+    def __init__(self, data_config: DataConfig, predefined_extractors: List[BaseDatasetExtractor]):
         self.data_config = data_config
+        self.auto_extractor = AutoExtractor(predefined_extractors)
 
     def extract(self, data: SupportedData) -> Tuple[torch.Tensor, torch.Tensor]:
         """Convert raw batch (coming from dataloader) into a batch of image and a batch of labels.
@@ -69,7 +71,7 @@ class DatasetAdapter:
         """
         images = self._extract_images(data)
         labels = self._extract_labels(data)
-        return self._to_torch(images), self._to_torch(labels)
+        return to_torch(images), to_torch(labels)
 
     def _extract_images(self, data: SupportedData) -> torch.Tensor:
         images_extractor = self._get_images_extractor(data)
@@ -88,6 +90,11 @@ class DatasetAdapter:
             if isinstance(data[0], (torch.Tensor, np.ndarray, PIL.Image.Image)):
                 self.data_config.images_extractor = "[0]"  # We save it for later use
                 return self.data_config.get_images_extractor()  # This will return a callable
+
+        elif self.auto_extractor.find_extractor(data=data):
+            dataset_extractor = self.auto_extractor.find_extractor(data=data)
+            self.data_config.images_extractor = dataset_extractor.images_extractor(data)
+            return self.data_config.get_images_extractor()  # This will return a callable
 
         # Otherwise, we ask the user how to map data -> image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
@@ -111,6 +118,11 @@ class DatasetAdapter:
                 self.data_config.labels_extractor = "[1]"  # We save it for later use
                 return self.data_config.get_labels_extractor()  # This will return a callable
 
+        elif self.auto_extractor.find_extractor(data=data):
+            dataset_extractor = self.auto_extractor.find_extractor(data=data)
+            self.data_config.images_extractor = dataset_extractor.images_extractor(data)
+            return self.data_config.get_images_extractor()  # This will return a callable
+
         # Otherwise, we ask the user how to map data -> labels
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
             description, options = get_tensor_extractor_options(data)
@@ -122,12 +134,3 @@ class DatasetAdapter:
             f"Please implement a custom `labels_extractor` for your dataset. "
             f"You can find more detail about this in our documentation: https://github.com/Deci-AI/data-gradients"
         )
-
-    @staticmethod
-    def _to_torch(tensor: Union[np.ndarray, PIL.Image.Image, torch.Tensor]) -> torch.Tensor:
-        if isinstance(tensor, np.ndarray):
-            return torch.from_numpy(tensor)
-        elif isinstance(tensor, PIL.Image.Image):
-            return transforms.ToTensor()(tensor)
-        else:
-            return tensor
