@@ -124,8 +124,8 @@ class DetectionBatchFormatter(BatchFormatter):
 
         if xyxy_bboxes.max().item() < 2:
             h, w = image_shape
-            bboxes[..., 0::2] *= w
-            bboxes[..., 1::2] *= h
+            xyxy_bboxes[..., 0::2] *= w
+            xyxy_bboxes[..., 1::2] *= h
 
         return torch.cat([labels, xyxy_bboxes], dim=-1)
 
