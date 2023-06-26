@@ -3,7 +3,7 @@ from enum import Enum
 
 class ImageFeatures(Enum):
     """
-    Define the features that are extracted from the image itself.
+    Define the features that are extracted from the image itselfss.
 
     DatasetSplit: str - The name of the dataset split. Could be "train", "val", "test", etc.
     ImageId: str - The unique identifier of the image. Could be the image path or the image name.
