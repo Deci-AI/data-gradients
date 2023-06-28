@@ -1,14 +1,64 @@
 # Built-in Datasets
 
 ## Object Detection
-### Yolo Dataset
+### Paired Image-Label Dataset
 
-#### Description
-- Each image is associated with a label file.
-- Each label file is a `.txt` where each line represents a Bounding Box in the following format:
-    - `label, cx, cy, w, h` - normalized (between 0-1)
+The Paired Image-Label Detection Dataset is a minimalistic and flexible Dataset class for loading datasets 
+with a one-to-one correspondence between an image file and a corresponding label text file.
 
-#### Example
+#### Expected folder structure
+Any structure including at least one sub-directory for images and one for labels. They can be the same.
+
+Example 1: Separate directories for images and labels
+```
+    dataset_root/
+        ├── images/
+        │   ├── train/
+        │   │   ├── 1.jpg
+        │   │   ├── 2.jpg
+        │   │   └── ...
+        │   ├── test/
+        │   │   ├── ...
+        │   └── validation/
+        │       ├── ...
+        └── labels/
+            ├── train/
+            │   ├── 1.txt
+            │   ├── 2.txt
+            │   └── ...
+            ├── test/
+            │   ├── ...
+            └── validation/
+                ├── ...
+```
+
+Example 2: Same directory for images and labels
+```
+    dataset_root/
+        ├── train/
+        │   ├── 1.jpg
+        │   ├── 1.txt
+        │   ├── 2.jpg
+        │   ├── 2.txt
+        │   └── ...
+        └── validation/
+            ├── ...
+```
+
+#### Expected label files structure
+The label files must be structured such that each row represents a bounding box annotation.
+Each bounding box is represented by 5 elements.
+  - 1 representing the class id
+  - 4 representing the bounding box coordinates.
+
+The class id can be at the beginning or at the end of the row, but this format needs to be consistent throughout the dataset.
+Example:
+  - `class_id x1 y1 x2 y2`
+  - `cx, cy, w, h, class_id`
+  - `class_id x, y, w, h`
+  - ...
+
+#### Instantiation
 ```
 dataset_root/
     ├── images/
@@ -32,8 +82,8 @@ dataset_root/
 ```
 
 ```python
-from data_gradients.datasets.detection import YoloDetectionDataset
+from data_gradients.datasets.detection import PairedImageLabelDetectionDataset
 
-train_loader = YoloDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
-val_loader = YoloDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
+train_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
+val_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
 ```

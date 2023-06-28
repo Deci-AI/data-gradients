@@ -10,11 +10,15 @@ from data_gradients.datasets.utils import load_image, ImageChannelFormat
 logger = logging.getLogger(__name__)
 
 
-class YoloDetectionDataset:
-    """YoloDataset is a minimalistic and flexible Dataset class for loading YoloV5 and Darknet format datasets.
-    YoloDataset supports the following dataset structures:
+class PairedImageLabelDetectionDataset:
+    """The Paired Image-Label Detection Dataset is a minimalistic and flexible Dataset class for loading datasets
+    with a one-to-one correspondence between an image file and a corresponding label text file.
 
-    Example 1:
+    #### Expected folder structure
+    Any structure including at least one sub-directory for images and one for labels. They can be the same.
+
+    Example 1: Separate directories for images and labels
+    ```
         dataset_root/
             ├── images/
             │   ├── train/
@@ -34,8 +38,10 @@ class YoloDetectionDataset:
                 │   ├── ...
                 └── validation/
                     ├── ...
+    ```
 
-    Example 2 (same directory for images and labels):
+    Example 2: Same directory for images and labels
+    ```
         dataset_root/
             ├── train/
             │   ├── 1.jpg
@@ -45,6 +51,52 @@ class YoloDetectionDataset:
             │   └── ...
             └── validation/
                 ├── ...
+    ```
+
+    #### Expected label files structure
+    The label files must be structured such that each row represents a bounding box annotation.
+    Each bounding box is represented by 5 elements.
+      - 1 representing the class id
+      - 4 representing the bounding box coordinates.
+
+    The class id can be at the beginning or at the end of the row, but this format needs to be consistent throughout the dataset.
+    Example:
+      - `class_id x1 y1 x2 y2`
+      - `cx, cy, w, h, class_id`
+      - `class_id x, y, w, h`
+      - ...
+
+    #### Instantiation
+    ```
+    dataset_root/
+        ├── images/
+        │   ├── train/
+        │   │   ├── 1.jpg
+        │   │   ├── 2.jpg
+        │   │   └── ...
+        │   ├── test/
+        │   │   ├── ...
+        │   └── validation/
+        │       ├── ...
+        └── labels/
+            ├── train/
+            │   ├── 1.txt
+            │   ├── 2.txt
+            │   └── ...
+            ├── test/
+            │   ├── ...
+            └── validation/
+                ├── ...
+    ```
+
+    ```python
+    from data_gradients.datasets.detection import PairedImageLabelDetectionDataset
+
+    train_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
+    val_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
+    ```
+
+    This class does NOT support dataset formats such as Pascal VOC or COCO.
     """
 
     def __init__(
@@ -81,27 +133,22 @@ class YoloDetectionDataset:
     def load_annotation(self, index: int) -> np.ndarray:
         _, label_path = self.image_label_tuples[index]
 
-        if not os.path.exists(label_path):
-            return np.zeros((0, 5))
-
         with open(label_path, "r") as file:
             lines = file.readlines()
 
-        labels_yolo_format = []
+        labels = []
         for line in filter(lambda x: x != "\n", lines):
-            try:
-                label_id, cx, cw, w, h = line.split()
-                labels_yolo_format.append([int(label_id), float(cx), float(cw), float(w), float(h)])
-            except Exception as e:
+            lines_elements = line.split()
+            if len(lines_elements) == 5:
+                # Loading everything as floats, even the class_id, because we want to be agnostic of the format.
+                labels.append(list(map(float, lines_elements)))
+            else:
+                error = f"invalid label: {line} from {label_path}.\n Expected 5 elements (class id & 4 bbox coordinates), got {len(lines_elements)}."
                 if self.ignore_invalid_labels:
-                    if self.verbose:
-                        logger.warning(
-                            f"Line `{line}` of file {label_path} will be ignored because could not parsed into (cls_id, cx, cy, w, h) format.\n"
-                            f"Got Exception: {e}"
-                        )
+                    logger.warning(f"Ignoring {error}")
                 else:
-                    raise e
-        return np.array(labels_yolo_format) if labels_yolo_format else np.zeros((0, 5))
+                    raise RuntimeError(error.capitalize())
+        return np.array(labels) if labels else np.zeros((0, 5))
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
         image = self.load_image(index)

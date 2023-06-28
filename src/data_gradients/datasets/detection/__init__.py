@@ -1,3 +1,3 @@
-from data_gradients.datasets.detection.yolo_dataset import YoloDetectionDataset
+from data_gradients.datasets.detection.paired_image_label_detection_dataset import PairedImageLabelDetectionDataset
 
-__all__ = ["YoloDetectionDataset"]
+__all__ = ["PairedImageLabelDetectionDataset"]
