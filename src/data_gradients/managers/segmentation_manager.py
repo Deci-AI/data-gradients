@@ -1,11 +1,11 @@
-from typing import Optional, Iterable, Callable, List, Union, Type
+from typing import Optional, Iterable, Callable, List
 import torch
 
-from data_gradients.feature_extractors import AbstractFeatureExtractor
+from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
 from data_gradients.config.data.data_config import SegmentationDataConfig
-from data_gradients.config.data.typing import SupportedDataType
+from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -22,16 +22,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
-        feature_extractors: Optional[
-            Union[
-                List[
-                    Union[str, AbstractFeatureExtractor, Type[AbstractFeatureExtractor]]
-                ],
-                str,
-                AbstractFeatureExtractor,
-                Type[AbstractFeatureExtractor],
-            ]
-        ] = None,
+        feature_extractors: Optional[FeatureExtractorsType] = None,
         log_dir: Optional[str] = None,
         use_cache: bool = False,
         class_names: Optional[List[str]] = None,
@@ -54,8 +45,10 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`. If set, `class_names` will be a list of `class_ids`.
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
-        :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used.
-        :param feature_extractors:      One or more feature extractors to use. If None, the default configuration will be used.
+        :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
+                                        with feature_extractors
+        :param feature_extractors:      One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
+                                        with config_path
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
         :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
@@ -66,7 +59,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
-        assert feature_extractors is None or config_path is None, "`feature_extractors` and `config_path` cannot be specified at the same time"
+        if feature_extractors is not None and config_path is not None:
+            raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         data_config = SegmentationDataConfig(use_cache=use_cache, images_extractor=images_extractor, labels_extractor=labels_extractor)
 
@@ -84,7 +78,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         class_names_to_use = class_names_to_use or class_names
 
-        grouped_feature_extractors = self._get_grouped_feature_extractors(
+        grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="segmentation",
             config_path=config_path,
             feature_extractors=feature_extractors,

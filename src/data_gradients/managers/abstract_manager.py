@@ -7,8 +7,6 @@ from itertools import zip_longest
 from logging import getLogger
 from tqdm import tqdm
 
-from data_gradients.common.factories import FeatureExtractorsFactory
-from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
@@ -259,34 +257,3 @@ class AnalysisManagerAbstract(abc.ABC):
         msg_train = f"Train set: {self._train_iters_done} out of {total_train_samples} samples were analyzed{portion_train}.\n"
         msg_val = f"Validation set: {self._val_iters_done} out of {total_val_samples} samples were analyzed{portion_val}.\n "
         return msg_head + msg_train + msg_val
-
-    @staticmethod
-    def _get_grouped_feature_extractors(default_config_name: str, config_path: str, feature_extractors) -> Dict[str, List[AbstractFeatureExtractor]]:
-        if feature_extractors is None:
-            if config_path is None:
-                config_dir, config_name = None, default_config_name
-            else:
-                config_path = os.path.abspath(config_path)
-                config_dir, config_name = os.path.dirname(config_path), os.path.basename(config_path).split(".")[0]
-            grouped_feature_extractors = load_report_feature_extractors(config_name=config_name, config_dir=config_dir)
-        else:
-            if not isinstance(feature_extractors, list):
-                feature_extractors = [feature_extractors]
-
-            section_name = "Selected features"
-            grouped_feature_extractors = {section_name: []}
-            for feature_extractor in feature_extractors:
-                if isinstance(feature_extractor, AbstractFeatureExtractor):
-                    grouped_feature_extractors[section_name].append(feature_extractor)
-                elif isinstance(feature_extractor, str):
-                    grouped_feature_extractors[section_name].append(FeatureExtractorsFactory().get(feature_extractor))
-                elif issubclass(feature_extractor, AbstractFeatureExtractor):
-                    try:
-                        grouped_feature_extractors[section_name].append(feature_extractor())
-                    except RuntimeError as e:
-                        raise RuntimeError(f"The feature extractor {feature_extractor.__class__} requires additional init argument. "
-                                           f"Initialize the feature extractor and pass it as an instance")
-                else:
-                    raise RuntimeError(f"Unsupported feature extractor type. Supported types are string (name of FeatureExtractor) or AbstractFeatureExtractor")
-
-        return grouped_feature_extractors
