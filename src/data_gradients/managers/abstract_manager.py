@@ -40,6 +40,7 @@ class AnalysisManagerAbstract(abc.ABC):
         batch_processor: BatchProcessor,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,
+        remove_plots_after_report: Optional[bool] = True,
     ):
         """
         :param report_title:        Title of the report. Will be used to save the report
@@ -51,6 +52,7 @@ class AnalysisManagerAbstract(abc.ABC):
         :param grouped_feature_extractors:  List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
+        :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
         self.renderer = SeabornRenderer()
         self.summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
@@ -72,6 +74,7 @@ class AnalysisManagerAbstract(abc.ABC):
         # FEATURES
         self.batch_processor = batch_processor
         self.grouped_feature_extractors = grouped_feature_extractors
+        self._remove_plots_after_report = remove_plots_after_report
 
         self._train_iters_done = 0
         self._val_iters_done = 0
@@ -193,8 +196,9 @@ class AnalysisManagerAbstract(abc.ABC):
         self.data_config.write_to_json(filename=self.data_config_cache_name)
 
         # Cleanup of generated images
-        for image_created in images_created:
-            os.remove(image_created)
+        if self._remove_plots_after_report:
+            for image_created in images_created:
+                os.remove(image_created)
 
     def close(self):
         """Safe logging closing"""
