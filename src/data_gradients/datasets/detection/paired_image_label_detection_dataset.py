@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import logging
-from typing import List, Optional, Tuple
+from typing import Tuple, Sequence
 
 from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
 from data_gradients.datasets.utils import load_image, ImageChannelFormat
@@ -106,8 +106,8 @@ class PairedImageLabelDetectionDataset:
         labels_dir: str,
         ignore_invalid_labels: bool = True,
         verbose: bool = False,
-        image_extension: Optional[List[str]] = None,
-        label_extension: Optional[List[str]] = None,
+        image_extension: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
+        label_extension: Sequence[str] = ("xml",),
     ):
         """
         :param root_dir:                Where the data is stored.
@@ -115,6 +115,8 @@ class PairedImageLabelDetectionDataset:
         :param labels_dir:              Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_dir`.
         :param ignore_invalid_labels:   Whether to ignore labels that fail to be parsed. If True ignores and logs a warning, otherwise raise an error.
         :param verbose:                 Whether to show extra information during loading.
+        :param image_extension:         List of image file extensions to load from.
+        :param label_extension:         List of label file extensions to load from.
         """
         self.image_label_tuples = ImageLabelFilesIterator(
             images_dir=os.path.join(root_dir, images_dir),

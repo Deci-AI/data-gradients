@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Optional, Tuple
+from typing import List, Tuple, Sequence
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +14,8 @@ class ImageLabelFilesIterator:
         self,
         images_dir: str,
         labels_dir: str,
-        label_extension: List[str],
-        image_extension: Optional[List[str]] = None,
+        label_extension: Sequence[str],
+        image_extension: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         verbose: bool = True,
     ):
         """
