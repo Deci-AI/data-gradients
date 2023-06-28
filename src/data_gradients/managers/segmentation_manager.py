@@ -1,9 +1,8 @@
-import os
-from typing import Optional, Iterable, Callable, List
+from typing import Optional, Iterable, Callable, List, Union, Type
 import torch
 
+from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
-from data_gradients.config.utils import load_report_feature_extractors
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
 from data_gradients.config.data.data_config import SegmentationDataConfig
 from data_gradients.config.data.typing import SupportedDataType
@@ -23,6 +22,16 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
+        feature_extractors: Optional[
+            Union[
+                List[
+                    Union[str, AbstractFeatureExtractor, Type[AbstractFeatureExtractor]]
+                ],
+                str,
+                AbstractFeatureExtractor,
+                Type[AbstractFeatureExtractor],
+            ]
+        ] = None,
         log_dir: Optional[str] = None,
         use_cache: bool = False,
         class_names: Optional[List[str]] = None,
@@ -45,6 +54,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used.
+        :param feature_extractors:      One or more feature extractors to use. If None, the default configuration will be used.
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
         :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
@@ -54,6 +64,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
         """
+        assert feature_extractors is None or config_path is None, "`feature_extractors` and `config_path` cannot be specified at the same time"
+
         data_config = SegmentationDataConfig(use_cache=use_cache, images_extractor=images_extractor, labels_extractor=labels_extractor)
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
@@ -70,12 +82,11 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         class_names_to_use = class_names_to_use or class_names
 
-        # Resolve `config_dir` and `config_name` defining the feature extractors.
-        if config_path is None:
-            config_dir, config_name = None, "segmentation"
-        else:
-            config_path = os.path.abspath(config_path)
-            config_dir, config_name = os.path.dirname(config_path), os.path.basename(config_path).split(".")[0]
+        grouped_feature_extractors = self._get_grouped_feature_extractors(
+            default_config_name="segmentation",
+            config_path=config_path,
+            feature_extractors=feature_extractors,
+        )
 
         batch_processor = SegmentationBatchProcessor(
             data_config=data_config,
@@ -84,8 +95,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             n_image_channels=num_image_channels,
             threshold_value=threshold_soft_labels,
         )
-
-        grouped_feature_extractors = load_report_feature_extractors(config_name=config_name, config_dir=config_dir)
 
         super().__init__(
             data_config=data_config,
