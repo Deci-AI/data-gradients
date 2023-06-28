@@ -33,9 +33,9 @@ def xywh_to_xyxy(bboxes: torch.Tensor) -> torch.Tensor:
 
 
 XYXY_CONVERTERS = {
-    "xyxy": {"function": lambda x: x, "description": "xyxy: x-left, y-top, x-right, y-bottom"},
+    "xyxy": {"function": lambda x: x, "description": "xyxy: x-left, y-top, x-right, y-bottom\t\t(Pascal-VOC format)"},
     "xywh": {"function": xywh_to_xyxy, "description": "xywh: x-left, y-top, width, height"},
-    "cxcywh": {"function": cxcywh_to_xyxy, "description": "cxcywh: x-center, y-center, width, height"},
+    "cxcywh": {"function": cxcywh_to_xyxy, "description": "cxcywh: x-center, y-center, width, height\t\t(COCO\YOLO format)"},
 }
 
 
