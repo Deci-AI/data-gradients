@@ -33,6 +33,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         num_image_channels: int = 3,
         threshold_soft_labels: float = 0.5,
         batches_early_stop: int = 999,
+        remove_plots_after_report: Optional[bool] = True,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -53,6 +54,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param labels_extractor:        Function extracting the label(s) out of the data output.
         :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
+        :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
         data_config = SegmentationDataConfig(use_cache=use_cache, images_extractor=images_extractor, labels_extractor=labels_extractor)
 
@@ -97,4 +99,5 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             grouped_feature_extractors=grouped_feature_extractors,
             log_dir=log_dir,
             batches_early_stop=batches_early_stop,
+            remove_plots_after_report=remove_plots_after_report
         )
