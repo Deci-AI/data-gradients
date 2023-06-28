@@ -33,6 +33,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         bbox_format: Optional[str] = None,
         n_image_channels: int = 3,
         batches_early_stop: int = 999,
+        remove_plots_after_report: Optional[bool] = True,
     ):
         """
         Constructor of detection manager which controls the analyzer
@@ -53,6 +54,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
                                             > (class_id, x, y, w, h) for instance, as opposed to (x, y, w, h, class_id)
         :param bbox_format:             Format of the bounding boxes. 'xyxy', 'xywh' or 'cxcywh'
         :param n_image_channels:        Number of channels for each image in the dataset
+        :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
         data_config = DetectionDataConfig(
             use_cache=use_cache,
@@ -102,4 +104,5 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             grouped_feature_extractors=feature_extractors,
             log_dir=log_dir,
             batches_early_stop=batches_early_stop,
+            remove_plots_after_report=remove_plots_after_report
         )
