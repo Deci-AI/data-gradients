@@ -1,4 +1,5 @@
 site_name: data-gradients
+docs_dir: .
 nav:
 - Welcome:
   - Intro: .README.md
