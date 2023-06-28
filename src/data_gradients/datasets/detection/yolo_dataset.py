@@ -10,7 +10,43 @@ from data_gradients.datasets.utils import load_image, ImageChannelFormat
 logger = logging.getLogger(__name__)
 
 
-class YoloDataset:
+class YoloDetectionDataset:
+    """YoloDataset is a minimalistic and flexible Dataset class for loading YoloV5 and Darknet format datasets.
+    YoloDataset supports the following dataset structures:
+
+    Example 1:
+        dataset_root/
+            ├── images/
+            │   ├── train/
+            │   │   ├── 1.jpg
+            │   │   ├── 2.jpg
+            │   │   └── ...
+            │   ├── test/
+            │   │   ├── ...
+            │   └── validation/
+            │       ├── ...
+            └── labels/
+                ├── train/
+                │   ├── 1.txt
+                │   ├── 2.txt
+                │   └── ...
+                ├── test/
+                │   ├── ...
+                └── validation/
+                    ├── ...
+
+    Example 2 (same directory for images and labels):
+        dataset_root/
+            ├── train/
+            │   ├── 1.jpg
+            │   ├── 1.txt
+            │   ├── 2.jpg
+            │   ├── 2.txt
+            │   └── ...
+            └── validation/
+                ├── ...
+    """
+
     def __init__(
         self,
         root_dir: str,
@@ -21,41 +57,7 @@ class YoloDataset:
         image_extension: Optional[List[str]] = None,
         label_extension: Optional[List[str]] = None,
     ):
-        """YoloDataset is a minimalistic and flexible Dataset class for loading YoloV5 and Darknet format datasets.
-        YoloDataset supports the following dataset structures:
-
-        Example 1:
-            dataset_root/
-                ├── images/
-                │   ├── train/
-                │   │   ├── 1.jpg
-                │   │   ├── 2.jpg
-                │   │   └── ...
-                │   ├── test/
-                │   │   ├── ...
-                │   └── validation/
-                │       ├── ...
-                └── labels/
-                    ├── train/
-                    │   ├── 1.txt
-                    │   ├── 2.txt
-                    │   └── ...
-                    ├── test/
-                    │   ├── ...
-                    └── validation/
-                        ├── ...
-
-        Example 2 (same directory for images and labels):
-            dataset_root/
-                ├── train/
-                │   ├── 1.jpg
-                │   ├── 1.txt
-                │   ├── 2.jpg
-                │   ├── 2.txt
-                │   └── ...
-                └── validation/
-                    ├── ...
-
+        """
         :param root_dir:                Where the data is stored.
         :param images_dir:              Local path to directory that includes all the images. Path relative to `root_dir`. Can be the same as `labels_dir`.
         :param labels_dir:              Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_dir`.
@@ -63,9 +65,8 @@ class YoloDataset:
         :param verbose:                 Whether to show extra information during loading.
         """
         self.image_label_tuples = ImageLabelFilesIterator(
-            images_subdir=images_dir,
-            labels_subdir=labels_dir,
-            root_dir=root_dir,
+            images_dir=os.path.join(root_dir, images_dir),
+            labels_dir=os.path.join(root_dir, labels_dir),
             image_extension=image_extension or DEFAULT_IMG_EXTENSIONS,
             label_extension=label_extension or [".txt"],
             verbose=verbose,
@@ -75,7 +76,7 @@ class YoloDataset:
 
     def load_image(self, index: int) -> np.ndarray:
         img_file, _ = self.image_label_tuples[index]
-        return load_image(img_file, channel_format=ImageChannelFormat.RGB)
+        return load_image(path=img_file, channel_format=ImageChannelFormat.RGB)
 
     def load_annotation(self, index: int) -> np.ndarray:
         _, label_path = self.image_label_tuples[index]

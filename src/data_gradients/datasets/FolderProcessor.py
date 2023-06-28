@@ -8,41 +8,38 @@ DEFAULT_IMG_EXTENSIONS = ("bmp", "dng", "jpeg", "jpg", "mpo", "png", "tif", "tif
 
 
 class ImageLabelFilesIterator:
+    """Iterate over all image and label files in the provided directories."""
+
     def __init__(
         self,
-        *,
-        root_dir: Optional[str] = None,
-        images_subdir: str,
-        labels_subdir: str,
-        image_extension: Optional[List[str]] = None,
+        images_dir: str,
+        labels_dir: str,
         label_extension: List[str],
+        image_extension: Optional[List[str]] = None,
         verbose: bool = True,
     ):
-        self.images_subdir = images_subdir
-        self.labels_subdir = labels_subdir
-        self.root_dir = root_dir
+        """
+        :param images_dir:      The directory containing the images.
+        :param labels_dir:      The directory containing the labels.
+        :param label_extension: The extensions of the labels. Only the labels with these extensions will be considered.
+        :param image_extension: The extensions of the images. Only the images with these extensions will be considered.
+        :param verbose:         Whether to print extra messages.
+        """
+
+        self.images_dir = images_dir
+        self.labels_dir = labels_dir
         self.verbose = verbose
-        self.image_extension = self._clean_extension(image_extension or DEFAULT_IMG_EXTENSIONS)
-        self.label_extension = self._clean_extension(label_extension)
-        self.images_with_labels_files = self.get_image_and_label_file_names(images_subdir=images_subdir, labels_subdir=labels_subdir)
+        self.image_extension = self._normalize_extension(image_extension or DEFAULT_IMG_EXTENSIONS)
+        self.label_extension = self._normalize_extension(label_extension)
+        self.images_with_labels_files = self.get_image_and_label_file_names(images_dir=images_dir, labels_dir=labels_dir)
 
-    def _clean_extension(self, extensions: List[str]) -> List[str]:
-        """Removes the "." from any extension from a list."""
-        return [ext.replace(".", "") for ext in extensions]
+    def _normalize_extension(self, extensions: List[str]) -> List[str]:
+        """Ensure that all extensions are lower case and don't include the '.'"""
+        return [ext.replace(".", "").lower() for ext in extensions]
 
-    def _validate_user_specified_dirs(self, sub_dirs: List[str]):
-        """Use user specified training and validation split_directories."""
-        for dir_name in sub_dirs:
-            full_dir_path = os.path.join(self.root_dir, dir_name)
-            if not os.path.exists(full_dir_path):
-                raise ValueError(f"The directory {full_dir_path} does not exist.")
-
-    def get_image_and_label_file_names(self, images_subdir: str, labels_subdir: str) -> List[Tuple[str, str]]:
-        """This function gathers all image and label files from the provided sub_dirs."""
+    def get_image_and_label_file_names(self, images_dir: str, labels_dir: str) -> List[Tuple[str, str]]:
+        """Gather all image and label files from the provided sub_dirs."""
         images_with_labels_files = []
-
-        images_dir = images_subdir if self.root_dir is None else os.path.join(self.root_dir, images_subdir)
-        labels_dir = labels_subdir if self.root_dir is None else os.path.join(self.root_dir, labels_subdir)
 
         if not os.path.exists(images_dir):
             raise FileNotFoundError(f"The image directory `{images_dir}` does not exist.")
