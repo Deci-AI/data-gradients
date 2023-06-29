@@ -1,10 +1,14 @@
 # Built-in Datasets
 
-## Object Detection
-### Paired Image-Label Dataset
+DataGradients offer a few basic datasets which can help you load your data without needing to provide any additional code. 
+These datasets contain only the very basic functionalities and are not recommended for training.
 
-The Paired Image-Label Detection Dataset is a minimalistic and flexible Dataset class for loading datasets 
-with a one-to-one correspondence between an image file and a corresponding label text file.
+## Object Detection
+
+
+### Yolo Format Dataset
+
+The Yolo format Detection Dataset supports any dataset stored in the YOLO format.
 
 #### Expected folder structure
 Any structure including at least one sub-directory for images and one for labels. They can be the same.
@@ -47,16 +51,7 @@ Example 2: Same directory for images and labels
 
 #### Expected label files structure
 The label files must be structured such that each row represents a bounding box annotation.
-Each bounding box is represented by 5 elements.
-  - 1 representing the class id
-  - 4 representing the bounding box coordinates.
-
-The class id can be at the beginning or at the end of the row, but this format needs to be consistent throughout the dataset.
-Example:
-  - `class_id x1 y1 x2 y2`
-  - `cx, cy, w, h, class_id`
-  - `class_id x, y, w, h`
-  - ...
+Each bounding box is represented by 5 elements: `class_id, cx, cy, w, h`.
 
 #### Instantiation
 ```
@@ -82,8 +77,8 @@ dataset_root/
 ```
 
 ```python
-from data_gradients.datasets.detection import PairedImageLabelDetectionDataset
+from data_gradients.datasets.detection import YoloFormatDetectionDataset
 
-train_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
-val_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
+train_loader = YoloFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
+val_loader = YoloFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
 ```

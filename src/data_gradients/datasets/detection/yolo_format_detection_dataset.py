@@ -10,9 +10,8 @@ from data_gradients.datasets.utils import load_image, ImageChannelFormat
 logger = logging.getLogger(__name__)
 
 
-class PairedImageLabelDetectionDataset:
-    """The Paired Image-Label Detection Dataset is a minimalistic and flexible Dataset class for loading datasets
-    with a one-to-one correspondence between an image file and a corresponding label text file.
+class YoloFormatDetectionDataset:
+    """The Yolo format Detection Dataset supports any dataset stored in the YOLO format.
 
     #### Expected folder structure
     Any structure including at least one sub-directory for images and one for labels. They can be the same.
@@ -55,16 +54,7 @@ class PairedImageLabelDetectionDataset:
 
     #### Expected label files structure
     The label files must be structured such that each row represents a bounding box annotation.
-    Each bounding box is represented by 5 elements.
-      - 1 representing the class id
-      - 4 representing the bounding box coordinates.
-
-    The class id can be at the beginning or at the end of the row, but this format needs to be consistent throughout the dataset.
-    Example:
-      - `class_id x1 y1 x2 y2`
-      - `cx, cy, w, h, class_id`
-      - `class_id x, y, w, h`
-      - ...
+    Each bounding box is represented by 5 elements: `class_id, cx, cy, w, h`.
 
     #### Instantiation
     ```
@@ -90,10 +80,10 @@ class PairedImageLabelDetectionDataset:
     ```
 
     ```python
-    from data_gradients.datasets.detection import PairedImageLabelDetectionDataset
+    from data_gradients.datasets.detection import YoloFormatDetectionDataset
 
-    train_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
-    val_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
+    train_loader = YoloFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
+    val_loader = YoloFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
     ```
 
     This class does NOT support dataset formats such as Pascal VOC or COCO.
@@ -140,10 +130,14 @@ class PairedImageLabelDetectionDataset:
         for line in filter(lambda x: x != "\n", lines):
             lines_elements = line.split()
             if len(lines_elements) == 5:
-                # Loading everything as floats, even the class_id, because we want to be agnostic of the format.
-                labels.append(list(map(float, lines_elements)))
+                try:
+                    labels.append(list(map(float, lines_elements)))
+                except ValueError as e:
+                    raise ValueError(
+                        f"Invalid label: {line} from {label_path}.\nExpected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}."
+                    ) from e
             else:
-                error = f"invalid label: {line} from {label_path}.\n Expected 5 elements (class id & 4 bbox coordinates), got {len(lines_elements)}."
+                error = f"invalid label: {line} from {label_path}.\n Expected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}."
                 if self.ignore_invalid_labels:
                     logger.warning(f"Ignoring {error}")
                 else:
