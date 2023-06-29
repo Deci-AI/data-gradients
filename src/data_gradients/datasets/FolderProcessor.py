@@ -64,9 +64,9 @@ class ImageLabelFilesIterator:
         images_with_labels_files = []
 
         if not os.path.exists(images_dir):
-            raise FileNotFoundError(f"The image directory `{images_dir}` does not exist.")
+            raise FileNotFoundError(f"The image directory `images_dir={images_dir}` does not exist.")
         if not os.path.exists(labels_dir):
-            raise FileNotFoundError(f"The label directory `{labels_dir}` does not exist.")
+            raise FileNotFoundError(f"The label directory `labels_dir={labels_dir}` does not exist.")
 
         images_files, labels_files = self._get_file_names_in_folder(images_dir, labels_dir)
         matched_images_with_labels_files = self._match_file_names(images_files, labels_files)
@@ -94,9 +94,9 @@ class ImageLabelFilesIterator:
 
         if self.verbose:
             for imagefile in unmatched_image_files:
-                logger.warning(f"Image file {imagefile} does not have a matching label file. Hide this message by setting verbose=False.")
+                logger.warning(f"Image file {imagefile} does not have a matching label file. Hide this message by setting `verbose=False`.")
             for label_file in unmatched_label_files:
-                logger.warning(f"Warning: Label file {label_file} does not have a matching image file. Hide this message by setting verbose=False.")
+                logger.warning(f"Label file {label_file} does not have a matching image file. Hide this message by setting `verbose=False`.")
 
         return [(image_file_base_names[name], label_file_base_names[name]) for name in common_base_names]
 
