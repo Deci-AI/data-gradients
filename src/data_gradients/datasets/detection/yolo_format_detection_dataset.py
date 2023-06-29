@@ -96,8 +96,8 @@ class YoloFormatDetectionDataset:
         labels_dir: str,
         ignore_invalid_labels: bool = True,
         verbose: bool = False,
-        image_extension: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
-        label_extension: Sequence[str] = ("xml",),
+        image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
+        label_extensions: Sequence[str] = ("txt",),
     ):
         """
         :param root_dir:                Where the data is stored.
@@ -109,8 +109,8 @@ class YoloFormatDetectionDataset:
         self.image_label_tuples = ImageLabelFilesIterator(
             images_dir=os.path.join(root_dir, images_dir),
             labels_dir=os.path.join(root_dir, labels_dir),
-            image_extension=image_extension or DEFAULT_IMG_EXTENSIONS,
-            label_extension=label_extension or [".txt"],
+            image_extensions=image_extensions,
+            label_extensions=label_extensions,
             verbose=verbose,
         )
         self.ignore_invalid_labels = ignore_invalid_labels

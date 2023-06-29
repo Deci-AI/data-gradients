@@ -36,23 +36,23 @@ class ImageLabelFilesIterator:
         self,
         images_dir: str,
         labels_dir: str,
-        label_extension: Sequence[str],
-        image_extension: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
+        label_extensions: Sequence[str],
+        image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         verbose: bool = True,
     ):
         """
         :param images_dir:      The directory containing the images.
         :param labels_dir:      The directory containing the labels.
-        :param label_extension: The extensions of the labels. Only the labels with these extensions will be considered.
-        :param image_extension: The extensions of the images. Only the images with these extensions will be considered.
+        :param label_extensions: The extensions of the labels. Only the labels with these extensions will be considered.
+        :param image_extensions: The extensions of the images. Only the images with these extensions will be considered.
         :param verbose:         Whether to print extra messages.
         """
 
         self.images_dir = images_dir
         self.labels_dir = labels_dir
         self.verbose = verbose
-        self.image_extension = self._normalize_extension(image_extension or DEFAULT_IMG_EXTENSIONS)
-        self.label_extension = self._normalize_extension(label_extension)
+        self.image_extensions = self._normalize_extension(image_extensions or DEFAULT_IMG_EXTENSIONS)
+        self.label_extensions = self._normalize_extension(label_extensions)
         self.images_with_labels_files = self.get_image_and_label_file_names(images_dir=images_dir, labels_dir=labels_dir)
 
     def _normalize_extension(self, extensions: List[str]) -> List[str]:
@@ -102,11 +102,11 @@ class ImageLabelFilesIterator:
 
     def is_image(self, filename: str) -> bool:
         """Check if the given file name refers to image."""
-        return filename.split(".")[-1].lower() in self.image_extension
+        return filename.split(".")[-1].lower() in self.image_extensions
 
     def is_label(self, filename: str) -> bool:
         """Check if the given file name refers to image."""
-        return filename.split(".")[-1].lower() in self.label_extension
+        return filename.split(".")[-1].lower() in self.label_extensions
 
     def __len__(self):
         return len(self.images_with_labels_files)
