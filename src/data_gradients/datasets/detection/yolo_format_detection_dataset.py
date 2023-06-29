@@ -53,7 +53,7 @@ class YoloFormatDetectionDataset:
     ```
 
     #### Expected label files structure
-    The label files must be structured such that each row represents a bounding box annotation.
+    The label files must be structured such that each row represents a bounding box label.
     Each bounding box is represented by 5 elements: `class_id, cx, cy, w, h`.
 
     #### Instantiation
@@ -120,7 +120,7 @@ class YoloFormatDetectionDataset:
         img_file, _ = self.image_label_tuples[index]
         return load_image(path=img_file, channel_format=ImageChannelFormat.RGB)
 
-    def load_annotation(self, index: int) -> np.ndarray:
+    def load_label(self, index: int) -> np.ndarray:
         _, label_path = self.image_label_tuples[index]
 
         with open(label_path, "r") as file:
@@ -146,5 +146,5 @@ class YoloFormatDetectionDataset:
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
         image = self.load_image(index)
-        annotation = self.load_annotation(index)
-        return image, annotation
+        label = self.load_label(index)
+        return image, label
