@@ -3,7 +3,7 @@ import numpy as np
 import logging
 from typing import Tuple, Sequence
 
-from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
+from data_gradients.datasets.FolderProcessor import ImageLabelFolderIterator, DEFAULT_IMG_EXTENSIONS
 from data_gradients.datasets.utils import load_image, ImageChannelFormat
 
 
@@ -118,7 +118,7 @@ class PairedImageLabelDetectionDataset:
         :param image_extension:         List of image file extensions to load from.
         :param label_extension:         List of label file extensions to load from.
         """
-        self.image_label_tuples = ImageLabelFilesIterator(
+        self.image_label_tuples = ImageLabelFolderIterator(
             images_dir=os.path.join(root_dir, images_dir),
             labels_dir=os.path.join(root_dir, labels_dir),
             image_extension=image_extension or DEFAULT_IMG_EXTENSIONS,

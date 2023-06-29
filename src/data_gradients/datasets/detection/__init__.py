@@ -1,3 +1,4 @@
 from data_gradients.datasets.detection.paired_image_label_detection_dataset import PairedImageLabelDetectionDataset
+from data_gradients.datasets.detection.xml_paired_image_label_detection_dataset import XMLPairedImageLabelDetectionDataset
 
-__all__ = ["PairedImageLabelDetectionDataset"]
+__all__ = ["PairedImageLabelDetectionDataset", "XMLPairedImageLabelDetectionDataset"]
