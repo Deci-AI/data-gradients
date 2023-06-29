@@ -95,7 +95,7 @@ class ImageLabelFilesIterator:
             for imagefile in unmatched_image_files:
                 logger.warning(f"Image file {imagefile} does not have a matching label file. Hide this message by setting `verbose=False`.")
             for label_file in unmatched_label_files:
-                logger.warning(f"Label file {label_file} does not have a matching image file. Hide this message by setting verbose=False.")
+                logger.warning(f"Label file {label_file} does not have a matching image file. Hide this message by setting `verbose=False`.")
 
         return [(image_file_base_names[name], label_file_base_names[name]) for name in common_base_names]
 
@@ -163,12 +163,12 @@ class ImageLabelConfigIterator:
             verbose=verbose,
         )
         file_ids = self._load_file_ids(config_path=config_path)
-        filename_to_image_label_pair = {get_filename(image_path): (image_path, label_path) for (image_path, label_path) in image_label_folder_iterator}
+        filename_to_images_with_labels_files = {get_filename(image_path): (image_path, label_path) for (image_path, label_path) in image_label_folder_iterator}
 
         images_with_labels_files = []
         for file_id in file_ids:
-            if file_id in filename_to_image_label_pair:
-                images_with_labels_files.append(filename_to_image_label_pair[file_id])
+            if file_id in filename_to_images_with_labels_files:
+                images_with_labels_files.append(filename_to_images_with_labels_files[file_id])
             elif verbose:
                 logger.warning(
                     f"No file with `file_id={file_id}` found in `images_dir={images_dir}` and/or `labels_dir={labels_dir}`. "
