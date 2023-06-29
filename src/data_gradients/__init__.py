@@ -1,1 +1,1 @@
-__version__ = "CI changes this value automatically"
+__version__ = "0.2.0rc1243"
