@@ -161,7 +161,7 @@ class ImageLabelConfigIterator:
             if not verbose:
                 error_msg += "\nSet `verbose=True` for more information."
             raise RuntimeError(error_msg)
-        elif len(images_with_labels_files) != len(file_ids) and verbose:
+        elif len(images_with_labels_files) != len(file_ids):
             logger.warning(
                 f"Out of {len(file_ids)} file ids found in `config_path={config_path}`, "
                 f"{len(images_with_labels_files)} were found in both `images_dir={images_dir}` and `labels_dir={labels_dir}`. "
