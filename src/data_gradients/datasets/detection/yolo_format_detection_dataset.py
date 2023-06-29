@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import logging
-from typing import List, Optional, Tuple
+from typing import Tuple, Sequence
 
 from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
 from data_gradients.datasets.utils import load_image, ImageChannelFormat
@@ -96,8 +96,8 @@ class YoloFormatDetectionDataset:
         labels_dir: str,
         ignore_invalid_labels: bool = True,
         verbose: bool = False,
-        image_extension: Optional[List[str]] = None,
-        label_extension: Optional[List[str]] = None,
+        image_extension: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
+        label_extension: Sequence[str] = ("xml",),
     ):
         """
         :param root_dir:                Where the data is stored.
