@@ -4,7 +4,29 @@ from typing import List, Tuple, Sequence
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_IMG_EXTENSIONS = ("bmp", "dng", "jpeg", "jpg", "mpo", "png", "tif", "tiff", "webp", "pfm")
+# Supported image extensions for opencv: https://docs.opencv.org/3.4.3/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56
+DEFAULT_IMG_EXTENSIONS = (
+    "bmp",
+    "dib",
+    "exr",
+    "hdr",
+    "jp2",
+    "jpe",
+    "jpeg",
+    "jpg",
+    "pbm",
+    "pgm",
+    "pic",
+    "png",
+    "pnm",
+    "ppm",
+    "pxm",
+    "ras",
+    "sr",
+    "tif",
+    "tiff",
+    "webp",
+)
 
 
 class ImageLabelFilesIterator:
