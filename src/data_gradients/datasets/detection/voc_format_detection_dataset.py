@@ -177,7 +177,14 @@ class VOCFormatDetectionDataset:
 
         return np.array(labels, dtype=float) if labels else np.zeros((0, 5), dtype=float)
 
+    def __len__(self) -> int:
+        return len(self.image_label_tuples)
+
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
         image = self.load_image(index)
-        annotation = self.load_annotation(index)
-        return image, annotation
+        labels = self.load_labels(index)
+        return image, labels
+
+    def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
+        for i in range(len(self)):
+            yield self[i]
