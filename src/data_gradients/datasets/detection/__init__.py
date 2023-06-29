@@ -1,4 +1,5 @@
-from data_gradients.datasets.detection.paired_image_label_detection_dataset import PairedImageLabelDetectionDataset
-from data_gradients.datasets.detection.xml_paired_image_label_detection_dataset import XMLPairedImageLabelDetectionDataset
+from data_gradients.datasets.detection.voc_detection_dataset import VOCDetectionDataset
+from data_gradients.datasets.detection.voc_format_detection_dataset import VOCFormatDetectionDataset
+from data_gradients.datasets.detection.yolo_format_detection_dataset import YoloFormatDetectionDataset
 
-__all__ = ["PairedImageLabelDetectionDataset", "XMLPairedImageLabelDetectionDataset"]
+__all__ = ["VOCDetectionDataset", "VOCFormatDetectionDataset", "YoloFormatDetectionDataset"]

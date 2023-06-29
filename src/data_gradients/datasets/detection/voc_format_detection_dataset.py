@@ -4,19 +4,18 @@ import logging
 from typing import List, Tuple, Sequence, Optional
 from xml.etree import ElementTree
 
-from data_gradients.datasets.FolderProcessor import ImageLabelFolderIterator, ImageLabelConfigIterator, DEFAULT_IMG_EXTENSIONS
+from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, ImageLabelConfigIterator, DEFAULT_IMG_EXTENSIONS
 from data_gradients.datasets.utils import load_image, ImageChannelFormat
 
 
 logger = logging.getLogger(__name__)
 
 
-class XMLPairedImageLabelDetectionDataset:
-    """The Paired Image-Label Detection Dataset is a minimalistic and flexible Dataset class for loading datasets
-    with a one-to-one correspondence between an image file and a corresponding label text file.
+class VOCFormatDetectionDataset:
+    """The VOC format Detection Dataset supports datasets where labels are stored in XML following according to VOC standard.
 
     #### Expected folder structure
-    Any structure including at least one sub-directory for images and one for labels. They can be the same.
+    Any structure including at least one sub-directory for images and one for xml labels. They can be the same.
 
     Example 1: Separate directories for images and labels
     ```
@@ -32,8 +31,8 @@ class XMLPairedImageLabelDetectionDataset:
             │       ├── ...
             └── labels/
                 ├── train/
-                │   ├── 1.txt
-                │   ├── 2.txt
+                │   ├── 1.xml
+                │   ├── 2.xml
                 │   └── ...
                 ├── test/
                 │   ├── ...
@@ -46,26 +45,42 @@ class XMLPairedImageLabelDetectionDataset:
         dataset_root/
             ├── train/
             │   ├── 1.jpg
-            │   ├── 1.txt
+            │   ├── 1.xml
             │   ├── 2.jpg
-            │   ├── 2.txt
+            │   ├── 2.xml
             │   └── ...
             └── validation/
                 ├── ...
     ```
 
-    #### Expected label files structure
-    The label files must be structured such that each row represents a bounding box annotation.
-    Each bounding box is represented by 5 elements.
-      - 1 representing the class id
-      - 4 representing the bounding box coordinates.
+    **Note**: The label file need to be stored in XML format, but the file extension can be different.
 
-    The class id can be at the beginning or at the end of the row, but this format needs to be consistent throughout the dataset.
-    Example:
-      - `class_id x1 y1 x2 y2`
-      - `cx, cy, w, h, class_id`
-      - `class_id x, y, w, h`
-      - ...
+    #### Expected label files structure
+    The label files must be structured in XML format, like in the following example:
+
+    ``` xml
+    <annotation>
+        <object>
+            <name>chair</name>
+            <bndbox>
+                <xmin>1</xmin>
+                <ymin>213</ymin>
+                <xmax>263</xmax>
+                <ymax>375</ymax>
+            </bndbox>
+        </object>
+        <object>
+            <name>sofa</name>
+            <bndbox>
+                <xmin>104</xmin>
+                <ymin>151</ymin>
+                <xmax>334</xmax>
+                <ymax>287</ymax>
+            </bndbox>
+        </object>
+    </annotation>
+    ```
+
 
     #### Instantiation
     ```
@@ -91,13 +106,11 @@ class XMLPairedImageLabelDetectionDataset:
     ```
 
     ```python
-    from data_gradients.datasets.detection import PairedImageLabelDetectionDataset
+    from data_gradients.datasets.detection import VOCFormatDetectionDataset
 
-    train_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
-    val_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
+    train_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
+    val_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
     ```
-
-    This class does NOT support dataset formats such as YOLO or COCO.
     """
 
     def __init__(
@@ -108,8 +121,8 @@ class XMLPairedImageLabelDetectionDataset:
         class_names: List[str],
         config_path: Optional[str],
         verbose: bool = False,
-        image_extension: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
-        label_extension: Sequence[str] = ("xml",),
+        image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
+        label_extensions: Sequence[str] = ("xml",),
     ):
         """
         :param root_dir:        Where the data is stored.
@@ -117,16 +130,16 @@ class XMLPairedImageLabelDetectionDataset:
         :param labels_dir:      Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_dir`.
         :param class_names:     List of class names. This is required to be able to parse the class names into class ids.
         :param verbose:         Whether to show extra information during loading.
-        :param image_extension: List of image file extensions to load from.
-        :param label_extension: List of label file extensions to load from.
+        :param image_extensions: List of image file extensions to load from.
+        :param label_extensions: List of label file extensions to load from.
         """
         self.class_names = class_names
         if config_path is None:
-            self.image_label_tuples = ImageLabelFolderIterator(
+            self.image_label_tuples = ImageLabelFilesIterator(
                 images_dir=os.path.join(root_dir, images_dir),
                 labels_dir=os.path.join(root_dir, labels_dir),
-                image_extension=image_extension,
-                label_extension=label_extension,
+                image_extensions=image_extensions,
+                label_extensions=label_extensions,
                 verbose=verbose,
             )
         else:
@@ -134,8 +147,8 @@ class XMLPairedImageLabelDetectionDataset:
                 images_dir=os.path.join(root_dir, images_dir),
                 labels_dir=os.path.join(root_dir, labels_dir),
                 config_path=config_path,
-                image_extension=image_extension,
-                label_extension=label_extension,
+                image_extensions=image_extensions,
+                label_extensions=label_extensions,
                 verbose=verbose,
             )
 

@@ -3,16 +3,15 @@ import numpy as np
 import logging
 from typing import Tuple, Sequence
 
-from data_gradients.datasets.FolderProcessor import ImageLabelFolderIterator, DEFAULT_IMG_EXTENSIONS
+from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
 from data_gradients.datasets.utils import load_image, ImageChannelFormat
 
 
 logger = logging.getLogger(__name__)
 
 
-class PairedImageLabelDetectionDataset:
-    """The Paired Image-Label Detection Dataset is a minimalistic and flexible Dataset class for loading datasets
-    with a one-to-one correspondence between an image file and a corresponding label text file.
+class YoloFormatDetectionDataset:
+    """The Yolo format Detection Dataset supports any dataset stored in the YOLO format.
 
     #### Expected folder structure
     Any structure including at least one sub-directory for images and one for labels. They can be the same.
@@ -54,17 +53,8 @@ class PairedImageLabelDetectionDataset:
     ```
 
     #### Expected label files structure
-    The label files must be structured such that each row represents a bounding box annotation.
-    Each bounding box is represented by 5 elements.
-      - 1 representing the class id
-      - 4 representing the bounding box coordinates.
-
-    The class id can be at the beginning or at the end of the row, but this format needs to be consistent throughout the dataset.
-    Example:
-      - `class_id x1 y1 x2 y2`
-      - `cx, cy, w, h, class_id`
-      - `class_id x, y, w, h`
-      - ...
+    The label files must be structured such that each row represents a bounding box label.
+    Each bounding box is represented by 5 elements: `class_id, cx, cy, w, h`.
 
     #### Instantiation
     ```
@@ -90,10 +80,10 @@ class PairedImageLabelDetectionDataset:
     ```
 
     ```python
-    from data_gradients.datasets.detection import PairedImageLabelDetectionDataset
+    from data_gradients.datasets.detection import YoloFormatDetectionDataset
 
-    train_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
-    val_loader = PairedImageLabelDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
+    train_loader = YoloFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
+    val_loader = YoloFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
     ```
 
     This class does NOT support dataset formats such as Pascal VOC or COCO.
@@ -106,8 +96,8 @@ class PairedImageLabelDetectionDataset:
         labels_dir: str,
         ignore_invalid_labels: bool = True,
         verbose: bool = False,
-        image_extension: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
-        label_extension: Sequence[str] = ("xml",),
+        image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
+        label_extensions: Sequence[str] = ("txt",),
     ):
         """
         :param root_dir:                Where the data is stored.
@@ -115,14 +105,14 @@ class PairedImageLabelDetectionDataset:
         :param labels_dir:              Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_dir`.
         :param ignore_invalid_labels:   Whether to ignore labels that fail to be parsed. If True ignores and logs a warning, otherwise raise an error.
         :param verbose:                 Whether to show extra information during loading.
-        :param image_extension:         List of image file extensions to load from.
-        :param label_extension:         List of label file extensions to load from.
+        :param image_extensions:         List of image file extensions to load from.
+        :param label_extensions:         List of label file extensions to load from.
         """
-        self.image_label_tuples = ImageLabelFolderIterator(
+        self.image_label_tuples = ImageLabelFilesIterator(
             images_dir=os.path.join(root_dir, images_dir),
             labels_dir=os.path.join(root_dir, labels_dir),
-            image_extension=image_extension or DEFAULT_IMG_EXTENSIONS,
-            label_extension=label_extension or [".txt"],
+            image_extensions=image_extensions,
+            label_extensions=label_extensions,
             verbose=verbose,
         )
         self.ignore_invalid_labels = ignore_invalid_labels
@@ -132,7 +122,7 @@ class PairedImageLabelDetectionDataset:
         img_file, _ = self.image_label_tuples[index]
         return load_image(path=img_file, channel_format=ImageChannelFormat.RGB)
 
-    def load_annotation(self, index: int) -> np.ndarray:
+    def load_labels(self, index: int) -> np.ndarray:
         _, label_path = self.image_label_tuples[index]
 
         with open(label_path, "r") as file:
@@ -142,17 +132,28 @@ class PairedImageLabelDetectionDataset:
         for line in filter(lambda x: x != "\n", lines):
             lines_elements = line.split()
             if len(lines_elements) == 5:
-                # Loading everything as floats, even the class_id, because we want to be agnostic of the format.
-                labels.append(list(map(float, lines_elements)))
+                try:
+                    labels.append(list(map(float, lines_elements)))
+                except ValueError as e:
+                    raise ValueError(
+                        f"Invalid label: {line} from {label_path}.\nExpected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}."
+                    ) from e
             else:
-                error = f"invalid label: {line} from {label_path}.\n Expected 5 elements (class id & 4 bbox coordinates), got {len(lines_elements)}."
+                error = f"invalid label: {line} from {label_path}.\n Expected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}."
                 if self.ignore_invalid_labels:
                     logger.warning(f"Ignoring {error}")
                 else:
                     raise RuntimeError(error.capitalize())
         return np.array(labels) if labels else np.zeros((0, 5))
 
+    def __len__(self) -> int:
+        return len(self.image_label_tuples)
+
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
         image = self.load_image(index)
-        annotation = self.load_annotation(index)
-        return image, annotation
+        labels = self.load_labels(index)
+        return image, labels
+
+    def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
+        for i in range(len(self)):
+            yield self[i]
