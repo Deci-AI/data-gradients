@@ -6,6 +6,7 @@ from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
 from data_gradients.visualize.plot_options import KDEPlotOptions
+from data_gradients.visualize.plot_options import BarPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
 
@@ -38,22 +39,40 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")
 
-        self.data.append({"split": sample.split, "brightness": brightness})
+        if sample.split == "val":
+            self.data.append({"split": sample.split, "brightness": 123})
+        else:
+            self.data.append({"split": sample.split, "brightness": brightness})
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
+        n_unique_per_split = {len(df[df["split"] == split]["brightness"].unique()) for split in df["split"].unique()}
 
-        plot_options = KDEPlotOptions(
-            x_label_key="brightness",
-            x_label_name="Average Brightness of Images",
-            title=self.title,
-            x_lim=(0, 255),
-            x_ticks_rotation=None,
-            labels_key="split",
-            common_norm=False,
-            fill=True,
-            sharey=True,
-        )
+        # If a split has only one unique value, KDE plot will not work. Instead, we show the average brightness of the images.
+        if 1 in n_unique_per_split:
+            plot_options = BarPlotOptions(
+                x_label_key="split",
+                x_label_name="Split",
+                y_label_key="brightness",
+                y_label_name="Average Brightness",
+                title=self.title,
+                x_ticks_rotation=None,
+                orient="v",
+                show_values=False,
+            )
+        else:
+            plot_options = KDEPlotOptions(
+                x_label_key="brightness",
+                x_label_name="Average Brightness of Images",
+                title=self.title,
+                x_lim=(0, 255),
+                x_ticks_rotation=None,
+                labels_key="split",
+                common_norm=False,
+                fill=True,
+                sharey=True,
+            )
+
         json = dict(train=dict(df[df["split"] == "train"]["brightness"].describe()), val=dict(df[df["split"] == "val"]["brightness"].describe()))
 
         feature = Feature(
