@@ -74,7 +74,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         data = {}
         json = {}
 
-        splits = df["split"].unique()
+        splits = sorted(df["split"].unique())
         for split in splits:
             counts = self._compute_cumulative_counts_at_thresholds(df[df["split"] == split], class_names, self.num_bins)
 
@@ -95,6 +95,11 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             self._show_plot = False
             return Feature(data=None, plot_options=None, json={})
 
+        # Height of the plot is proportional to the number of classes
+        figsize_x = min(max(10, len(bins)), 25)
+        figsize_y = int(num_classes * 0.3) + 4
+        figsize_y = min(max(6, figsize_y), 90)
+
         plot_options = HeatmapOptions(
             xticklabels=xticklabels,
             yticklabels=class_names + ["All classes"],
@@ -106,8 +111,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
             annot=True,
             title=self.title,
             square=True,
-            # Height of the plot is proportional to the number of classes
-            figsize=(10, (int(num_classes * 0.3) + 4) * len(splits)),
+            figsize=(figsize_x, figsize_y),
             tight_layout=True,
             x_ticks_rotation=90,
         )

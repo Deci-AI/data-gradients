@@ -35,12 +35,11 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
         # TODO: check this
         df_class_count = df.groupby(["class_name", "class_id", "sample_id", "split"]).size().reset_index(name="n_appearance")
 
+        # Height of the plot is proportional to the number of classes
         n_unique = len(df_class_count["class_name"].unique())
-        factor = max(1.0, n_unique / 10.0)
-        figsize_x = min(max(10, int(10 * factor)), 30)
-        figsize_y = min(max(6, int(6 * factor / 2)), 9)
+        figsize_x = 10
+        figsize_y = min(max(6, int(n_unique * 0.3)), 90)
 
-        print("factor: ", figsize_x, figsize_y)
         plot_options = ViolinPlotOptions(
             x_label_key="n_appearance",
             x_label_name="Number of class instance per Image",
