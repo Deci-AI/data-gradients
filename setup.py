@@ -9,7 +9,7 @@ from setuptools import find_packages
 
 README_LOCATION = "README.md"
 REQ_LOCATION = "requirements.txt"
-INIT_FILE = "src/__init__.py"
+INIT_FILE = "src/data_gradients/__init__.py"
 VERSION_FILE = "version.txt"
 
 
@@ -27,7 +27,15 @@ def get_requirements():
 
 def get_version():
     with open(VERSION_FILE, encoding="utf-8") as f:
-        return f.readline()
+        ver = f.readline()
+
+    if ver.startswith("for"):
+        with open(INIT_FILE, encoding="utf-8") as f:
+            for line in f.readlines():
+                if line.startswith("__version__"):
+                    ver = line.split()[-1].strip('"') + "+master"
+
+    return ver
 
 
 setup(
