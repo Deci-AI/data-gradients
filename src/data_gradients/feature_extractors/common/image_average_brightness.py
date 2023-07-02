@@ -39,10 +39,7 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")
 
-        if sample.split == "val":
-            self.data.append({"split": sample.split, "brightness": 123})
-        else:
-            self.data.append({"split": sample.split, "brightness": brightness})
+        self.data.append({"split": sample.split, "brightness": brightness})
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
