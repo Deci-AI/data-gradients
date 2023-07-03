@@ -60,7 +60,11 @@ class ImageLabelFilesIterator:
         return [ext.replace(".", "").lower() for ext in extensions]
 
     def get_image_and_label_file_names(self, images_dir: str, labels_dir: str) -> List[Tuple[str, str]]:
-        """Gather all image and label files from the provided sub_dirs."""
+        """Gather all image and label files that are in the directories.
+        :param images_dir:      The directory containing the images.
+        :param labels_dir:      The directory containing the labels.
+        :return:                A list of tuple(<path-to-image>, <path-to-label>).
+        """
         images_with_labels_files = []
 
         if not os.path.exists(images_dir):
@@ -147,6 +151,11 @@ class ImageLabelConfigIterator(ImageLabelFilesIterator):
         )
 
     def get_image_and_label_file_names(self, images_dir: str, labels_dir: str) -> List[Tuple[str, str]]:
+        """Gather all image and label files that are both listed in the config_path and in the directories.
+        :param images_dir:      The directory containing the images.
+        :param labels_dir:      The directory containing the labels.
+        :return:                A list of tuple(<path-to-image>, <path-to-label>).
+        """
         images_with_labels_files = super().get_image_and_label_file_names(images_dir=images_dir, labels_dir=labels_dir)
         file_ids = self._load_file_ids(config_path=self.config_path)
         filename_to_images_with_labels_files = {get_filename(image_path): (image_path, label_path) for (image_path, label_path) in images_with_labels_files}
