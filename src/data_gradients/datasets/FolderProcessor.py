@@ -139,12 +139,12 @@ class ImageLabelConfigIterator(ImageLabelFilesIterator):
         verbose: bool = True,
     ):
         """
-        :param images_dir:      The directory containing the images.
-        :param labels_dir:      The directory containing the labels.
-        :param config_path:     The path to the config file. This config file should contain a list of file ids.
-        :param label_extensions: The extensions of the labels. Only the labels with this extensions will be considered.
-        :param image_extensions: The extensions of the images. Only the images with this extensions will be considered.
-        :param verbose:         Whether to print extra messages.
+        :param images_dir:          The directory containing the images.
+        :param labels_dir:          The directory containing the labels.
+        :param config_path:         Path to the config file. This config file should contain the list of file ids to include.
+        :param label_extensions:    The extensions of the labels. Only the labels with this extensions will be considered.
+        :param image_extensions:    The extensions of the images. Only the images with this extensions will be considered.
+        :param verbose:             Whether to print extra messages.
         """
         self.config_path = config_path
         super().__init__(

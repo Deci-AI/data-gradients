@@ -129,6 +129,7 @@ class VOCFormatDetectionDataset:
         :param images_subdir:       Local path to directory that includes all the images. Path relative to `root_dir`. Can be the same as `labels_subdir`.
         :param labels_subdir:       Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_subdir`.
         :param class_names:         List of class names. This is required to be able to parse the class names into class ids.
+        :param config_path:         Path to an optional config file. This config file should contain the list of file ids to include.
         :param verbose:             Whether to show extra information during loading.
         :param image_extensions:    List of image file extensions to load from.
         :param label_extensions:    List of label file extensions to load from.
