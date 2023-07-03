@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import logging
-from typing import List, Tuple, Sequence, Optional
+from typing import Tuple, Sequence, Optional
 from xml.etree import ElementTree
 
 from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, ImageLabelConfigIterator, DEFAULT_IMG_EXTENSIONS
@@ -108,44 +108,44 @@ class VOCFormatDetectionDataset:
     ```python
     from data_gradients.datasets.detection import VOCFormatDetectionDataset
 
-    train_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/train", labels_dir="labels/train")
-    val_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_dir="images/validation", labels_dir="labels/validation")
+    train_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_subdir="images/train", labels_subdir="labels/train")
+    val_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_subdir="images/validation", labels_subdir="labels/validation")
     ```
     """
 
     def __init__(
         self,
         root_dir: str,
-        images_dir: str,
-        labels_dir: str,
-        class_names: List[str],
+        images_subdir: str,
+        labels_subdir: str,
+        class_names: Sequence[str],
         config_path: Optional[str],
         verbose: bool = False,
         image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         label_extensions: Sequence[str] = ("xml",),
     ):
         """
-        :param root_dir:        Where the data is stored.
-        :param images_dir:      Local path to directory that includes all the images. Path relative to `root_dir`. Can be the same as `labels_dir`.
-        :param labels_dir:      Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_dir`.
-        :param class_names:     List of class names. This is required to be able to parse the class names into class ids.
-        :param verbose:         Whether to show extra information during loading.
-        :param image_extensions: List of image file extensions to load from.
-        :param label_extensions: List of label file extensions to load from.
+        :param root_dir:            Where the data is stored.
+        :param images_subdir:       Local path to directory that includes all the images. Path relative to `root_dir`. Can be the same as `labels_subdir`.
+        :param labels_subdir:       Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_subdir`.
+        :param class_names:         List of class names. This is required to be able to parse the class names into class ids.
+        :param verbose:             Whether to show extra information during loading.
+        :param image_extensions:    List of image file extensions to load from.
+        :param label_extensions:    List of label file extensions to load from.
         """
         self.class_names = class_names
         if config_path is None:
             self.image_label_tuples = ImageLabelFilesIterator(
-                images_dir=os.path.join(root_dir, images_dir),
-                labels_dir=os.path.join(root_dir, labels_dir),
+                images_dir=os.path.join(root_dir, images_subdir),
+                labels_dir=os.path.join(root_dir, labels_subdir),
                 image_extensions=image_extensions,
                 label_extensions=label_extensions,
                 verbose=verbose,
             )
         else:
             self.image_label_tuples = ImageLabelConfigIterator(
-                images_dir=os.path.join(root_dir, images_dir),
-                labels_dir=os.path.join(root_dir, labels_dir),
+                images_dir=os.path.join(root_dir, images_subdir),
+                labels_dir=os.path.join(root_dir, labels_subdir),
                 config_path=config_path,
                 image_extensions=image_extensions,
                 label_extensions=label_extensions,

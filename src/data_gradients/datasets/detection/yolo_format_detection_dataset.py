@@ -105,8 +105,8 @@ class YoloFormatDetectionDataset:
         :param labels_dir:              Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_dir`.
         :param ignore_invalid_labels:   Whether to ignore labels that fail to be parsed. If True ignores and logs a warning, otherwise raise an error.
         :param verbose:                 Whether to show extra information during loading.
-        :param image_extensions:         List of image file extensions to load from.
-        :param label_extensions:         List of label file extensions to load from.
+        :param image_extensions:        List of image file extensions to load from.
+        :param label_extensions:        List of label file extensions to load from.
         """
         self.image_label_tuples = ImageLabelFilesIterator(
             images_dir=os.path.join(root_dir, images_dir),

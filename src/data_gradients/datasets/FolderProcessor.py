@@ -41,11 +41,11 @@ class ImageLabelFilesIterator:
         verbose: bool = True,
     ):
         """
-        :param images_dir:      The directory containing the images.
-        :param labels_dir:      The directory containing the labels.
-        :param label_extensions: The extensions of the labels. Only the labels with these extensions will be considered.
-        :param image_extensions: The extensions of the images. Only the images with these extensions will be considered.
-        :param verbose:         Whether to print extra messages.
+        :param images_dir:          The directory containing the images.
+        :param labels_dir:          The directory containing the labels.
+        :param label_extensions:    The extensions of the labels. Only the labels with these extensions will be considered.
+        :param image_extensions:    The extensions of the images. Only the images with these extensions will be considered.
+        :param verbose:             Whether to print extra messages.
         """
 
         self.images_dir = images_dir
@@ -141,6 +141,7 @@ class ImageLabelConfigIterator(ImageLabelFilesIterator):
         """
         :param images_dir:      The directory containing the images.
         :param labels_dir:      The directory containing the labels.
+        :param config_path:     The path to the config file. This config file should contain a list of file ids.
         :param label_extensions: The extensions of the labels. Only the labels with this extensions will be considered.
         :param image_extensions: The extensions of the images. Only the images with this extensions will be considered.
         :param verbose:         Whether to print extra messages.
