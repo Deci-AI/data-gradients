@@ -43,6 +43,8 @@ class VOCFormatDetectionDataset:
     Example 2: Same directory for images and labels
     ```
         dataset_root/
+            ├── train.txt
+            ├── validation.txt
             ├── train/
             │   ├── 1.jpg
             │   ├── 1.xml
@@ -81,10 +83,22 @@ class VOCFormatDetectionDataset:
     </annotation>
     ```
 
+    The (optional) config file should include the list image ids to include.
+    ```
+    1
+    5
+    6
+    ...
+    34122
+    ```
+    The associated images/labels will then be loaded from the images_subdir and labels_subdir.
+    If config_path is not provided, all images will be used.
 
     #### Instantiation
     ```
     dataset_root/
+        ├── train.txt
+        ├── validation.txt
         ├── images/
         │   ├── train/
         │   │   ├── 1.jpg
@@ -105,11 +119,16 @@ class VOCFormatDetectionDataset:
                 ├── ...
     ```
 
+
     ```python
     from data_gradients.datasets.detection import VOCFormatDetectionDataset
 
-    train_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_subdir="images/train", labels_subdir="labels/train")
-    val_set = VOCFormatDetectionDataset(root_dir="<path/to/dataset_root>", images_subdir="images/validation", labels_subdir="labels/validation")
+    train_set = VOCFormatDetectionDataset(
+        root_dir="<path/to/dataset_root>", images_subdir="images/train", labels_subdir="labels/train", config_path="train.txt"
+    )
+    val_set = VOCFormatDetectionDataset(
+        root_dir="<path/to/dataset_root>", images_subdir="images/validation", labels_subdir="labels/validation", config_path="validation.txt"
+    )
     ```
     """
 
@@ -119,7 +138,7 @@ class VOCFormatDetectionDataset:
         images_subdir: str,
         labels_subdir: str,
         class_names: Sequence[str],
-        config_path: Optional[str],
+        config_path: Optional[str] = None,
         verbose: bool = False,
         image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         label_extensions: Sequence[str] = ("xml",),
@@ -130,6 +149,7 @@ class VOCFormatDetectionDataset:
         :param labels_subdir:       Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_subdir`.
         :param class_names:         List of class names. This is required to be able to parse the class names into class ids.
         :param config_path:         Path to an optional config file. This config file should contain the list of file ids to include.
+                                    If None, all the available images and tagets will be loaded.
         :param verbose:             Whether to show extra information during loading.
         :param image_extensions:    List of image file extensions to load from.
         :param label_extensions:    List of label file extensions to load from.
@@ -147,7 +167,7 @@ class VOCFormatDetectionDataset:
             self.image_label_tuples = ImageLabelConfigIterator(
                 images_dir=os.path.join(root_dir, images_subdir),
                 labels_dir=os.path.join(root_dir, labels_subdir),
-                config_path=config_path,
+                config_path=os.path.join(root_dir, config_path),
                 image_extensions=image_extensions,
                 label_extensions=label_extensions,
                 verbose=verbose,
