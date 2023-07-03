@@ -88,8 +88,8 @@ class ImageLabelFilesIterator:
     def _match_file_names(self, all_images_file_names: List[str], all_labels_file_names: List[str]) -> List[Tuple[str, str]]:
         """Matches the names of image and label files."""
 
-        image_file_base_names = {get_filename(file_name): file_name for file_name in all_images_file_names}
-        label_file_base_names = {get_filename(file_name): file_name for file_name in all_labels_file_names}
+        image_file_base_names = {self.get_filename(file_name): file_name for file_name in all_images_file_names}
+        label_file_base_names = {self.get_filename(file_name): file_name for file_name in all_labels_file_names}
 
         common_base_names = set(image_file_base_names.keys()) & set(label_file_base_names.keys())
         unmatched_image_files = set(image_file_base_names.keys()) - set(label_file_base_names.keys())
@@ -110,6 +110,10 @@ class ImageLabelFilesIterator:
     def is_label(self, filename: str) -> bool:
         """Check if the given file name refers to image."""
         return filename.split(".")[-1].lower() in self.label_extensions
+
+    @staticmethod
+    def get_filename(file_name: str) -> str:
+        return os.path.splitext(os.path.basename(file_name))[0]
 
     def __len__(self):
         return len(self.images_with_labels_files)
@@ -158,7 +162,9 @@ class ImageLabelConfigIterator(ImageLabelFilesIterator):
         """
         images_with_labels_files = super().get_image_and_label_file_names(images_dir=images_dir, labels_dir=labels_dir)
         file_ids = self._load_file_ids(config_path=self.config_path)
-        filename_to_images_with_labels_files = {get_filename(image_path): (image_path, label_path) for (image_path, label_path) in images_with_labels_files}
+        filename_to_images_with_labels_files = {
+            self.get_filename(image_path): (image_path, label_path) for (image_path, label_path) in images_with_labels_files
+        }
 
         images_with_labels_files = []
         for file_id in file_ids:
@@ -201,7 +207,3 @@ class ImageLabelConfigIterator(ImageLabelFilesIterator):
             raise RuntimeError(f"`config_path={config_path}` is empty and contains no file IDs.")
 
         return file_ids
-
-
-def get_filename(file_name: str) -> str:
-    return os.path.splitext(os.path.basename(file_name))[0]
