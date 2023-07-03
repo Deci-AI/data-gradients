@@ -118,7 +118,7 @@ class ImageLabelFilesIterator:
             yield image_label_file
 
 
-class ImageLabelConfigIterator:
+class ImageLabelConfigIterator(ImageLabelFilesIterator):
     """Iterate over all image and label files in the provided directories."""
 
     def __init__(
@@ -137,39 +137,25 @@ class ImageLabelConfigIterator:
         :param image_extensions: The extensions of the images. Only the images with this extensions will be considered.
         :param verbose:         Whether to print extra messages.
         """
-        self.images_with_labels_files = self.get_image_and_label_file_names(
+        self.config_path = config_path
+        super().__init__(
             images_dir=images_dir,
             labels_dir=labels_dir,
-            config_path=config_path,
             label_extensions=label_extensions,
             image_extensions=image_extensions,
             verbose=verbose,
         )
 
-    def get_image_and_label_file_names(
-        self,
-        images_dir: str,
-        labels_dir: str,
-        config_path: str,
-        image_extensions: List[str],
-        label_extensions: List[str],
-        verbose: bool,
-    ) -> List[Tuple[str, str]]:
-        image_label_folder_iterator = ImageLabelFilesIterator(
-            images_dir=images_dir,
-            labels_dir=labels_dir,
-            image_extensions=image_extensions,
-            label_extensions=label_extensions,
-            verbose=verbose,
-        )
-        file_ids = self._load_file_ids(config_path=config_path)
-        filename_to_images_with_labels_files = {get_filename(image_path): (image_path, label_path) for (image_path, label_path) in image_label_folder_iterator}
+    def get_image_and_label_file_names(self, images_dir: str, labels_dir: str) -> List[Tuple[str, str]]:
+        images_with_labels_files = super().get_image_and_label_file_names(images_dir=images_dir, labels_dir=labels_dir)
+        file_ids = self._load_file_ids(config_path=self.config_path)
+        filename_to_images_with_labels_files = {get_filename(image_path): (image_path, label_path) for (image_path, label_path) in images_with_labels_files}
 
         images_with_labels_files = []
         for file_id in file_ids:
             if file_id in filename_to_images_with_labels_files:
                 images_with_labels_files.append(filename_to_images_with_labels_files[file_id])
-            elif verbose:
+            elif self.verbose:
                 logger.warning(
                     f"No file with `file_id={file_id}` found in `images_dir={images_dir}` and/or `labels_dir={labels_dir}`. "
                     f"Hide this message by setting `verbose=False`."
@@ -177,15 +163,15 @@ class ImageLabelConfigIterator:
 
         if images_with_labels_files == []:
             error_msg = (
-                f"Out of {len(file_ids)} file ids found in `config_path={config_path}`, "
+                f"Out of {len(file_ids)} file ids found in `config_path={self.config_path}`, "
                 f"no matching file found in `images_dir={images_dir}` and/or `labels_dir={labels_dir}`."
             )
-            if not verbose:
+            if not self.verbose:
                 error_msg += "\nSet `verbose=True` for more information."
             raise RuntimeError(error_msg)
         elif len(images_with_labels_files) != len(file_ids):
             logger.warning(
-                f"Out of {len(file_ids)} file ids found in `config_path={config_path}`, "
+                f"Out of {len(file_ids)} file ids found in `config_path={self.config_path}`, "
                 f"{len(images_with_labels_files)} were found in both `images_dir={images_dir}` and `labels_dir={labels_dir}`. "
                 f"Hide this message by setting `verbose=False`."
             )
@@ -206,16 +192,6 @@ class ImageLabelConfigIterator:
             raise RuntimeError(f"`config_path={config_path}` is empty and contains no file IDs.")
 
         return file_ids
-
-    def __len__(self):
-        return len(self.images_with_labels_files)
-
-    def __getitem__(self, index):
-        return self.images_with_labels_files[index]
-
-    def __iter__(self):
-        for image_label_file in self.images_with_labels_files:
-            yield image_label_file
 
 
 def get_filename(file_name: str) -> str:

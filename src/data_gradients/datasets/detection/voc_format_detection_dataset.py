@@ -156,7 +156,7 @@ class VOCFormatDetectionDataset:
         img_file, _ = self.image_label_tuples[index]
         return load_image(path=img_file, channel_format=ImageChannelFormat.RGB)
 
-    def load_annotation(self, index: int) -> np.ndarray:
+    def load_labels(self, index: int) -> np.ndarray:
         _, label_path = self.image_label_tuples[index]
 
         with open(label_path) as f:
