@@ -108,16 +108,16 @@ class VOCDetectionDataset(VOCFormatDetectionDataset):
     ```python
     from data_gradients.datasets.detection import VOCDetectionDataset
 
-    train_set = VOCDetectionDataset(root_dir="<path/to/dataset_root>", year=2012, image_set="train")
-    val_set = VOCDetectionDataset(root_dir="<path/to/dataset_root>", year=2012, image_set="val")
+    train_set = VOCDetectionDataset(root_dir="<path/to/dataset_root>", year=2012, split="train")
+    val_set = VOCDetectionDataset(root_dir="<path/to/dataset_root>", year=2012, split="val")
     ```
     """
 
-    def __init__(self, root_dir: str, year: Union[int, str], image_set: str, verbose: bool = False):
+    def __init__(self, root_dir: str, year: Union[int, str], split: str, verbose: bool = False):
         """
         :param root_dir:        Where the data is stored.
         :param year:            Year of the dataset. Usually 2007 or 2012.
-        :param image_set:       Set of images to load. Usually `train` or `val`, but your dataset may include other sets such as `aeroplane_train.txt`, ...
+        :param split:       Set of images to load. Usually `train` or `val`, but your dataset may include other sets such as `aeroplane_train.txt`, ...
                                     Check out your ImageSets/Main folder to find the list
         :param verbose:         Whether to show extra information during loading.
         """
@@ -125,7 +125,7 @@ class VOCDetectionDataset(VOCFormatDetectionDataset):
             root_dir=root_dir,
             images_dir=os.path.join(root_dir, f"VOC{year}", "JPEGImages"),
             labels_dir=os.path.join(root_dir, f"VOC{year}", "Annotations"),
-            config_path=os.path.join(root_dir, f"VOC{year}", "ImageSets", "Main", f"{image_set}.txt"),
+            config_path=os.path.join(root_dir, f"VOC{year}", "ImageSets", "Main", f"{split}.txt"),
             class_names=PASCAL_VOC_CLASS_NAMES,
             verbose=verbose,
         )
