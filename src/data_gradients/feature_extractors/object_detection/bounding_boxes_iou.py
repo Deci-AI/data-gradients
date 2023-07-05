@@ -97,8 +97,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
 
         # Height of the plot is proportional to the number of classes
         figsize_x = min(max(10, len(bins)), 25)
-        figsize_y = int(num_classes * 0.3) + 4
-        figsize_y = min(max(6, figsize_y), 90)
+        figsize_y = min(max(6, int(num_classes * 0.3)), 175)
 
         plot_options = HeatmapOptions(
             xticklabels=xticklabels,

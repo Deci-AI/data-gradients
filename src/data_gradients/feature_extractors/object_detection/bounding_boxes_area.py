@@ -34,7 +34,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         # Height of the plot is proportional to the number of classes
         n_unique = len(df["class_name"].unique())
         figsize_x = 10
-        figsize_y = min(max(6, int(n_unique * 0.3)), 90)
+        figsize_y = min(max(6, int(n_unique * 0.3)), 175)
 
         max_area = min(100, df["relative_bbox_area"].max())
 
