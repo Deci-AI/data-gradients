@@ -43,7 +43,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
         max_area = min(100, df["bbox_area"].max())
         plot_options = ViolinPlotOptions(
             x_label_key="bbox_area",
-            x_label_name="Bounding Box Area (in % of image)",
+            x_label_name="Object Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
