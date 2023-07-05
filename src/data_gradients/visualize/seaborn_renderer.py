@@ -65,8 +65,6 @@ class SeabornRenderer(PlotRenderer):
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         if n_rows == 1 and n_cols == 1:
@@ -109,6 +107,8 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
@@ -125,8 +125,6 @@ class SeabornRenderer(PlotRenderer):
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         if n_rows == 1 and n_cols == 1:
@@ -181,6 +179,8 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_kdeplot(self, df, options: KDEPlotOptions) -> plt.Figure:
@@ -197,8 +197,6 @@ class SeabornRenderer(PlotRenderer):
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         if n_rows == 1 and n_cols == 1:
@@ -255,12 +253,12 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_violinplot(self, df, options: ViolinPlotOptions) -> plt.Figure:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         plot_args = dict(
@@ -304,13 +302,12 @@ class SeabornRenderer(PlotRenderer):
                 options.x_ticks_rotation = 45
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
-
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         barplot_args = dict(
@@ -372,6 +369,8 @@ class SeabornRenderer(PlotRenderer):
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_heatmap(self, data: Mapping[str, np.ndarray], options: HeatmapOptions) -> plt.Figure:

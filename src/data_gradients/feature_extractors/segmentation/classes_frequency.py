@@ -50,6 +50,7 @@ class SegmentationClassFrequency(AbstractFeatureExtractor):
             x_ticks_rotation=None,
             labels_key="split",
             orient="h",
+            tight_layout=True,
         )
 
         json = dict(
