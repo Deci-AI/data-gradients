@@ -15,7 +15,7 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     Get all Bounding Boxes areas and plot them as a percentage of the whole image.
     """
 
-    def __init__(self, topk: int = 40, prioritization_mode: str = "train_val_diff"):
+    def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
         :param topk:                How many rows (per split) to show.
         :param prioritization_mode: Strategy to use to chose which class will be prioritized. Only the topk will be shown

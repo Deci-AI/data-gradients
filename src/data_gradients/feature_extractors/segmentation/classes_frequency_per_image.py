@@ -10,7 +10,7 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
-    def __init__(self, topk: int = 40, prioritization_mode: str = "train_val_diff"):
+    def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
         :param topk:                How many rows (per split) to show.
         :param prioritization_mode: Strategy to use to chose which class will be prioritized. Only the topk will be shown

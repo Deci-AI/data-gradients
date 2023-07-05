@@ -16,15 +16,15 @@ report_sections:
           n_cols: 2
           heatmap_shape: [200, 200]
       - DetectionBoundingBoxArea:
-          topk: 4
+          topk: 30
           prioritization_mode: train_val_diff
       - DetectionBoundingBoxPerImageCount
       - DetectionBoundingBoxSize
       - DetectionClassFrequency:
-          topk: 4
+          topk: 30
           prioritization_mode: train_val_diff
       - DetectionClassesPerImageCount:
-          topk: 4
+          topk: 30
           prioritization_mode: train_val_diff
       - DetectionBoundingBoxIoU:
           num_bins: 10
