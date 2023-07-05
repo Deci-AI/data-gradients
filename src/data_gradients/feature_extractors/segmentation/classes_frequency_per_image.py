@@ -5,11 +5,13 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.plot_options import ViolinPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
 class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
-    def __init__(self):
+    def __init__(self, topk: int = 40, mode: str = "gap"):
+        self.value_extractor = MostImportantValuesSelector(topk=topk, mode=mode)
         self.data = []
 
     def update(self, sample: SegmentationSample):
@@ -33,6 +35,8 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
         # Include ("class_name", "class_id", "split", "n_appearance")
         # For each class, image, split, I want to know how many bbox I have
         df_class_count = df.groupby(["class_name", "class_id", "sample_id", "split"]).size().reset_index(name="n_appearance")
+
+        df_class_count = self.value_extractor.select(df=df_class_count, id_col="class_id", split_col="split", value_col="n_appearance")
 
         max_n_appearance = df_class_count["n_appearance"].max()
 

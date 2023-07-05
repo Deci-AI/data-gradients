@@ -5,7 +5,7 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.plot_options import ViolinPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
-from data_gradients.feature_extractors.utils import get_top_values
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
@@ -13,7 +13,8 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
     """Feature Extractor to show the distribution of number of instance of each class per image.
     This gives information like "The class 'Human' usually appears 2 to 20 times per image."""
 
-    def __init__(self):
+    def __init__(self, topk: int = 40, mode: str = "gap"):
+        self.value_extractor = MostImportantValuesSelector(topk=topk, mode=mode)
         self.data = []
 
     def update(self, sample: DetectionSample):
@@ -36,7 +37,7 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
         # TODO: check this
         df_class_count = df.groupby(["class_name", "class_id", "sample_id", "split"]).size().reset_index(name="n_appearance")
 
-        df_class_count = get_top_values(df=df_class_count, id_col="class_id", split_col="split", val_col="n_appearance", mode="outliers")
+        df_class_count = self.value_extractor.select(df=df_class_count, id_col="class_id", split_col="split", value_col="n_appearance")
 
         # Height of the plot is proportional to the number of classes
         n_unique = len(df_class_count["class_name"].unique())

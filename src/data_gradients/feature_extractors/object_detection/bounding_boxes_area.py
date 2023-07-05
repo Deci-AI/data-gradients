@@ -5,14 +5,15 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
-from data_gradients.feature_extractors.utils import get_top_values
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
 class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     """Feature Extractor to compute the area covered Bounding Boxes."""
 
-    def __init__(self):
+    def __init__(self, topk: int = 40, mode: str = "gap"):
+        self.value_extractor = MostImportantValuesSelector(topk=topk, mode=mode)
         self.data = []
 
     def update(self, sample: DetectionSample):
@@ -32,7 +33,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        df = get_top_values(df=df, id_col="class_id", split_col="split", val_col="relative_bbox_area", mode="outliers")
+        df = self.value_extractor.select(df=df, id_col="class_id", split_col="split", value_col="relative_bbox_area")
 
         # Height of the plot is proportional to the number of classes
         n_unique = len(df["class_name"].unique())

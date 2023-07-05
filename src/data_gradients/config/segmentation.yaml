@@ -16,10 +16,16 @@ report_sections:
           n_rows: 6
           n_cols: 2
           heatmap_shape: [200, 200]
-      - SegmentationClassFrequency
-      - SegmentationClassesPerImageCount
+      - SegmentationClassFrequency:
+          topk: 30
+          mode: gap
+      - SegmentationClassesPerImageCount:
+          topk: 30
+          mode: gap
       - SegmentationComponentsPerImageCount
       - SegmentationBoundingBoxResolution
-      - SegmentationBoundingBoxArea
+      - SegmentationBoundingBoxArea:
+          topk: 30
+          mode: gap
       - SegmentationComponentsConvexity
       - SegmentationComponentsErosion

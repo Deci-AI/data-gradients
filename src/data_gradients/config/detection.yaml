@@ -15,11 +15,17 @@ report_sections:
           n_rows: 6
           n_cols: 2
           heatmap_shape: [200, 200]
-      - DetectionBoundingBoxArea
+      - DetectionBoundingBoxArea:
+          topk: 4
+          mode: gap
       - DetectionBoundingBoxPerImageCount
       - DetectionBoundingBoxSize
-      - DetectionClassFrequency
-      - DetectionClassesPerImageCount
+      - DetectionClassFrequency:
+          topk: 4
+          mode: gap
+      - DetectionClassesPerImageCount:
+          topk: 4
+          mode: gap
       - DetectionBoundingBoxIoU:
           num_bins: 10
           class_agnostic: true

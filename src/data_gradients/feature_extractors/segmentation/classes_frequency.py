@@ -5,11 +5,13 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.seaborn_renderer import BarPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
 class SegmentationClassFrequency(AbstractFeatureExtractor):
-    def __init__(self):
+    def __init__(self, topk: int = 40, mode: str = "gap"):
+        self.value_extractor = MostImportantValuesSelector(topk=topk, mode=mode)
         self.data = []
 
     def update(self, sample: SegmentationSample):
@@ -33,6 +35,8 @@ class SegmentationClassFrequency(AbstractFeatureExtractor):
 
         split_sums = df_class_count.groupby("split")["n_appearance"].sum()
         df_class_count["frequency"] = 100 * (df_class_count["n_appearance"] / df_class_count["split"].map(split_sums))
+
+        df_class_count = self.value_extractor.select(df=df_class_count, id_col="class_id", split_col="split", value_col="frequency")
 
         # Height of the plot is proportional to the number of classes
         n_unique = len(df_class_count["class_name"].unique())

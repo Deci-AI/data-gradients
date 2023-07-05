@@ -5,6 +5,7 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
@@ -14,7 +15,8 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     Get all Bounding Boxes areas and plot them as a percentage of the whole image.
     """
 
-    def __init__(self):
+    def __init__(self, topk: int = 40, mode: str = "gap"):
+        self.value_extractor = MostImportantValuesSelector(topk=topk, mode=mode)
         self.data = []
 
     def update(self, sample: SegmentationSample):
@@ -28,21 +30,23 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
                         "split": sample.split,
                         "class_name": class_name,
                         "class_id": class_id,
-                        "bbox_area": 100 * (contour.bbox_area / image_area),
+                        "relative_bbox_area": 100 * (contour.bbox_area / image_area),
                     }
                 )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
+        df = self.value_extractor.select(df=df, id_col="class_id", split_col="split", value_col="relative_bbox_area")
+
         # Height of the plot is proportional to the number of classes
         n_unique = len(df["class_name"].unique())
         figsize_x = 10
         figsize_y = min(max(6, int(n_unique * 0.3)), 175)
 
-        max_area = min(100, df["bbox_area"].max())
+        max_area = min(100, df["relative_bbox_area"].max())
         plot_options = ViolinPlotOptions(
-            x_label_key="bbox_area",
+            x_label_key="relative_bbox_area",
             x_label_name="Object Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
@@ -54,7 +58,9 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
             labels_key="split",
             bandwidth=0.4,
         )
-        json = dict(train=dict(df[df["split"] == "train"]["bbox_area"].describe()), val=dict(df[df["split"] == "val"]["bbox_area"].describe()))
+        json = dict(
+            train=dict(df[df["split"] == "train"]["relative_bbox_area"].describe()), val=dict(df[df["split"] == "val"]["relative_bbox_area"].describe())
+        )
 
         feature = Feature(
             data=df,
