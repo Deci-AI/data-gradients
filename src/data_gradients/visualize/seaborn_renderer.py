@@ -376,17 +376,18 @@ class SeabornRenderer(PlotRenderer):
 
     def _render_heatmap(self, data: Mapping[str, np.ndarray], options: HeatmapOptions) -> plt.Figure:
 
-        fig, axes = plt.subplots(nrows=len(data), ncols=1, figsize=options.figsize, tight_layout=options.tight_layout)
+        fig, axes = plt.subplots(nrows=1, ncols=len(data), figsize=options.figsize, tight_layout=options.tight_layout)
         fig.subplots_adjust()
 
         for i, (key, heatmap) in enumerate(data.items()):
             ax = axes[i] if len(data) > 1 else axes
+            cbar = options.cbar if i + 1 == len(data) else False
             heatmap_args = dict(
                 data=heatmap,
                 xticklabels=options.xticklabels,
                 yticklabels=options.yticklabels,
                 annot=options.annot,
-                cbar=options.cbar,
+                cbar=cbar,
                 cbar_kws={"shrink": 0.5},
                 square=options.square,
                 cmap=options.cmap,
