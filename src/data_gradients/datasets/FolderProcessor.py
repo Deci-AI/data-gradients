@@ -41,11 +41,11 @@ class ImageLabelFilesIterator:
         verbose: bool = True,
     ):
         """
-        :param images_dir:      The directory containing the images.
-        :param labels_dir:      The directory containing the labels.
-        :param label_extensions: The extensions of the labels. Only the labels with these extensions will be considered.
-        :param image_extensions: The extensions of the images. Only the images with these extensions will be considered.
-        :param verbose:         Whether to print extra messages.
+        :param images_dir:          The directory containing the images.
+        :param labels_dir:          The directory containing the labels.
+        :param label_extensions:    The extensions of the labels. Only the labels with these extensions will be considered.
+        :param image_extensions:    The extensions of the images. Only the images with these extensions will be considered.
+        :param verbose:             Whether to print extra messages.
         """
 
         self.images_dir = images_dir
@@ -60,7 +60,11 @@ class ImageLabelFilesIterator:
         return [ext.replace(".", "").lower() for ext in extensions]
 
     def get_image_and_label_file_names(self, images_dir: str, labels_dir: str) -> List[Tuple[str, str]]:
-        """Gather all image and label files from the provided sub_dirs."""
+        """Gather all image and label files that are in the directories.
+        :param images_dir:      The directory containing the images.
+        :param labels_dir:      The directory containing the labels.
+        :return:                A list of tuple(<path-to-image>, <path-to-label>).
+        """
         images_with_labels_files = []
 
         if not os.path.exists(images_dir):
@@ -83,10 +87,9 @@ class ImageLabelFilesIterator:
 
     def _match_file_names(self, all_images_file_names: List[str], all_labels_file_names: List[str]) -> List[Tuple[str, str]]:
         """Matches the names of image and label files."""
-        base_name = lambda file_name: os.path.splitext(os.path.basename(file_name))[0]
 
-        image_file_base_names = {base_name(file_name): file_name for file_name in all_images_file_names}
-        label_file_base_names = {base_name(file_name): file_name for file_name in all_labels_file_names}
+        image_file_base_names = {self.get_filename(file_name): file_name for file_name in all_images_file_names}
+        label_file_base_names = {self.get_filename(file_name): file_name for file_name in all_labels_file_names}
 
         common_base_names = set(image_file_base_names.keys()) & set(label_file_base_names.keys())
         unmatched_image_files = set(image_file_base_names.keys()) - set(label_file_base_names.keys())
@@ -108,6 +111,10 @@ class ImageLabelFilesIterator:
         """Check if the given file name refers to image."""
         return filename.split(".")[-1].lower() in self.label_extensions
 
+    @staticmethod
+    def get_filename(file_name: str) -> str:
+        return os.path.splitext(os.path.basename(file_name))[0]
+
     def __len__(self):
         return len(self.images_with_labels_files)
 
@@ -117,3 +124,87 @@ class ImageLabelFilesIterator:
     def __iter__(self):
         for image_label_file in self.images_with_labels_files:
             yield image_label_file
+
+
+class ImageLabelConfigIterator(ImageLabelFilesIterator):
+    """Iterate over all image and label files in the provided directories."""
+
+    def __init__(
+        self,
+        images_dir: str,
+        labels_dir: str,
+        config_path: str,
+        label_extensions: Sequence[str],
+        image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
+        verbose: bool = True,
+    ):
+        """
+        :param images_dir:          The directory containing the images.
+        :param labels_dir:          The directory containing the labels.
+        :param config_path:         Path to the config file. This config file should contain the list of file ids to include.
+        :param label_extensions:    The extensions of the labels. Only the labels with this extensions will be considered.
+        :param image_extensions:    The extensions of the images. Only the images with this extensions will be considered.
+        :param verbose:             Whether to print extra messages.
+        """
+        self.config_path = config_path
+        super().__init__(
+            images_dir=images_dir,
+            labels_dir=labels_dir,
+            label_extensions=label_extensions,
+            image_extensions=image_extensions,
+            verbose=verbose,
+        )
+
+    def get_image_and_label_file_names(self, images_dir: str, labels_dir: str) -> List[Tuple[str, str]]:
+        """Gather all image and label files that are both listed in the config_path and in the directories.
+        :param images_dir:      The directory containing the images.
+        :param labels_dir:      The directory containing the labels.
+        :return:                A list of tuple(<path-to-image>, <path-to-label>).
+        """
+        images_with_labels_files = super().get_image_and_label_file_names(images_dir=images_dir, labels_dir=labels_dir)
+        file_ids = self._load_file_ids(config_path=self.config_path)
+        filename_to_images_with_labels_files = {
+            self.get_filename(image_path): (image_path, label_path) for (image_path, label_path) in images_with_labels_files
+        }
+
+        images_with_labels_files = []
+        for file_id in file_ids:
+            if file_id in filename_to_images_with_labels_files:
+                images_with_labels_files.append(filename_to_images_with_labels_files[file_id])
+            elif self.verbose:
+                logger.warning(
+                    f"No file with `file_id={file_id}` found in `images_dir={images_dir}` and/or `labels_dir={labels_dir}`. "
+                    f"Hide this message by setting `verbose=False`."
+                )
+
+        if images_with_labels_files == []:
+            error_msg = (
+                f"Out of {len(file_ids)} file ids found in `config_path={self.config_path}`, "
+                f"no matching file found in `images_dir={images_dir}` and/or `labels_dir={labels_dir}`."
+            )
+            if not self.verbose:
+                error_msg += "\nSet `verbose=True` for more information."
+            raise RuntimeError(error_msg)
+        elif len(images_with_labels_files) != len(file_ids):
+            logger.warning(
+                f"Out of {len(file_ids)} file ids found in `config_path={self.config_path}`, "
+                f"{len(images_with_labels_files)} were found in both `images_dir={images_dir}` and `labels_dir={labels_dir}`. "
+                f"Hide this message by setting `verbose=False`."
+            )
+
+        return images_with_labels_files
+
+    def _load_file_ids(self, config_path: str) -> List[str]:
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(f"The config file `{config_path}` does not exist.")
+
+        with open(config_path, "r") as f:
+            try:
+                file_ids = f.read().split()
+            except Exception as e:
+                raise e(f"Could not properly parse `config_path={config_path}`") from e
+
+        if file_ids == []:
+            raise RuntimeError(f"`config_path={config_path}` is empty and contains no file IDs.")
+
+        return file_ids
