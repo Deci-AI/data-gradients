@@ -14,12 +14,12 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
 
     def __init__(self, topk: int = 40, prioritization_mode: str = "train_val_diff"):
         """
-        :param topk:    How many rows (per split) to return.
-        :param prioritization_mode:    The prioritization_mode to get the top values for. One of:
-                - 'train_val_diff':         Returns rows with the biggest train_val_diff between 'train' and 'val' split values.
-                - 'outliers':    Returns rows with the most extreme average values.
-                - 'max':         Returns rows with the highest average values.
-                - 'min':         Returns rows with the lowest average values.
+        :param topk:                How many rows (per split) to show.
+        :param prioritization_mode: Strategy to use to chose which class will be prioritized. Only the topk will be shown
+                    - 'train_val_diff':     Returns rows with the biggest train_val_diff between 'train' and 'val' split values.
+                    - 'outliers':           Returns rows with the most extreme average values.
+                    - 'max':                Returns rows with the highest average values.
+                    - 'min':                Returns rows with the lowest average values.
         """
         self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
