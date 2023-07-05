@@ -40,7 +40,7 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
         # Height of the plot is proportional to the number of classes
         n_unique = len(df_class_count["class_name"].unique())
         figsize_x = 10
-        figsize_y = min(max(6, int(n_unique * 0.3)), 90)
+        figsize_y = min(max(6, int(n_unique * 0.3)), 175)
 
         plot_options = BarPlotOptions(
             x_label_key="frequency",
