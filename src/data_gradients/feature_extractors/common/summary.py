@@ -70,36 +70,36 @@ class SummaryStats(AbstractFeatureExtractor):
             basic_stats.classes_count = len(sample.class_names)
 
     def aggregate(self) -> Feature:
-
         for basic_stats in self.stats.values():
-            basic_stats.classes_in_use = len(set(basic_stats.classes))
+            if basic_stats.image_count > 0:
+                basic_stats.classes_in_use = len(set(basic_stats.classes))
 
-            basic_stats.classes = np.array(basic_stats.classes)
-            basic_stats.annotations_per_image = np.array(basic_stats.annotations_per_image)
-            basic_stats.annotations_sizes = np.array(basic_stats.annotations_sizes)
+                basic_stats.classes = np.array(basic_stats.classes)
+                basic_stats.annotations_per_image = np.array(basic_stats.annotations_per_image)
+                basic_stats.annotations_sizes = np.array(basic_stats.annotations_sizes)
 
-            basic_stats.annotation_count = int(np.sum(basic_stats.annotations_per_image))
-            basic_stats.images_without_annotation = np.count_nonzero(basic_stats.annotations_per_image == 0)
+                basic_stats.annotation_count = int(np.sum(basic_stats.annotations_per_image))
+                basic_stats.images_without_annotation = np.count_nonzero(basic_stats.annotations_per_image == 0)
 
-            basic_stats.images_resolutions = np.array(basic_stats.images_resolutions)
-            basic_stats.smallest_annotations = int(np.min(basic_stats.annotations_sizes))
-            basic_stats.largest_annotations = int(np.max(basic_stats.annotations_sizes))
-            basic_stats.most_annotations = int(np.max(basic_stats.annotations_per_image))
-            basic_stats.least_annotations = int(np.min(basic_stats.annotations_per_image))
+                basic_stats.images_resolutions = np.array(basic_stats.images_resolutions)
+                basic_stats.smallest_annotations = int(np.min(basic_stats.annotations_sizes))
+                basic_stats.largest_annotations = int(np.max(basic_stats.annotations_sizes))
+                basic_stats.most_annotations = int(np.max(basic_stats.annotations_per_image))
+                basic_stats.least_annotations = int(np.min(basic_stats.annotations_per_image))
 
-            areas = basic_stats.images_resolutions[:, 0] * basic_stats.images_resolutions[:, 1]
-            areas = areas[:, None]
-            index_of_med = np.argsort(areas)[len(areas) // 2]
-            basic_stats.med_image_resolution = self.format_resolution(basic_stats.images_resolutions[index_of_med][0])
+                areas = basic_stats.images_resolutions[:, 0] * basic_stats.images_resolutions[:, 1]
+                areas = areas[:, None]
+                index_of_med = np.argsort(areas)[len(areas) // 2]
+                basic_stats.med_image_resolution = self.format_resolution(basic_stats.images_resolutions[index_of_med][0])
 
-            basic_stats.annotations_per_image = f"{basic_stats.annotation_count / basic_stats.image_count:.2f}"
-            basic_stats.image_count = f"{basic_stats.image_count:,}"
-            basic_stats.annotation_count = f"{basic_stats.annotation_count:,}"
+                basic_stats.annotations_per_image = f"{basic_stats.annotation_count / basic_stats.image_count:.2f}"
+                basic_stats.image_count = f"{basic_stats.image_count:,}"
+                basic_stats.annotation_count = f"{basic_stats.annotation_count:,}"
 
-            # To support JSON - delete arrays
-            basic_stats.classes = None
-            basic_stats.images_resolutions = None
-            basic_stats.annotations_sizes = None
+                # To support JSON - delete arrays
+                basic_stats.classes = None
+                basic_stats.images_resolutions = None
+                basic_stats.annotations_sizes = None
 
         json_res = {k: dataclasses.asdict(v) for k, v in self.stats.items()}
 
@@ -116,7 +116,7 @@ class SummaryStats(AbstractFeatureExtractor):
 
     @property
     def description(self) -> str:
-        return self.template.render(train=self.stats["train"], val=self.stats["val"])
+        return self.template.render(**self.stats)
 
     @staticmethod
     def format_resolution(array: np.ndarray) -> str:
