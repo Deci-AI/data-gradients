@@ -1,6 +1,6 @@
 from typing import Union
 
-from data_gradients.datasets.segmentation.coco_format import CocoFormatSegmentationDataset
+from data_gradients.datasets.segmentation.coco_format_segmentation_dataset import CocoFormatSegmentationDataset
 
 
 class CocoSegmentationDataset(CocoFormatSegmentationDataset):
