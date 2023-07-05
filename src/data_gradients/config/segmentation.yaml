@@ -18,14 +18,14 @@ report_sections:
           heatmap_shape: [200, 200]
       - SegmentationClassFrequency:
           topk: 30
-          mode: gap
+          prioritization_mode: train_val_diff
       - SegmentationClassesPerImageCount:
           topk: 30
-          mode: gap
+          prioritization_mode: train_val_diff
       - SegmentationComponentsPerImageCount
       - SegmentationBoundingBoxResolution
       - SegmentationBoundingBoxArea:
           topk: 30
-          mode: gap
+          prioritization_mode: train_val_diff
       - SegmentationComponentsConvexity
       - SegmentationComponentsErosion
