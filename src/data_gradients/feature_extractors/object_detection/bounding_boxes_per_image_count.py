@@ -16,22 +16,19 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
         self.data = []
 
     def update(self, sample: DetectionSample):
-        for _ in sample.class_ids:
-            self.data.append(
-                {
-                    "split": sample.split,
-                    "sample_id": sample.sample_id,
-                }
-            )
+        self.data.append(
+            {
+                "split": sample.split,
+                "sample_id": sample.sample_id,
+                "n_bbox": len(sample.bboxes_xyxy),
+            }
+        )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        # Include ("sample_id", "split", "n_components")
-        df_class_count = df.groupby(["sample_id", "split"]).size().reset_index(name="n_components")
-
         plot_options = Hist2DPlotOptions(
-            x_label_key="n_components",
+            x_label_key="n_bbox",
             x_label_name="Number of bounding box per Image",
             title=self.title,
             kde=False,
@@ -44,11 +41,11 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
         )
 
         json = dict(
-            train=dict(df_class_count[df_class_count["split"] == "train"]["n_components"].describe()),
-            val=dict(df_class_count[df_class_count["split"] == "val"]["n_components"].describe()),
+            train=dict(df[df["split"] == "train"]["n_bbox"].describe()),
+            val=dict(df[df["split"] == "val"]["n_bbox"].describe()),
         )
 
-        feature = Feature(data=df_class_count, plot_options=plot_options, json=json)
+        feature = Feature(data=df, plot_options=plot_options, json=json)
         return feature
 
     @property
