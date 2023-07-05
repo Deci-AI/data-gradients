@@ -1,5 +1,4 @@
 import pandas as pd
-from abc import ABC, abstractmethod
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import DetectionSample
@@ -79,41 +78,3 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
             "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
             "learn to predict that class."
         )
-
-
-class DataframeExtractor(ABC):
-    def __init__(self, topk: int):
-        self.topk = topk
-
-    @abstractmethod
-    def extract(self, df: pd.DataFrame, column: str) -> pd.DataFrame:
-        pass
-
-
-class OutliersExtractor(DataframeExtractor):
-    def extract(self, df: pd.DataFrame, column: str) -> pd.DataFrame:
-        values = df[column]
-        values_normalized = (values - values.mean()) / values.var()
-        outliers_index = values_normalized.abs().sort_values(ascending=False).index[: self.topk]
-        return df[outliers_index]
-
-
-class HighestValuesExtractor(DataframeExtractor):
-    def extract(self, df: pd.DataFrame, column: str) -> pd.DataFrame:
-        return df.sort_values(by=column, ascending=False)[: self.topk]
-
-
-class LowestValuesExtractor(DataframeExtractor):
-    def extract(self, df: pd.DataFrame, column: str) -> pd.DataFrame:
-        return df.sort_values(by=column, ascending=True)[: self.topk]
-
-
-def get_dataframe_extractor_per_frequency(extractor_name: str, topk: int) -> DataframeExtractor:
-    available_extractors = {
-        "outliers": OutliersExtractor(topk=topk),
-        "most_frequent": HighestValuesExtractor(topk=topk),
-        "least_frequent": LowestValuesExtractor(topk=topk),
-    }
-    if extractor_name not in available_extractors.keys():
-        raise ValueError
-    return available_extractors[extractor_name]
