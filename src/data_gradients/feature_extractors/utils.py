@@ -1,40 +1,47 @@
-from typing import Dict, List, Any, Tuple
-
 import numpy as np
 
 
-def align_histogram_keys(train_histogram: Dict[str, Any], val_histogram: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """Enforces the keys of training and validation histograms to be the same.
-    If one of the keys is missing, the histogram will filled with defaults value (0, 0.0, "") depending on the situation
-
-    :param train_histogram:  Histogram representing metrics from training split.
-    :param val_histogram:  Histogram representing metrics from validation split.
-    :return: A merged dictionary containing key-value pairs from both "train" and "val" splits.
+def get_top_values(df, id_col, split_col, val_col, mode):
     """
-    keys = set(train_histogram.keys()) | set(val_histogram.keys())
+    Returns the top 5 rows of the DataFrame based on the mode.
+    The DataFrame is expected to have three columns: id_col, split_col, val_col.
 
-    aligned_train_histogram, aligned_val_histogram = {}, {}
-    for key in keys:
-        train_value = train_histogram.get(key)
-        val_value = val_histogram.get(key)
-
-        value_type = type(train_value) if train_value is not None else type(val_value)
-        default_value = value_type()
-
-        aligned_train_histogram[key] = train_value or default_value
-        aligned_val_histogram[key] = val_value or default_value
-
-    return aligned_train_histogram, aligned_val_histogram
-
-
-def normalize_values_to_percentages(counters: List[float], total_count: float) -> List[float]:
+    Modes:
+    'gap' - Returns rows with the biggest gap between 'train' and 'val' split values.
+    'outliers' - Returns rows with the most extreme average split values.
+    'max' - Returns rows with the highest average split values.
+    'min' - Returns rows with the lowest average split values.
     """
-    Normalize a list of count to percentages relative to a total value.
+    # Verify inputs
+    for col in [id_col, split_col, val_col]:
+        if col not in df.columns:
+            raise ValueError(f"{col} is not a column in the DataFrame")
+    print(id_col, split_col, val_col)
 
-    :param counters:    Values to normalize.
-    :param total_count: Total number of values, which will be used to calculate percentages.
-    :return:            Values representing the percentages of each input value.
-    """
-    if total_count == 0:
-        total_count = 1
-    return [np.round(((100 * count) / total_count), 3) for count in counters]
+    # the mean of val_col for each id_col/split_col
+    df_mean = df.groupby([id_col, split_col])[val_col].mean().reset_index()
+
+    # Pivot DataFrame to have 'train' and 'val' as columns
+    df_pivot = df_mean.pivot(index=id_col, columns=split_col, values=val_col)
+
+    # Calculate the relative difference or average based on the mode
+    if mode == "gap":
+        df_pivot["metric"] = np.abs((df_pivot["train"] - df_pivot["val"]) / ((df_pivot["train"] + df_pivot["val"]) / 2))
+    elif mode in ["outliers", "max", "min"]:
+        df_pivot["metric"] = (df_pivot["train"] + df_pivot["val"]) / 2
+
+    # Calculate the z-score if mode is 'outliers'
+    if mode == "outliers":
+        mean, std = df_pivot["metric"].mean(), df_pivot["metric"].std()
+        df_pivot["metric"] = (df_pivot["metric"] - mean).abs() / std
+
+    # Get the top 5 class_ids based on the metric
+    if mode in ["gap", "outliers", "max"]:
+        top_ids = df_pivot.nlargest(5, "metric").index
+    elif mode == "min":
+        top_ids = df_pivot.nsmallest(5, "metric").index
+    else:
+        raise ValueError("Invalid mode. Expected one of: gap, outliers, max, min")
+
+    # Filter the original DataFrame to only include rows with the top class_ids
+    return df[df[id_col].isin(top_ids)]
