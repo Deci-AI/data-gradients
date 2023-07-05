@@ -14,6 +14,14 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
     This gives information like "The class 'Human' usually appears 2 to 20 times per image."""
 
     def __init__(self, topk: int = 40, prioritization_mode: str = "train_val_diff"):
+        """
+        :param topk:    How many rows (per split) to return.
+        :param prioritization_mode:    The prioritization_mode to get the top values for. One of:
+                - 'train_val_diff':         Returns rows with the biggest train_val_diff between 'train' and 'val' split values.
+                - 'outliers':    Returns rows with the most extreme average values.
+                - 'max':         Returns rows with the highest average values.
+                - 'min':         Returns rows with the lowest average values.
+        """
         self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
 
