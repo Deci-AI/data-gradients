@@ -7,12 +7,13 @@ class MostImportantValuesSelector:
         """
         :param topk:    How many rows (per split) to return.
         :param prioritization_mode:    The prioritization_mode to get the top values for. One of:
-                - 'train_val_diff':         Returns rows with the biggest train_val_diff between 'train' and 'val' split values.
-                - 'outliers':    Returns rows with the most extreme average values.
-                - 'max':         Returns rows with the highest average values.
-                - 'min':         Returns rows with the lowest average values.
+                - 'train_val_diff': Returns the top k rows with the biggest train_val_diff between 'train' and 'val' split values.
+                - 'outliers':       Returns the top k rows with the most extreme average values.
+                - 'max':            Returns the top k rows with the highest average values.
+                - 'min':            Returns the top k rows with the lowest average values.
+                - 'min_max':        Returns the (top k)/2 rows with the biggest average values, and the (top k)/2 with the smallest average values.
         """
-        valid_modes = ("train_val_diff", "outliers", "max", "min")
+        valid_modes = ("train_val_diff", "outliers", "max", "min", "min_max")
         if prioritization_mode not in valid_modes:
             raise ValueError(f"Invalid `prioritization_mode={prioritization_mode}'. Must be one of: {valid_modes}.")
         self.topk = topk
@@ -43,7 +44,7 @@ class MostImportantValuesSelector:
         # Calculate the relative difference or average based on the prioritization_mode
         if self.prioritization_mode == "train_val_diff":
             df_pivot["metric"] = np.abs((df_pivot["train"] - df_pivot["val"]) / ((df_pivot["train"] + df_pivot["val"]) / 2))
-        elif self.prioritization_mode in ["outliers", "max", "min"]:
+        elif self.prioritization_mode in ["outliers", "max", "min", "min_max"]:
             df_pivot["metric"] = (df_pivot["train"] + df_pivot["val"]) / 2
 
         if self.prioritization_mode == "outliers":
@@ -57,5 +58,10 @@ class MostImportantValuesSelector:
         elif self.prioritization_mode == "min":
             top_ids = df_pivot.nsmallest(self.topk, "metric").index
             return df[df[id_col].isin(top_ids)]
+        elif self.prioritization_mode == "min_max":
+            n_min_results = self.topk // 2
+            bottom_ids = df_pivot.nlargest(n_min_results, "metric").index
+            top_ids = df_pivot.nsmallest(self.topk - n_min_results, "metric").index
+            return pd.concat([df[df[id_col].isin(top_ids)], df[df[id_col].isin(bottom_ids)]])
         else:
             raise NotImplementedError(f"Mode {self.prioritization_mode} is not implemented")

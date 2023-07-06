@@ -17,10 +17,11 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
         """
         :param topk:                How many rows (per split) to show.
         :param prioritization_mode: Strategy to use to chose which class will be prioritized. Only the topk will be shown
-                    - 'train_val_diff':     Returns rows with the biggest train_val_diff between 'train' and 'val' split values.
-                    - 'outliers':           Returns rows with the most extreme average values.
-                    - 'max':                Returns rows with the highest average values.
-                    - 'min':                Returns rows with the lowest average values.
+                - 'train_val_diff': Returns the top k rows with the biggest train_val_diff between 'train' and 'val' split values.
+                - 'outliers':       Returns the top k rows with the most extreme average values.
+                - 'max':            Returns the top k rows with the highest average values.
+                - 'min':            Returns the top k rows with the lowest average values.
+                - 'min_max':        Returns the (top k)/2 rows with the biggest average values, and the (top k)/2 with the smallest average values.
         """
         self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
