@@ -65,6 +65,7 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             bandwidth=0.4,
             x_ticks_rotation=None,
             labels_key="split",
+            tight_layout=True,
         )
 
         json = dict(

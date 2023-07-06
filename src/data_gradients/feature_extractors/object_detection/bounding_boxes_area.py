@@ -62,6 +62,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             x_lim=(0, max_area),
             figsize=(figsize_x, figsize_y),
             bandwidth=0.4,
+            tight_layout=True,
         )
 
         json = dict(
