@@ -39,50 +39,15 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
-        print(df.describe())
+
         # Include ("class_name", "class_id", "split", "n_appearance")
         # For each class, image, split, I want to know how many bbox I have
         # TODO: check this
 
         df_class_count = df.groupby(["class_name", "class_id", "sample_id", "split"]).size().reset_index(name="n_appearance")
-        print(df_class_count.groupby("class_name").sum())
-        print(self.value_extractor.select(df=df_class_count.copy(), id_col="class_id", split_col="split", value_col="n_appearance").groupby("class_name").sum())
-        print(self.value_extractor.select(df=df_class_count.copy(), id_col="class_id", split_col="split", value_col="n_appearance").groupby("class_name").sum())
+
         df_class_count = self.value_extractor.select(df=df_class_count, id_col="class_id", split_col="split", value_col="n_appearance")
-        # """             class_id  n_appearance
-        # class_name
-        # big bus             0            89
-        # big truck         126           355
-        # bus-l-             46            29
-        # bus-s-             39            13
-        # car              1540          3310
-        # mid truck         185            70
-        # small bus         162            30
-        # small truck      1337           668
-        # truck-l-          976           193
-        # truck-m-         1458           321
-        # truck-s-          870           126
-        # truck-xl-         737            78
-        # """
 
-        # """class_name
-        # big bus             0           116
-        # big truck         156           457
-        # bus-l-             38            26
-        # bus-s-             51            19
-        # car              1552          3303
-        # mid truck         215            85
-        # small bus         120            22
-        # small truck      1295           619
-        # truck-l-          960           185
-        # truck-m-         1485           336
-        # truck-s-          750           115
-        # truck-xl-         770            76"""
-
-        # """bus-l-             40            25
-        # car              1540          3169
-        # mid truck         245            90
-        # small truck      1281           572"""
         # Height of the plot is proportional to the number of classes
         n_unique = len(df_class_count["class_name"].unique())
         figsize_x = 10

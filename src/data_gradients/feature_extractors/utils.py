@@ -20,13 +20,14 @@ class MostImportantValuesSelector:
 
     def select(self, df: pd.DataFrame, id_col: str, split_col: str, value_col: str):
         """
-        Returns the top 5 rows of the DataFrame based on the prioritization_mode.
-        The DataFrame is expected to have three columns: id_col, split_col, val_col.
+        Returns the top k rows of the DataFrame based on the prioritization_mode.
+        The DataFrame is expected to have at least three columns: id_col, split_col, val_col.
 
         :param df:          The DataFrame to get the top values from.
         :param id_col:      The name of the id column.
-        :param split_col:   The name of the split column.
-        :param value_col:   The name of the value column.
+        :param split_col:   The name of the split column. (Usually 'split')
+        :param value_col:   The name of column that will be used to calculate the metric.
+        :return: The Dataframe with only the rows associated to the most important values.
         """
         # Verify inputs
         for col in [id_col, split_col, value_col]:
