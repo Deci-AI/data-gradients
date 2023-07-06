@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 
 
@@ -16,20 +17,18 @@ def check_all_integers(tensor: torch.Tensor) -> bool:
 
 
 def to_one_hot(labels: torch.Tensor, n_classes: int) -> torch.Tensor:
-    """
-    Converts labels to one-hot encoded representation.
-
+    """Method gets label with the shape of [BS, N, H, W] where N is the number of classes.
+    This numpy implementation is much faster than Torch.nn.functional.one_hot.
     :param labels:      Tensor of shape [BS, H, W]
     :param n_classes:   Number of classes in the dataset.
     :return:            Labels tensor shaped as [BS, N, H, W]
     """
-    batch_size, height, width = labels.shape
 
-    # Expand dimensions and create a tensor filled with zeros
-    labels_one_hot = torch.zeros(batch_size, n_classes, height, width, device=labels.device)
-
-    # Set corresponding class index to 1 in one-hot representation
-    labels_long = labels.long()  # Convert labels to long (int64) dtype
-    labels_one_hot.scatter_(1, labels_long.unsqueeze(1), 1)
-
-    return labels_one_hot
+    labels = labels.to(torch.int64)
+    labels_np = labels.numpy()
+    out = np.zeros((labels_np.size, n_classes), dtype=np.uint8)
+    out[np.arange(labels_np.size), labels_np.ravel()] = 1
+    out.shape = labels_np.shape + (n_classes,)
+    labels = torch.from_numpy(out)
+    labels = labels.squeeze().permute(0, -1, 1, 2)
+    return labels

@@ -1,4 +1,0 @@
-from data_gradients.datasets.segmentation.coco_segmentation_dataset import CocoSegmentationDataset
-from data_gradients.datasets.segmentation.coco_format_segmentation_dataset import CocoFormatSegmentationDataset
-
-__all__ = ["CocoSegmentationDataset", "CocoFormatSegmentationDataset"]

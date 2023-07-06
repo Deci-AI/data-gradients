@@ -129,10 +129,11 @@ class SegmentationBatchFormatter(BatchFormatter):
     def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
         """
         Validating labels dimensions are (BS, N, H, W) where N is either 1 or number of valid classes
-        :param labels:  Tensor [BS, N, W, H]
+        :param labels: Tensor [BS, N, W, H]
         :return: labels: Tensor [BS, N, W, H]
         """
         if labels.dim() == 3:
+            labels = labels.unsqueeze(1)  # Probably (B, H, W)
             return labels
         elif labels.dim() == 4:
             total_n_classes = n_classes + len(ignore_labels)
@@ -145,7 +146,7 @@ class SegmentationBatchFormatter(BatchFormatter):
                 )
             return labels
         else:
-            raise DatasetFormatError(f"Labels batch shape should be [Channels x Width x Height] or [BatchSize x Channels x Width x Height]. Got {labels.shape}")
+            raise DatasetFormatError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
 
     @staticmethod
     def binary_mask_above_threshold(labels: Tensor, threshold_value: float) -> Tensor:
