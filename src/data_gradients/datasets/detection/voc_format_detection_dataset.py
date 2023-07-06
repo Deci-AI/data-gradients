@@ -1,16 +1,17 @@
+import os
 import numpy as np
 import logging
-from typing import Sequence, Optional
+from typing import Tuple, Sequence, Optional
 from xml.etree import ElementTree
 
-from data_gradients.datasets.base_dataset import BaseImageLabelDirectoryDataset
-from data_gradients.datasets.FolderProcessor import DEFAULT_IMG_EXTENSIONS
+from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
+from data_gradients.datasets.utils import load_image, ImageChannelFormat
 
 
 logger = logging.getLogger(__name__)
 
 
-class VOCFormatDetectionDataset(BaseImageLabelDirectoryDataset):
+class VOCFormatDetectionDataset:
     """The VOC format Detection Dataset supports datasets where labels are stored in XML following according to VOC standard.
 
     #### Expected folder structure
@@ -153,20 +154,24 @@ class VOCFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         :param image_extensions:    List of image file extensions to load from.
         :param label_extensions:    List of label file extensions to load from.
         """
-        super().__init__(
-            root_dir=root_dir,
-            images_subdir=images_subdir,
-            labels_subdir=labels_subdir,
-            config_path=config_path,
-            verbose=verbose,
+        self.image_label_tuples = ImageLabelFilesIterator(
+            images_dir=os.path.join(root_dir, images_subdir),
+            labels_dir=os.path.join(root_dir, labels_subdir),
+            config_path=os.path.join(root_dir, config_path),
             image_extensions=image_extensions,
             label_extensions=label_extensions,
+            verbose=verbose,
         )
         self.class_names = class_names
 
-    def load_labels(self, path: str) -> np.ndarray:
+    def load_image(self, index: int) -> np.ndarray:
+        img_file, _ = self.image_label_tuples[index]
+        return load_image(path=img_file, channel_format=ImageChannelFormat.RGB)
 
-        with open(path) as f:
+    def load_labels(self, index: int) -> np.ndarray:
+        _, label_path = self.image_label_tuples[index]
+
+        with open(label_path) as f:
             xml_parser = ElementTree.parse(f).getroot()
 
         labels = []
@@ -183,3 +188,15 @@ class VOCFormatDetectionDataset(BaseImageLabelDirectoryDataset):
                 labels.append([class_id, xmin, ymin, xmax, ymax])
 
         return np.array(labels, dtype=float) if labels else np.zeros((0, 5), dtype=float)
+
+    def __len__(self) -> int:
+        return len(self.image_label_tuples)
+
+    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
+        image = self.load_image(index)
+        labels = self.load_labels(index)
+        return image, labels
+
+    def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
+        for i in range(len(self)):
+            yield self[i]
