@@ -154,10 +154,11 @@ class VOCFormatDetectionDataset:
         :param image_extensions:    List of image file extensions to load from.
         :param label_extensions:    List of label file extensions to load from.
         """
+        config_path = os.path.join(root_dir, config_path) if config_path is not None else None
         self.image_label_tuples = ImageLabelFilesIterator(
             images_dir=os.path.join(root_dir, images_subdir),
             labels_dir=os.path.join(root_dir, labels_subdir),
-            config_path=os.path.join(root_dir, config_path),
+            config_path=config_path,
             image_extensions=image_extensions,
             label_extensions=label_extensions,
             verbose=verbose,
