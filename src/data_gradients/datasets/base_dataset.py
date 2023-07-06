@@ -56,10 +56,11 @@ class BaseImageLabelDirectoryDataset(BaseDataset, ABC):
                                     If None, all the available images and tagets will be loaded.
         :param verbose:             Whether to show extra information during loading.
         """
+        config_path = os.path.join(root_dir, config_path) if config_path is not None else None
         self.image_label_tuples = ImageLabelFilesIterator(
             images_dir=os.path.join(root_dir, images_subdir),
             labels_dir=os.path.join(root_dir, labels_subdir),
-            config_path=os.path.join(root_dir, config_path),
+            config_path=config_path,
             image_extensions=image_extensions,
             label_extensions=label_extensions,
             verbose=verbose,
