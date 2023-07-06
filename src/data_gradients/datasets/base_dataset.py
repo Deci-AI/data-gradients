@@ -78,7 +78,7 @@ class BaseImageLabelDirectoryDataset(BaseDataset, ABC):
         return len(self.image_label_tuples)
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
-        image_path, labels_path = self.image_label_tuples
+        image_path, labels_path = self.image_label_tuples[index]
         image = self.load_image(path=image_path)
         labels = self.load_labels(path=labels_path)
         return image, labels
