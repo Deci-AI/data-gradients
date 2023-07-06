@@ -36,6 +36,11 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
 
         max_n_appearance = df_class_count["n_appearance"].max()
 
+        # Height of the plot is proportional to the number of classes
+        n_unique = len(df_class_count["class_name"].unique())
+        figsize_x = 10
+        figsize_y = min(max(6, int(n_unique * 0.3)), 175)
+
         plot_options = ViolinPlotOptions(
             x_label_key="n_appearance",
             x_label_name="Number of class instance per Image",
@@ -44,9 +49,11 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             order_key="class_id",
             title=self.title,
             x_lim=(0, max_n_appearance * 1.2),  # Cut the max_x at 120% of the highest max n_appearance to increase readability
+            figsize=(figsize_x, figsize_y),
             bandwidth=0.4,
             x_ticks_rotation=None,
             labels_key="split",
+            tight_layout=True,
         )
 
         json = dict(
