@@ -2,6 +2,7 @@ report_sections:
   - name: Image Features
     features:
       - SummaryStats
+      - ImageDuplicates
       - ImagesResolution
       - ImageColorDistribution
       - ImagesAverageBrightness

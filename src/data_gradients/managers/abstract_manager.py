@@ -10,6 +10,7 @@ from tqdm import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
+from data_gradients.feature_extractors.common.image_duplicates import ImageDuplicates
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
@@ -73,7 +74,10 @@ class AnalysisManagerAbstract(abc.ABC):
         self.batch_processor = batch_processor
         self.grouped_feature_extractors = grouped_feature_extractors
         self._remove_plots_after_report = remove_plots_after_report
-
+        for _, grouped_feature_list in self.grouped_feature_extractors.items():
+            for feature_extractor in grouped_feature_list:
+                if isinstance(feature_extractor, ImageDuplicates):
+                    feature_extractor.prep_for_duplicated_detection(train_data, val_data)
         self._train_iters_done = 0
         self._val_iters_done = 0
         self._train_batch_size = None
@@ -130,6 +134,12 @@ class AnalysisManagerAbstract(abc.ABC):
 
             if self._val_batch_size is None:
                 self._val_batch_size = self._val_iters_done
+
+    def _handle_image_duplicates_feature_extractor(self):
+        for feature_extractors in self.grouped_feature_extractors.values():
+            for feature_extractor in feature_extractors:
+                if isinstance(feature_extractor, ImageDuplicates):
+                    feature_extractor.set_image_dirs(train_data=self.train_iter, valid_data=self.val_iter)
 
     def post_process(self, interrupted=False):
         """

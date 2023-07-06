@@ -1,7 +1,9 @@
 import dataclasses
+import os
 from typing import List
 
 import numpy as np
+from imagededup.methods import DHash
 from jinja2 import Template
 
 from data_gradients.common.registry.registry import register_feature_extractor
@@ -28,17 +30,50 @@ class BasicStatistics:
     largest_annotations: int = 0
     most_annotations: int = 0
     least_annotations: int = 0
+    duplicate_images_in_train: int = 0
+    duplicate_images_in_validation: int = 0
+    duplicate_image_appearences_in_train: int = 0
+    duplicate_image_appearences_in_validation: int = 0
 
 
 @register_feature_extractor()
 class SummaryStats(AbstractFeatureExtractor):
     """Extracts general summary statistics from images."""
 
-    def __init__(self):
+    def __init__(self, find_duplicates: bool = True):
         super().__init__()
         self.stats = {"train": BasicStatistics(), "val": BasicStatistics()}
-
+        self.find_duplicates = find_duplicates
         self.template = Template(source=assets.html.basic_info_fe)
+        self._train_image_dir = None
+        self._valid_image_dir = None
+
+    def _get_image_dir(self, split: str) -> str:
+        p = input(f"Image duplicates extraction: please enter the full path to the directory containing all {split} images >>> \n")
+        if not os.path.exists(p):
+            raise ValueError(f"Path to the directory containing all {split} images does not exist.")
+        return p
+
+    def _is_in_dup_clique(self, sample, dup_clique_list):
+        return any([sample in d for d in dup_clique_list])
+
+    def _make_dup_clique(self, dup_key, dups):
+        dup_clique = [dup_key] + dups[dup_key]
+        return dup_clique
+
+    def _is_train_dup(self, dup_clique):
+        return len([d for d in dup_clique if d.startswith(self._train_image_dir)]) > 1
+
+    def _is_valid_dup(self, dup_clique):
+        if self._valid_image_dir is None:
+            return False
+        else:
+            return len([d for d in dup_clique if d.startswith(self._valid_image_dir)]) > 1
+
+    def _is_intersection_dup(self, dup_clique):
+        return (
+            len([d for d in dup_clique if d.startswith(self._train_image_dir)]) > 0 and len([d for d in dup_clique if d.startswith(self._valid_image_dir)]) > 0
+        )
 
     def update(self, sample: ImageSample):
 
@@ -70,6 +105,13 @@ class SummaryStats(AbstractFeatureExtractor):
             basic_stats.classes_count = len(sample.class_names)
 
     def aggregate(self) -> Feature:
+        if self.find_duplicates:
+            train_duplicates, valid_duplicates, intersection_duplicates = self._find_duplicates()
+            self.stats["train"].duplicate_images_in_train = train_duplicates
+            self.stats["val"].duplicate_images_in_validation = valid_duplicates
+            self.stats["train"].duplicate_images_in_validation = intersection_duplicates
+            self.stats["val"].duplicate_images_in_train = intersection_duplicates
+
         for basic_stats in self.stats.values():
             if basic_stats.image_count > 0:
                 basic_stats.classes_in_use = len(set(basic_stats.classes))
@@ -109,6 +151,36 @@ class SummaryStats(AbstractFeatureExtractor):
             json=json_res,
         )
         return feature
+
+    def _find_duplicates(self):
+        dhasher = DHash()
+        train_encodings = dhasher.encode_images(self._train_image_dir)
+        valid_encodings = dhasher.encode_images(self._valid_image_dir)
+        train_encodings = {str(os.path.join(self._train_image_dir, k)): v for k, v in train_encodings.items()}
+        valid_encodings = {str(os.path.join(self._valid_image_dir, k)): v for k, v in valid_encodings.items()}
+        all_encodings = {**train_encodings, **valid_encodings}
+        dups = dhasher.find_duplicates(encoding_map=all_encodings, max_distance_threshold=0)
+        dups = {k: v for k, v in dups.items() if len(v) > 0}
+        train_dups = []
+        valid_dups = []
+        intersection_dups = []
+        dup_clique_heads = list(dups.keys())
+        for i in range(len(dup_clique_heads)):
+            dup_key = dup_clique_heads[i]
+            if self._is_in_dup_clique(dup_key, train_dups) or self._is_in_dup_clique(dup_key, valid_dups) or self._is_in_dup_clique(dup_key, intersection_dups):
+                continue
+            dup_clique = self._make_dup_clique(dup_key, dups)
+            if self._is_train_dup(dup_clique):
+                train_dups.append([d for d in dup_clique if d.startswith(self._train_image_dir)])
+            if self._is_valid_dup(dup_clique):
+                valid_dups.append([d for d in dup_clique if d.startswith(self._valid_image_dir)])
+            if self._is_intersection_dup(dup_clique):
+                intersection_dups.append(dup_clique)
+
+        return train_dups, valid_dups, intersection_dups
+        # for dup in dups[dup_key]:
+        #     if dup in dups.keys():
+        #         del dups[dup]
 
     @property
     def title(self) -> str:
