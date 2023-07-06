@@ -65,8 +65,6 @@ class SeabornRenderer(PlotRenderer):
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         if n_rows == 1 and n_cols == 1:
@@ -109,6 +107,8 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_histplot(self, df, options: Hist2DPlotOptions) -> plt.Figure:
@@ -125,8 +125,6 @@ class SeabornRenderer(PlotRenderer):
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         if n_rows == 1 and n_cols == 1:
@@ -181,6 +179,8 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_kdeplot(self, df, options: KDEPlotOptions) -> plt.Figure:
@@ -197,8 +197,6 @@ class SeabornRenderer(PlotRenderer):
             n_rows = int(np.ceil(_num_images / n_cols))
 
         fig, axs = plt.subplots(nrows=n_rows, ncols=n_cols, figsize=options.figsize, sharey=options.sharey)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         if n_rows == 1 and n_cols == 1:
@@ -255,12 +253,12 @@ class SeabornRenderer(PlotRenderer):
 
             self._set_ticks_rotation(ax_i, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_violinplot(self, df, options: ViolinPlotOptions) -> plt.Figure:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         plot_args = dict(
@@ -304,13 +302,12 @@ class SeabornRenderer(PlotRenderer):
                 options.x_ticks_rotation = 45
 
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
-
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_barplot(self, df, options: BarPlotOptions) -> plt.Figure:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=options.figsize)
-        if options.tight_layout:
-            fig.tight_layout()
         fig.subplots_adjust(top=0.9)
 
         barplot_args = dict(
@@ -349,14 +346,15 @@ class SeabornRenderer(PlotRenderer):
         if options.labels_name is not None:
             ax.legend(title=options.labels_name)
 
-        # Write the values on the graph
-        y_ticklabels_fontsize = ax.get_yticklabels()[0].get_fontsize()
-        for container in ax.containers:
-            for bar in container:
-                width = bar.get_width()
-                height = bar.get_y() + bar.get_height() / 2
-                width_rounded = round(width, 1) if width >= 0.1 else float(f"{width:.1e}")
-                ax.text(width + 0.5, height, f"{width_rounded}%", ha="left", va="center", fontsize=y_ticklabels_fontsize)
+        if options.show_values:
+            # Write the values on the graph
+            y_ticklabels_fontsize = ax.get_yticklabels()[0].get_fontsize()
+            for container in ax.containers:
+                for bar in container:
+                    width = bar.get_width()
+                    height = bar.get_y() + bar.get_height() / 2
+                    width_rounded = round(width, 1) if width >= 0.1 else float(f"{width:.1e}")
+                    ax.text(width + 0.5, height, f"{width_rounded}%", ha="left", va="center", fontsize=y_ticklabels_fontsize)
 
         if options.log_scale is True:
             ax.set_yscale("log")
@@ -369,26 +367,26 @@ class SeabornRenderer(PlotRenderer):
             elif n_unique > 10:
                 options.x_ticks_rotation = 45
 
-        if options.show_values:
-            self._show_values(ax)
-
         self._set_ticks_rotation(ax, options.x_ticks_rotation, options.y_ticks_rotation)
 
+        if options.tight_layout:
+            fig.tight_layout()
         return fig
 
     def _render_heatmap(self, data: Mapping[str, np.ndarray], options: HeatmapOptions) -> plt.Figure:
 
-        fig, axes = plt.subplots(nrows=len(data), ncols=1, figsize=options.figsize, tight_layout=options.tight_layout)
+        fig, axes = plt.subplots(nrows=1, ncols=len(data), figsize=options.figsize, tight_layout=options.tight_layout)
         fig.subplots_adjust()
 
         for i, (key, heatmap) in enumerate(data.items()):
             ax = axes[i] if len(data) > 1 else axes
+            cbar = options.cbar if i + 1 == len(data) else False
             heatmap_args = dict(
                 data=heatmap,
                 xticklabels=options.xticklabels,
                 yticklabels=options.yticklabels,
                 annot=options.annot,
-                cbar=options.cbar,
+                cbar=cbar,
                 cbar_kws={"shrink": 0.5},
                 square=options.square,
                 cmap=options.cmap,

@@ -15,19 +15,16 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
 
     def update(self, sample: SegmentationSample):
         for j, class_channel in enumerate(sample.contours):
-            for contour in class_channel:
-                self.data.append(
-                    {
-                        "split": sample.split,
-                        "sample_id": sample.sample_id,
-                    }
-                )
+            self.data.append(
+                {
+                    "split": sample.split,
+                    "sample_id": sample.sample_id,
+                    "n_components": len(class_channel),
+                }
+            )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
-
-        # Include ("sample_id", "split", "n_components")
-        df_class_count = df.groupby(["sample_id", "split"]).size().reset_index(name="n_components")
 
         plot_options = Hist2DPlotOptions(
             x_label_key="n_components",
@@ -42,11 +39,11 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
         )
 
         json = dict(
-            train=dict(df_class_count[df_class_count["split"] == "train"]["n_components"].describe()),
-            val=dict(df_class_count[df_class_count["split"] == "val"]["n_components"].describe()),
+            train=dict(df[df["split"] == "train"]["n_components"].describe()),
+            val=dict(df[df["split"] == "val"]["n_components"].describe()),
         )
 
-        feature = Feature(data=df_class_count, plot_options=plot_options, json=json)
+        feature = Feature(data=df, plot_options=plot_options, json=json)
         return feature
 
     @property

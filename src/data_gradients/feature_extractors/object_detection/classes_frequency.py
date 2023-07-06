@@ -34,6 +34,11 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
         split_sums = df_class_count.groupby("split")["n_appearance"].sum()
         df_class_count["frequency"] = 100 * (df_class_count["n_appearance"] / df_class_count["split"].map(split_sums))
 
+        # Height of the plot is proportional to the number of classes
+        n_unique = len(df_class_count["class_name"].unique())
+        figsize_x = 10
+        figsize_y = min(max(6, int(n_unique * 0.3)), 175)
+
         plot_options = BarPlotOptions(
             x_label_key="frequency",
             x_label_name="Frequency",
@@ -41,9 +46,11 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
             y_label_name="Class",
             order_key="class_id",
             title=self.title,
+            figsize=(figsize_x, figsize_y),
             x_ticks_rotation=None,
             labels_key="split",
             orient="h",
+            tight_layout=True,
         )
 
         json = dict(

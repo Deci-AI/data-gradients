@@ -57,6 +57,10 @@ class DetectionBatchFormatter(BatchFormatter):
             - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
 
+        # Might happen if the user passes tensors as [N, 5] with N=1; Depending on the Dataset implementation, it may actually return a [5] tensor instead
+        if labels.numel() == 0:
+            labels = torch.zeros((0, 5))
+
         # If the label is of shape [N, 5] we can assume that it represents the targets of a single sample (class_name + 4 bbox coordinates)
         if labels.ndim == 2 and labels.shape[1] == 5:
             images = images.unsqueeze(0)
@@ -76,14 +80,14 @@ class DetectionBatchFormatter(BatchFormatter):
             images *= 255
             images = images.to(torch.uint8)
 
-        labels = self.convert_to_label_xyxy(
-            annotated_bboxes=labels,
-            image_shape=images.shape[-2:],
-            xyxy_converter=self.xyxy_converter,
-            label_first=self.label_first,
-        )
-
-        labels = self.filter_non_relevant_annotations(bboxes=labels, class_ids_to_use=self.class_ids_to_use)
+        if labels.numel() > 0:
+            labels = self.convert_to_label_xyxy(
+                annotated_bboxes=labels,
+                image_shape=images.shape[-2:],
+                xyxy_converter=self.xyxy_converter,
+                label_first=self.label_first,
+            )
+            labels = self.filter_non_relevant_annotations(bboxes=labels, class_ids_to_use=self.class_ids_to_use)
 
         return images, labels
 

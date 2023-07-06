@@ -35,18 +35,25 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
+        # Height of the plot is proportional to the number of classes
+        n_unique = len(df["class_name"].unique())
+        figsize_x = 10
+        figsize_y = min(max(6, int(n_unique * 0.3)), 175)
+
         max_area = min(100, df["bbox_area"].max())
         plot_options = ViolinPlotOptions(
             x_label_key="bbox_area",
-            x_label_name="Bounding Box Area (in % of image)",
+            x_label_name="Object Area (in % of image)",
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
             title=self.title,
+            figsize=(figsize_x, figsize_y),
             x_lim=(0, max_area),
             x_ticks_rotation=None,
             labels_key="split",
             bandwidth=0.4,
+            tight_layout=True,
         )
         json = dict(train=dict(df[df["split"] == "train"]["bbox_area"].describe()), val=dict(df[df["split"] == "val"]["bbox_area"].describe()))
 
