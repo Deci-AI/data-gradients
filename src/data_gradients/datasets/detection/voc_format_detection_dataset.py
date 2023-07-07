@@ -4,7 +4,7 @@ import logging
 from typing import Tuple, Sequence, Optional
 from xml.etree import ElementTree
 
-from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, ImageLabelConfigIterator, DEFAULT_IMG_EXTENSIONS
+from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
 from data_gradients.datasets.utils import load_image, ImageChannelFormat
 
 
@@ -154,24 +154,16 @@ class VOCFormatDetectionDataset:
         :param image_extensions:    List of image file extensions to load from.
         :param label_extensions:    List of label file extensions to load from.
         """
+        config_path = os.path.join(root_dir, config_path) if config_path is not None else None
+        self.image_label_tuples = ImageLabelFilesIterator(
+            images_dir=os.path.join(root_dir, images_subdir),
+            labels_dir=os.path.join(root_dir, labels_subdir),
+            config_path=config_path,
+            image_extensions=image_extensions,
+            label_extensions=label_extensions,
+            verbose=verbose,
+        )
         self.class_names = class_names
-        if config_path is None:
-            self.image_label_tuples = ImageLabelFilesIterator(
-                images_dir=os.path.join(root_dir, images_subdir),
-                labels_dir=os.path.join(root_dir, labels_subdir),
-                image_extensions=image_extensions,
-                label_extensions=label_extensions,
-                verbose=verbose,
-            )
-        else:
-            self.image_label_tuples = ImageLabelConfigIterator(
-                images_dir=os.path.join(root_dir, images_subdir),
-                labels_dir=os.path.join(root_dir, labels_subdir),
-                config_path=os.path.join(root_dir, config_path),
-                image_extensions=image_extensions,
-                label_extensions=label_extensions,
-                verbose=verbose,
-            )
 
     def load_image(self, index: int) -> np.ndarray:
         img_file, _ = self.image_label_tuples[index]
