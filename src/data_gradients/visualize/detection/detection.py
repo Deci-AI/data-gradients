@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from data_gradients.visualize.detection.detection_legend import draw_legend_on_canvas
 from data_gradients.visualize.detection.utils import best_text_color, generate_color_mapping
-from data_gradients.visualize.utils import resize_keep_aspect_ratio
+from data_gradients.visualize.utils import resize_and_align_bottom_center
 
 
 def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, bboxes_ids: np.ndarray, class_names: List[str]) -> np.ndarray:
@@ -40,7 +40,7 @@ def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, bboxes_ids: np.ndarr
             y2=y2,
         )
 
-    image = resize_keep_aspect_ratio(image, target_shape=(600, 600))
+    image = resize_and_align_bottom_center(image, target_shape=(600, 600))
 
     canvas = draw_legend_on_canvas(image=image, class_color_tuples=classes_in_image_with_color)
     image = np.concatenate((image, canvas), axis=0)

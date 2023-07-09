@@ -1,23 +1,17 @@
+from typing import Tuple
 import cv2
 import numpy as np
 
 
-def resize_keep_aspect_ratio(image: np.ndarray, target_shape: tuple):
-    """
-    Resizes a single image to fit within a specified width while maintaining the aspect ratio.
-    If the resulting height is below 400 pixels, the image won't be padded. The width is padded
-    with center alignment, and the top is padded with white color to maintain the aspect ratio.
+def resize_and_align_bottom_center(image: np.ndarray, target_shape: Tuple[int, int]) -> np.ndarray:
+    """Resizes an image while maintaining its aspect ratio, and aligns it at the bottom center on a canvas of the target size.
 
-    Args:
-        image (np.ndarray): The input image.
-        target_shape (tuple): A tuple (width, height) specifying the desired dimensions.
-
-    Returns:
-        np.ndarray: The resized and padded image.
-
+    :param image:           Input image to resize and center.
+    :param target_shape:    Desired output shape as (height, width).
+    :return:                Output image, which is the input image resized, centered horizontally, and aligned at the bottom on a canvas of the target size.
     """
     image_height, image_width = image.shape[:2]
-    target_width, target_height = target_shape
+    target_height, target_width = target_shape
 
     scale_factor = min(target_width / image_width, target_height / image_height)
     new_width = int(image_width * scale_factor)
