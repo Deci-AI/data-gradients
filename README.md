@@ -43,7 +43,7 @@ It automatically extracts features from your datasets and combines them all into
 You can install DataGradients directly from the GitHub repository.
 
 ```
-pip install git+https://github.com/Deci-AI/data-gradients
+pip install data-gradients
 ```
 
 
