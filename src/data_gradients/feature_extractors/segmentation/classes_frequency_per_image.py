@@ -75,6 +75,7 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "This graph shows how many times each class appears in an image. It highlights whether each class has a constant number of "
-            "appearance per image, or whether it really depends from an image to another."
+            "This graph shows how many times each class appears in an image. "
+            "It highlights whether each class has a constant number of appearances per image, "
+            "or whether there is variability in the number of appearances from image to image."
         )
