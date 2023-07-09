@@ -14,11 +14,11 @@ from data_gradients.utils.data_classes.data_samples import ImageSample, Segmenta
 @dataclasses.dataclass
 class BasicStatistics:
 
-    image_count: int = 0
+    num_samples: int = 0
     classes_count: int = 0
     classes_in_use: int = 0
     classes: List[int] = dataclasses.field(default_factory=list)
-    annotation_count: int = 0
+    num_annotations: int = 0
     images_without_annotation: int = 0
     images_resolutions: List[int] = dataclasses.field(default_factory=list)
     annotations_sizes: List[int] = dataclasses.field(default_factory=list)
@@ -47,7 +47,7 @@ class SummaryStats(AbstractFeatureExtractor):
         height, width = sample.image.shape[:2]
         basic_stats.images_resolutions.append([height, width])
 
-        basic_stats.image_count += 1
+        basic_stats.num_samples += 1
 
         if isinstance(sample, SegmentationSample):
             contours = [contour for sublist in sample.contours for contour in sublist]
@@ -71,14 +71,14 @@ class SummaryStats(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         for basic_stats in self.stats.values():
-            if basic_stats.image_count > 0:
+            if basic_stats.num_samples > 0:
                 basic_stats.classes_in_use = len(set(basic_stats.classes))
 
                 basic_stats.classes = np.array(basic_stats.classes)
                 basic_stats.annotations_per_image = np.array(basic_stats.annotations_per_image)
                 basic_stats.annotations_sizes = np.array(basic_stats.annotations_sizes)
 
-                basic_stats.annotation_count = int(np.sum(basic_stats.annotations_per_image))
+                basic_stats.num_annotations = int(np.sum(basic_stats.annotations_per_image))
                 basic_stats.images_without_annotation = np.count_nonzero(basic_stats.annotations_per_image == 0)
 
                 basic_stats.images_resolutions = np.array(basic_stats.images_resolutions)
@@ -92,9 +92,9 @@ class SummaryStats(AbstractFeatureExtractor):
                 index_of_med = np.argsort(areas)[len(areas) // 2]
                 basic_stats.med_image_resolution = self.format_resolution(basic_stats.images_resolutions[index_of_med][0])
 
-                basic_stats.annotations_per_image = f"{basic_stats.annotation_count / basic_stats.image_count:.2f}"
-                basic_stats.image_count = f"{basic_stats.image_count:,}"
-                basic_stats.annotation_count = f"{basic_stats.annotation_count:,}"
+                basic_stats.annotations_per_image = f"{basic_stats.num_annotations / basic_stats.num_samples:.2f}"
+                basic_stats.num_samples = int(basic_stats.num_samples)
+                basic_stats.num_annotations = int(basic_stats.num_annotations)
 
                 # To support JSON - delete arrays
                 basic_stats.classes = None
