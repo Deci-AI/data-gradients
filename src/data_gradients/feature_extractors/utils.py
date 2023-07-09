@@ -63,9 +63,13 @@ class MostImportantValuesSelector:
             top_ids = df_pivot.nsmallest(self.topk, "metric").index
             return df[df[id_col].isin(top_ids)]
         elif self.prioritization_mode == "min_max":
-            n_min_results = self.topk // 2
-            bottom_ids = df_pivot.nlargest(n_min_results, "metric").index
-            top_ids = df_pivot.nsmallest(self.topk - n_min_results, "metric").index
+            n_max_results = self.topk // 2
+            n_min_results = self.topk - n_max_results
+
+            top_ids = df_pivot.nlargest(n_max_results, "metric").index
+
+            n_rows_available = len(df_pivot) - len(top_ids)
+            bottom_ids = df_pivot.nsmallest(min(n_min_results, n_rows_available), "metric").index
             return pd.concat([df[df[id_col].isin(top_ids)], df[df[id_col].isin(bottom_ids)]])
         else:
             raise NotImplementedError(f"Mode {self.prioritization_mode} is not implemented")
