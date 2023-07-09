@@ -61,7 +61,7 @@ def combine_images(images: List[np.ndarray], n_cols: int, row_figsize: Tuple[flo
 
 def fig_to_array(fig: plt.Figure) -> np.ndarray:
     buf = io.BytesIO()
-    fig.savefig(buf, format="png")
+    fig.savefig(buf, format="png", dpi=200)
     buf.seek(0)
     image = Image.open(buf)
     plt.close(fig)
