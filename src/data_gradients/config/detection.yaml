@@ -1,25 +1,25 @@
 report_sections:
-  - name: Image Features
-    features:
-      - SummaryStats
-      - ImagesResolution
-      - ImageColorDistribution
-      - ImagesAverageBrightness
+#  - name: Image Features
+#    features:
+#      - SummaryStats
+#      - ImagesResolution
+#      - ImageColorDistribution
+#      - ImagesAverageBrightness
   - name: Object Detection Features
     features:
       - DetectionSampleVisualization:
           n_rows: 3
           n_cols: 4
           stack_splits_vertically: True
-      - DetectionClassHeatmap:
-          n_rows: 6
-          n_cols: 2
-          heatmap_shape: [200, 200]
-      - DetectionBoundingBoxArea
-      - DetectionBoundingBoxPerImageCount
-      - DetectionBoundingBoxSize
-      - DetectionClassFrequency
-      - DetectionClassesPerImageCount
-      - DetectionBoundingBoxIoU:
-          num_bins: 10
-          class_agnostic: true
+#      - DetectionClassHeatmap:
+#          n_rows: 6
+#          n_cols: 2
+#          heatmap_shape: [200, 200]
+#      - DetectionBoundingBoxArea
+#      - DetectionBoundingBoxPerImageCount
+#      - DetectionBoundingBoxSize
+#      - DetectionClassFrequency
+#      - DetectionClassesPerImageCount
+#      - DetectionBoundingBoxIoU:
+#          num_bins: 10
+#          class_agnostic: true
