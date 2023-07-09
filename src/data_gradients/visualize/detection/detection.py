@@ -24,21 +24,22 @@ def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, bboxes_ids: np.ndarr
     classes_in_image_with_color: Set[Tuple[str, Tuple]] = set()
 
     for (x1, y1, x2, y2), class_id in zip(bboxes_xyxy, bboxes_ids):
-        class_name: str = class_names[class_id]
-        color = colors[class_names.index(class_name)]
+        for i in range(10):
+            class_name: str = class_names[i]
+            color = colors[class_names.index(class_name)]
 
-        # If the class is not already in the list, add it
-        classes_in_image_with_color.add((class_name, color))
+            # If the class is not already in the list, add it
+            classes_in_image_with_color.add((class_name, color))
 
-        image = draw_bbox(
-            image=image,
-            color=color,
-            box_thickness=2,
-            x1=x1,
-            y1=y1,
-            x2=x2,
-            y2=y2,
-        )
+            image = draw_bbox(
+                image=image,
+                color=color,
+                box_thickness=2,
+                x1=x1,
+                y1=y1,
+                x2=x2,
+                y2=y2,
+            )
 
     image = resize_and_align_bottom_center(image, target_shape=(600, 600))
 
