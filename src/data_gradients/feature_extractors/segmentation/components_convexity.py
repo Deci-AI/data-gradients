@@ -51,7 +51,7 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Objects Convexity"
+        return "Object Convexity"
 
     @property
     def description(self) -> str:

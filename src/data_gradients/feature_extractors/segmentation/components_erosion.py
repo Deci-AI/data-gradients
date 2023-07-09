@@ -60,7 +60,7 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Objects Stability to Erosion"
+        return "Object Stability to Erosion"
 
     @property
     def description(self) -> str:
