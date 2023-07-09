@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Set
 import matplotlib.pyplot as plt
 import cv2
 
@@ -18,26 +18,65 @@ def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, bboxes_ids: np.ndarr
         return image
     colors = generate_color_mapping(len(class_names) + 1)
 
+    # Initialize an empty list to store the classes that appear in the image
+    classes_in_image_with_color = set()
+
     for (x1, y1, x2, y2), class_id in zip(bboxes_xyxy, bboxes_ids):
         class_name = class_names[class_id]
-        title = class_name if not class_name.isdigit() else f"class_id={class_name}"
+        color = colors[class_names.index(class_name)]
+
+        # If the class is not already in the list, add it
+        classes_in_image_with_color.add((class_name, color))
 
         image = draw_bbox(
             image=image,
-            title=title,
-            color=colors[class_names.index(class_name)],
+            color=color,
             box_thickness=2,
             x1=x1,
             y1=y1,
             x2=x2,
             y2=y2,
         )
+
+    image = resize_keep_aspect_ratio(image, target_shape=(400, 400))
+    # Draw the class names on the side of the image
+    image = draw_class_names(image=image, classes_in_image_with_color=classes_in_image_with_color)
+
     return image
+
+
+def resize_keep_aspect_ratio(image: np.ndarray, target_shape: tuple):
+    """
+    Resizes a single image to fit within a specified width while maintaining the aspect ratio.
+    If the resulting height is below 400 pixels, the image won't be padded. The width is padded
+    with center alignment, and the top is padded with white color to maintain the aspect ratio.
+
+    Args:
+        image (np.ndarray): The input image.
+        target_shape (tuple): A tuple (width, height) specifying the desired dimensions.
+
+    Returns:
+        np.ndarray: The resized and padded image.
+
+    """
+    image_height, image_width = image.shape[:2]
+    target_width, target_height = target_shape
+
+    scale_factor = min(target_width / image_width, target_height / image_height)
+    new_width = int(image_width * scale_factor)
+    new_height = int(image_height * scale_factor)
+    resized_image = cv2.resize(image, (new_width, new_height))
+
+    canvas = np.full((target_height, target_width, 3), 255, dtype=np.uint8)
+    x = int((target_width - new_width) / 2)
+    y = int(target_height - new_height)
+    canvas[y : y + new_height, x : x + new_width] = resized_image
+
+    return canvas
 
 
 def draw_bbox(
     image: np.ndarray,
-    title: str,
     color: Tuple[int, int, int],
     box_thickness: int,
     x1: int,
@@ -49,7 +88,6 @@ def draw_bbox(
 
     :param image:           Image on which to draw the bounding box.
     :param color:           RGB values of the color of the bounding box.
-    :param title:           Title to display inside the bounding box.
     :param box_thickness:   Thickness of the bounding box border.
     :param x1:              x-coordinate of the top-left corner of the bounding box.
     :param y1:              y-coordinate of the top-left corner of the bounding box.
@@ -57,20 +95,60 @@ def draw_bbox(
     :param y2:              y-coordinate of the bottom-right corner of the bounding box.
     :return: Image with bbox
     """
-
     overlay = image.copy()
     overlay = cv2.rectangle(overlay, (x1, y1), (x2, y2), color, box_thickness)
-
-    # Adapt font size to image shape.
-    # This is required because small images require small font size, but this makes the title look bad,
-    # so when possible we increase the font size to a more appropriate value.
-    font_size = 0.25 + 0.07 * min(overlay.shape[:2]) / 100
-    font_size = max(font_size, 0.5)  # Set min font_size to 0.5
-    font_size = min(font_size, 0.8)  # Set max font_size to 0.8
-
-    overlay = draw_text_box(image=overlay, text=title, x=x1, y=y1, font=2, font_size=font_size, background_color=color, thickness=1)
-
     return cv2.addWeighted(overlay, 0.75, image, 0.25, 0)
+
+
+def draw_class_names(image: np.ndarray, classes_in_image_with_color: Set[Tuple[str, tuple]]) -> np.ndarray:
+    """Draw class names below the image.
+
+    :param image: Image on which to draw the class names.
+    :param classes_in_image_with_color: Set of tuples containing class names and their corresponding colors.
+    :return: Image with class names.
+    """
+
+    # Create a blank canvas for the class names
+    canvas_height_ratio = 0.1  # Ratio of canvas height to image height
+    canvas = np.ones((int(image.shape[0] * canvas_height_ratio), image.shape[1], 3), dtype=np.uint8) * 255
+
+    # Define margin and calculate font size and line type based on number of classes
+    margin = 20  # Margin from border
+    font_size = 1
+    line_type = max(int(font_size * 2), 1)  # Line type, scaled with font size
+
+    # Prepare for adding class names
+    line_y = margin + int(canvas.shape[0] * 0.1)
+    current_x = margin
+
+    for class_name, class_color in sorted(classes_in_image_with_color, key=lambda x: x[0]):
+
+        # Calculate width of the new class name
+        text_width, text_height = cv2.getTextSize(class_name, cv2.FONT_HERSHEY_SIMPLEX, font_size, line_type)[0]
+
+        # Check if the new class name will fit on the current line
+        if current_x + text_width + 2 * margin > canvas.shape[1]:
+            # Start a new line
+            line_y += int(canvas.shape[0] * 0.1)
+            current_x = margin
+
+        # Create a semi-transparent background for the class name
+        # background_color = [int(c * alpha + 255 * (1 - alpha)) for c in class_color]  # Semi-transparent class color
+        background_top_left = (current_x - margin // 2, line_y - text_height - margin // 2)
+        background_bottom_right = (current_x + text_width + margin // 2, line_y + margin // 2)
+        canvas = cv2.rectangle(canvas, background_top_left, background_bottom_right, class_color, -1)
+
+        # Add class_name
+        canvas = cv2.putText(
+            canvas, class_name, (current_x, line_y), cv2.FONT_HERSHEY_SIMPLEX, font_size, best_text_color(class_color), line_type, lineType=cv2.LINE_AA
+        )
+
+        # Update current position on the x axis
+        current_x += text_width + margin
+
+    # Concatenate the image and the canvas
+    image = np.concatenate((image, canvas), axis=0)
+    return image
 
 
 def draw_text_box(
