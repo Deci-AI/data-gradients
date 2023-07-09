@@ -249,7 +249,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
             if len(self.intersection_dups):
                 desc = desc.replace(
                     "train and validation.",
-                    f" appearing {self.intersection_train_appearnces} times in the train image directory,"
+                    f"train and validation appearing {self.intersection_train_appearnces} times in the train image directory,"
                     f" and {self.intersection_val_appearnces} times in the validation image directory.",
                 )
 
