@@ -66,10 +66,7 @@ class SegmentationClassFrequency(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = dict(
-            train=dict(df_class_count[df_class_count["split"] == "train"]["n_appearance"].describe()),
-            val=dict(df_class_count[df_class_count["split"] == "val"]["n_appearance"].describe()),
-        )
+        json = {split: dict(df[df["split"] == split]["n_appearance"].describe()) for split in df["split"].unique()}
 
         feature = Feature(
             data=df_class_count,

@@ -66,9 +66,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = dict(
-            train=dict(df[df["split"] == "train"]["relative_bbox_area"].describe()), val=dict(df[df["split"] == "val"]["relative_bbox_area"].describe())
-        )
+        json = {split: dict(df[df["split"] == split]["relative_bbox_area"].describe()) for split in df["split"].unique()}
 
         feature = Feature(
             data=df,
