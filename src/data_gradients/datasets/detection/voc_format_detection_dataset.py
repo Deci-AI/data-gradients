@@ -166,7 +166,7 @@ class VOCFormatDetectionDataset(BaseImageLabelDirectoryDataset):
 
     def load_labels(self, path: str) -> np.ndarray:
 
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             xml_parser = ElementTree.parse(f).getroot()
 
         labels = []

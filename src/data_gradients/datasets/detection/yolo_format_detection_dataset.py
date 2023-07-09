@@ -129,7 +129,7 @@ class YoloFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         :return:     Numpy array representing the labels.
         """
 
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             lines = file.readlines()
 
         labels = []
@@ -147,7 +147,7 @@ class YoloFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         return np.array(labels) if labels else np.zeros((0, 5))
 
 
-def parse_yolo_format_line(line: str) -> Optional[List]:
+def parse_yolo_format_line(line: str) -> Optional[List[float]]:
     """Parses a line in the standard Yolo format, i.e. `<class_id> <cx> <cy> <w> <h>`. Does not support any variation.
     :param line:    Line representing a bounding box instance. Should be formatted in Yolo format: `<class_id> <cx> <cy> <w> <h>`.
     :return:        List representing the bounding box labels (class_id, cx, cy, w, h).
