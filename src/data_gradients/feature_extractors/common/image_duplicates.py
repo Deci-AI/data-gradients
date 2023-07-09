@@ -89,10 +89,11 @@ class ImageDuplicates(AbstractFeatureExtractor):
         return len([d for d in dup_clique if d.startswith(self.train_image_dir)]) > 0 and len([d for d in dup_clique if d.startswith(self.valid_image_dir)]) > 0
 
     def _count_dup_appearences(self, dups):
+        print("App: " + str(dups))
         return sum([len(d) for d in dups])
 
     def _count_dir_dup_appearences(self, dups, dir):
-        return self._count_dup_appearences([list(map(lambda dup: [d for d in dup if d.startswith(dir)], dups))])
+        return self._count_dup_appearences(list(map(lambda dup: [d for d in dup if d.startswith(dir)], dups)))
 
     def aggregate(self) -> Feature:
         self._find_duplicates()
@@ -113,13 +114,14 @@ class ImageDuplicates(AbstractFeatureExtractor):
         if self.valid_image_dir is not None:
             desc += self._get_split_description(self.valid_dups, "Validation", self.validation_dups_appearences)
             desc += (
-                f"\nThere are {len(self.intersection_dups)} duplicates between train and validation,"
+                f"<br />There are {len(self.intersection_dups)} duplicates between train and validation,"
                 f" appearing {self.intersection_train_appearnces} times in the train image directory,"
                 f" and {self.intersection_val_appearnces} times in the validation image directory."
             )
+        return desc
 
     def _get_split_description(self, dups: List, split: str, appearences: int):
-        desc = f"{split} duplicated images:\n There are {len(dups)} images.\n"
+        desc = f"{split} duplicated images:<br /> <br /> There are {len(dups)} duplicated images.<br />"
         if len(dups) > 0:
-            desc = desc.replace(".\n", f"appearing {appearences} times across the dataset.\n")
+            desc = desc.replace(".<br />", f" appearing {appearences} times across the dataset.<br /><br />")
         return desc

@@ -135,12 +135,6 @@ class AnalysisManagerAbstract(abc.ABC):
             if self._val_batch_size is None:
                 self._val_batch_size = self._val_iters_done
 
-    def _handle_image_duplicates_feature_extractor(self):
-        for feature_extractors in self.grouped_feature_extractors.values():
-            for feature_extractor in feature_extractors:
-                if isinstance(feature_extractor, ImageDuplicates):
-                    feature_extractor.set_image_dirs(train_data=self.train_iter, valid_data=self.val_iter)
-
     def post_process(self, interrupted=False):
         """
         Post process method runs on all feature extractors, concurrently on valid and train extractors, send each
