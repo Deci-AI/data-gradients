@@ -69,7 +69,7 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = {split: dict(df[df["split"] == split]["n_appearance"].describe()) for split in df["split"].unique()}
+        json = {split: dict(df_class_count[df_class_count["split"] == split]["n_appearance"].describe()) for split in df_class_count["split"].unique()}
 
         feature = Feature(
             data=df_class_count,
