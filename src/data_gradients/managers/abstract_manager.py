@@ -10,7 +10,6 @@ from tqdm import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
-from data_gradients.feature_extractors.common.image_duplicates import ImageDuplicates
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
@@ -76,8 +75,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self._remove_plots_after_report = remove_plots_after_report
         for _, grouped_feature_list in self.grouped_feature_extractors.items():
             for feature_extractor in grouped_feature_list:
-                if isinstance(feature_extractor, ImageDuplicates):
-                    feature_extractor.prep_for_duplicated_detection(train_data, val_data)
+                feature_extractor.setup_data_sources(train_data, val_data)
         self._train_iters_done = 0
         self._val_iters_done = 0
         self._train_batch_size = None
@@ -180,7 +178,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 section.add_feature(
                     FeatureSummary(
                         name=feature_extractor.title,
-                        description=feature_extractor.description,
+                        description=self._format_feature_description(feature_extractor.description),
                         image_path=image_path,
                         warning=warning,
                         notice=feature_extractor.notice,
@@ -261,3 +259,10 @@ class AnalysisManagerAbstract(abc.ABC):
         msg_train = f"Train set: {self._train_iters_done} out of {total_train_samples} samples were analyzed{portion_train}.\n"
         msg_val = f"Validation set: {self._val_iters_done} out of {total_val_samples} samples were analyzed{portion_val}.\n "
         return msg_head + msg_train + msg_val
+
+    @staticmethod
+    def _format_feature_description(description: str) -> str:
+        """
+        Formats the feature extractor's description string for a vieable display in HTML.
+        """
+        return description.replace("\n", "<br />")

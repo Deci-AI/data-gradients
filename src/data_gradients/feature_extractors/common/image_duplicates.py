@@ -1,5 +1,5 @@
 from collections import Iterable
-from typing import List
+from typing import List, Optional
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
@@ -17,7 +17,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
 
     Under the hood, uses Difference Hashing (http://www.hackerfactor.com/blog/index.php?/archives/529-Kind-of-Like-That.html)
      and considers duplicates if and only if they have the exact same hash code. This means that regardless of color format
-      (i.e BGR, RGB grreyscale) duplicates will be found, but might result (rarely) in false positives.
+      (i.e BGR, RGB greyscale) duplicates will be found, but might result (rarely) in false positives.
 
     Attributes:
         train_image_dir: str, The directory containing all train images. When None, will ask the user using prompt for input.
@@ -68,7 +68,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
          - Supported image formats: 'JPEG', 'PNG', 'BMP', 'MPO', 'PPM', 'TIFF', 'GIF', 'SVG', 'PGM', 'PBM', 'WEBP'.
     """
 
-    def __init__(self, train_image_dir: str = None, valid_image_dir: str = None):
+    def __init__(self, train_image_dir: Optional[str] = None, valid_image_dir: Optional[str] = None):
         """
         :param train_image_dir: str = None, The directory containing all train images. When None, will ask the user
             using prompt for input.
@@ -83,15 +83,15 @@ class ImageDuplicates(AbstractFeatureExtractor):
         self.train_image_dir = train_image_dir
         self.valid_image_dir = valid_image_dir
 
-    def prep_for_duplicated_detection(self, train_data: Iterable, val_data: Iterable):
+    def setup_data_sources(self, train_data: Iterable, val_data: Iterable):
         """
         Called in AbstractManager.__init__
         In case train_image_dir: str = None, valid_image_dir: str = None in __init__, will ask the user to pass them.
 
-        train_data: Iterable, the train_data used by AbstractManager (not used at the moment, but acts as a placeholder that
+        :param train_data: Iterable, the train_data used by AbstractManager (not used at the moment, but acts as a placeholder that
             will later be used to derrive the diretory automatically according to its type - i.e ImageFolder.root etc).
 
-        val_data, Iterbale, the val_Data used by AbstractManager.
+        :param  val_data: Iterbale, the val_Data used by AbstractManager.
         """
         # TODO: ADD AUTOMATIC EXTRACTION FOR SG DATASETS
         if self.train_image_dir is None:
@@ -186,7 +186,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
         return any([sample in d for d in dup_clique_list])
 
     @staticmethod
-    def _make_dup_clique(dup_key, dups):
+    def _make_dup_clique(dup_key: str, dups: List[str]):
         dup_clique = [dup_key] + dups[dup_key]
         return dup_clique
 
@@ -194,7 +194,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
         """
         Whether the dup_clique contains duplicate image paths from train_image_dir.
 
-        :param dup_clique: str, list of duplicated image paths
+        :param dup_clique: List[str], list of duplicated image paths
         """
         return len([d for d in dup_clique if d.startswith(self.train_image_dir)]) > 1
 
@@ -202,7 +202,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
         """
         Whether the dup_clique contains duplicate image paths from valid_image_dir.
 
-        :param dup_clique: str, list of duplicated image paths
+        :param dup_clique: List[str], list of duplicated image paths
         """
         return len([d for d in dup_clique if d.startswith(self.valid_image_dir)]) > 1
 
@@ -210,7 +210,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
         """
         Whether the dup_clique contains duplicate image paths from train_image_dir and valid_image_dir.
 
-        :param dup_clique: str, list of duplicated image paths
+        :param dup_clique: List[str], list of duplicated image paths
         """
         return len([d for d in dup_clique if d.startswith(self.train_image_dir)]) > 0 and len([d for d in dup_clique if d.startswith(self.valid_image_dir)]) > 0
 
@@ -223,7 +223,8 @@ class ImageDuplicates(AbstractFeatureExtractor):
 
     def _count_dir_dup_appearences(self, dups: List[List[str]], dir: str) -> int:
         """
-        Counts the duplicate appearences = sum of the sizes of all duplicate cliques in dups.
+        Counts the duplicate appearences inside dir = sum of the sizes of all
+         duplicate cliques in dups after filtering all paths not in dir.
         """
         return self._count_dup_appearences(list(map(lambda dup: [d for d in dup if d.startswith(dir)], dups)))
 
@@ -245,7 +246,7 @@ class ImageDuplicates(AbstractFeatureExtractor):
         desc = self._get_split_description(self.train_dups, "Train", self.train_dups_appearences)
         if self.valid_image_dir is not None:
             desc += self._get_split_description(self.valid_dups, "Validation", self.validation_dups_appearences)
-            desc += f"<br /><br />There are {len(self.intersection_dups)} duplicates between train and validation."
+            desc += f"\n\nThere are {len(self.intersection_dups)} duplicates between train and validation."
             if len(self.intersection_dups):
                 desc = desc.replace(
                     "train and validation.",
@@ -254,11 +255,11 @@ class ImageDuplicates(AbstractFeatureExtractor):
                 )
 
         else:
-            desc += "<br />"
+            desc += "\n"
         return desc
 
     def _get_split_description(self, dups: List, split: str, appearences: int) -> str:
-        desc = f"<strong>{split} duplicated images</strong>:<br /> There are {len(dups)} duplicated images.<br />"
+        desc = f"<strong>{split} duplicated images</strong>:\n There are {len(dups)} duplicated images.\n"
         if len(dups) > 0:
-            desc = desc.replace(".<br />", f" appearing {appearences} times across the dataset.<br /><br />")
+            desc = desc.replace(".\n", f" appearing {appearences} times across the dataset.\n\n")
         return desc
