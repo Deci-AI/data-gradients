@@ -163,7 +163,7 @@ class AnalysisManagerAbstract(abc.ABC):
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
                     image_path = os.path.join(self.summary_writer.archive_dir, image_name)
-                    f.savefig(image_path, dpi=300)
+                    f.savefig(image_path, dpi=200)
                     images_created.append(image_path)
                 else:
                     image_path = None
