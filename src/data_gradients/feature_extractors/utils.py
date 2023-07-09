@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 
@@ -43,9 +42,14 @@ class MostImportantValuesSelector:
 
         # Calculate the relative difference or average based on the prioritization_mode
         if self.prioritization_mode == "train_val_diff":
-            df_pivot["metric"] = np.abs((df_pivot["train"] - df_pivot["val"]) / ((df_pivot["train"] + df_pivot["val"]) / 2))
+            # `train_val_diff` only defined when working with 2 sets.
+            if len(df_pivot.columns) != 2:
+                raise ValueError(f'`prioritization_mode"train_val_diff"` is only supported when working with 2 sets. Found {len(df_pivot.columns)}.')
+            delta = (df_pivot.iloc[:, 0] - df_pivot.iloc[:, 1]).abs()
+            average = (df_pivot.iloc[:, 0] + df_pivot.iloc[:, 1] + 1e-6).abs() / 2
+            df_pivot["metric"] = delta / average
         elif self.prioritization_mode in ["outliers", "max", "min", "min_max"]:
-            df_pivot["metric"] = (df_pivot["train"] + df_pivot["val"]) / 2
+            df_pivot["metric"] = df_pivot.mean(1)
 
         if self.prioritization_mode == "outliers":
             mean, std = df_pivot["metric"].mean(), df_pivot["metric"].std()
