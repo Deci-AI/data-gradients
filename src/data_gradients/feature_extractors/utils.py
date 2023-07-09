@@ -46,14 +46,14 @@ class MostImportantValuesSelector:
             if len(df_pivot.columns) != 2:
                 raise ValueError(f'`prioritization_mode"train_val_diff"` is only supported when working with 2 sets. Found {len(df_pivot.columns)}.')
             delta = (df_pivot.iloc[:, 0] - df_pivot.iloc[:, 1]).abs()
-            average = (df_pivot.iloc[:, 0] + df_pivot.iloc[:, 1] + 1e-6).abs() / 2
-            df_pivot["metric"] = delta / average
+            average = (df_pivot.iloc[:, 0] + df_pivot.iloc[:, 1]).abs() / 2
+            df_pivot["metric"] = delta / (average + 1e-6)
         elif self.prioritization_mode in ["outliers", "max", "min", "min_max"]:
             df_pivot["metric"] = df_pivot.mean(1)
 
         if self.prioritization_mode == "outliers":
             mean, std = df_pivot["metric"].mean(), df_pivot["metric"].std()
-            df_pivot["metric"] = (df_pivot["metric"] - mean).abs() / std
+            df_pivot["metric"] = (df_pivot["metric"] - mean).abs() / (std + 1e-6)
 
         # Only return the top k.
         if self.prioritization_mode in ["train_val_diff", "outliers", "max"]:
