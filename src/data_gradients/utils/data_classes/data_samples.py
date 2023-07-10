@@ -12,6 +12,7 @@ class ImageChannelFormat(Enum):
     BGR = "BGR"
     GRAYSCALE = "GRAYSCALE"
     UNKNOWN = "UNKNOWN"
+    UNCHANGED = "UNCHANGED"
 
 
 @dataclasses.dataclass
