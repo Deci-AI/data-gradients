@@ -1,0 +1,10 @@
+report_sections:
+  - name: Image Features
+    features:
+      - SummaryStats
+      - ImagesResolution
+      - ImageColorDistribution
+      - ImagesAverageBrightness
+  - name: Classification Features
+    features:
+      - ClassificationClassDistribution

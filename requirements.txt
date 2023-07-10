@@ -17,3 +17,4 @@ seaborn
 xhtml2pdf
 jinja2
 imagededup
+jupyter-ui-poll==0.2.2
