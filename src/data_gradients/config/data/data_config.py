@@ -100,7 +100,7 @@ class DataConfig(ABC):
             if cache_dict:
                 logger.info(
                     f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                    f"Please set `use_cache=False` if you want to deactivate it."
+                    f'Caching path = "{path}". Please set `use_cache=False` if you want to deactivate it.'
                 )
                 self._fill_missing_params(json_dict=cache_dict)
         else:
