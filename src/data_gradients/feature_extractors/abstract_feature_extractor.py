@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Union, Optional, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,6 +45,13 @@ class AbstractFeatureExtractor(ABC):
     @property
     def warning(self) -> Optional[str]:
         return None
+
+    def setup_data_sources(self, tran_data: Iterable, val_data: Iterable):
+        """
+        Called in AnalysisManagerAbstract.__init__ for the purpose of exposing tran_data and val_data
+         to the feature in case some information is needed.
+        """
+        pass
 
     def __repr__(self):
         return self.__class__.__name__

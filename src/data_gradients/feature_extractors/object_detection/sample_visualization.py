@@ -4,7 +4,7 @@ import numpy as np
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.common.sample_visualization import AbstractSampleVisualization
 from data_gradients.utils.data_classes.data_samples import DetectionSample, ImageChannelFormat
-from data_gradients.visualize.detection import draw_bboxes
+from data_gradients.visualize.detection.detection import draw_bboxes
 
 
 @register_feature_extractor()

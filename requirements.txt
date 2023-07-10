@@ -2,7 +2,7 @@ hydra-core>=1.2.0
 omegaconf>=2.2.3
 pygments>=2.13.0
 tqdm>=4.64.1
-appdirs>=1.4.4
+platformdirs>=2.5.2
 opencv-python
 Pillow
 tensorboard
@@ -16,3 +16,4 @@ coverage~=5.3.1
 seaborn
 xhtml2pdf
 jinja2
+imagededup

@@ -5,11 +5,22 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.seaborn_renderer import BarPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
 class SegmentationClassFrequency(AbstractFeatureExtractor):
-    def __init__(self):
+    def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
+        """
+        :param topk:                How many rows (per split) to show.
+        :param prioritization_mode: Strategy to use to chose which class will be prioritized. Only the topk will be shown
+                - 'train_val_diff': Returns the top k rows with the biggest train_val_diff between 'train' and 'val' split values.
+                - 'outliers':       Returns the top k rows with the most extreme average values.
+                - 'max':            Returns the top k rows with the highest average values.
+                - 'min':            Returns the top k rows with the lowest average values.
+                - 'min_max':        Returns the (top k)/2 rows with the biggest average values, and the (top k)/2 with the smallest average values.
+        """
+        self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
 
     def update(self, sample: SegmentationSample):
@@ -34,6 +45,8 @@ class SegmentationClassFrequency(AbstractFeatureExtractor):
         split_sums = df_class_count.groupby("split")["n_appearance"].sum()
         df_class_count["frequency"] = 100 * (df_class_count["n_appearance"] / df_class_count["split"].map(split_sums))
 
+        df_class_count = self.value_extractor.select(df=df_class_count, id_col="class_id", split_col="split", value_col="frequency")
+
         # Height of the plot is proportional to the number of classes
         n_unique = len(df_class_count["class_name"].unique())
         figsize_x = 10
@@ -53,10 +66,7 @@ class SegmentationClassFrequency(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = dict(
-            train=dict(df_class_count[df_class_count["split"] == "train"]["n_appearance"].describe()),
-            val=dict(df_class_count[df_class_count["split"] == "val"]["n_appearance"].describe()),
-        )
+        json = {split: dict(df_class_count[df_class_count["split"] == split]["n_appearance"].describe()) for split in df_class_count["split"].unique()}
 
         feature = Feature(
             data=df_class_count,

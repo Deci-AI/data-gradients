@@ -86,7 +86,7 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "This graph shows the distribution of the image brightness of each dataset. \n"
+            "This graph shows the distribution of the brightness levels across all images. \n"
             "This may for instance uncover differences between the training and validation sets, "
             "such as the presence of exclusively daytime images in the training set and nighttime images in the validation set."
         )

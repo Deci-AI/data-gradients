@@ -1,16 +1,14 @@
-import os
 import numpy as np
 import logging
-from typing import Tuple, Sequence
+from typing import Sequence, Optional, List, Callable
 
-from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
-from data_gradients.datasets.utils import load_image, ImageChannelFormat
-
+from data_gradients.datasets.base_dataset import BaseImageLabelDirectoryDataset
+from data_gradients.datasets.FolderProcessor import DEFAULT_IMG_EXTENSIONS
 
 logger = logging.getLogger(__name__)
 
 
-class YoloFormatDetectionDataset:
+class YoloFormatDetectionDataset(BaseImageLabelDirectoryDataset):
     """The Yolo format Detection Dataset supports any dataset stored in the YOLO format.
 
     #### Expected folder structure
@@ -98,6 +96,7 @@ class YoloFormatDetectionDataset:
         verbose: bool = False,
         image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         label_extensions: Sequence[str] = ("txt",),
+        single_line_parser: Optional[Callable[[str], Sequence[float]]] = None,
     ):
         """
         :param root_dir:                Where the data is stored.
@@ -107,53 +106,70 @@ class YoloFormatDetectionDataset:
         :param verbose:                 Whether to show extra information during loading.
         :param image_extensions:        List of image file extensions to load from.
         :param label_extensions:        List of label file extensions to load from.
+        :param single_line_parser:      Function to parse a single line in the label file.
+                                        Should return a list of 5 elements. (class_id and bounding box coordinates)
+                                        By default, parse according to the standard Yolo format `<class_id> <cx> <cy> <w> <h>`
         """
-        self.image_label_tuples = ImageLabelFilesIterator(
-            images_dir=os.path.join(root_dir, images_dir),
-            labels_dir=os.path.join(root_dir, labels_dir),
+        super().__init__(
+            root_dir=root_dir,
+            images_subdir=images_dir,
+            labels_subdir=labels_dir,
+            config_path=None,
+            verbose=verbose,
             image_extensions=image_extensions,
             label_extensions=label_extensions,
-            verbose=verbose,
         )
         self.ignore_invalid_labels = ignore_invalid_labels
         self.verbose = verbose
+        self.single_line_parser = single_line_parser or parse_yolo_format_line
 
-    def load_image(self, index: int) -> np.ndarray:
-        img_file, _ = self.image_label_tuples[index]
-        return load_image(path=img_file, channel_format=ImageChannelFormat.RGB)
+    def load_labels(self, path: str) -> np.ndarray:
+        """Parse a single label file according to `self.single_line_parser`.
+        :param path: Local path to the label file.
+        :return:     Numpy array representing the labels.
+        """
 
-    def load_labels(self, index: int) -> np.ndarray:
-        _, label_path = self.image_label_tuples[index]
-
-        with open(label_path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             lines = file.readlines()
 
         labels = []
         for line in filter(lambda x: x != "\n", lines):
-            lines_elements = line.split()
-            if len(lines_elements) == 5:
-                try:
-                    labels.append(list(map(float, lines_elements)))
-                except ValueError as e:
-                    raise ValueError(
-                        f"Invalid label: {line} from {label_path}.\nExpected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}."
-                    ) from e
-            else:
-                error = f"invalid label: {line} from {label_path}.\n Expected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}."
+            try:
+                label = self.single_line_parser(line)
+                if label is not None:
+                    labels.append(label)
+            except Exception as e:
+                error = f"invalid label: {line} from {path}. "
                 if self.ignore_invalid_labels:
-                    logger.warning(f"Ignoring {error}")
+                    logger.warning(f"Ignoring {error}. Exception raise: {e}")
                 else:
-                    raise RuntimeError(error.capitalize())
+                    raise RuntimeError(error.capitalize()) from e
         return np.array(labels) if labels else np.zeros((0, 5))
 
-    def __len__(self) -> int:
-        return len(self.image_label_tuples)
 
-    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
-        image = self.load_image(index)
-        labels = self.load_labels(index)
-        return image, labels
+def parse_yolo_format_line(line: str) -> Optional[List[float]]:
+    """Parses a line in the standard Yolo format, i.e. `<class_id> <cx> <cy> <w> <h>`. Does not support any variation.
+    :param line:    Line representing a bounding box instance. Should be formatted in Yolo format: `<class_id> <cx> <cy> <w> <h>`.
+    :return:        List representing the bounding box labels (class_id, cx, cy, w, h).
+    """
 
-    def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
-        for i in range(len(self)):
-            yield self[i]
+    elements = line.split()
+
+    # Skip empty lines and comments
+    if not elements or elements[0].startswith("#"):
+        return None
+
+    if len(elements) != 5:
+        raise ValueError(f"Expected at 5 elements per line. Got {len(elements)} elements.")
+
+    # Check if the class_id is a non-negative integer
+    class_id = int(elements[0])
+    if class_id < 0 or float(elements[0]) != class_id:
+        raise ValueError(f"`class_id` should be a non-negative integer. Got `class_id={class_id}`.")
+
+    cx = float(elements[1])
+    cy = float(elements[2])
+    w = float(elements[3])
+    h = float(elements[4])
+
+    return [class_id, cx, cy, w, h]
