@@ -12,5 +12,7 @@ def load_image(path: str, channel_format: ImageChannelFormat = ImageChannelForma
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     elif channel_format == ImageChannelFormat.GRAYSCALE:
         return cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    elif channel_format == ImageChannelFormat.UNCHANGED:
+        return cv2.imread(path, cv2.IMREAD_UNCHANGED)
     else:
         raise NotImplementedError(f"Channel format {channel_format} is not supported for loading image")
