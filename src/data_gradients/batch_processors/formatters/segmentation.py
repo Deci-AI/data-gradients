@@ -93,7 +93,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
             images = images.to(torch.uint8)
-        elif 0 >= images.min(): # images were normalized with some unknown mean and std
+        elif images.min() < 0:  # images were normalized with some unknown mean and std
             images -= images.min()
             images /= images.max()
             images *= 255
