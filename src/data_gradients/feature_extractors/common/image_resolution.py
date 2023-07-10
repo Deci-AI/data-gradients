@@ -83,5 +83,5 @@ class ImagesResolution(AbstractFeatureExtractor):
         return (
             "These histograms depict the distributions of image height and width. "
             "It's important to note that if certain images have been rescaled or padded, the histograms will represent the size after "
-            "the rescaling and padding operations."
+            "these operations."
         )

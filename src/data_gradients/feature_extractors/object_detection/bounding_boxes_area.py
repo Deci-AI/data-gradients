@@ -5,13 +5,24 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
 class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     """Feature Extractor to compute the area covered Bounding Boxes."""
 
-    def __init__(self):
+    def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
+        """
+        :param topk:                How many rows (per split) to show.
+        :param prioritization_mode: Strategy to use to chose which class will be prioritized. Only the topk will be shown
+                - 'train_val_diff': Returns the top k rows with the biggest train_val_diff between 'train' and 'val' split values.
+                - 'outliers':       Returns the top k rows with the most extreme average values.
+                - 'max':            Returns the top k rows with the highest average values.
+                - 'min':            Returns the top k rows with the lowest average values.
+                - 'min_max':        Returns the (top k)/2 rows with the biggest average values, and the (top k)/2 with the smallest average values.
+        """
+        self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
 
     def update(self, sample: DetectionSample):
@@ -30,6 +41,8 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
+
+        df = self.value_extractor.select(df=df, id_col="class_id", split_col="split", value_col="relative_bbox_area")
 
         # Height of the plot is proportional to the number of classes
         n_unique = len(df["class_name"].unique())
@@ -53,9 +66,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = dict(
-            train=dict(df[df["split"] == "train"]["relative_bbox_area"].describe()), val=dict(df[df["split"] == "val"]["relative_bbox_area"].describe())
-        )
+        json = {split: dict(df[df["split"] == split]["relative_bbox_area"].describe()) for split in df["split"].unique()}
 
         feature = Feature(
             data=df,
@@ -71,8 +82,8 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "This graph shows the distribution of bounding box area for each class. "
-            "This can highlight distribution gap in object size between the training and validation splits, which can harm the model performance. \n"
-            "Another thing to keep in mind is that having too many very small objects may indicate that your are down sizing your original image to a "
+            "This graph shows the frequency of each class's appearance in the dataset. "
+            "This can highlight distribution gap in object size between the training and validation splits, which can harm the model's performance. \n"
+            "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
             "low resolution that is not appropriate for your objects."
         )
