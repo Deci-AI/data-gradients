@@ -81,7 +81,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         if val_data is not None and not isinstance(val_data, DataLoader):
             try:
-                next(iter(DataLoader(train_data)))
+                next(iter(DataLoader(val_data)))
                 val_data = DataLoader(val_data)
             except:
                 pass
