@@ -16,10 +16,16 @@ report_sections:
           n_rows: 6
           n_cols: 2
           heatmap_shape: [200, 200]
-      - SegmentationClassFrequency
-      - SegmentationClassesPerImageCount
+      - SegmentationClassFrequency:
+          topk: 30
+          prioritization_mode: train_val_diff
+      - SegmentationClassesPerImageCount:
+          topk: 30
+          prioritization_mode: train_val_diff
       - SegmentationComponentsPerImageCount
       - SegmentationBoundingBoxResolution
-      - SegmentationBoundingBoxArea
+      - SegmentationBoundingBoxArea:
+          topk: 30
+          prioritization_mode: train_val_diff
       - SegmentationComponentsConvexity
       - SegmentationComponentsErosion
