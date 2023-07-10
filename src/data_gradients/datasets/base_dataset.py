@@ -4,45 +4,21 @@ from typing import Tuple, Sequence, Optional
 
 import numpy as np
 from torch.utils.data.dataset import Dataset
+
 from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
 from data_gradients.datasets.utils import load_image, ImageChannelFormat
 
 
-class BaseDataset(Dataset, ABC):
-    """Base class for every DataGradients dataset."""
-
-    @abstractmethod
-    def load_image(self, path: str) -> np.ndarray:
-        ...
-
-    @abstractmethod
-    def load_labels(self, path: str) -> np.ndarray:
-        ...
-
-    @abstractmethod
-    def __len__(self) -> int:
-        ...
-
-    @abstractmethod
-    def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
-        ...
-
-    @abstractmethod
-    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
-        ...
-
-
-class BaseImageLabelDirectoryDataset(BaseDataset, ABC):
+class BaseImageLabelDirectoryDataset(Dataset, ABC):
     """Base class for any dataset that is primarily made of an image and label directories."""
 
     def __init__(
         self,
-        *,
         root_dir: str,
         images_subdir: str,
         labels_subdir: str,
-        image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         label_extensions: Sequence[str],
+        image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         config_path: Optional[str] = None,
         verbose: bool = False,
     ):
