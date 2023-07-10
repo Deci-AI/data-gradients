@@ -34,7 +34,7 @@ class DetectionClassHeatmap(BaseClassHeatmap):
 
     @property
     def title(self) -> str:
-        return "Bounding Boxes Density"
+        return "Bounding Box Density"
 
     @property
     def description(self) -> str:
