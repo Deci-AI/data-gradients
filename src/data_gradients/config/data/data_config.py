@@ -1,7 +1,8 @@
 import os
 import logging
+
+import platformdirs
 import torch
-import appdirs
 from abc import ABC
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Callable, Union
@@ -31,7 +32,7 @@ class DataConfig(ABC):
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
-    DEFAULT_CACHE_DIR: str = field(default=appdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+    DEFAULT_CACHE_DIR: str = field(default=platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
 
     @classmethod
     def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
@@ -99,7 +100,7 @@ class DataConfig(ABC):
             if cache_dict:
                 logger.info(
                     f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                    f"Please set `use_cache=False` if you want to deactivate it."
+                    f'Caching path = "{path}". Please set `use_cache=False` if you want to deactivate it.'
                 )
                 self._fill_missing_params(json_dict=cache_dict)
         else:
