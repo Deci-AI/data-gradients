@@ -1,6 +1,7 @@
 import numpy as np
 import logging
-from typing import Sequence
+from typing import Sequence, Optional, List, Callable
+
 from data_gradients.datasets.base_dataset import BaseImageLabelDirectoryDataset
 from data_gradients.datasets.FolderProcessor import DEFAULT_IMG_EXTENSIONS
 
@@ -95,6 +96,7 @@ class YoloFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         verbose: bool = False,
         image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         label_extensions: Sequence[str] = ("txt",),
+        single_line_parser: Optional[Callable[[str], Sequence[float, float, float, float, float]]] = None,
     ):
         """
         :param root_dir:                Where the data is stored.
@@ -104,6 +106,9 @@ class YoloFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         :param verbose:                 Whether to show extra information during loading.
         :param image_extensions:        List of image file extensions to load from.
         :param label_extensions:        List of label file extensions to load from.
+        :param single_line_parser:      Function to parse a single line in the label file.
+                                        Should return a list of 5 elements. (class_id and bounding box coordinates)
+                                        By default, parse according to the standard Yolo format `<class_id> <cx> <cy> <w> <h>`
         """
         super().__init__(
             root_dir=root_dir,
@@ -116,24 +121,55 @@ class YoloFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         )
         self.ignore_invalid_labels = ignore_invalid_labels
         self.verbose = verbose
+        self.single_line_parser = single_line_parser or parse_yolo_format_line
 
     def load_labels(self, path: str) -> np.ndarray:
+        """Parse a single label file according to `self.single_line_parser`.
+        :param path: Local path to the label file.
+        :return:     Numpy array representing the labels.
+        """
 
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             lines = file.readlines()
 
         labels = []
         for line in filter(lambda x: x != "\n", lines):
-            lines_elements = line.split()
-            if len(lines_elements) == 5:
-                try:
-                    labels.append(list(map(float, lines_elements)))
-                except ValueError as e:
-                    raise ValueError(f"Invalid label: {line} from {path}.\nExpected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}.") from e
-            else:
-                error = f"invalid label: {line} from {path}.\n Expected 5 elements (class_id, cx, cy, w, h), got {len(lines_elements)}."
+            try:
+                label = self.single_line_parser(line)
+                if label is not None:
+                    labels.append(label)
+            except Exception as e:
+                error = f"invalid label: {line} from {path}. "
                 if self.ignore_invalid_labels:
-                    logger.warning(f"Ignoring {error}")
+                    logger.warning(f"Ignoring {error}. Exception raise: {e}")
                 else:
-                    raise RuntimeError(error.capitalize())
+                    raise RuntimeError(error.capitalize()) from e
         return np.array(labels) if labels else np.zeros((0, 5))
+
+
+def parse_yolo_format_line(line: str) -> Optional[List[float]]:
+    """Parses a line in the standard Yolo format, i.e. `<class_id> <cx> <cy> <w> <h>`. Does not support any variation.
+    :param line:    Line representing a bounding box instance. Should be formatted in Yolo format: `<class_id> <cx> <cy> <w> <h>`.
+    :return:        List representing the bounding box labels (class_id, cx, cy, w, h).
+    """
+
+    elements = line.split()
+
+    # Skip empty lines and comments
+    if not elements or elements[0].startswith("#"):
+        return None
+
+    if len(elements) != 5:
+        raise ValueError(f"Expected at 5 elements per line. Got {len(elements)} elements.")
+
+    # Check if the class_id is a non-negative integer
+    class_id = int(elements[0])
+    if class_id < 0 or float(elements[0]) != class_id:
+        raise ValueError(f"`class_id` should be a non-negative integer. Got `class_id={class_id}`.")
+
+    cx = float(elements[1])
+    cy = float(elements[2])
+    w = float(elements[3])
+    h = float(elements[4])
+
+    return [class_id, cx, cy, w, h]
