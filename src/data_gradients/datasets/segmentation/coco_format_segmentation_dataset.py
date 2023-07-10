@@ -31,7 +31,6 @@ class CocoFormatSegmentationDataset:
 
         # Get image size
         image_size = self.base_dataset[index][0].size[::-1]
-        H, W = image_size
 
         # Initialize empty mask
         masks = np.zeros(image_size, dtype=np.uint8)

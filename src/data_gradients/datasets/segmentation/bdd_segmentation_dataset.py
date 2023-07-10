@@ -3,7 +3,8 @@ from typing import Tuple
 import numpy as np
 from torchvision.transforms import transforms
 
-from data_gradients.datasets.segmentation.image_label_file_segmentation_dataset import ImageLabelFileIteratorSegmentationDataset
+from data_gradients.datasets.base_dataset import BaseImageLabelDirectoryDataset
+from data_gradients.datasets.utils import load_image, ImageChannelFormat
 
 NORMALIZATION_MEANS = [0.485, 0.456, 0.406]
 NORMALIZATION_STDS = [0.229, 0.224, 0.225]
@@ -32,18 +33,19 @@ BDDD_CLASS_NAMES = [
 ]
 
 
-class BDDDataset(ImageLabelFileIteratorSegmentationDataset):
+class BDDDataset(BaseImageLabelDirectoryDataset):
     """
     PyTorch Dataset implementation of the BDD100K dataset.
     The BDD100K data and annotations can be obtained at https://bdd-data.berkeley.edu/.
     """
+
+    CLASS_NAMES = BDDD_CLASS_NAMES
 
     def __init__(
         self,
         data_folder,
         split: str,
         transform=transforms.Compose([]).transforms,
-        target_transform=transforms.Compose([]),
         verbose: bool = False,
     ):
         """
@@ -52,16 +54,18 @@ class BDDDataset(ImageLabelFileIteratorSegmentationDataset):
         """
         self.transforms = transform
         self.target_transforms = transform
-        self.class_names = BDDD_CLASS_NAMES
 
         super().__init__(
             root_dir=data_folder,
             images_subdir=split,
             labels_subdir=split,
             verbose=verbose,
-            image_extensions=("jpg"),
-            label_extensions=("png"),
+            image_extensions=("jpg",),
+            label_extensions=("png",),
         )
+
+    def load_labels(self, path: str) -> np.ndarray:
+        return load_image(path, ImageChannelFormat.UNCHANGED)
 
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
         image, label = super().__getitem__(index)
