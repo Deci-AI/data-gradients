@@ -48,7 +48,10 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
 
     @property
     def notice(self) -> str:
-        return (
-            f"Only the {self.n_cols * self.n_rows} classes with highest density are shown.<br/>"
-            f"You can increase the number of classes by changing `n_cols` and `n_rows` in the configuration file."
-        )
+        if len(self.class_names) > self.n_cols * self.n_rows:
+            return (
+                f"Only the {self.n_cols * self.n_rows} classes with highest density are shown.<br/>"
+                f"You can increase the number of classes by changing `n_cols` and `n_rows` in the configuration file."
+            )
+        else:
+            return None
