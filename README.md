@@ -32,12 +32,25 @@ It automatically extracts features from your datasets and combines them all into
 - And [many more](./documentation/feature_description.md)!
 
 <div align="center">
-  <img src="documentation/assets/report_image_stats.png" width="250px">
-  <img src="documentation/assets/report_mask_sample.png" width="250px">
-  <img src="documentation/assets/report_classes_distribution.png" width="250px">
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png"><img src="documentation/assets/report_image_stats.png" width="250px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_mask_sample.png"><img src="documentation/assets/report_mask_sample.png" width="250px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_classes_distribution.png"><img src="documentation/assets/report_classes_distribution.png" width="250px"></a>
   <p><em>Example of pages from the Report</em>
 </div>
 
+<div align="center">
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxArea.png"><img src="documentation/assets/SegmentationBoundingBoxArea.png" width="375px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxResolution.png"><img src="documentation/assets/SegmentationBoundingBoxResolution.png" width="375px"></a>
+  <br />
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationClassFrequency.png"><img src="documentation/assets/SegmentationClassFrequency.png" width="375px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationComponentsPerImageCount.png"><img src="documentation/assets/SegmentationComponentsPerImageCount.png" width="375px"></a>
+  <p><em>Example of specific features</em>
+</div>
+
+## Examples 
+[COCO 2017 Detection report](documentation/assets/Report_COCO.pdf)
+
+[Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
 
 ## Installation
 You can install DataGradients directly from the GitHub repository.

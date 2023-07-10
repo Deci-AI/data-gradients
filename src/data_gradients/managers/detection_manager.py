@@ -33,7 +33,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         is_label_first: Optional[bool] = None,
         bbox_format: Optional[str] = None,
         n_image_channels: int = 3,
-        batches_early_stop: int = 999,
+        batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
         """
@@ -108,5 +108,5 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             grouped_feature_extractors=grouped_feature_extractors,
             log_dir=log_dir,
             batches_early_stop=batches_early_stop,
-            remove_plots_after_report=remove_plots_after_report
+            remove_plots_after_report=remove_plots_after_report,
         )

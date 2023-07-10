@@ -147,7 +147,8 @@ class SegmentationBatchFormatter(BatchFormatter):
                 return labels.squeeze(1)  # [BS, 1, W, H] -> [BS, W, H] (categorical representation)
             elif labels.shape[-1] == 1 and labels.shape[-1] != total_n_classes:
                 return labels.squeeze(-1)  # [BS, W, H, 1] -> [BS, W, H] (categorical representation)
-            elif labels.shape[1] != total_n_classes and labels.shape[-1] != total_n_classes:
+            elif not (labels.shape[1] == total_n_classes or labels.shape[-1] == total_n_classes):
+                # We have 4 dims, but it's neither [BS, N, W, H] nor [BS, W, H, N]
                 raise DatasetFormatError(f"Labels batch shape should be [BS, N, W, H] where N is n_classes. Got {labels.shape}")
             return labels
         else:
