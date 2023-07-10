@@ -96,7 +96,7 @@ class YoloFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         verbose: bool = False,
         image_extensions: Sequence[str] = DEFAULT_IMG_EXTENSIONS,
         label_extensions: Sequence[str] = ("txt",),
-        single_line_parser: Optional[Callable[[str], Sequence[float, float, float, float, float]]] = None,
+        single_line_parser: Optional[Callable[[str], Sequence[float]]] = None,
     ):
         """
         :param root_dir:                Where the data is stored.
