@@ -29,7 +29,7 @@ class BaseImageLabelDirectoryDataset(Dataset, ABC):
         :param image_extensions:    List of image file extensions to load from.
         :param label_extensions:    List of label file extensions to load from.
         :param config_path:         Path to an optional config file. This config file should contain the list of file ids to include.
-                                    If None, all the available images and tagets will be loaded.
+                                    If None, all the available images and labels will be loaded.
         :param verbose:             Whether to show extra information during loading.
         """
         config_path = os.path.join(root_dir, config_path) if config_path is not None else None
