@@ -157,6 +157,7 @@ class AnalysisManagerAbstract(abc.ABC):
                     feature_json = {"error": error_description}
                     feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.summary_writer.errors_path}</em>"
                     self.summary_writer.add_error(title=feature_extractor.title, error=error_description)
+                    logger.error(f"Feature extractor {feature_extractor} error: {error_description}")
 
                 if f is not None:
                     image_name = feature_extractor.__class__.__name__ + ".png"
