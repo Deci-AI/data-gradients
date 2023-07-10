@@ -55,12 +55,12 @@ class TensorExtractorResolver:
         return TensorExtractorResolver._resolve(tensor_extractor).value
 
     @staticmethod
-    def to_string(tensor_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]]) -> Optional[str]:
+    def to_string(tensor_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]]) -> str:
         """Ensures the input `tensor_extractor` to be a string.
 
         For example:
             >> TensorExtractorResolver.to_string(None)
-            # None
+            # "None"
 
             >> TensorExtractorResolver.to_string("[1].bbox")
             # "[1].bbox"
@@ -92,7 +92,7 @@ class TensorExtractorResolver:
         :return: Dataclass including both the value (used in the code) and the name (used in the cache) of this function.
         """
         if tensor_extractor is None:
-            return CachableParam(value=None, name=None)
+            return CachableParam(value=None, name="None")
 
         elif isinstance(tensor_extractor, str):
             if tensor_extractor.startswith(NON_CACHABLE_PREFIX):
@@ -126,12 +126,12 @@ class XYXYConverterResolver:
         return XYXYConverterResolver._resolve(xyxy_converter).value
 
     @staticmethod
-    def to_string(xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]]) -> Optional[str]:
+    def to_string(xyxy_converter: Union[None, str, Callable[[torch.Tensor], torch.Tensor]]) -> str:
         """Ensures the input `xyxy_converter` to be a string.
 
         For example:
             >> XYXYConverterResolver.to_string(None)
-            # None
+            # "None"
 
             >> XYXYConverterResolver.to_string("xywh")
             # "xyxy"
@@ -161,7 +161,7 @@ class XYXYConverterResolver:
         :return: Dataclass including both the value (used in the code) and the name (used in the cache) of this function.
         """
         if xyxy_converter is None:
-            return CachableParam(value=None, name=None)
+            return CachableParam(value=None, name="None")
 
         elif isinstance(xyxy_converter, str):
             if xyxy_converter.startswith(NON_CACHABLE_PREFIX):
