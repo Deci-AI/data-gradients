@@ -80,7 +80,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         labels = ensure_channel_first(labels, n_image_channels=self.n_image_channels)
 
         images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
-        labels = self.ensure_labels_shape(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
+        labels = self.validate_labels_dim(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
 
         labels = self.ensure_hard_labels(labels, n_classes=len(self.class_names), threshold_value=self.threshold_value)
 
@@ -131,27 +131,28 @@ class SegmentationBatchFormatter(BatchFormatter):
         return not (is_binary or is_onehot)
 
     @staticmethod
-    def ensure_labels_shape(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
+    def validate_labels_dim(labels: Tensor, n_classes: int, ignore_labels: List[int]) -> Tensor:
         """
         Validating labels dimensions are (BS, N, H, W) where N is either 1 or number of valid classes
-        :param labels: Tensor [BS, N, W, H]
-        :return: labels: Tensor [BS, N, W, H]
+        :param labels:      Tensor [BS, W, H] or [BS, N, W, H]
+        :return: labels:    Tensor [BS, N, W, H]
         """
         if labels.dim() == 3:
-            labels = labels.unsqueeze(1)  # Probably (B, H, W)
-            return labels
+            return labels  # Assuming [BS, W, H]
         elif labels.dim() == 4:
             total_n_classes = n_classes + len(ignore_labels)
-            valid_n_classes = (total_n_classes, 1)
-            input_n_classes = labels.shape[1]
-            if input_n_classes not in valid_n_classes and labels.shape[-1] not in valid_n_classes:
-                raise DatasetFormatError(
-                    f"Labels batch shape should be [BS, N, W, H] where N is either 1 or n_classes + len(ignore_labels)"
-                    f" ({total_n_classes}). Got: {input_n_classes}"
-                )
+
+            # Check if first or last dim is 1; it can be due to mask being saved with [1, H, W] or [H, W, 1]
+            if labels.shape[1] == 1 and labels.shape[1] != total_n_classes:
+                return labels.squeeze(1)  # [BS, 1, W, H] -> [BS, W, H] (categorical representation)
+            elif labels.shape[-1] == 1 and labels.shape[-1] != total_n_classes:
+                return labels.squeeze(-1)  # [BS, W, H, 1] -> [BS, W, H] (categorical representation)
+            elif not (labels.shape[1] == total_n_classes or labels.shape[-1] == total_n_classes):
+                # We have 4 dims, but it's neither [BS, N, W, H] nor [BS, W, H, N]
+                raise DatasetFormatError(f"Labels batch shape should be [BS, N, W, H] where N is n_classes. Got {labels.shape}")
             return labels
         else:
-            raise DatasetFormatError(f"Labels batch shape should be [BatchSize x Channels x Width x Height]. Got {labels.shape}")
+            raise DatasetFormatError(f"Labels batch shape should be [Channels x Width x Height] or [BatchSize x Channels x Width x Height]. Got {labels.shape}")
 
     @staticmethod
     def binary_mask_above_threshold(labels: Tensor, threshold_value: float) -> Tensor:
