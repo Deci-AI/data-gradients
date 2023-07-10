@@ -82,8 +82,8 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "This graph shows the distribution of bounding box area for each class. "
-            "This can highlight distribution gap in object size between the training and validation splits, which can harm the model performance. \n"
-            "Another thing to keep in mind is that having too many very small objects may indicate that your are down sizing your original image to a "
+            "This graph shows the frequency of each class's appearance in the dataset. "
+            "This can highlight distribution gap in object size between the training and validation splits, which can harm the model's performance. \n"
+            "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
             "low resolution that is not appropriate for your objects."
         )
