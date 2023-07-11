@@ -8,3 +8,4 @@ report_sections:
   - name: Classification Features
     features:
       - ClassificationClassDistribution
+      - ClassificationClassDistributionVsArea
