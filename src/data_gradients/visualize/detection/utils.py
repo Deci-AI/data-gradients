@@ -1,7 +1,5 @@
 from typing import Tuple, List
 
-from matplotlib import pyplot as plt
-
 
 def best_text_color(background_color: Tuple[int, int, int]) -> Tuple[int, int, int]:
     """Determine the best color for text to be visible on a given background color.
@@ -32,6 +30,9 @@ def generate_color_mapping(num_classes: int) -> List[Tuple[int, ...]]:
     :param num_classes: The number of classes in the dataset.
     :return:            List of RGB colors for each class.
     """
-    cmap = plt.cm.get_cmap("gist_rainbow", num_classes)
-    colors = [cmap(i, bytes=True)[:3][::-1] for i in range(num_classes)]
-    return [tuple(int(v) for v in c) for c in colors]
+    # cmap = plt.cm.get_cmap("gist_rainbow", num_classes)
+    import seaborn as sns
+
+    cmap = sns.color_palette("Set2", n_colors=num_classes)
+    # colors = [cmap(i, bytes=True)[:3][::-1] for i in range(num_classes)]
+    return [tuple(int(v * 255) for v in c) for c in cmap]
