@@ -7,7 +7,7 @@ from data_gradients.utils.data_classes.data_samples import ImageChannelFormat, C
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
-class ClassificationClassDistributionTest(unittest.TestCase):
+class ClassificationClassFrequencyTest(unittest.TestCase):
     def setUp(self) -> None:
         self.class_distribution = ClassificationClassFrequency()
 

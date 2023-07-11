@@ -7,6 +7,6 @@ report_sections:
       - ImagesAverageBrightness
   - name: Classification Features
     features:
-      - ClassificationClassDistribution
+      - ClassificationClassFrequency
       - ClassificationClassDistributionVsArea
       # - ClassificationClassDistributionVsAreaPlot
