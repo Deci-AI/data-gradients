@@ -9,3 +9,4 @@ report_sections:
     features:
       - ClassificationClassDistribution
       - ClassificationClassDistributionVsArea
+      # - ClassificationClassDistributionVsAreaPlot

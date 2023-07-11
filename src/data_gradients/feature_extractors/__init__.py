@@ -21,7 +21,12 @@ from .object_detection import (
     DetectionSampleVisualization,
     DetectionBoundingBoxIoU,
 )
-from .classification import ClassificationClassDistribution, ClassificationSummaryStats, ClassificationClassDistributionVsArea
+from .classification import (
+    ClassificationClassDistribution,
+    ClassificationSummaryStats,
+    ClassificationClassDistributionVsArea,
+    ClassificationClassDistributionVsAreaPlot,
+)
 
 __all__ = [
     "ImageDuplicates",
@@ -50,4 +55,5 @@ __all__ = [
     "ClassificationClassDistribution",
     "ClassificationSummaryStats",
     "ClassificationClassDistributionVsArea",
+    "ClassificationClassDistributionVsAreaPlot"
 ]
