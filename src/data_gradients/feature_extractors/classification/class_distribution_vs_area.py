@@ -14,14 +14,21 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
-    """Feature Extractor to count the number of labels of each class."""
+    """Feature Extractor to show image area vs image class violin plot."""
 
     def __init__(self):
         self.data = []
 
     def update(self, sample: ClassificationSample):
         class_name = sample.class_names[sample.class_id]
-        self.data.append({"split": sample.split, "class_id": sample.class_id, "class_name": class_name, "image_area": np.prod(sample.image.shape[:2])})
+        self.data.append(
+            {
+                "split": sample.split,
+                "class_id": sample.class_id,
+                "class_name": class_name,
+                "image_size": int(np.sum(sample.image.shape[:2]) // 2),
+            }
+        )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
@@ -35,8 +42,8 @@ class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
         figsize_y = min(max(6, int(n_unique * 0.3)), 175)
 
         plot_options = ViolinPlotOptions(
-            x_label_key="image_area",
-            x_label_name="Image area (px²)",
+            x_label_key="image_size",
+            x_label_name="Image size (px)",
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
@@ -49,12 +56,9 @@ class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = {}
-        for split in df["split"].unique():
-            empty_dict = {class_name: 0 for class_name in all_class_names}
-            counter = collections.Counter(empty_dict)
-            counter.update(df[df["split"] == split]["class_name"])
-            json[split] = dict(counter)
+        df_summary = df[["split", "class_name", "image_size"]].groupby(["split", "class_name", "image_size"]).size().reset_index(name="counts")
+
+        json = df_summary.to_dict(orient="records")
 
         feature = Feature(
             data=df,
@@ -65,11 +69,11 @@ class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
 
     @property
     def title(self) -> str:
-        return "Image area distribution per class"
+        return "Image size distribution per class"
 
     @property
     def description(self) -> str:
         return (
-            "Distribution of images resolution (H*W) with respect to assigned image label and (when possible) a split.\n"
+            "Distribution of image size (mean value of image width & height) with respect to assigned image label and (when possible) a split.\n"
             "This may highlight issues when classes in train/val has different image resolution which may negatively affect the accuracy of the model.\n"
         )

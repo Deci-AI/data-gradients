@@ -79,27 +79,6 @@ class ClassificationClassDistributionTest(unittest.TestCase):
                 )
             )
 
-    def test_update_and_aggregate(self):
-        # Create a sample SegmentationSample object for testing
-        output_json = self.class_distribution.aggregate().json
-
-        expected_json = {
-            "train": {
-                "class_1": 1,
-                "class_2": 1,
-                "class_3": 1,
-                "class_4": 0,
-            },
-            "valid": {
-                "class_1": 1,
-                "class_2": 0,
-                "class_3": 0,
-                "class_4": 1,
-            },
-        }
-
-        self.assertEqual(output_json, expected_json)
-
     def test_plot(self):
         feature = self.class_distribution.aggregate()
         sns = SeabornRenderer()
