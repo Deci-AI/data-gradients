@@ -83,6 +83,7 @@ class ClassificationClassDistributionTest(unittest.TestCase):
         feature = self.class_distribution.aggregate()
         sns = SeabornRenderer()
         f = sns.render(feature.data, feature.plot_options)
+        f.savefig(fname=self.class_distribution.__class__.__name__ + ".png")
         f.show()
 
 

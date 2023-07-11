@@ -22,7 +22,7 @@ from .object_detection import (
     DetectionBoundingBoxIoU,
 )
 from .classification import (
-    ClassificationClassDistribution,
+    ClassificationClassFrequency,
     ClassificationSummaryStats,
     ClassificationClassDistributionVsArea,
     ClassificationClassDistributionVsAreaPlot,
@@ -52,7 +52,7 @@ __all__ = [
     "DetectionClassesPerImageCount",
     "DetectionSampleVisualization",
     "DetectionBoundingBoxIoU",
-    "ClassificationClassDistribution",
+    "ClassificationClassFrequency",
     "ClassificationSummaryStats",
     "ClassificationClassDistributionVsArea",
     "ClassificationClassDistributionVsAreaPlot"

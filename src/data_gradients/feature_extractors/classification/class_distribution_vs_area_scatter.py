@@ -1,19 +1,16 @@
-import collections
-from functools import partial
-
-import numpy as np
 import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
+from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes.data_samples import ClassificationSample
 from data_gradients.visualize.plot_options import ScatterPlotOptions
-from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 
 
 @register_feature_extractor()
 class ClassificationClassDistributionVsAreaPlot(AbstractFeatureExtractor):
-    """Feature Extractor to show image area vs image class violin plot."""
+    """Feature Extractor to show scatter plot of width & height distribution
+    with breakdown along image class and split."""
 
     def __init__(self):
         self.data = []
@@ -35,19 +32,13 @@ class ClassificationClassDistributionVsAreaPlot(AbstractFeatureExtractor):
 
         all_class_names = df["class_name"].unique()
 
-        num_splits = len(df["split"].unique())
-        # Height of the plot is proportional to the number of classes
-        n_unique = len(all_class_names)
-        # figsize_x = 10
-        # figsize_y = min(max(6, int(n_unique * 0.3)), 175)
-
         plot_options = ScatterPlotOptions(
             x_label_key="image_cols",
             x_label_name="Image width (px)",
             y_label_key="image_rows",
             y_label_name="Image height (px)",
             title=self.title,
-            # figsize=(figsize_x, figsize_y),
+            figsize=(10, 10),
             x_ticks_rotation=None,
             labels_key="class_name",
             style_key="split",
