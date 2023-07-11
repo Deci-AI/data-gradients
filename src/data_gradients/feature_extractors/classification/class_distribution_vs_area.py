@@ -76,4 +76,7 @@ class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
         return (
             "Distribution of image size (mean value of image width & height) with respect to assigned image label and (when possible) a split.\n"
             "This may highlight issues when classes in train/val has different image resolution which may negatively affect the accuracy of the model.\n"
+            "If you see a large difference in image size between classes and splits - you may need to adjust data collection process or training regime:\n"
+            " - When splitting data into train/val/test - make sure that the image size distribution is similar between splits.\n"
+            " - If size distribution overlap between splits to too big - you can address this (to some extent) by using more agressize values for zoom-in/zoo-out augmentation at training time.\n"
         )
