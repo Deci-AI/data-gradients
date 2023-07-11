@@ -54,13 +54,59 @@ VOC_CLASSE_NAMES = [
 
 
 class VOCSegmentationDataset(VOCFormatSegmentationDataset):
+    """
+    The VOCSegmentationDataset is specifically tailored for loading PASCAL VOC segmentation datasets.
+
+    #### Expected folder structure
+    Similar to the VOCFormatSegmentationDataset, this class also expects certain folder structures.
+    The folder structure of the PASCAL VOC dataset is as follows:
+
+    ```
+        dataset_root/
+            ├── VOC2007/
+            │   ├── JPEGImages/
+            │   ├── SegmentationClass/
+            │   └── ImageSets/
+            │       └── Segmentation/
+            │           ├── train.txt
+            │           └── val.txt
+            └── VOC2012/
+                ├── JPEGImages/
+                ├── SegmentationClass/
+                └── ImageSets/
+                    └── Segmentation/
+                        ├── train.txt
+                        └── val.txt
+    ```
+    Each label image should be a color image where the color of each pixel corresponds to the class of that pixel.
+
+    #### Instantiation
+    ```
+    from data_gradients.datasets.segmentation import VOCSegmentationDataset
+
+    train_set = VOCSegmentationDataset(
+        root_dir="<path/to/dataset_root>",
+        year=2007,
+        split="train",
+        verbose=True
+    )
+    val_set = VOCSegmentationDataset(
+        root_dir="<path/to/dataset_root>",
+        year=2007,
+        split="val",
+        verbose=True
+    )
+    ```
+    """
+
     def __init__(self, root_dir: str, year: Union[int, str], split: str, verbose: bool = False):
         """
-        :param root_dir:    Where the data is stored.
-        :param year:        Year of the dataset. Usually 2007 or 2012.
-        :param split:       Set of images to load. Usually `train` or `val`, but your dataset may include other sets such as `aeroplane_train.txt`, ...
-                            Check out your ImageSets/Main folder to find the list
-        :param verbose:     Whether to show extra information during loading.
+        :param root_dir:    Root directory where the VOC dataset is stored.
+        :param year:        Year of the VOC dataset (2007 or 2012).
+        :param split:       Set of images to load. This usually corresponds to the data split (train or val).
+                            Your dataset may also include other sets such as those specific to a class (e.g., `aeroplane_train.txt`).
+                            These sets can be found in the `ImageSets/Main` folder.
+        :param verbose:     If True, print out additional information during the data loading process.
         """
         super().__init__(
             root_dir=root_dir,
