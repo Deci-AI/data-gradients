@@ -77,3 +77,56 @@ def safe_json_load(path: str) -> Dict:
             return json.load(f)
     except json.decoder.JSONDecodeError:
         return {}
+
+
+def text_to_blue(text: str) -> str:
+    return f"\033[34;1m{text}\033[0m"
+
+
+def text_to_yellow(text: str):
+    return f"\033[33;1m{text}\033[0m"
+
+
+def break_text(text: str, line_length: int):
+    lines = []
+    words = text.split()
+    current_line = []
+    current_length = 0
+
+    for word in words:
+        word_length = len(word)
+
+        if current_length + len(current_line) + word_length <= line_length:
+            current_line.append(word)
+            current_length += word_length
+        else:
+            lines.append(' '.join(current_line))
+            current_line = [word]
+            current_length = word_length
+
+    if current_line:
+        lines.append(' '.join(current_line))
+
+    # Add spaces to the end of each line to make them equal in length
+    for i in range(len(lines)):
+        spaces_needed = line_length - len(lines[i])
+        lines[i] += ' ' * spaces_needed
+
+    return lines
+
+
+def print_in_box(text_lines: str, box_size: int = 70):
+    left = text_to_blue("║  ")
+    right = text_to_blue("  ║")
+    bottom_left = text_to_blue("╚")
+    top_bottom = text_to_blue("═")
+    top_left = text_to_blue("╔")
+    top_right = text_to_blue("╗")
+    bottom_right = text_to_blue("╝")
+
+    lines = break_text(text_lines, box_size)
+    top_bottom = top_bottom * (box_size + 4)
+    print(top_left + top_bottom + top_right)
+    for text in lines:
+        print(left + text + right)
+    print(bottom_left + top_bottom +bottom_right)
