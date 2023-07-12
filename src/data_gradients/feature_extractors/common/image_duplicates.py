@@ -1,5 +1,4 @@
-from collections import Iterable
-from typing import List, Optional
+from typing import List, Optional, Iterable
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
