@@ -55,7 +55,7 @@ It automatically extracts features from your datasets and combines them all into
 <table style="border: 0">
   <tr>
     <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/colab.png" width="80pt"></td>
-    <td><a href="https://colab.research.google.com/drive/1dswgeK0KF-n61p6ixRdFgbQKHEtOu8SE?usp=sharing"> Example notebook on Colab</a></td>
+    <td><a href="https://colab.research.google.com/drive/1xYX6PtD7FAgtKE-w25E2MmvIQJ1pvCVc"> Example notebook on Colab</a></td>
   </tr>
 </table>
 
