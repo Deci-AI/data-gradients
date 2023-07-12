@@ -10,6 +10,7 @@ from tqdm import tqdm
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
+from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
@@ -97,6 +98,9 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - Archive directory: {self.summary_writer.archive_dir} \n"
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
+
+        print_in_box("To better understand how to tackle the data issues highlighted in this report, explore our comprehensive course on analyzing "
+                     "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0")
 
         datasets_tqdm = tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
