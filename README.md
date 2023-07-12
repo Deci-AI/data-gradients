@@ -52,6 +52,14 @@ It automatically extracts features from your datasets and combines them all into
 
 [Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
 
+<table style="border: 0">
+  <tr>
+    <td><img src="documentation/assets/colab.png" width="80pt"></td>
+    <td><a href="https://colab.research.google.com/drive/1dswgeK0KF-n61p6ixRdFgbQKHEtOu8SE?usp=sharing"> Example notebook on Colab</a></td>
+  </tr>
+</table>
+
+
 ## Installation
 You can install DataGradients directly from the GitHub repository.
 
@@ -240,6 +248,13 @@ SegmentationAnalysisManager(
 )
 ```
 
+## Community
+<table style="border: 0">
+  <tr>
+    <td><img src="documentation/assets/discord.png" width="60pt"></td>
+    <td><a href="https://discord.gg/2v6cEGMREN"> Click here to join our Discord Community</a></td>
+  </tr>
+</table>
 
 ## License
 
