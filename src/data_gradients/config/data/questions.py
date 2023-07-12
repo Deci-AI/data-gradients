@@ -107,7 +107,7 @@ def ask_user_via_jupyter(main_question: str, options: List[str], optional_descri
 
     import ipywidgets as widgets
     from IPython.display import display
-    from jupyter_ui_poll import ui_events
+    from data_gradients.utils.jupyter_utils import ui_events
 
     for i, option in enumerate(options):
         button = widgets.Button(description=option)
