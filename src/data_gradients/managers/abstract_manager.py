@@ -289,4 +289,11 @@ class AnalysisManagerAbstract(abc.ABC):
         """
         Formats the feature extractor's description string for a vieable display in HTML.
         """
-        return description.replace("\n", "<br />")
+        if AnalysisManagerAbstract._is_html(description):
+            return description
+        else:
+            return description.replace("\n", "<br />")
+
+    @staticmethod
+    def _is_html(description: str) -> bool:
+        return description.startswith("<") and description.endswith(">")
