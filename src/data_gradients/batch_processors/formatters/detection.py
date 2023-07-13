@@ -99,8 +99,8 @@ class DetectionBatchFormatter(BatchFormatter):
             # e.g. to tensor([]) for single sample or tensor([], size=(BS, 0)) for batch
             # This breaks the expected target format which should be (N, 5), (BS, N, 5) or (N, 6)
             if annotated_bboxes.shape[-1] == 0:
-                # This means that the last dim is N (representing the number of bounding boxes)
-                # In that case, we need to add the last dimension to represent each bounding box class/coordinates
+                # This means that the last dim is N (representing the number of bounding boxes), i.e. (N, ) or (BS, N)
+                # In that case, we need to add the last dimension to represent each bounding box class/coordinates, i.e. (N, 5) or (BS, N, 5)
                 if annotated_bboxes.ndim == 1:  # (N, ) -> (N, 5) with N=0
                     annotated_bboxes = torch.zeros((0, 5))
                 elif annotated_bboxes.ndim == 2:  # (BS, N) -> (BS, N, 5) with N=0
