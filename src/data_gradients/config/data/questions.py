@@ -2,13 +2,7 @@ from dataclasses import dataclass
 from time import sleep
 from typing import Dict, Any, Optional, List
 
-
-def text_to_blue(text: str) -> str:
-    return f"\033[34;1m{text}\033[0m"
-
-
-def text_to_yellow(text: str):
-    return f"\033[33;1m{text}\033[0m"
+from data_gradients.utils.utils import text_to_blue, text_to_yellow
 
 
 @dataclass
