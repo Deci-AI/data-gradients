@@ -73,6 +73,11 @@ class CocoFormatDetectionDataset:
             annFile=os.path.join(root_dir, annotation_file_path),
         )
 
+        self.class_ids = self.base_dataset.coco.getCatIds()
+
+        categories = self.base_dataset.coco.loadCats(self.class_ids)
+        self.class_names = [category["name"] for category in categories]
+
     def load_image(self, index: int) -> np.ndarray:
         image = self.base_dataset[index][0]
         return np.array(image)
