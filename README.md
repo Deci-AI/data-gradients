@@ -32,18 +32,18 @@ It automatically extracts features from your datasets and combines them all into
 - And [many more](./documentation/feature_description.md)!
 
 <div align="center">
-  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png"><img src="documentation/assets/report_image_stats.png" width="250px"></a>
-  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_mask_sample.png"><img src="documentation/assets/report_mask_sample.png" width="250px"></a>
-  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_classes_distribution.png"><img src="documentation/assets/report_classes_distribution.png" width="250px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png" width="250px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_mask_sample.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_mask_sample.png" width="250px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_classes_distribution.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_classes_distribution.png" width="250px"></a>
   <p><em>Example of pages from the Report</em>
 </div>
 
 <div align="center">
-  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxArea.png"><img src="documentation/assets/SegmentationBoundingBoxArea.png" width="375px"></a>
-  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxResolution.png"><img src="documentation/assets/SegmentationBoundingBoxResolution.png" width="375px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxArea.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxArea.png" width="375px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxResolution.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationBoundingBoxResolution.png" width="375px"></a>
   <br />
-  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationClassFrequency.png"><img src="documentation/assets/SegmentationClassFrequency.png" width="375px"></a>
-  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationComponentsPerImageCount.png"><img src="documentation/assets/SegmentationComponentsPerImageCount.png" width="375px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationClassFrequency.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationClassFrequency.png" width="375px"></a>
+  <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationComponentsPerImageCount.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/SegmentationComponentsPerImageCount.png" width="375px"></a>
   <p><em>Example of specific features</em>
 </div>
 
@@ -51,6 +51,14 @@ It automatically extracts features from your datasets and combines them all into
 [COCO 2017 Detection report](documentation/assets/Report_COCO.pdf)
 
 [Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
+
+<table style="border: 0">
+  <tr>
+    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/colab.png" width="80pt"></td>
+    <td><a href="https://colab.research.google.com/drive/1dswgeK0KF-n61p6ixRdFgbQKHEtOu8SE?usp=sharing"> Example notebook on Colab</a></td>
+  </tr>
+</table>
+
 
 ## Installation
 You can install DataGradients directly from the GitHub repository.
@@ -240,6 +248,13 @@ SegmentationAnalysisManager(
 )
 ```
 
+## Community
+<table style="border: 0">
+  <tr>
+    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/discord.png" width="60pt"></td>
+    <td><a href="https://discord.gg/2v6cEGMREN"> Click here to join our Discord Community</a></td>
+  </tr>
+</table>
 
 ## License
 
