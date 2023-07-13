@@ -57,30 +57,38 @@ class DetectionBatchFormatter(BatchFormatter):
             - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
 
-        # Might happen if the user passes tensors as [N, 5] with N=1; Depending on the Dataset implementation, it may actually return a [5] tensor instead
         if labels.numel() == 0:
-            labels = torch.zeros((0, 5))
+            # If we have an empty tensor, there is a risk that the target shape will be different.
+            # e.g. to tensor([]) for single sample or tensor([], size=(BS, 0)) for batch
+            # This breaks the expected target format which should be (N, 5), (BS, N, 5) or (N, 6)
+            if labels.shape[-1] == 0:
+                # This means that the last dim is N (representing the number of bounding boxes)
+                # In that case, we need to add the last dimension to represent each bounding box class/coordinates
+                if labels.ndim == 1:  # (N, ) -> (N, 5) with N=0
+                    labels = torch.zeros((0, 5))
+                elif labels.ndim == 2:  # (BS, N) -> (BS, N, 5) with N=0
+                    labels = torch.zeros((labels.shape[0], 0, 5))
 
         # If the label is of shape [N, 5] we can assume that it represents the targets of a single sample (class_name + 4 bbox coordinates)
         if labels.ndim == 2 and labels.shape[1] == 5:
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
-        labels = drop_nan(labels)
-
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
-        labels = self.ensure_labels_shape(annotated_bboxes=labels)
-
-        targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
-        self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
-        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
             images = images.to(torch.uint8)
 
         if labels.numel() > 0:
+            labels = drop_nan(labels)
+            labels = self.ensure_labels_shape(annotated_bboxes=labels)
+
+            targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
+            self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
+            self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
+
             labels = self.convert_to_label_xyxy(
                 annotated_bboxes=labels,
                 image_shape=images.shape[-2:],
