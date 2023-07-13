@@ -66,21 +66,21 @@ class DetectionBatchFormatter(BatchFormatter):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
+        labels = drop_nan(labels)
+
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         images = check_images_shape(images, n_image_channels=self.n_image_channels)
+        labels = self.ensure_labels_shape(annotated_bboxes=labels)
+
+        targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
+        self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
+        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
             images = images.to(torch.uint8)
 
         if labels.numel() > 0:
-            labels = drop_nan(labels)
-            labels = self.ensure_labels_shape(annotated_bboxes=labels)
-
-            targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
-            self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
-            self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
-
             labels = self.convert_to_label_xyxy(
                 annotated_bboxes=labels,
                 image_shape=images.shape[-2:],
