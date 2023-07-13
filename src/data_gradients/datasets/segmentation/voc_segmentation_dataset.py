@@ -99,6 +99,8 @@ class VOCSegmentationDataset(VOCFormatSegmentationDataset):
     ```
     """
 
+    CLASS_NAMES = VOC_CLASSE_NAMES
+
     def __init__(self, root_dir: str, year: Union[int, str], split: str, verbose: bool = False):
         """
         :param root_dir:    Root directory where the VOC dataset is stored.
