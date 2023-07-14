@@ -35,7 +35,7 @@ def ensure_channel_first(images: Tensor, n_image_channels: int) -> Tensor:
     return images
 
 
-def ensure_images_shape(images: Tensor, n_image_channels: int) -> Tensor:
+def check_images_shape(images: Tensor, n_image_channels: int) -> Tensor:
     """Validate images dimensions are (BS, C, H, W)
 
     :param images:              Tensor [BS, C, H, W]

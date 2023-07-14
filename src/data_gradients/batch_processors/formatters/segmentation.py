@@ -6,7 +6,7 @@ from torch import Tensor
 from data_gradients.config.data.questions import ask_user
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.utils import check_all_integers, to_one_hot
-from data_gradients.batch_processors.formatters.utils import DatasetFormatError, ensure_images_shape, ensure_channel_first, drop_nan
+from data_gradients.batch_processors.formatters.utils import DatasetFormatError, check_images_shape, ensure_channel_first, drop_nan
 
 
 class SegmentationBatchFormatter(BatchFormatter):
@@ -79,7 +79,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         labels = ensure_channel_first(labels, n_image_channels=self.n_image_channels)
 
-        images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
+        images = check_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.validate_labels_dim(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
 
         labels = self.ensure_hard_labels(labels, n_classes=len(self.class_names), threshold_value=self.threshold_value)
