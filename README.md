@@ -10,7 +10,21 @@
 
 DataGradients is an open-source python based library specifically designed for computer vision dataset analysis. 
 
-It automatically extracts features from your datasets and combines them all into a single user-friendly report. 
+It automatically extracts features from your datasets and combines them all into a single user-friendly report.
+
+**Detect Common Data Issues** - corrupted data, labeling errors, underlying biases, data leakage, duplications, faulty augmentations, and disparities between train and validation sets. 
+
+**Extract Insights for Better Model Design** - take informed decisions when designing your model, based on data characteristics such as 
+object size and location distributions, number of object in an image and high frequency details.
+
+**Reduce Guesswork Searching For The Right Hyperparameters** - define the correct NMS and filtering parameters, identify 
+class distribution issues and define loss function weights accordingly, define proper augmentations according to data variability, 
+and calibrate metrics to monitor your unique dataset.
+
+
+<div style="padding: 20px; background: rgba(33,114,255,0.23) no-repeat 10px 50%; border: 1px solid #2172ff;">
+    To better understand how to tackle the data issues highlighted by DataGradients, explore our comprehensive <a href="https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course">online course</a> on analyzing computer vision datasets.
+</div>
 
 - [Features](#features)
 - [Installation](#installation)

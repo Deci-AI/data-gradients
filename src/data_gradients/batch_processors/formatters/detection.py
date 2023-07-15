@@ -5,7 +5,7 @@ from torch import Tensor
 
 from data_gradients.batch_processors.utils import check_all_integers
 from data_gradients.batch_processors.formatters.base import BatchFormatter
-from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
+from data_gradients.batch_processors.formatters.utils import check_images_shape, ensure_channel_first, drop_nan
 from data_gradients.config.data.data_config import DetectionDataConfig
 from data_gradients.batch_processors.formatters.utils import DatasetFormatError
 
@@ -57,9 +57,9 @@ class DetectionBatchFormatter(BatchFormatter):
             - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
 
-        # Might happen if the user passes tensors as [N, 5] with N=1; Depending on the Dataset implementation, it may actually return a [5] tensor instead
         if labels.numel() == 0:
-            labels = torch.zeros((0, 5))
+            # First thing is to make sure that, if we have empty labels, they are in a correct format
+            labels = self.format_empty_labels(annotated_bboxes=labels)
 
         # If the label is of shape [N, 5] we can assume that it represents the targets of a single sample (class_name + 4 bbox coordinates)
         if labels.ndim == 2 and labels.shape[1] == 5:
@@ -69,7 +69,7 @@ class DetectionBatchFormatter(BatchFormatter):
         labels = drop_nan(labels)
 
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
-        images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
+        images = check_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(annotated_bboxes=labels)
 
         targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
@@ -90,6 +90,22 @@ class DetectionBatchFormatter(BatchFormatter):
             labels = self.filter_non_relevant_annotations(bboxes=labels, class_ids_to_use=self.class_ids_to_use)
 
         return images, labels
+
+    @staticmethod
+    def format_empty_labels(annotated_bboxes: Tensor) -> Tensor:
+        """Ensure that empty labels have a valid shape, i.e. (N, 5) or (BS, N, 5)."""
+        if annotated_bboxes.numel() == 0:
+            # If we have an empty tensor, there is a risk that the target shape will be different.
+            # e.g. to tensor([]) for single sample or tensor([], size=(BS, 0)) for batch
+            # This breaks the expected target format which should be (N, 5), (BS, N, 5) or (N, 6)
+            if annotated_bboxes.shape[-1] == 0:
+                # This means that the last dim is N (representing the number of bounding boxes), i.e. (N, ) or (BS, N)
+                # In that case, we need to add the last dimension to represent each bounding box class/coordinates, i.e. (N, 5) or (BS, N, 5)
+                if annotated_bboxes.ndim == 1:  # (N, ) -> (N, 5) with N=0
+                    annotated_bboxes = torch.zeros((0, 5))
+                elif annotated_bboxes.ndim == 2:  # (BS, N) -> (BS, N, 5) with N=0
+                    annotated_bboxes = torch.zeros((annotated_bboxes.shape[0], 0, 5))
+        return annotated_bboxes
 
     @staticmethod
     def ensure_labels_shape(annotated_bboxes: Tensor) -> Tensor:
