@@ -2,11 +2,11 @@ from typing import Optional, Iterable, Callable, List
 
 import torch
 
-from data_gradients.batch_processors.detection import DetectionBatchProcessor
-from data_gradients.config.data.data_config import DetectionDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
+from data_gradients.utils.summary_writer import SummaryWriter
+from data_gradients.datasets.adapter.detection_adapter import DetectionDatasetAdapter
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -60,53 +60,54 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param n_image_channels:        Number of channels for each image in the dataset
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
-        if feature_extractors is not None and config_path is not None:
-            raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
-        data_config = DetectionDataConfig(
-            use_cache=use_cache,
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
-            is_label_first=is_label_first,
-            xyxy_converter=bbox_format,
-        )
+        self._validate_input(class_names=class_names, n_classes=n_classes, class_names_to_use=class_names_to_use)
 
-        # Check values of `n_classes` and `class_names` to define `class_names`.
-        if n_classes and class_names:
-            raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
-        elif n_classes is None and class_names is None:
-            raise RuntimeError("Either `class_names` or `n_classes` must be specified")
-        class_names = class_names if class_names else list(map(str, range(n_classes)))
+        summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
-        # Define `class_names_to_use`
-        if class_names_to_use:
-            invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
-            if invalid_class_names_to_use != set():
-                raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
-        class_names_to_use = class_names_to_use or class_names
+        if not isinstance(train_data, DetectionDatasetAdapter):
+            train_data = DetectionDatasetAdapter(
+                data_iterable=train_data,
+                class_names=class_names,
+                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+                class_names_to_use=class_names_to_use,
+                images_extractor=images_extractor,
+                labels_extractor=labels_extractor,
+                is_label_first=is_label_first,
+                bbox_format=bbox_format,
+                n_image_channels=n_image_channels,
+            )
+
+        if not isinstance(val_data, DetectionDatasetAdapter):
+            val_data = DetectionDatasetAdapter(
+                data_iterable=val_data,
+                class_names=class_names,
+                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
+                class_names_to_use=class_names_to_use,
+                n_classes=n_classes,
+                images_extractor=images_extractor,
+                labels_extractor=labels_extractor,
+                is_label_first=is_label_first,
+                bbox_format=bbox_format,
+                n_image_channels=n_image_channels,
+            )
 
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="detection",
             config_path=config_path,
             feature_extractors=feature_extractors,
         )
-
-        batch_processor = DetectionBatchProcessor(
-            data_config=data_config,
-            n_image_channels=n_image_channels,
-            class_names=class_names,
-            class_names_to_use=class_names_to_use,
-        )
-
         super().__init__(
-            data_config=data_config,
-            report_title=report_title,
-            report_subtitle=report_subtitle,
             train_data=train_data,
             val_data=val_data,
-            batch_processor=batch_processor,
+            summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
-            log_dir=log_dir,
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
         )
+
+    @staticmethod
+    def _validate_input(class_names: List[str], n_classes: Optional[int], class_names_to_use: Optional[List[str]]):
+        """Making sure that the input parameters are valid. If not, this will an exception."""
+        DetectionDatasetAdapter.resolve_class_names(class_names=class_names, n_classes=n_classes)
+        DetectionDatasetAdapter.resolve_class_names_to_use(class_names=class_names, class_names_to_use=class_names_to_use)

@@ -2,20 +2,18 @@ import os
 import abc
 import logging
 import traceback
-from typing import Iterable, List, Dict, Optional
+from typing import List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
-from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.config.data.data_config import DataConfig
-
+from data_gradients.datasets.adapter.base_adapter import BaseDatasetAdapter
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,13 +28,9 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
-        report_title: str,
-        data_config: DataConfig,
-        train_data: Iterable,
-        val_data: Optional[Iterable] = None,
-        report_subtitle: Optional[str] = None,
-        log_dir: Optional[str] = None,
-        batch_processor: BatchProcessor,
+        train_data: BaseDatasetAdapter,
+        val_data: BaseDatasetAdapter,
+        summary_writer: SummaryWriter,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
@@ -47,31 +41,25 @@ class AnalysisManagerAbstract(abc.ABC):
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
         :param log_dir:             Directory where to save the logs. By default uses the current working directory
-        :param batch_processor:     Batch processor object to be used before extracting features
         :param grouped_feature_extractors:  List of feature extractors to be used
         :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
-        self.renderer = SeabornRenderer()
-        self.summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+        self.train_data = train_data
+        self.val_data = val_data
 
-        self.data_config_cache_name = f"{self.summary_writer.run_name}.json"
-        self.data_config = data_config
-        self.data_config.fill_missing_params_with_cache(cache_filename=self.data_config_cache_name)
+        self.renderer = SeabornRenderer()
+        self.summary_writer = summary_writer
 
         # DATA
         if batches_early_stop:
             logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
-        self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
-        self.val_size = len(val_data) if hasattr(val_data, "__len__") else None
-
-        self.train_iter = iter(train_data)
-        self.val_iter = iter(val_data) if val_data is not None else iter([])
+        self.train_size = len(train_data)
+        self.val_size = len(val_data)
 
         # FEATURES
-        self.batch_processor = batch_processor
         self.grouped_feature_extractors = grouped_feature_extractors
         self._remove_plots_after_report = remove_plots_after_report
         for _, grouped_feature_list in self.grouped_feature_extractors.items():
@@ -99,11 +87,13 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
-        print_in_box("To better understand how to tackle the data issues highlighted in this report, explore our comprehensive course on analyzing "
-                     "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0")
+        print_in_box(
+            "To better understand how to tackle the data issues highlighted in this report, explore our comprehensive course on analyzing "
+            "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0"
+        )
 
         datasets_tqdm = tqdm(
-            zip_longest(self.train_iter, self.val_iter, fillvalue=None),
+            zip_longest(self.train_data.samples_iterator(split_name="train"), self.val_data.samples_iterator(split_name="val"), fillvalue=None),
             desc="Analyzing... ",
             total=self.n_batches,
         )
@@ -111,28 +101,26 @@ class AnalysisManagerAbstract(abc.ABC):
         self._train_iters_done, self._val_iters_done = 0, 0
         self._stopped_early = False
 
-        for i, (train_batch, val_batch) in enumerate(datasets_tqdm):
+        for i, (train_sample, val_sample) in enumerate(datasets_tqdm):
 
             if i == self.batches_early_stop:
                 self._stopped_early = True
                 break
 
-            if train_batch is not None:
-                for sample in self.batch_processor.process(train_batch, split="train"):
-                    for feature_extractors in self.grouped_feature_extractors.values():
-                        for feature_extractor in feature_extractors:
-                            feature_extractor.update(sample)
-                    self._train_iters_done += 1
+            if train_sample is not None:
+                for feature_extractors in self.grouped_feature_extractors.values():
+                    for feature_extractor in feature_extractors:
+                        feature_extractor.update(train_sample)
+                self._train_iters_done += 1
 
             if self._train_batch_size is None:
                 self._train_batch_size = self._train_iters_done
 
-            if val_batch is not None:
-                for sample in self.batch_processor.process(val_batch, split="val"):
-                    for feature_extractors in self.grouped_feature_extractors.values():
-                        for feature_extractor in feature_extractors:
-                            feature_extractor.update(sample)
-                    self._val_iters_done += 1
+            if val_sample is not None:
+                for feature_extractors in self.grouped_feature_extractors.values():
+                    for feature_extractor in feature_extractors:
+                        feature_extractor.update(val_sample)
+                self._val_iters_done += 1
 
             if self._val_batch_size is None:
                 self._val_batch_size = self._val_iters_done
@@ -194,11 +182,8 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
         self.summary_writer.set_pdf_summary(pdf_summary=summary)
-        self.summary_writer.set_data_config(data_config_dict=self.data_config.to_json())
+        self.summary_writer.set_data_config(data_config_dict=self.train_data.data_config.to_json())
         self.summary_writer.write()
-
-        # Save cache in a specific Folder
-        self.data_config.write_to_json(filename=self.data_config_cache_name)
 
         # Cleanup of generated images
         if self._remove_plots_after_report:
@@ -207,11 +192,12 @@ class AnalysisManagerAbstract(abc.ABC):
 
     def close(self):
         """Safe logging closing"""
+        self.train_data.close()
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print()
         print("The cache of your DataConfig object can be found in:")
-        print(f"    - {os.path.join(self.data_config.DEFAULT_CACHE_DIR, self.data_config_cache_name)}")
+        # print(f"    - {os.path.join(self.data_config.DEFAULT_CACHE_DIR, self.data_config_cache_name)}")
         print()
         print("The results can be seen in:")
         print(f"    - {self.summary_writer.log_dir}")
