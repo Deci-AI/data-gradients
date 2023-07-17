@@ -37,20 +37,19 @@ class SegmentationDatasetAdapter(BaseDatasetAdapter):
         if data_config is None:
             data_config = SegmentationDataConfig(
                 cache_filename=cache_filename,
+                class_names=class_names,
+                class_names_to_use=class_names_to_use,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
+                n_image_channels=n_image_channels,
+                threshold_soft_labels=threshold_soft_labels,
             )
 
         dataset_adapter = DatasetAdapter(data_config=data_config)
-        formatter = SegmentationBatchFormatter(
-            class_names=class_names,
-            class_names_to_use=class_names_to_use,
-            n_image_channels=n_image_channels,
-            threshold_value=threshold_soft_labels,
-        )
+        formatter = SegmentationBatchFormatter(data_config=data_config)
         super().__init__(data_iterable=data_iterable, dataset_adapter=dataset_adapter, formatter=formatter, data_config=data_config)
 
-        self.preprocessor = SegmentationBatchPreprocessor(class_names=class_names)
+        self.preprocessor = SegmentationBatchPreprocessor(data_config=data_config)
 
     def samples_iterator(self, split_name: str) -> Iterable[SegmentationSample]:
         for (images, labels) in self:

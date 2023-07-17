@@ -1,4 +1,4 @@
-from typing import List, Iterable
+from typing import Iterable
 import time
 import numpy as np
 from torch import Tensor
@@ -8,14 +8,12 @@ from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
 from data_gradients.batch_processors.preprocessors.contours import get_contours
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.config.data.data_config import SegmentationDataConfig
 
 
 class SegmentationBatchPreprocessor(BatchPreprocessor):
-    def __init__(self, class_names: List[str]):
-        """
-        :param class_names: List of all class names in the dataset. The index should represent the class_id.
-        """
-        self.class_names = class_names
+    def __init__(self, data_config: SegmentationDataConfig):
+        self.class_names = data_config.get_class_names()
 
     def preprocess(self, images: Tensor, labels: Tensor, split: str) -> Iterable[SegmentationSample]:
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.

@@ -30,8 +30,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
-        num_image_channels: int = 3,
-        threshold_soft_labels: float = 0.5,
+        num_image_channels: int = None,
+        threshold_soft_labels: float = None,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):

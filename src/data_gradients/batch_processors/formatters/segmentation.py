@@ -7,6 +7,8 @@ from data_gradients.config.data.questions import ask_user
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.utils import check_all_integers, to_one_hot
 from data_gradients.batch_processors.formatters.utils import DatasetFormatError, check_images_shape, ensure_channel_first, drop_nan
+from data_gradients.config.data.data_config import SegmentationDataConfig
+from data_gradients.config.data.questions import Question, text_to_yellow
 
 
 class SegmentationBatchFormatter(BatchFormatter):
@@ -16,28 +18,19 @@ class SegmentationBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
-        class_names: List[str],
-        class_names_to_use: List[str],
-        n_image_channels: int,
-        threshold_value: float,
+        data_config: SegmentationDataConfig,
         ignore_labels: Optional[List[int]] = None,
     ):
         """
-        :param class_names:         List of all class names in the dataset. The index should represent the class_id.
-        :param class_names_to_use:  List of class names that we should use for analysis.
-        :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
-        :param threshold_value:     Threshold
         :param ignore_labels:       Numbers that we should avoid from analyzing as valid classes, such as background
         """
-        class_names_to_use = set(class_names_to_use)
+        self.data_config = data_config
 
-        self.class_names = class_names
-        self.class_ids_to_ignore = [class_id for class_id, class_name in enumerate(class_names) if class_name not in class_names_to_use]
+        class_names_to_use = set(data_config.get_class_names_to_use())
+        self.class_names = data_config.get_class_names()
+        self.class_ids_to_ignore = [class_id for class_id, class_name in enumerate(self.class_names) if class_name not in class_names_to_use]
 
-        self.n_image_channels = n_image_channels
         self.ignore_labels = ignore_labels or []
-
-        self.threshold_value = threshold_value
         self.is_input_soft_label = None
         self.is_batch = None
 
@@ -76,13 +69,14 @@ class SegmentationBatchFormatter(BatchFormatter):
         images = drop_nan(images)
         labels = drop_nan(labels)
 
-        images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
-        labels = ensure_channel_first(labels, n_image_channels=self.n_image_channels)
+        n_image_channels = self.ask_n_image_channels(data_config=self.data_config, images=images)
+        images = ensure_channel_first(images, n_image_channels=n_image_channels)
+        labels = ensure_channel_first(labels, n_image_channels=n_image_channels)
 
-        images = check_images_shape(images, n_image_channels=self.n_image_channels)
-        labels = self.validate_labels_dim(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
+        images = check_images_shape(images, n_image_channels=n_image_channels)
+        labels = self.validate_labels_dim(labels, n_classes=n_image_channels, ignore_labels=self.ignore_labels)
 
-        labels = self.ensure_hard_labels(labels, n_classes=len(self.class_names), threshold_value=self.threshold_value)
+        labels = self.ensure_hard_labels(labels, n_classes=len(self.class_names), data_config=self.data_config)
 
         if self.require_onehot(labels=labels, n_classes=len(self.class_names)):
             labels = to_one_hot(labels, n_classes=len(self.class_names))
@@ -102,7 +96,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         return images, labels
 
     @staticmethod
-    def ensure_hard_labels(labels: Tensor, n_classes: int, threshold_value: float) -> Tensor:
+    def ensure_hard_labels(labels: Tensor, n_classes: int, data_config: SegmentationDataConfig) -> Tensor:
         unique_values = torch.unique(labels)
 
         if check_all_integers(unique_values):
@@ -112,6 +106,8 @@ class SegmentationBatchFormatter(BatchFormatter):
         else:
             if n_classes > 1:
                 raise DatasetFormatError(f"Not supporting soft-labeling for number of classes > 1!\nGot {n_classes} classes.")
+
+            threshold_value = SegmentationBatchFormatter.ask_threshold_value(data_config=data_config)
             labels = SegmentationBatchFormatter.binary_mask_above_threshold(labels=labels, threshold_value=threshold_value)
         return labels
 
@@ -163,3 +159,9 @@ class SegmentationBatchFormatter(BatchFormatter):
             torch.zeros_like(labels),
         )
         return labels
+
+    @staticmethod
+    def ask_threshold_value(data_config: SegmentationDataConfig) -> float:
+        options = {threshold / 10: threshold / 10 for threshold in range(11)}  # For now, hardcoded
+        question = Question(question=f"What {text_to_yellow('threshold')} do you want to use to determine binary class?", options=options)
+        return data_config.get_n_image_channels(question=question)

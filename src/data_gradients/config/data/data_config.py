@@ -5,7 +5,7 @@ import platformdirs
 import torch
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Callable, Union
+from typing import Dict, Optional, Callable, Union, List
 
 import data_gradients
 from data_gradients.config.data.questions import Question, ask_question, text_to_yellow
@@ -29,10 +29,14 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
-    cache_filename: Optional[str] = None
-    cache_dir: str = field(default=DEFAULT_CACHE_DIR)
+    class_names: List[str]
+    class_names_to_use: List[str]
+    n_image_channels: int
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
+
+    cache_filename: Optional[str] = None
+    cache_dir: str = field(default=DEFAULT_CACHE_DIR)
 
     def __post_init__(self):
         # Once the object is initialized, we check if the cache is activated or not.
@@ -96,6 +100,9 @@ class DataConfig(ABC):
         json_dict = {
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
+            "class_names": self.class_names,
+            "class_names_to_use": self.class_names_to_use,
+            "n_image_channels": self.n_image_channels,
         }
         return json_dict
 
@@ -121,6 +128,12 @@ class DataConfig(ABC):
             self.images_extractor = json_dict.get("images_extractor")
         if self.labels_extractor is None:
             self.labels_extractor = json_dict.get("labels_extractor")
+        if self.class_names is None:
+            self.class_names = json_dict.get("class_names")
+        if self.class_names_to_use is None:
+            self.class_names_to_use = json_dict.get("class_names_to_use")
+        if self.n_image_channels is None:
+            self.n_image_channels = json_dict.get("n_image_channels")
 
     def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -132,6 +145,21 @@ class DataConfig(ABC):
             self.labels_extractor = ask_question(question=question, hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
 
+    def get_class_names(self) -> List[str]:
+        if self.class_names is None:
+            raise RuntimeError("`class_names` was not passed and not found in cache.")
+        return self.class_names
+
+    def get_class_names_to_use(self) -> List[str]:
+        if self.class_names_to_use is None:
+            raise RuntimeError("`self.class_names_to_use` was not passed and not found in cache.")
+        return self.class_names_to_use
+
+    def get_n_image_channels(self, question: Optional[Question] = None, hint: str = "") -> int:
+        if self.n_image_channels is None:
+            self.n_image_channels = ask_question(question=question, hint=hint)
+        return self.n_image_channels
+
     def close(self):
         if self.cache_filename is not None:
             logger.info(f"Saving cache to {self.cache_filename}")
@@ -140,7 +168,24 @@ class DataConfig(ABC):
 
 @dataclass
 class SegmentationDataConfig(DataConfig):
-    pass
+    threshold_soft_labels: Optional[float] = None
+
+    def to_json(self) -> JSONDict:
+        json_dict = {
+            **super().to_json(),
+            "threshold_soft_labels": self.threshold_soft_labels,
+        }
+        return json_dict
+
+    def _fill_missing_params(self, json_dict: JSONDict):
+        super()._fill_missing_params(json_dict=json_dict)
+        if self.threshold_soft_labels is None:
+            self.threshold_soft_labels = json_dict.get("threshold_soft_labels")
+
+    def get_threshold_soft_labels(self, question: Question, hint: str = "") -> bool:
+        if self.threshold_soft_labels is None:
+            self.threshold_soft_labels: bool = ask_question(question=question, hint=hint)
+        return self.threshold_soft_labels
 
 
 @dataclass
