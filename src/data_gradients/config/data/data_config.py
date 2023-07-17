@@ -38,7 +38,7 @@ def resolve_class_names(class_names: Optional[List[str]], n_classes: Optional[in
         return class_names
 
 
-def resolve_class_names_to_use(class_names: Optional[List[str]], class_names_to_use: Optional[List[str]]) -> List[str]:
+def resolve_class_names_to_use(class_names: List[str], class_names_to_use: Optional[List[str]]) -> List[str]:
     # Define `class_names_to_use`
     if class_names_to_use:
         invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
