@@ -4,8 +4,10 @@ import torch
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
-from data_gradients.batch_processors.segmentation import SegmentationDatasetAdapter
 from data_gradients.utils.summary_writer import SummaryWriter
+
+from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
+from data_gradients.config.data.data_config import SegmentationDataConfig
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -62,32 +64,21 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         if feature_extractors is not None and config_path is not None:
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
+        # Check values of `n_classes` and `class_names` to define `class_names`.
+        if n_classes and class_names:
+            raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
+        elif n_classes is None and class_names is None:
+            raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+        class_names = class_names if class_names else list(map(str, range(n_classes)))
+
+        # Define `class_names_to_use`
+        if class_names_to_use:
+            invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
+            if invalid_class_names_to_use != set():
+                raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
+        class_names_to_use = class_names_to_use or class_names
+
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
-        if not isinstance(train_data, SegmentationDatasetAdapter):
-            train_data = SegmentationDatasetAdapter(
-                data_iterable=train_data,
-                class_names=class_names,
-                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-                class_names_to_use=class_names_to_use,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=num_image_channels,
-                threshold_soft_labels=threshold_soft_labels,
-            )
-
-        if not isinstance(val_data, SegmentationDatasetAdapter):
-            val_data = SegmentationDatasetAdapter(
-                data_iterable=val_data,
-                class_names=class_names,
-                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
-                class_names_to_use=class_names_to_use,
-                n_classes=n_classes,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=num_image_channels,
-                threshold_soft_labels=threshold_soft_labels,
-            )
 
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="segmentation",
@@ -95,9 +86,23 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             feature_extractors=feature_extractors,
         )
 
+        data_config = SegmentationDataConfig(
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+        )
+        batch_processor = SegmentationBatchProcessor(
+            data_config=data_config,
+            class_names=class_names,
+            class_names_to_use=class_names_to_use,
+            n_image_channels=num_image_channels,
+            threshold_value=threshold_soft_labels,
+        )
         super().__init__(
             train_data=train_data,
             val_data=val_data,
+            data_config=data_config,
+            batch_processor=batch_processor,
             summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
             batches_early_stop=batches_early_stop,
