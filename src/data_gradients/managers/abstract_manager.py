@@ -99,8 +99,10 @@ class AnalysisManagerAbstract(abc.ABC):
             f"  - feature extractor list: {self.grouped_feature_extractors}"
         )
 
-        print_in_box("To better understand how to tackle the data issues highlighted in this report, explore our comprehensive course on analyzing "
-                     "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0")
+        print_in_box(
+            "To better understand how to tackle the data issues highlighted in this report, explore our comprehensive course on analyzing "
+            "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0"
+        )
 
         datasets_tqdm = tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
