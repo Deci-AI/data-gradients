@@ -52,6 +52,10 @@ class BaseDatasetAdapter(ABC):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         return class_names_to_use or class_names
 
+    def close(self):
+        """Run any action required to cleanly close the object. May include saving cache."""
+        self.data_config.close()
+
     def __len__(self) -> int:
         """Length of the dataset if available. Otherwise, None."""
         return len(self.data_iterable) if isinstance(self.data_iterable, Sized) else None
@@ -63,9 +67,6 @@ class BaseDatasetAdapter(ABC):
             images, labels = self.dataset_output_mapper.extract(data)
             images, labels = self.formatter.format(images, labels)
             yield images, labels
-
-    def close(self):
-        self.data_config.close()
 
     @abstractmethod
     def samples_iterator(self, split_name: str) -> Iterable[ImageSample]:

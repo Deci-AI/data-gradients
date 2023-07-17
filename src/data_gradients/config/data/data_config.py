@@ -133,6 +133,7 @@ class DataConfig(ABC):
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
 
     def close(self):
+        """Run any action required to cleanly close the object. May include saving cache."""
         if self.cache_filename is not None:
             logger.info(f"Saving cache to {self.cache_filename}")
             self.write_to_json(self.cache_filename)
