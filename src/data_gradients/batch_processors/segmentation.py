@@ -13,14 +13,23 @@ from data_gradients.utils.data_classes.data_samples import SegmentationSample
 
 
 class SegmentationDatasetAdapter(BaseDatasetAdapter):
-    """
-    This is an abstract class that represents a dataset adapter.
-    It acts as a bridge interface between any specific dataset/dataloader/raw data on disk and the analysis manager.
+    """Wrap a segmentation dataset so that it would return standardized tensors.
+
+    :param data_iterable:           Iterable object that yields data points from the dataset.
+    :param cache_filename:          The filename of the cache file.
+    :param n_classes:               The number of classes.
+    :param class_names:             List of class names.
+    :param class_names_to_use:      List of class names to use.
+    :param images_extractor:        Callable function for extracting images.
+    :param labels_extractor:        Callable function for extracting labels.
+    :param n_image_channels:        Number of image channels.
+    :param threshold_soft_labels:   Soft labels threshold.
+    :param data_config:             Instance of DetectionDataConfig class that manages dataset/dataloader configurations.
     """
 
     def __init__(
         self,
-        data_iterable: Iterable,
+        data_iterable: Iterable[SupportedDataType],
         cache_filename: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
@@ -53,5 +62,10 @@ class SegmentationDatasetAdapter(BaseDatasetAdapter):
         self.preprocessor = SegmentationBatchPreprocessor(class_names=class_names)
 
     def samples_iterator(self, split_name: str) -> Iterable[SegmentationSample]:
+        """Iterate over each sample of the original data iterator, sample by sample.
+
+        :param split_name:  The name of the split to iterate over.
+        :return:            Single image sample, with its associated labels (Mask).
+        """
         for (images, labels) in self:
             yield from self.preprocessor.preprocess(images, labels, split=split_name)

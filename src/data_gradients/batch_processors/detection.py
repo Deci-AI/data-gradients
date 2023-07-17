@@ -12,9 +12,24 @@ from data_gradients.config.data.data_config import DetectionDataConfig
 
 
 class DetectionDatasetAdapter(BaseDatasetAdapter):
+    """Wrap a detection dataset so that it would return standardized tensors.
+
+    :param data_iterable:       Iterable object that yields data points from the dataset.
+    :param cache_filename:      The filename of the cache file.
+    :param n_classes:           The number of classes.
+    :param class_names:         List of class names.
+    :param class_names_to_use:  List of class names to use.
+    :param images_extractor:    Callable function for extracting images.
+    :param labels_extractor:    Callable function for extracting labels.
+    :param is_label_first:      A flag to indicate if labels are the first entity in the dataset.
+    :param bbox_format:         Callable function for formatting bounding boxes.
+    :param n_image_channels:    Number of image channels.
+    :param data_config:         Instance of DetectionDataConfig class that manages dataset/dataloader configurations.
+    """
+
     def __init__(
         self,
-        data_iterable: Iterable,
+        data_iterable: Iterable[SupportedDataType],
         cache_filename: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
@@ -52,5 +67,10 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
         self.preprocessor = DetectionBatchPreprocessor(class_names=class_names)
 
     def samples_iterator(self, split_name: str) -> Iterable[DetectionSample]:
+        """Iterate over each sample of the original data iterator, sample by sample.
+
+        :param split_name:  The name of the split to iterate over.
+        :return:            Single image sample, with its associated labels (Bounding Boxes).
+        """
         for (images, labels) in iter(self):
             yield from self.preprocessor.preprocess(images, labels, split=split_name)
