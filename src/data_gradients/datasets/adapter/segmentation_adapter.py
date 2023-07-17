@@ -5,7 +5,7 @@ import torch
 from data_gradients.config.data.typing import SupportedDataType
 
 from data_gradients.datasets.adapter.base_adapter import BaseDatasetAdapter
-from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
+from data_gradients.batch_processors.output_mapper.dataset_output_mapper import DatasetOutputMapper
 from data_gradients.batch_processors.preprocessors.segmentation import SegmentationBatchPreprocessor
 from data_gradients.batch_processors.formatters.segmentation import SegmentationBatchFormatter
 from data_gradients.config.data.data_config import SegmentationDataConfig
@@ -41,14 +41,14 @@ class SegmentationDatasetAdapter(BaseDatasetAdapter):
                 labels_extractor=labels_extractor,
             )
 
-        dataset_adapter = DatasetAdapter(data_config=data_config)
+        dataset_output_mapper = DatasetOutputMapper(data_config=data_config)
         formatter = SegmentationBatchFormatter(
             class_names=class_names,
             class_names_to_use=class_names_to_use,
             n_image_channels=n_image_channels,
             threshold_value=threshold_soft_labels,
         )
-        super().__init__(data_iterable=data_iterable, dataset_adapter=dataset_adapter, formatter=formatter, data_config=data_config)
+        super().__init__(data_iterable=data_iterable, dataset_output_mapper=dataset_output_mapper, formatter=formatter, data_config=data_config)
 
         self.preprocessor = SegmentationBatchPreprocessor(class_names=class_names)
 

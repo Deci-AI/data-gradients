@@ -3,7 +3,7 @@ from data_gradients.utils.data_classes.data_samples import ImageSample
 from abc import ABC, abstractmethod
 from typing import List, Optional, Iterable, Sized
 
-from data_gradients.batch_processors.adapters.dataset_adapter import DatasetAdapter
+from data_gradients.batch_processors.output_mapper.dataset_output_mapper import DatasetOutputMapper
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.config.data.data_config import DataConfig
 
@@ -12,14 +12,14 @@ class BaseDatasetAdapter(ABC):
     def __init__(
         self,
         data_iterable: Iterable,
-        dataset_adapter: DatasetAdapter,
+        dataset_output_mapper: DatasetOutputMapper,
         formatter: BatchFormatter,
         data_config: Optional[DataConfig] = None,
     ):
         self.data_iterable = data_iterable
         self.data_config = data_config
 
-        self.dataset_adapter = dataset_adapter
+        self.dataset_output_mapper = dataset_output_mapper
         self.formatter = formatter
 
     @staticmethod
@@ -47,7 +47,7 @@ class BaseDatasetAdapter(ABC):
     def __iter__(self):
         for data in self.data_iterable:
             # data can be a batch or a sample
-            images, labels = self.dataset_adapter.extract(data)
+            images, labels = self.dataset_output_mapper.extract(data)
             images, labels = self.formatter.format(images, labels)
             yield images, labels
 
