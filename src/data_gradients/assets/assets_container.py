@@ -1,7 +1,5 @@
 import os
 
-import pkg_resources
-
 
 class AssetNotFoundException(Exception):
     pass
@@ -79,6 +77,7 @@ class Assets:
        call assets.css.test to get full path of assets/text/test.css asset
        call assets.image.logo to get full path of assets/images/logo.png asset (supported image formats: jpg, jpeg, png, gif)
     """
+
     def __init__(self, asset_dir):
         self.asset_dir = asset_dir
         self._text_assets = TextAssets(asset_dir)
@@ -101,4 +100,3 @@ class Assets:
     @property
     def html(self):
         return self._html_assets
-

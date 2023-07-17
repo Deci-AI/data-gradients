@@ -102,5 +102,5 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             grouped_feature_extractors=grouped_feature_extractors,
             log_dir=log_dir,
             batches_early_stop=batches_early_stop,
-            remove_plots_after_report=remove_plots_after_report
+            remove_plots_after_report=remove_plots_after_report,
         )
