@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Callable, List
+from typing import Tuple, Callable, List
 
 import torch
 from torch import Tensor
@@ -22,15 +22,7 @@ class UnsupportedDetectionBatchFormatError(DatasetFormatError):
 class DetectionBatchFormatter(BatchFormatter):
     """Detection formatter class"""
 
-    def __init__(
-        self,
-        data_config: DetectionDataConfig,
-        class_names: List[str],
-        class_names_to_use: List[str],
-        n_image_channels: int,
-        xyxy_converter: Optional[Callable[[Tensor], Tensor]] = None,
-        label_first: Optional[bool] = None,
-    ):
+    def __init__(self, data_config: DetectionDataConfig):
         """
         :param class_names:         List of all class names in the dataset. The index should represent the class_id.
         :param class_names_to_use:  List of class names that we should use for analysis.
@@ -40,12 +32,9 @@ class DetectionBatchFormatter(BatchFormatter):
         """
         self.data_config = data_config
 
-        class_names_to_use = set(class_names_to_use)
-        self.class_ids_to_use = [class_id for class_id, class_name in enumerate(class_names) if class_name in class_names_to_use]
-
-        self.n_image_channels = n_image_channels
-        self.xyxy_converter = xyxy_converter
-        self.label_first = label_first
+        class_names_to_use = set(data_config.get_class_names_to_use())
+        self.class_names = data_config.get_class_names()
+        self.class_ids_to_use = [class_id for class_id, class_name in enumerate(self.class_names) if class_name in class_names_to_use]
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, List[Tensor]]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
@@ -68,24 +57,25 @@ class DetectionBatchFormatter(BatchFormatter):
 
         labels = drop_nan(labels)
 
-        images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
-        images = check_images_shape(images, n_image_channels=self.n_image_channels)
+        n_image_channels = self.ask_n_image_channels(data_config=self.data_config, images=images)
+        images = ensure_channel_first(images, n_image_channels=n_image_channels)
+        images = check_images_shape(images, n_image_channels=n_image_channels)
         labels = self.ensure_labels_shape(annotated_bboxes=labels)
-
-        targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
-        self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
-        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
             images = images.to(torch.uint8)
 
         if labels.numel() > 0:
+            targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
+            label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
+            xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
+
             labels = self.convert_to_label_xyxy(
                 annotated_bboxes=labels,
                 image_shape=images.shape[-2:],
-                xyxy_converter=self.xyxy_converter,
-                label_first=self.label_first,
+                xyxy_converter=xyxy_converter,
+                label_first=label_first,
             )
             labels = self.filter_non_relevant_annotations(bboxes=labels, class_ids_to_use=self.class_ids_to_use)
 

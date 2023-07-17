@@ -32,6 +32,7 @@ class DataConfig(ABC):
     class_names: List[str]
     class_names_to_use: List[str]
     n_image_channels: int
+    is_batch: Optional[bool] = None
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
@@ -103,6 +104,7 @@ class DataConfig(ABC):
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
             "n_image_channels": self.n_image_channels,
+            "is_batch": self.is_batch,
         }
         return json_dict
 
@@ -134,6 +136,8 @@ class DataConfig(ABC):
             self.class_names_to_use = json_dict.get("class_names_to_use")
         if self.n_image_channels is None:
             self.n_image_channels = json_dict.get("n_image_channels")
+        if self.is_batch is None:
+            self.is_batch = json_dict.get("is_batch")
 
     def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -159,6 +163,11 @@ class DataConfig(ABC):
         if self.n_image_channels is None:
             self.n_image_channels = ask_question(question=question, hint=hint)
         return self.n_image_channels
+
+    def get_is_batch(self, question: Optional[Question] = None, hint: str = "") -> bool:
+        if self.is_batch is None:
+            self.is_batch = ask_question(question=question, hint=hint)
+        return self.is_batch
 
     def close(self):
         if self.cache_filename is not None:

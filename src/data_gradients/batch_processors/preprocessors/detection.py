@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import Iterable
 from torch import Tensor
 import numpy as np
 import time
@@ -6,14 +6,12 @@ import time
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.batch_processors.preprocessors.base import BatchPreprocessor
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.config.data.data_config import DetectionDataConfig
 
 
 class DetectionBatchPreprocessor(BatchPreprocessor):
-    def __init__(self, class_names: List[str]):
-        """
-        :param class_names: List of all class names in the dataset. The index should represent the class_id.
-        """
-        self.class_names = class_names
+    def __init__(self, data_config: DetectionDataConfig):
+        self.class_names = data_config.get_class_names()
 
     def preprocess(self, images: Tensor, labels: Tensor, split: str) -> Iterable[DetectionSample]:
         """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.

@@ -32,7 +32,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         is_label_first: Optional[bool] = None,
         bbox_format: Optional[str] = None,
-        n_image_channels: int = 3,
+        n_image_channels: int = None,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):

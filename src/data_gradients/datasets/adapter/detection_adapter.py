@@ -34,6 +34,9 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
         if data_config is None:
             data_config = DetectionDataConfig(
                 cache_filename=cache_filename,
+                class_names=class_names,
+                class_names_to_use=class_names_to_use,
+                n_image_channels=n_image_channels,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
                 is_label_first=is_label_first,
@@ -41,15 +44,10 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
             )
 
         dataset_adapter = DatasetAdapter(data_config=data_config)
-        formatter = DetectionBatchFormatter(
-            data_config=data_config,
-            class_names=class_names,
-            class_names_to_use=class_names_to_use,
-            n_image_channels=n_image_channels,
-        )
+        formatter = DetectionBatchFormatter(data_config=data_config)
         super().__init__(data_iterable=data_iterable, dataset_adapter=dataset_adapter, formatter=formatter, data_config=data_config)
 
-        self.preprocessor = DetectionBatchPreprocessor(class_names=class_names)
+        self.preprocessor = DetectionBatchPreprocessor(data_config=data_config)
 
     def samples_iterator(self, split_name: str) -> Iterable[DetectionSample]:
         for (images, labels) in iter(self):

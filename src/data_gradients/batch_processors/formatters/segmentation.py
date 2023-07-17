@@ -3,7 +3,6 @@ from typing import Optional, List, Tuple
 import torch
 from torch import Tensor
 
-from data_gradients.config.data.questions import ask_user
 from data_gradients.batch_processors.formatters.base import BatchFormatter
 from data_gradients.batch_processors.utils import check_all_integers, to_one_hot
 from data_gradients.batch_processors.formatters.utils import DatasetFormatError, check_images_shape, ensure_channel_first, drop_nan
@@ -45,22 +44,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         """
 
         if self.is_batch is None:
-            # if less any dim is 4, we know it's a batch
-            if images.ndim == 4 or labels.ndim == 4:
-                self.is_batch = True
-            # If image or mask only includes 2 dims, we can guess it's a single sample
-            elif images.ndim == 2 or labels.ndim == 2:
-                self.is_batch = False
-            # Otherwise, we need to ask the user
-            else:
-                is_batch_descriptions = {"Batch Data": True, "Single Image Data": False}
-                selected_option = ask_user(
-                    main_question=(
-                        f"Do your tensors represent a batch or a single image data?\n    - Image shape: {images.shape}\n    - Mask shape:  {labels.shape}"
-                    ),
-                    options=list(is_batch_descriptions.keys()),
-                )
-                self.is_batch = is_batch_descriptions[selected_option]
+            self.is_batch = self.ask_is_batch(data_config=self.data_config, images=images, labels=labels)
 
         if not self.is_batch:
             images = images.unsqueeze(0)
@@ -165,3 +149,19 @@ class SegmentationBatchFormatter(BatchFormatter):
         options = {threshold / 10: threshold / 10 for threshold in range(11)}  # For now, hardcoded
         question = Question(question=f"What {text_to_yellow('threshold')} do you want to use to determine binary class?", options=options)
         return data_config.get_n_image_channels(question=question)
+
+    @staticmethod
+    def ask_is_batch(data_config: SegmentationDataConfig, images: torch.Tensor, labels: torch.Tensor) -> bool:
+        if images.ndim == 4 or labels.ndim == 4:
+            # if less any dim is 4, we know it's a batch
+            return True
+        elif images.ndim == 2 or labels.ndim == 2:
+            # If image or mask only includes 2 dims, we can guess it's a single sample
+            return False
+        else:
+            # Otherwise, we need to ask the user
+            question = Question(
+                question=f"Do your tensors represent a {text_to_yellow('batch')} or a single image {text_to_yellow('sample')}?",
+                options={"Batch Data": True, "Single Image Data": False},
+            )
+            return data_config.get_is_batch(question=question, hint=f"    - Image shape: {images.shape}\n    - Mask shape:  {labels.shape}")
