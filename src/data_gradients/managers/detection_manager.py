@@ -60,8 +60,8 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param n_image_channels:        Number of channels for each image in the dataset
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
-
-        self._validate_input(class_names=class_names, n_classes=n_classes, class_names_to_use=class_names_to_use)
+        if feature_extractors is not None and config_path is not None:
+            raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 

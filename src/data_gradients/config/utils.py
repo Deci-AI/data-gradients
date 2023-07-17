@@ -38,9 +38,6 @@ def get_grouped_feature_extractors(
     config_path: str,
     feature_extractors: FeatureExtractorsType,
 ) -> Dict[str, List[AbstractFeatureExtractor]]:
-    if feature_extractors is not None and config_path is not None:
-        raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
-
     if feature_extractors is None:
         if config_path is None:
             config_dir, config_name = None, default_config_name

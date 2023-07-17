@@ -63,7 +63,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
             n_image_channels=n_image_channels,
         )
         super().__init__(data_iterable=data_iterable, dataset_output_mapper=dataset_output_mapper, formatter=formatter, data_config=data_config)
-
+        self.data_config = data_config
         self.preprocessor = DetectionBatchPreprocessor(class_names=class_names)
 
     def samples_iterator(self, split_name: str) -> Iterable[DetectionSample]:
