@@ -1,13 +1,12 @@
-from typing import Tuple, Optional, Callable, List
+from typing import Tuple, List
 
 import torch
 from torch import Tensor
 
-from data_gradients.batch_processors.utils import check_all_integers
 from data_gradients.batch_processors.formatters.base import BatchFormatter
-from data_gradients.batch_processors.formatters.utils import ensure_images_shape, ensure_channel_first, drop_nan
-from data_gradients.config.data.data_config import DetectionDataConfig, ClassificationDataConfig
-from data_gradients.batch_processors.formatters.utils import DatasetFormatError
+from data_gradients.batch_processors.formatters.utils import DatasetFormatError, check_images_shape
+from data_gradients.batch_processors.formatters.utils import ensure_channel_first
+from data_gradients.config.data.data_config import ClassificationDataConfig
 
 
 class UnsupportedClassificationBatchFormatError(DatasetFormatError):
@@ -48,7 +47,7 @@ class ClassificationBatchFormatter(BatchFormatter):
         """
 
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
-        images = ensure_images_shape(images, n_image_channels=self.n_image_channels)
+        images = check_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(images=images, labels=labels)
 
         if 0 <= images.min() and images.max() <= 1:
