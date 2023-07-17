@@ -105,9 +105,3 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
         )
-
-    @staticmethod
-    def _validate_input(class_names: List[str], n_classes: Optional[int], class_names_to_use: Optional[List[str]]):
-        """Making sure that the input parameters are valid. If not, this will an exception."""
-        DetectionDatasetAdapter.resolve_class_names(class_names=class_names, n_classes=n_classes)
-        DetectionDatasetAdapter.resolve_class_names_to_use(class_names=class_names, class_names_to_use=class_names_to_use)
