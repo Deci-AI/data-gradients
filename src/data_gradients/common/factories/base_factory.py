@@ -86,5 +86,3 @@ class BaseFactory(AbstractFactory):
                 raise UnknownTypeException(_type, list(self.type_dict.keys()))
         else:
             return conf
-
-

@@ -33,7 +33,6 @@ def load_report_feature_extractors(
     return grouped_feature_extractors
 
 
-
 def get_grouped_feature_extractors(
     default_config_name: str,
     config_path: str,
@@ -48,9 +47,7 @@ def get_grouped_feature_extractors(
                 os.path.dirname(config_path),
                 os.path.basename(config_path).split(".")[0],
             )
-        grouped_feature_extractors = load_report_feature_extractors(
-            config_name=config_name, config_dir=config_dir
-        )
+        grouped_feature_extractors = load_report_feature_extractors(config_name=config_name, config_dir=config_dir)
     else:
         if not isinstance(feature_extractors, list):
             feature_extractors = [feature_extractors]
@@ -61,9 +58,7 @@ def get_grouped_feature_extractors(
             if isinstance(feature_extractor, AbstractFeatureExtractor):
                 grouped_feature_extractors[section_name].append(feature_extractor)
             elif isinstance(feature_extractor, str):
-                grouped_feature_extractors[section_name].append(
-                    FeatureExtractorsFactory().get(feature_extractor)
-                )
+                grouped_feature_extractors[section_name].append(FeatureExtractorsFactory().get(feature_extractor))
             elif issubclass(feature_extractor, AbstractFeatureExtractor):
                 try:
                     grouped_feature_extractors[section_name].append(feature_extractor())
@@ -73,9 +68,7 @@ def get_grouped_feature_extractors(
                         f"Initialize the feature extractor and pass it as an instance"
                     ) from e
             else:
-                raise TypeError(
-                    f"Unsupported feature extractor type. Supported types are string (name of FeatureExtractor) or AbstractFeatureExtractor"
-                )
+                raise TypeError("Unsupported feature extractor type. Supported types are string (name of FeatureExtractor) or AbstractFeatureExtractor")
 
     return grouped_feature_extractors
 
