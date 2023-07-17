@@ -19,6 +19,34 @@ logger = logging.getLogger(__name__)
 DEFAULT_CACHE_DIR = platformdirs.user_cache_dir("DataGradients", "Deci")
 
 
+def resolve_class_names(class_names: Optional[List[str]], n_classes: Optional[int]) -> List[str]:
+    # Check values of `n_classes` and `class_names` to define `class_names`.
+    if n_classes is None and class_names is None:
+        raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+    elif n_classes:
+        generated_class_names = list(map(str, range(n_classes)))
+        if class_names:
+            if len(generated_class_names) != n_classes:
+                raise RuntimeError(
+                    f"You defined `n_classes` with {n_classes} classes, which is not equal to the number of classes in `class_names`: {generated_class_names}"
+                )
+            else:
+                return class_names  # We still prefer the original `class_names` if available
+        else:
+            return generated_class_names
+    else:
+        return class_names
+
+
+def resolve_class_names_to_use(class_names: Optional[List[str]], class_names_to_use: Optional[List[str]]) -> List[str]:
+    # Define `class_names_to_use`
+    if class_names_to_use:
+        invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
+        if invalid_class_names_to_use != set():
+            raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
+    return class_names_to_use or class_names
+
+
 @dataclass
 class DataConfig(ABC):
     """Data class for handling Dataset/Dataloader configuration.
@@ -29,10 +57,13 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
-    class_names: List[str]
-    class_names_to_use: List[str]
-    n_image_channels: int
+    class_names: Optional[List[str]] = None
+    n_classes: Optional[int] = None
+    class_names_to_use: Optional[List[str]] = None
+
+    n_image_channels: Optional[int] = None
     is_batch: Optional[bool] = None
+
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
@@ -40,6 +71,8 @@ class DataConfig(ABC):
     cache_dir: str = field(default=DEFAULT_CACHE_DIR)
 
     def __post_init__(self):
+        self.cache_dir = self.cache_dir if self.cache_dir is not None else DEFAULT_CACHE_DIR
+
         # Once the object is initialized, we check if the cache is activated or not.
         if self.cache_filename is not None:
             logger.info(
@@ -50,6 +83,11 @@ class DataConfig(ABC):
             self._fill_missing_params_with_cache(cache_path)
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
+
+        # Now that the cache is loaded, we can safely resolve the class names (that way we can combine input + cache values to be resolved).
+        self.class_names = resolve_class_names(self.class_names, self.n_classes)
+        self.n_classes = len(self.class_names)
+        self.class_names_to_use = resolve_class_names_to_use(self.class_names, self.class_names_to_use)
 
     @classmethod
     def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":

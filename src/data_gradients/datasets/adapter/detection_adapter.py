@@ -16,6 +16,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
         self,
         data_iterable: Iterable,
         cache_filename: Optional[str] = None,
+        cache_dir: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
@@ -28,13 +29,12 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
     ):
         self.data_iterable = data_iterable
 
-        class_names = self.resolve_class_names(class_names=class_names, n_classes=n_classes)
-        class_names_to_use = self.resolve_class_names_to_use(class_names=class_names, class_names_to_use=class_names_to_use)
-
         if data_config is None:
             data_config = DetectionDataConfig(
                 cache_filename=cache_filename,
+                cache_dir=cache_dir,
                 class_names=class_names,
+                n_classes=n_classes,
                 class_names_to_use=class_names_to_use,
                 n_image_channels=n_image_channels,
                 images_extractor=images_extractor,
