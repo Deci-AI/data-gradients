@@ -6,7 +6,7 @@ from data_gradients.config.data.typing import SupportedDataType, FeatureExtracto
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.datasets.adapter.detection_adapter import DetectionDatasetAdapter
+from data_gradients.batch_processors.detection import DetectionDatasetAdapter
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):

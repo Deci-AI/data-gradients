@@ -4,7 +4,7 @@ import torch
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
-from data_gradients.datasets.adapter.segmentation_adapter import SegmentationDatasetAdapter
+from data_gradients.batch_processors.segmentation import SegmentationDatasetAdapter
 from data_gradients.utils.summary_writer import SummaryWriter
 
 
