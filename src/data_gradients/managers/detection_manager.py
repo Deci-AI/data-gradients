@@ -20,7 +20,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         *,
         report_title: str,
         train_data: Iterable,
-        val_data: Optional[Iterable] = None,
+        val_data: Iterable,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
         feature_extractors: Optional[FeatureExtractorsType] = None,
@@ -64,6 +64,16 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         if feature_extractors is not None and config_path is not None:
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
+        summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+
+        data_config = DetectionDataConfig(
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            is_label_first=is_label_first,
+            xyxy_converter=bbox_format,
+        )
+
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
             raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
@@ -78,21 +88,12 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         class_names_to_use = class_names_to_use or class_names
 
-        summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="detection",
             config_path=config_path,
             feature_extractors=feature_extractors,
         )
 
-        data_config = DetectionDataConfig(
-            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
-            is_label_first=is_label_first,
-            xyxy_converter=bbox_format,
-        )
         batch_processor = DetectionBatchProcessor(
             data_config=data_config,
             n_image_channels=n_image_channels,

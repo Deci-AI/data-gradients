@@ -64,6 +64,14 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         if feature_extractors is not None and config_path is not None:
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
+        summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+
+        data_config = SegmentationDataConfig(
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+        )
+
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
             raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
@@ -78,19 +86,12 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         class_names_to_use = class_names_to_use or class_names
 
-        summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="segmentation",
             config_path=config_path,
             feature_extractors=feature_extractors,
         )
 
-        data_config = SegmentationDataConfig(
-            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
-        )
         batch_processor = SegmentationBatchProcessor(
             data_config=data_config,
             class_names=class_names,
@@ -98,6 +99,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             n_image_channels=num_image_channels,
             threshold_value=threshold_soft_labels,
         )
+
         super().__init__(
             train_data=train_data,
             val_data=val_data,
