@@ -16,7 +16,6 @@ from data_gradients.utils.utils import safe_json_load, write_json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-DEFAULT_CACHE_DIR = platformdirs.user_cache_dir("DataGradients", "Deci")
 
 
 @dataclass
@@ -30,18 +29,22 @@ class DataConfig(ABC):
     """
 
     cache_filename: Optional[str] = None
-    cache_dir: str = field(default=DEFAULT_CACHE_DIR)
+    cache_dir: Optional[str] = None
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
+    DEFAULT_CACHE_DIR: str = field(default_factory=lambda: platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+
     def __post_init__(self):
+        self.cache_dir = self.cache_dir if self.cache_dir is not None else self.DEFAULT_CACHE_DIR
+
         # Once the object is initialized, we check if the cache is activated or not.
         if self.cache_filename is not None:
+            cache_path = os.path.join(self.cache_dir, self.cache_filename)
             logger.info(
                 f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                f'Caching to `cache_dir="{self.cache_dir}"` and `cache_filename="{self.cache_filename}"`.'
+                f'Caching to "{cache_path}"'
             )
-            cache_path = os.path.join(self.cache_dir, self.cache_filename)
             self._fill_missing_params_with_cache(cache_path)
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
@@ -53,7 +56,7 @@ class DataConfig(ABC):
         :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = dir_path or DEFAULT_CACHE_DIR
+        dir_path = dir_path or cls.DEFAULT_CACHE_DIR
         path = os.path.join(dir_path, filename)
         try:
             return cls(**cls._load_json_dict(path=path))
@@ -81,7 +84,7 @@ class DataConfig(ABC):
         :param filename: Name of the cache file. This should include ".json" extension.
         :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
         """
-        dir_path = dir_path or DEFAULT_CACHE_DIR
+        dir_path = dir_path or self.DEFAULT_CACHE_DIR
         path = os.path.join(dir_path, filename)
         if not path.endswith(".json"):
             raise ValueError(f"`{path}` should end with `.json`")
@@ -105,7 +108,7 @@ class DataConfig(ABC):
         :param cache_dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = cache_dir_path or DEFAULT_CACHE_DIR
+        dir_path = cache_dir_path or self.DEFAULT_CACHE_DIR
         path = os.path.join(dir_path, cache_filename)
         cache_dict = self._load_json_dict(path=path)
         if cache_dict:
