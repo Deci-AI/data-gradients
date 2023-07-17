@@ -5,14 +5,14 @@ import numpy as np
 import torch
 from torchvision.transforms import transforms
 
-from data_gradients.batch_processors.adapters.tensor_extractor import get_tensor_extractor_options
+from data_gradients.batch_processors.output_mapper.tensor_extractor import get_tensor_extractor_options
 from data_gradients.config.data.data_config import DataConfig
 from data_gradients.config.data.questions import Question, text_to_yellow
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
 
-class DatasetAdapter:
+class DatasetOutputMapper:
     """Class responsible to convert raw batch (coming from dataloader) into a batch of image and a batch of labels."""
 
     def __init__(self, data_config: DataConfig):
