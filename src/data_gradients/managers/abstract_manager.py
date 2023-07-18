@@ -15,6 +15,7 @@ from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.config.data.data_config import DataConfig
+from data_gradients.config.data.typing import SupportedDataType
 
 
 logging.basicConfig(level=logging.INFO)
@@ -32,8 +33,8 @@ class AnalysisManagerAbstract(abc.ABC):
         *,
         report_title: str,
         data_config: DataConfig,
-        train_data: Iterable,
-        val_data: Optional[Iterable] = None,
+        train_data: Iterable[SupportedDataType],
+        val_data: Iterable[SupportedDataType],
         report_subtitle: Optional[str] = None,
         log_dir: Optional[str] = None,
         batch_processor: BatchProcessor,
