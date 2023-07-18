@@ -31,7 +31,7 @@ class AnalysisManagerAbstract(abc.ABC):
         self,
         *,
         train_data: Iterable,
-        val_data: Iterable,
+        val_data: Optional[Iterable] = None,
         data_config: DataConfig,
         summary_writer: SummaryWriter,
         batch_processor: BatchProcessor,

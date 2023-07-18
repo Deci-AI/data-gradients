@@ -20,7 +20,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         *,
         report_title: str,
         train_data: Iterable,
-        val_data: Iterable,
+        val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
         feature_extractors: Optional[FeatureExtractorsType] = None,
