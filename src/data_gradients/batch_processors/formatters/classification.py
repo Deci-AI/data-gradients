@@ -1,3 +1,4 @@
+import warnings
 from typing import Tuple, List
 
 import torch
@@ -58,6 +59,12 @@ class ClassificationBatchFormatter(BatchFormatter):
             images /= images.max()
             images *= 255
             images = images.to(torch.uint8)
+
+            warnings.warn(
+                "Images were normalized with some unknown mean and std. "
+                "For visualization needs and color distribution plots Data Gradients will try to scale them to [0, 255] range. "
+                "This normalization will use min-max scaling per batch with may make the images look brighter/darker than they should be. "
+            )
 
         return images, labels
 
