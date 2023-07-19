@@ -57,6 +57,8 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             for split, pixel_frequency_per_channel in self.pixel_frequency_per_channel_per_split.items()
             for color, pixel_frequency in zip(self.colors, pixel_frequency_per_channel)
             for pixel_value, n in zip(range(256), pixel_frequency)
+            # This check ensures that we don't plot empty histograms (E.g split is missing)
+            if np.sum(self.pixel_frequency_per_channel_per_split[split]) > 0
         ]
         df = pd.DataFrame(data)
 
