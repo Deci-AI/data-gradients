@@ -77,3 +77,23 @@ class DetectionSample(ImageSample):
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, class_ids={self.class_ids.shape})"
+
+
+@dataclasses.dataclass
+class ClassificationSample(ImageSample):
+    """
+    This is a dataclass that represents a single classification sample of the dataset where input to the model is
+    a single image and the target is an image label.
+
+    :attr sample_id:    The unique identifier of the sample. Could be the image path or the image name.
+    :attr split:        The name of the dataset split. Could be "train", "val", "test", etc.
+    :attr image:        np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
+    :attr class_label:  Class label (int)
+    :attr class_names:  List of all class names in the dataset. The index should represent the class_id.
+    """
+
+    class_id: int
+    class_names: List[str]
+
+    def __repr__(self):
+        return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, label={self.class_id})"

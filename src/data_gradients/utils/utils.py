@@ -100,17 +100,17 @@ def break_text(text: str, line_length: int):
             current_line.append(word)
             current_length += word_length
         else:
-            lines.append(' '.join(current_line))
+            lines.append(" ".join(current_line))
             current_line = [word]
             current_length = word_length
 
     if current_line:
-        lines.append(' '.join(current_line))
+        lines.append(" ".join(current_line))
 
     # Add spaces to the end of each line to make them equal in length
     for i in range(len(lines)):
         spaces_needed = line_length - len(lines[i])
-        lines[i] += ' ' * spaces_needed
+        lines[i] += " " * spaces_needed
 
     return lines
 
@@ -129,4 +129,4 @@ def print_in_box(text_lines: str, box_size: int = 70):
     print(top_left + top_bottom + top_right)
     for text in lines:
         print(left + text + right)
-    print(bottom_left + top_bottom +bottom_right)
+    print(bottom_left + top_bottom + bottom_right)
