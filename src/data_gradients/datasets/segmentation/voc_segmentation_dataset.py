@@ -1,6 +1,7 @@
 import os
 from typing import Union
 
+from data_gradients.datasets.download.voc import download_VOC
 from data_gradients.datasets.segmentation.voc_format_segmentation_dataset import VOCFormatSegmentationDataset
 
 
@@ -101,20 +102,26 @@ class VOCSegmentationDataset(VOCFormatSegmentationDataset):
 
     CLASS_NAMES = VOC_CLASSE_NAMES
 
-    def __init__(self, root_dir: str, year: Union[int, str], split: str, verbose: bool = False):
+    def __init__(self, root_dir: str, year: Union[int, str], split: str, download: bool = True, verbose: bool = False):
         """
         :param root_dir:    Root directory where the VOC dataset is stored.
         :param year:        Year of the VOC dataset (2007 or 2012).
         :param split:       Set of images to load. This usually corresponds to the data split (train or val).
                             Your dataset may also include other sets such as those specific to a class (e.g., `aeroplane_train.txt`).
                             These sets can be found in the `ImageSets/Main` folder.
+        :param download:    If True, download the VOC dataset.
         :param verbose:     If True, print out additional information during the data loading process.
         """
+        root_dir = os.path.abspath(root_dir)
+        print(root_dir)
+        if download:
+            download_VOC(year=year, download_root=root_dir)
+
         super().__init__(
             root_dir=root_dir,
-            images_subdir=os.path.join(f"VOC{year}", "JPEGImages"),
-            labels_subdir=os.path.join(f"VOC{year}", "SegmentationClass"),
-            config_path=os.path.join(f"VOC{year}", "ImageSets", "Segmentation", f"{split}.txt"),
+            images_subdir=os.path.join("VOCdevkit", f"VOC{year}", "JPEGImages"),
+            labels_subdir=os.path.join("VOCdevkit", f"VOC{year}", "SegmentationClass"),
+            config_path=os.path.join("VOCdevkit", f"VOC{year}", "ImageSets", "Segmentation", f"{split}.txt"),
             class_names=VOC_CLASSE_NAMES,
             color_map=VOC_COLORMAP,
             verbose=verbose,
