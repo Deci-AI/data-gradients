@@ -143,6 +143,11 @@ class DataConfig(ABC):
 
 
 @dataclass
+class ClassificationDataConfig(DataConfig):
+    pass
+
+
+@dataclass
 class SegmentationDataConfig(DataConfig):
     pass
 

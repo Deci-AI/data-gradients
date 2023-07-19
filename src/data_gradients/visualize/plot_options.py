@@ -266,6 +266,7 @@ class ScatterPlotOptions(CommonPlotOptions):
     x_ticks_rotation: Optional[int] = 45
     y_ticks_rotation: Optional[int] = None
 
+    style_key: Optional[str] = None
     sharey: Union[bool, str] = False
 
 

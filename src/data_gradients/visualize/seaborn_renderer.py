@@ -78,6 +78,7 @@ class SeabornRenderer(PlotRenderer):
                 x=options.x_label_key,
                 y=options.y_label_key,
                 ax=ax_i,
+                style=options.style_key,
             )
 
             if options.labels_key is not None:
