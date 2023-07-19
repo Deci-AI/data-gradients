@@ -34,5 +34,5 @@ def create_register_decorator(registry: Dict[str, Callable]) -> Callable:
     return register
 
 
-FEATURE_EXTRACTORS ={}
+FEATURE_EXTRACTORS = {}
 register_feature_extractor = create_register_decorator(registry=FEATURE_EXTRACTORS)

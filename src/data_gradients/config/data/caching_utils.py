@@ -3,7 +3,7 @@ from typing import Optional, Any, Union, Callable
 
 import torch
 
-from data_gradients.batch_processors.adapters.tensor_extractor import NestedDataLookup
+from data_gradients.batch_processors.output_mapper.tensor_extractor import NestedDataLookup
 from data_gradients.config.data.typing import SupportedDataType
 from data_gradients.utils.detection import XYXYConverter
 
