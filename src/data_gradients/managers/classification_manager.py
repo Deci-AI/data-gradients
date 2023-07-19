@@ -1,16 +1,16 @@
 from typing import Optional, Iterable, Callable, List
+
 import torch
 
+from data_gradients.batch_processors.classification import ClassificationBatchProcessor
+from data_gradients.config.data.data_config import ClassificationDataConfig
+from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
-from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
-from data_gradients.config.data.data_config import SegmentationDataConfig
-from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 
 
-class SegmentationAnalysisManager(AnalysisManagerAbstract):
-    """
-    Main semantic segmentation manager class.
+class ClassificationAnalysisManager(AnalysisManagerAbstract):
+    """Implementation of analysys manager for image classification task.
     Definition of task name, task-related preprocessor and parsing related configuration file
     """
 
@@ -30,19 +30,17 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
-        num_image_channels: int = 3,
-        threshold_soft_labels: float = 0.5,
+        n_image_channels: int = 3,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
         """
-        Constructor of semantic-segmentation manager which controls the analyzer
-
+        Constructor of detection manager which controls the analyzer
         :param report_title:            Title of the report. Will be used to save the report
         :param report_subtitle:         Subtitle of the report
-        :param class_names:             List of all class names in the dataset. The index should represent the class_id. Mutually exclusive with `n_classes`
+        :param class_names:             List of all class names in the dataset. The index should represent the class_id.
         :param class_names_to_use:      List of class names that we should use for analysis.
-        :param n_classes:               Number of classes. Mutually exclusive with `class_names`. If set, `class_names` will be a list of `class_ids`.
+        :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
@@ -50,19 +48,24 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param feature_extractors:      One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
                                         with config_path
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
-        :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
         :param use_cache:               Whether to use cache or not for the configuration of the data.
         :param images_extractor:        Function extracting the image(s) out of the data output.
         :param labels_extractor:        Function extracting the label(s) out of the data output.
-        :param num_image_channels:      Number of channels for each image in the dataset
-        :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
+        :param is_label_first:          Whether the labels are in the first dimension or not.
+                                            > (class_id, x, y, w, h) for instance, as opposed to (x, y, w, h, class_id)
+        :param bbox_format:             Format of the bounding boxes. 'xyxy', 'xywh' or 'cxcywh'
+        :param n_image_channels:        Number of channels for each image in the dataset
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
         if feature_extractors is not None and config_path is not None:
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
-        data_config = SegmentationDataConfig(use_cache=use_cache, images_extractor=images_extractor, labels_extractor=labels_extractor)
+        data_config = ClassificationDataConfig(
+            use_cache=use_cache,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+        )
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
@@ -79,17 +82,16 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         class_names_to_use = class_names_to_use or class_names
 
         grouped_feature_extractors = get_grouped_feature_extractors(
-            default_config_name="segmentation",
+            default_config_name="classification",
             config_path=config_path,
             feature_extractors=feature_extractors,
         )
 
-        batch_processor = SegmentationBatchProcessor(
+        batch_processor = ClassificationBatchProcessor(
             data_config=data_config,
+            n_image_channels=n_image_channels,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
-            n_image_channels=num_image_channels,
-            threshold_value=threshold_soft_labels,
         )
 
         super().__init__(
