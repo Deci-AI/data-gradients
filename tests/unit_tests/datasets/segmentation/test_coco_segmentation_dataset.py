@@ -1,13 +1,16 @@
+import os
 import unittest
+
 from torch.utils.data import DataLoader
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 from data_gradients.datasets.segmentation.coco_segmentation_dataset import COCOSegmentationDataset
 
 
-class CocoSegmentationDatasetTest(unittest.TestCase):
+class COCOSegmentationDatasetTest(unittest.TestCase):
     def setUp(self):
-        self.train_set = COCOSegmentationDataset(root_dir="../../../../example_dataset/tinycoco", split="train", year="2017")
-        self.val_set = COCOSegmentationDataset(root_dir="../../../../example_dataset/tinycoco", split="val", year="2017")
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+        self.train_set = COCOSegmentationDataset(root_dir=os.path.join(project_root, "example_dataset", "tinycoco"), split="train", year="2017")
+        self.val_set = COCOSegmentationDataset(root_dir=os.path.join(project_root, "example_dataset", "tinycoco"), split="val", year="2017")
 
     def test_coco_dataset(self):
         da = SegmentationAnalysisManager(
