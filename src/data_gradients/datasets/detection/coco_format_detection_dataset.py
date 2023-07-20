@@ -5,7 +5,7 @@ from typing import Tuple
 from torchvision.datasets import CocoDetection
 
 
-class CocoFormatDetectionDataset:
+class COCOFormatDetectionDataset:
     """The Coco Format Detection Dataset supports datasets where labels and annotations are stored in COCO format.
 
     #### Expected folder structure
@@ -50,12 +50,12 @@ class CocoFormatDetectionDataset:
     ```
 
     ```python
-    from data_gradients.datasets.detection import CocoFormatDetectionDataset
+    from data_gradients.datasets.detection import COCOFormatDetectionDataset
 
-    train_set = CocoFormatDetectionDataset(
+    train_set = COCOFormatDetectionDataset(
         root_dir="<path/to/dataset_root>", images_subdir="images/train", annotation_file_path="annotations/train.json"
     )
-    val_set = CocoFormatDetectionDataset(
+    val_set = COCOFormatDetectionDataset(
         root_dir="<path/to/dataset_root>", images_subdir="images/validation", annotation_file_path="annotations/validation.json"
     )
     ```

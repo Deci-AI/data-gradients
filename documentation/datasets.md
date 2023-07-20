@@ -317,12 +317,12 @@ dataset_root/
 ```
 
 ```python
-from data_gradients.datasets.detection import CocoFormatDetectionDataset
+from data_gradients.datasets.detection import COCOFormatDetectionDataset
 
-train_set = CocoFormatDetectionDataset(
+train_set = COCOFormatDetectionDataset(
     root_dir="<path/to/dataset_root>", images_subdir="images/train", annotation_file_path="annotations/train.json"
 )
-val_set = CocoFormatDetectionDataset(
+val_set = COCOFormatDetectionDataset(
     root_dir="<path/to/dataset_root>", images_subdir="images/validation", annotation_file_path="annotations/validation.json"
 )
 ```
@@ -351,8 +351,8 @@ dataset_root/
 To instantiate a dataset object for training data of the year 2017, use the following code:
 
 ```python
-from data_gradients.datasets.detection import CocoDetectionDataset
+from data_gradients.datasets.detection import COCODetectionDataset
 
-train_set = CocoDetectionDataset(root_dir="<path/to/dataset_root>", split="train", year=2017)
-val_set = CocoDetectionDataset(root_dir="<path/to/dataset_root>", split="val", year=2017)
+train_set = COCODetectionDataset(root_dir="<path/to/dataset_root>", split="train", year=2017)
+val_set = COCODetectionDataset(root_dir="<path/to/dataset_root>", split="val", year=2017)
 ```
