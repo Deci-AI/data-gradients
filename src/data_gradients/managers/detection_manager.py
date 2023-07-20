@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, Callable, List
+from typing import Optional, Iterable, Callable, List, Union
 
 import torch
 
@@ -6,6 +6,7 @@ from data_gradients.batch_processors.detection import DetectionBatchProcessor
 from data_gradients.config.data.data_config import DetectionDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
+
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 
 
@@ -107,6 +108,142 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             batch_processor=batch_processor,
             grouped_feature_extractors=grouped_feature_extractors,
             log_dir=log_dir,
+            batches_early_stop=batches_early_stop,
+            remove_plots_after_report=remove_plots_after_report,
+        )
+
+    @classmethod
+    def from_coco(
+        cls,
+        *,
+        root_dir: str,
+        year: Union[str, int],
+        report_title: str,
+        report_subtitle: Optional[str] = None,
+        config_path: Optional[str] = None,
+        feature_extractors: Optional[FeatureExtractorsType] = None,
+        log_dir: Optional[str] = None,
+        use_cache: bool = False,
+        class_names_to_use: Optional[List[str]] = None,
+        batches_early_stop: Optional[int] = None,
+        remove_plots_after_report: Optional[bool] = True,
+    ):
+        from data_gradients.datasets import CocoDetectionDataset
+
+        train_data = CocoDetectionDataset(root_dir=root_dir, split="train", year=year)
+        val_data = CocoDetectionDataset(root_dir=root_dir, split="val", year=year)
+
+        return cls(
+            train_data=train_data,
+            val_data=val_data,
+            #
+            report_title=report_title,
+            report_subtitle=report_subtitle,
+            config_path=config_path,
+            feature_extractors=feature_extractors,
+            log_dir=log_dir,
+            use_cache=use_cache,
+            #
+            class_names=train_data.class_names,
+            class_names_to_use=class_names_to_use,
+            is_label_first=True,
+            bbox_format="xywh",  # COCO format
+            #
+            batches_early_stop=batches_early_stop,
+            remove_plots_after_report=remove_plots_after_report,
+        )
+
+    @classmethod
+    def from_coco_format(
+        cls,
+        *,
+        # DATA
+        root_dir: str,
+        train_images_subdir: str,
+        train_annotation_file_path: str,
+        val_images_subdir: str,
+        val_annotation_file_path: str,
+        # Report
+        report_title: str,
+        report_subtitle: Optional[str] = None,
+        config_path: Optional[str] = None,
+        feature_extractors: Optional[FeatureExtractorsType] = None,
+        log_dir: Optional[str] = None,
+        use_cache: bool = False,
+        class_names_to_use: Optional[List[str]] = None,
+        batches_early_stop: Optional[int] = None,
+        remove_plots_after_report: Optional[bool] = True,
+    ):
+        from data_gradients.datasets import CocoFormatDetectionDataset
+
+        train_data = CocoFormatDetectionDataset(
+            root_dir=root_dir,
+            images_subdir=train_images_subdir,
+            annotation_file_path=train_annotation_file_path,
+        )
+        val_data = CocoFormatDetectionDataset(
+            root_dir=root_dir,
+            images_subdir=val_images_subdir,
+            annotation_file_path=val_annotation_file_path,
+        )
+
+        return cls(
+            train_data=train_data,
+            val_data=val_data,
+            #
+            report_title=report_title,
+            report_subtitle=report_subtitle,
+            config_path=config_path,
+            feature_extractors=feature_extractors,
+            log_dir=log_dir,
+            use_cache=use_cache,
+            #
+            class_names=train_data.class_names,
+            class_names_to_use=class_names_to_use,
+            is_label_first=True,
+            bbox_format="xywh",  # COCO format
+            #
+            batches_early_stop=batches_early_stop,
+            remove_plots_after_report=remove_plots_after_report,
+        )
+
+    @classmethod
+    def from_voc(
+        cls,
+        *,
+        root_dir: str,
+        year: Union[str, int],
+        report_title: str,
+        report_subtitle: Optional[str] = None,
+        config_path: Optional[str] = None,
+        feature_extractors: Optional[FeatureExtractorsType] = None,
+        log_dir: Optional[str] = None,
+        use_cache: bool = False,
+        class_names_to_use: Optional[List[str]] = None,
+        batches_early_stop: Optional[int] = None,
+        remove_plots_after_report: Optional[bool] = True,
+    ):
+        from data_gradients.datasets import VOCDetectionDataset
+
+        train_data = VOCDetectionDataset(root_dir=root_dir, split="train", year=year)
+        val_data = VOCDetectionDataset(root_dir=root_dir, split="val", year=year)
+
+        return cls(
+            train_data=train_data,
+            val_data=val_data,
+            #
+            report_title=report_title,
+            report_subtitle=report_subtitle,
+            config_path=config_path,
+            feature_extractors=feature_extractors,
+            log_dir=log_dir,
+            use_cache=use_cache,
+            #
+            class_names=train_data.class_names,
+            class_names_to_use=class_names_to_use,
+            is_label_first=True,
+            bbox_format="xyxy",  # COCO format
+            #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
         )
