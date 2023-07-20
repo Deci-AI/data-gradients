@@ -1,0 +1,37 @@
+<table align="center" border="0" cellpadding="1" cellspacing="1" style="width:800px">
+    <thead>
+    <tr>
+        <th scope="col" style="column-width: 300px;">
+            <h2>&nbsp;</h2>
+        </th>
+        <th scope="col" class="train_header">
+            <strong>Train</strong>
+        </th>
+        <th scope="col" class="val_header">
+            <strong>Validation</strong>
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td style="text-align:left; color:black;">Images</td>
+        <td class="train_header"><strong>{{train.num_samples}}</strong></td>
+        <td class="val_header"><strong>{{val.num_samples}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Classes</td>
+        <td class="train_header"><strong>{{train.classes_count}}</strong></td>
+        <td class="val_header"><strong>{{val.classes_count}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Classes in use</td>
+        <td class="train_header"><strong>{{train.classes_in_use}}</strong></td>
+        <td class="val_header"><strong>{{val.classes_in_use}}</strong></td>
+    </tr>
+    <tr>
+        <td style="text-align:left; color:black;">Median image resolution</td>
+        <td class="train_text"><strong>{{train.med_image_resolution}}</strong></td>
+        <td class="val_text"><strong>{{val.med_image_resolution}}</strong></td>
+    </tr>
+    </tbody>
+</table>
