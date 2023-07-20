@@ -4,7 +4,7 @@ from typing import Tuple
 from torchvision.datasets import CocoDetection
 
 
-class CocoFormatSegmentationDataset:
+class COCOFormatSegmentationDataset:
     """The Coco Format Segmentation Dataset supports datasets where labels and masks are stored in COCO format.
 
     #### Expected folder structure
@@ -32,13 +32,13 @@ class CocoFormatSegmentationDataset:
 
     #### Instantiation
     ```python
-    from data_gradients.datasets.segmentation import CocoFormatSegmentationDataset
-    train_set = CocoFormatSegmentationDataset(
+    from data_gradients.datasets.segmentation import COCOFormatSegmentationDataset
+    train_set = COCOFormatSegmentationDataset(
         root_dir="<path/to/dataset_root>",
         images_subdir="images/train",
         annotation_file_path="annotations/train.json"
     )
-    val_set = CocoFormatSegmentationDataset(
+    val_set = COCOFormatSegmentationDataset(
         root_dir="<path/to/dataset_root>",
         images_subdir="images/validation",
         annotation_file_path="annotations/validation.json"

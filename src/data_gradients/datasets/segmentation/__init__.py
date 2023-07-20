@@ -1,6 +1,6 @@
-from data_gradients.datasets.segmentation.coco_segmentation_dataset import CocoSegmentationDataset
-from data_gradients.datasets.segmentation.coco_format_segmentation_dataset import CocoFormatSegmentationDataset
+from data_gradients.datasets.segmentation.coco_segmentation_dataset import COCOSegmentationDataset
+from data_gradients.datasets.segmentation.coco_format_segmentation_dataset import COCOFormatSegmentationDataset
 from data_gradients.datasets.segmentation.voc_segmentation_dataset import VOCSegmentationDataset
 from data_gradients.datasets.segmentation.voc_format_segmentation_dataset import VOCFormatSegmentationDataset
 
-__all__ = ["CocoSegmentationDataset", "CocoFormatSegmentationDataset", "VOCSegmentationDataset", "VOCFormatSegmentationDataset"]
+__all__ = ["COCOSegmentationDataset", "COCOFormatSegmentationDataset", "VOCSegmentationDataset", "VOCFormatSegmentationDataset"]

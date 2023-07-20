@@ -1,7 +1,7 @@
 from data_gradients.datasets.detection import VOCDetectionDataset, VOCFormatDetectionDataset, YoloFormatDetectionDataset
 from data_gradients.datasets.segmentation import (
-    CocoSegmentationDataset,
-    CocoFormatSegmentationDataset,
+    COCOSegmentationDataset,
+    COCOFormatSegmentationDataset,
     VOCSegmentationDataset,
     VOCFormatSegmentationDataset,
 )
@@ -13,7 +13,7 @@ __all__ = [
     "YoloFormatDetectionDataset",
     "VOCSegmentationDataset",
     "VOCFormatSegmentationDataset",
-    "CocoSegmentationDataset",
-    "CocoFormatSegmentationDataset",
+    "COCOSegmentationDataset",
+    "COCOFormatSegmentationDataset",
     "BDDDataset",
 ]

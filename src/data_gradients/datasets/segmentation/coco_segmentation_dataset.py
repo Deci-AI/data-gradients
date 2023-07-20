@@ -1,10 +1,10 @@
 from typing import Union
 
-from data_gradients.datasets.segmentation.coco_format_segmentation_dataset import CocoFormatSegmentationDataset
+from data_gradients.datasets.segmentation.coco_format_segmentation_dataset import COCOFormatSegmentationDataset
 
 
-class CocoSegmentationDataset(CocoFormatSegmentationDataset):
-    """The CocoSegmentationDataset class is a convenience subclass of the CocoFormatSegmentationDataset that simplifies
+class COCOSegmentationDataset(COCOFormatSegmentationDataset):
+    """The COCOSegmentationDataset class is a convenience subclass of the COCOFormatSegmentationDataset that simplifies
     the instantiation for the widely-used COCO Segmentation Dataset.
 
     This class assumes the default COCO dataset structure and naming conventions. The data should be stored in a specific
@@ -31,9 +31,9 @@ class CocoSegmentationDataset(CocoFormatSegmentationDataset):
     #### Instantiation
 
     ```python
-    from data_gradients.datasets.segmentation import CocoSegmentationDataset
-    train_set = CocoSegmentationDataset(root_dir="<path/to/dataset_root>", split="train", year=2017)
-    val_set = CocoSegmentationDataset(root_dir="<path/to/dataset_root>", split="val", year=2017)
+    from data_gradients.datasets.segmentation import COCOSegmentationDataset
+    train_set = COCOSegmentationDataset(root_dir="<path/to/dataset_root>", split="train", year=2017)
+    val_set = COCOSegmentationDataset(root_dir="<path/to/dataset_root>", split="val", year=2017)
     ```
     """
 
