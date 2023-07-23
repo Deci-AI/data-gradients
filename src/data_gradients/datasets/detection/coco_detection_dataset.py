@@ -1,9 +1,9 @@
 from typing import Union
 
-from data_gradients.datasets.detection.coco_format_detection_dataset import CocoFormatDetectionDataset
+from data_gradients.datasets.detection.coco_format_detection_dataset import COCOFormatDetectionDataset
 
 
-class CocoDetectionDataset(CocoFormatDetectionDataset):
+class COCODetectionDataset(COCOFormatDetectionDataset):
     """Coco Detection Dataset expects the exact same annotation files and dataset structure os the original Coco dataset.
 
     #### Expected folder structure
@@ -26,10 +26,10 @@ class CocoDetectionDataset(CocoFormatDetectionDataset):
     To instantiate a dataset object for training data of the year 2017, use the following code:
 
     ```python
-    from data_gradients.datasets.detection import CocoDetectionDataset
+    from data_gradients.datasets.detection import COCODetectionDataset
 
-    train_set = CocoDetectionDataset(root_dir="<path/to/dataset_root>", split="train", year=2017)
-    val_set = CocoDetectionDataset(root_dir="<path/to/dataset_root>", split="val", year=2017)
+    train_set = COCODetectionDataset(root_dir="<path/to/dataset_root>", split="train", year=2017)
+    val_set = COCODetectionDataset(root_dir="<path/to/dataset_root>", split="val", year=2017)
     ```
     """
 
