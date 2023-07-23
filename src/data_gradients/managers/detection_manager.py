@@ -128,10 +128,10 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import CocoDetectionDataset
+        from data_gradients.datasets import COCODetectionDataset
 
-        train_data = CocoDetectionDataset(root_dir=root_dir, split="train", year=year)
-        val_data = CocoDetectionDataset(root_dir=root_dir, split="val", year=year)
+        train_data = COCODetectionDataset(root_dir=root_dir, split="train", year=year)
+        val_data = COCODetectionDataset(root_dir=root_dir, split="val", year=year)
 
         return cls(
             train_data=train_data,
@@ -174,14 +174,14 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import CocoFormatDetectionDataset
+        from data_gradients.datasets import COCOFormatDetectionDataset
 
-        train_data = CocoFormatDetectionDataset(
+        train_data = COCOFormatDetectionDataset(
             root_dir=root_dir,
             images_subdir=train_images_subdir,
             annotation_file_path=train_annotation_file_path,
         )
-        val_data = CocoFormatDetectionDataset(
+        val_data = COCOFormatDetectionDataset(
             root_dir=root_dir,
             images_subdir=val_images_subdir,
             annotation_file_path=val_annotation_file_path,
