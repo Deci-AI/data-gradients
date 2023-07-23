@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 import numpy as np
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.utils.data_classes import DetectionSample
@@ -42,11 +42,13 @@ class DetectionClassHeatmap(BaseClassHeatmap):
             "The heatmap represents areas of high object density within the images, providing insights into the spatial distribution of objects. "
             "By examining the heatmap, you can quickly detect whether objects are predominantly concentrated in specific regions or if they are evenly "
             "distributed throughout the scene. This information can serve as a heuristic to assess if the objects are positioned appropriately "
-            "within the expected areas of interest."
+            "within the expected areas of interest.<br/>"
+            "Note that images are resized to a square of the same dimension, which can affects the aspect ratio of objects. "
+            "This is done to focus on localization of objects in the scene (e.g. top-right, center, ...) independently of the original image sizes."
         )
 
     @property
-    def notice(self) -> str:
+    def notice(self) -> Optional[str]:
         if len(self.class_names) > self.n_cols * self.n_rows:
             return (
                 f"Only the {self.n_cols * self.n_rows} classes with highest density are shown.<br/>"
