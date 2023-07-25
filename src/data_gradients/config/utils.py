@@ -134,3 +134,11 @@ def dict_to_dotlist(dict_params: Dict[str, Any]) -> List[Tuple[str, Any]]:
         else:
             dotlist_params.append((key, value))
     return dotlist_params
+
+
+if __name__ == "__main__":
+    import yaml
+
+    with open("detection.yaml", "r") as f:
+        res = yaml.load(f, Loader=yaml.FullLoader)
+    print(res)

@@ -122,9 +122,13 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         remove_plots_after_report: Optional[bool] = True,
     ):
         from data_gradients.datasets import COCOSegmentationDataset
+        from torch.utils.data import DataLoader
 
         train_data = COCOSegmentationDataset(root_dir=root_dir, split="train", year=year)
         val_data = COCOSegmentationDataset(root_dir=root_dir, split="val", year=year)
+
+        train_data = DataLoader(train_data, num_workers=8, batch_size=1)
+        val_data = DataLoader(val_data, num_workers=8, batch_size=1)
 
         return cls(
             train_data=train_data,
@@ -137,7 +141,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             log_dir=log_dir,
             use_cache=use_cache,
             #
-            class_names=train_data.class_names,
+            class_names=train_data.dataset.class_names,
             class_names_to_use=class_names_to_use,
             #
             batches_early_stop=batches_early_stop,

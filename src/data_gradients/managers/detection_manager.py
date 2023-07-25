@@ -9,6 +9,8 @@ from data_gradients.config.utils import get_grouped_feature_extractors
 
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 
+from torch.utils.data import DataLoader
+
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
     """Main detection manager class.
@@ -133,9 +135,12 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         train_data = COCODetectionDataset(root_dir=root_dir, split="train", year=year)
         val_data = COCODetectionDataset(root_dir=root_dir, split="val", year=year)
 
+        train_loader = DataLoader(train_data, num_workers=8, batch_size=1)
+        val_loader = DataLoader(val_data, num_workers=8, batch_size=1)
+
         return cls(
-            train_data=train_data,
-            val_data=val_data,
+            train_data=train_loader,
+            val_data=val_loader,
             #
             report_title=report_title,
             report_subtitle=report_subtitle,
@@ -187,9 +192,12 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             annotation_file_path=val_annotation_file_path,
         )
 
+        train_loader = DataLoader(train_data, num_workers=8, batch_size=1)
+        val_loader = DataLoader(val_data, num_workers=8, batch_size=1)
+
         return cls(
-            train_data=train_data,
-            val_data=val_data,
+            train_data=train_loader,
+            val_data=val_loader,
             #
             report_title=report_title,
             report_subtitle=report_subtitle,
@@ -228,9 +236,12 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         train_data = VOCDetectionDataset(root_dir=root_dir, split="train", year=year)
         val_data = VOCDetectionDataset(root_dir=root_dir, split="val", year=year)
 
+        train_loader = DataLoader(train_data, num_workers=8, batch_size=1)
+        val_loader = DataLoader(val_data, num_workers=8, batch_size=1)
+
         return cls(
-            train_data=train_data,
-            val_data=val_data,
+            train_data=train_loader,
+            val_data=val_loader,
             #
             report_title=report_title,
             report_subtitle=report_subtitle,

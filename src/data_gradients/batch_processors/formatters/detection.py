@@ -5,7 +5,7 @@ from torch import Tensor
 
 from data_gradients.batch_processors.utils import check_all_integers
 from data_gradients.batch_processors.formatters.base import BatchFormatter
-from data_gradients.batch_processors.formatters.utils import check_images_shape, ensure_channel_first, drop_nan
+from data_gradients.batch_processors.formatters.utils import check_images_shape, ensure_channel_first
 from data_gradients.config.data.data_config import DetectionDataConfig
 from data_gradients.batch_processors.formatters.utils import DatasetFormatError
 
@@ -66,7 +66,7 @@ class DetectionBatchFormatter(BatchFormatter):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
-        labels = drop_nan(labels)
+        # labels = drop_nan(labels)
 
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         images = check_images_shape(images, n_image_channels=self.n_image_channels)
