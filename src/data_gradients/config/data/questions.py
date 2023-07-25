@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from time import sleep
 from typing import Dict, Any, Optional, List
 
 from data_gradients.utils.utils import text_to_blue, text_to_yellow
@@ -81,6 +80,8 @@ def ask_user_via_stdin(main_question: str, options: List[str], optional_descript
 
     selected_option = options[user_answer]
     print(f"Great! You chose: {text_to_yellow(selected_option)}\n")
+
+    return selected_option
 
 
 def ask_user_via_jupyter(main_question: str, options: List[str], optional_description: str = "") -> str:
