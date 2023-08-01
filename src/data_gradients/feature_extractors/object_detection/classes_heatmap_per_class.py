@@ -43,7 +43,7 @@ class DetectionClassHeatmap(BaseClassHeatmap):
             "By examining the heatmap, you can quickly detect whether objects are predominantly concentrated in specific regions or if they are evenly "
             "distributed throughout the scene. This information can serve as a heuristic to assess if the objects are positioned appropriately "
             "within the expected areas of interest.<br/>"
-            "Note that images are resized to a square of the same dimension, which can affects the aspect ratio of objects. "
+            "Note that images are resized to a square of the same dimension, which can affect the aspect ratio of objects. "
             "This is done to focus on localization of objects in the scene (e.g. top-right, center, ...) independently of the original image sizes."
         )
 
