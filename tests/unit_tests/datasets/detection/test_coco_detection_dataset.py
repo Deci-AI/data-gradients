@@ -7,7 +7,7 @@ from data_gradients.managers.detection_manager import DetectionAnalysisManager
 from data_gradients.datasets.detection.coco_detection_dataset import COCODetectionDataset
 
 
-class CocoSegmentationDatasetTest(unittest.TestCase):
+class COCOSegmentationDatasetTest(unittest.TestCase):
     def setUp(self):
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
         self.train_set = COCODetectionDataset(root_dir=os.path.join(project_root, "example_dataset", "tinycoco"), split="train", year="2017")
