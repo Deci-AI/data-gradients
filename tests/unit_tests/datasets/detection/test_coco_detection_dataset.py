@@ -15,7 +15,7 @@ class COCOSegmentationDatasetTest(unittest.TestCase):
 
     def test_coco_dataset(self):
         da = DetectionAnalysisManager(
-            report_title="Testing Data-Gradients NEW",
+            report_title="COCO 2017 Detection Report",
             train_data=self.train_set,
             val_data=self.val_set,
             class_names=self.train_set.class_names,
@@ -28,7 +28,7 @@ class COCOSegmentationDatasetTest(unittest.TestCase):
     def test_coco_dataset_batch(self):
 
         da = DetectionAnalysisManager(
-            report_title="Testing Data-Gradients NEW",
+            report_title="COCO 2017 Detection Report Batch",
             train_data=DataLoader(self.train_set, batch_size=1),
             val_data=DataLoader(self.val_set, batch_size=1),
             class_names=self.train_set.class_names,
