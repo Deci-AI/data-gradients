@@ -36,16 +36,18 @@ class DetectionResizeImpact(AbstractFeatureExtractor):
     The extractor evaluates the bounding box sizes upon varying the image resizing dimensions and records how many bounding boxes shrink below a certain size.
     """
 
-    def __init__(self, resizing_sizes: Optional[List[Tuple[int, int]]] = None, area_thresholds: Optional[List[int]] = None):
+    def __init__(self, resizing_sizes: Optional[List[Tuple[int, int]]] = None, area_thresholds: Optional[List[int]] = None, include_median_size: bool = True):
         """
-        :param resizing_sizes: List of tuples, where each tuple represents the dimensions (width, height) to which the image is resized.
+        :param resizing_sizes:      List of tuples, where each tuple represents the dimensions (width, height) to which the image is resized.
                                 If None, a default list of sizes is used.
-        :param area_thresholds: List of integers representing the minimum pixel areas (width*height) of bounding boxes to consider.
-                                If None, a default list of thresholds is used.
+        :param area_thresholds:     List of integers representing the minimum pixel areas (width*height) of bounding boxes to consider.
+                                    If None, a default list of thresholds is used.
+        :param include_median_size: If True, the median size of the bounding boxes is included in the analysis.
         """
         super().__init__()
         self.resizing_sizes = resizing_sizes or DEFAULT_SIZES
         self.area_thresholds = area_thresholds or DEFAULT_AREA_THRESHOLDS
+        self.include_median_size = include_median_size
         self.data = []
 
     def update(self, sample: DetectionSample):
@@ -64,13 +66,18 @@ class DetectionResizeImpact(AbstractFeatureExtractor):
     def aggregate(self) -> pd.DataFrame:
         df = pd.DataFrame(self.data)
 
+        median_size = (int(df["image_width"].median()), int(df["image_height"].median()))
+        resizing_size = set(self.resizing_sizes)
+        resizing_size.add(median_size)
+        resizing_size = sorted(resizing_size, key=lambda x: x[0] + x[1])
+
         splits = sorted(df["split"].unique())
         data: Dict[str, np.ndarray] = {}
         for split in splits:
             split_df = df[df["split"] == split]
 
             rescale = {threshold: dict() for threshold in self.area_thresholds}
-            for (image_rescale_width, image_rescale_height) in self.resizing_sizes:
+            for (image_rescale_width, image_rescale_height) in resizing_size:
                 name = f"{image_rescale_width}x{image_rescale_height}"
 
                 rescaled_bbox_height = split_df["bboxes_height"] * image_rescale_height / split_df["image_height"]
@@ -83,11 +90,12 @@ class DetectionResizeImpact(AbstractFeatureExtractor):
 
         # Height of the plot is proportional to the number of classes
         figsize_x = min(max(10, len(self.area_thresholds)), 25)
-        figsize_y = min(max(6, int(len(self.resizing_sizes) * 0.3)), 175)
+        figsize_y = min(max(6, int(len(resizing_size) * 0.3)), 175)
 
+        resizing_size_names = [f"{width}x{height}" if (width, height) != median_size else f"Median - {width}x{height}" for (width, height) in resizing_size]
         plot_options = HeatmapOptions(
             xticklabels=[f"Area < {threshold}" for threshold in self.area_thresholds],
-            yticklabels=[f"{width}x{height}" for (width, height) in self.resizing_sizes],
+            yticklabels=resizing_size_names,
             x_label_name="Bounding Box Area (in px^2)",
             y_label_name="Image Size (width x height)",
             cbar=True,
