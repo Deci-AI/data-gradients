@@ -6,6 +6,7 @@ from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.batch_processors.segmentation import SegmentationBatchProcessor
 from data_gradients.config.data.data_config import SegmentationDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
+from data_gradients.utils.summary_writer import SummaryWriter
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -62,7 +63,13 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         if feature_extractors is not None and config_path is not None:
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
-        data_config = SegmentationDataConfig(use_cache=use_cache, images_extractor=images_extractor, labels_extractor=labels_extractor)
+        summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+
+        data_config = SegmentationDataConfig(
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+        )
 
         # Check values of `n_classes` and `class_names` to define `class_names`.
         if n_classes and class_names:
@@ -93,14 +100,12 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         )
 
         super().__init__(
-            data_config=data_config,
-            report_title=report_title,
-            report_subtitle=report_subtitle,
             train_data=train_data,
             val_data=val_data,
+            data_config=data_config,
             batch_processor=batch_processor,
+            summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
-            log_dir=log_dir,
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
         )
