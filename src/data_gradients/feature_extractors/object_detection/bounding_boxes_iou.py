@@ -61,7 +61,13 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         return counts
 
     def aggregate(self) -> Feature:
-        df = pd.DataFrame(self.data).sort_values(by="class_id")
+        df = pd.DataFrame(self.data)
+
+        if len(df) == 0:
+            self._show_plot = False
+            return Feature(data=None, plot_options=None, json={})
+
+        df = df.sort_values(by="class_id")
 
         bins = np.linspace(0, 1, self.num_bins + 1)
         df["iou_bins"] = np.digitize(df["iou"].values, bins=bins)
