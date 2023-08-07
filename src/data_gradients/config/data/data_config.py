@@ -16,7 +16,6 @@ from data_gradients.utils.utils import safe_json_load, write_json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-DEFAULT_CACHE_DIR = platformdirs.user_cache_dir("DataGradients", "Deci")
 
 
 @dataclass
@@ -57,7 +56,7 @@ class DataConfig(ABC):
         :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = dir_path or DEFAULT_CACHE_DIR
+        dir_path = dir_path or cls.DEFAULT_CACHE_DIR
         path = os.path.join(dir_path, filename)
         try:
             return cls(**cls._load_json_dict(path=path))
@@ -85,7 +84,7 @@ class DataConfig(ABC):
         :param filename: Name of the cache file. This should include ".json" extension.
         :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
         """
-        dir_path = dir_path or DEFAULT_CACHE_DIR
+        dir_path = dir_path or self.DEFAULT_CACHE_DIR
         path = os.path.join(dir_path, filename)
         if not path.endswith(".json"):
             raise ValueError(f"`{path}` should end with `.json`")
@@ -109,7 +108,7 @@ class DataConfig(ABC):
         :param cache_dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = cache_dir_path or DEFAULT_CACHE_DIR
+        dir_path = cache_dir_path or self.DEFAULT_CACHE_DIR
         path = os.path.join(dir_path, cache_filename)
         cache_dict = self._load_json_dict(path=path)
         if cache_dict:
