@@ -28,11 +28,26 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
-    use_cache: bool = False  # To avoid user facing unexpected errors asking for nothing. Examples should set it to True.
+    cache_filename: Optional[str] = None
+    cache_dir: Optional[str] = None
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
-    DEFAULT_CACHE_DIR: str = field(default=platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+    DEFAULT_CACHE_DIR: str = field(default_factory=lambda: platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+
+    def __post_init__(self):
+        self.cache_dir = self.cache_dir if self.cache_dir is not None else self.DEFAULT_CACHE_DIR
+
+        # Once the object is initialized, we check if the cache is activated or not.
+        if self.cache_filename is not None:
+            cache_path = os.path.join(self.cache_dir, self.cache_filename)
+            logger.info(
+                f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
+                f'Caching to "{cache_path}"'
+            )
+            self._fill_missing_params_with_cache(cache_path)
+        else:
+            logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
     @classmethod
     def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
@@ -87,7 +102,7 @@ class DataConfig(ABC):
         }
         return json_dict
 
-    def fill_missing_params_with_cache(self, cache_filename: str, cache_dir_path: Optional[str] = None):
+    def _fill_missing_params_with_cache(self, cache_filename: str, cache_dir_path: Optional[str] = None):
         """Load an instance of DataConfig directly from a cache file.
         :param cache_filename: Name of the cache file. This should include ".json" extension.
         :param cache_dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
@@ -95,16 +110,9 @@ class DataConfig(ABC):
         """
         dir_path = cache_dir_path or self.DEFAULT_CACHE_DIR
         path = os.path.join(dir_path, cache_filename)
-        if self.use_cache:
-            cache_dict = self._load_json_dict(path=path)
-            if cache_dict:
-                logger.info(
-                    f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                    f'Caching path = "{path}". Please set `use_cache=False` if you want to deactivate it.'
-                )
-                self._fill_missing_params(json_dict=cache_dict)
-        else:
-            logger.info(f"Cache deactivated for `{self.__class__.__name__}`. Please set `load_cache=True` if you want to activate it.")
+        cache_dict = self._load_json_dict(path=path)
+        if cache_dict:
+            self._fill_missing_params(json_dict=cache_dict)
 
     def _fill_missing_params(self, json_dict: JSONDict):
         """Overwrite every attribute that is equal to `None`.
@@ -126,6 +134,12 @@ class DataConfig(ABC):
         if self.labels_extractor is None:
             self.labels_extractor = ask_question(question=question, hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
+
+    def close(self):
+        """Run any action required to cleanly close the object. May include saving cache."""
+        if self.cache_filename is not None:
+            logger.info(f"Saving cache to {self.cache_filename}")
+            self.write_to_json(self.cache_filename)
 
 
 @dataclass
