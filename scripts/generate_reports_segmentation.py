@@ -1,3 +1,9 @@
+"""
+Script for INTERNAL USE ONLY.
+Generate a list of reports for segmentation datasets.
+The script requires a clear dataset directory structures and will not work in environments not setup the same way.
+"""
+
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
 from super_gradients.training.dataloaders import cityscapes_train, cityscapes_val
 

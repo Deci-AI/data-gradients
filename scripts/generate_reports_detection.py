@@ -1,3 +1,9 @@
+"""
+Script for INTERNAL USE ONLY.
+Generate a list of reports for detection datasets.
+The script requires a clear dataset directory structures and will not work in environments not setup the same way.
+"""
+
 import os
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
@@ -17,20 +23,7 @@ from data_gradients.feature_extractors import (
     DetectionBoundingBoxIoU,
 )
 
-DATASETS = (
-    "acl-x-ray",
-    "circuit-voltages",
-    "furniture-ngpea",
-    "gynecology-mri",
-    "hand-gestures-jps7z",
-    "mitosis-gjs3g",
-    "number-ops",
-    "road-signs-6ih4y",
-    "shark-teeth-5atku",
-    "sign-language-sokdr",
-    "tweeter-profile",
-    "wall-damage",
-)
+
 if __name__ == "__main__":
 
     analyzer = DetectionAnalysisManager.from_coco(root_dir="/data/coco", year=2017, report_title="COCO")
