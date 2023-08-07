@@ -1,9 +1,9 @@
 from data_gradients.datasets.detection import (
     VOCDetectionDataset,
     VOCFormatDetectionDataset,
-    YoloFormatDetectionDataset,
     COCODetectionDataset,
     COCOFormatDetectionDataset,
+    YoloFormatDetectionDataset,
 )
 from data_gradients.datasets.segmentation import (
     COCOSegmentationDataset,

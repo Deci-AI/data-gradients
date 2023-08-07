@@ -6,7 +6,6 @@ from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 
-import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -34,12 +33,10 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
-        report_title: str,
-        data_config: DataConfig,
         train_data: Iterable[SupportedDataType],
-        val_data: Iterable[SupportedDataType],
-        report_subtitle: Optional[str] = None,
-        log_dir: Optional[str] = None,
+        val_data: Optional[Iterable[SupportedDataType]] = None,
+        data_config: DataConfig,
+        summary_writer: SummaryWriter,
         batch_processor: BatchProcessor,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,
@@ -57,12 +54,12 @@ class AnalysisManagerAbstract(abc.ABC):
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
-        self.renderer = SeabornRenderer()
-        self.summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+        self.train_data = train_data
+        self.val_data = val_data
 
-        self.data_config_cache_name = f"{self.summary_writer.run_name}.json"
+        self.renderer = SeabornRenderer()
+        self.summary_writer = summary_writer
         self.data_config = data_config
-        self.data_config.fill_missing_params_with_cache(cache_filename=self.data_config_cache_name)
 
         # DATA
         if batches_early_stop:
@@ -78,14 +75,14 @@ class AnalysisManagerAbstract(abc.ABC):
             try:
                 next(iter(DataLoader(train_data)))
                 train_data = DataLoader(train_data)
-            except:
+            except Exception:
                 pass
 
         if val_data is not None and not isinstance(val_data, DataLoader):
             try:
                 next(iter(DataLoader(val_data)))
                 val_data = DataLoader(val_data)
-            except:
+            except Exception:
                 pass
 
         self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
@@ -223,9 +220,6 @@ class AnalysisManagerAbstract(abc.ABC):
         self.summary_writer.set_data_config(data_config_dict=self.data_config.to_json())
         self.summary_writer.write()
 
-        # Save cache in a specific Folder
-        self.data_config.write_to_json(filename=self.data_config_cache_name)
-
         # Cleanup of generated images
         if self._remove_plots_after_report:
             for image_created in images_created:
@@ -236,12 +230,10 @@ class AnalysisManagerAbstract(abc.ABC):
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print()
-        print("The cache of your DataConfig object can be found in:")
-        print(f"    - {os.path.join(self.data_config.DEFAULT_CACHE_DIR, self.data_config_cache_name)}")
-        print()
         print("The results can be seen in:")
         print(f"    - {self.summary_writer.log_dir}")
         print(f"    - {self.summary_writer.archive_dir}")
+        self.data_config.close()
 
     def run(self):
         """

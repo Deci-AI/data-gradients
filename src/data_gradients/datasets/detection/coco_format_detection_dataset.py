@@ -78,28 +78,23 @@ class COCOFormatDetectionDataset:
         categories = self.base_dataset.coco.loadCats(self.class_ids)
         self.class_names = [category["name"] for category in categories]
 
-    def load_image(self, index: int) -> np.ndarray:
-        image = self.base_dataset[index][0]
-        return np.array(image)
+    def __len__(self) -> int:
+        return len(self.base_dataset)
 
-    def load_labels(self, index: int) -> np.ndarray:
-        annotations = self.base_dataset[index][1]
+    def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
+        for i in range(len(self)):
+            yield self[i]
+
+    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
+        image, annotations = self.base_dataset[index]
+        image = np.array(image)
 
         labels = []
         for annotation in annotations:
             class_id = annotation["category_id"]
             x, y, w, h = annotation["bbox"]
             labels.append((int(class_id), float(x), float(y), float(w), float(h)))
-        return np.array(labels)
 
-    def __len__(self) -> int:
-        return len(self.base_dataset)
+        labels = np.array(labels, dtype=np.float32).reshape(-1, 5)
 
-    def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
-        image = self.load_image(index)
-        labels = self.load_labels(index)
         return image, labels
-
-    def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
-        for i in range(len(self)):
-            yield self[i]
