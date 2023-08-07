@@ -29,3 +29,21 @@ report_sections:
       - DetectionBoundingBoxIoU:
           num_bins: 10
           class_agnostic: true
+      - DetectionResizeImpact:
+          resizing_sizes:
+            - [64, 64]
+            - [96, 96]
+            - [128, 128]
+            - [160, 160]
+            - [192, 192]
+            - [224, 224]
+            - [256, 256]
+            - [320, 320]
+            - [384, 384]
+            - [448, 448]
+            - [512, 512]
+            - [640, 640]
+            - [768, 768]
+            - [896, 896]
+            - [1024, 1024]
+          area_thresholds: [1,4,9,16,64]
