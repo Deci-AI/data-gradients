@@ -1,5 +1,7 @@
+from data_gradients.datasets.detection.coco_detection_dataset import COCODetectionDataset
+from data_gradients.datasets.detection.coco_format_detection_dataset import COCOFormatDetectionDataset
 from data_gradients.datasets.detection.voc_detection_dataset import VOCDetectionDataset
 from data_gradients.datasets.detection.voc_format_detection_dataset import VOCFormatDetectionDataset
 from data_gradients.datasets.detection.yolo_format_detection_dataset import YoloFormatDetectionDataset
 
-__all__ = ["VOCDetectionDataset", "VOCFormatDetectionDataset", "YoloFormatDetectionDataset"]
+__all__ = ["VOCDetectionDataset", "VOCFormatDetectionDataset", "COCODetectionDataset", "COCOFormatDetectionDataset", "YoloFormatDetectionDataset"]

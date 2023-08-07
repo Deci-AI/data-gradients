@@ -7,6 +7,7 @@ from data_gradients.config.data.data_config import DetectionDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
+from data_gradients.utils.summary_writer import SummaryWriter
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -63,8 +64,10 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         if feature_extractors is not None and config_path is not None:
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
+        summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
+
         data_config = DetectionDataConfig(
-            use_cache=use_cache,
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_label_first=is_label_first,
@@ -99,14 +102,12 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         )
 
         super().__init__(
-            data_config=data_config,
-            report_title=report_title,
-            report_subtitle=report_subtitle,
             train_data=train_data,
             val_data=val_data,
+            data_config=data_config,
             batch_processor=batch_processor,
+            summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
-            log_dir=log_dir,
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
         )
