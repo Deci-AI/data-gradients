@@ -6,7 +6,6 @@ from typing import Iterable, List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 
-import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -18,6 +17,7 @@ from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.config.data.data_config import DataConfig
+from data_gradients.config.data.typing import SupportedDataType
 
 
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +33,8 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
-        train_data: Iterable,
-        val_data: Optional[Iterable] = None,
+        train_data: Iterable[SupportedDataType],
+        val_data: Optional[Iterable[SupportedDataType]] = None,
         data_config: DataConfig,
         summary_writer: SummaryWriter,
         batch_processor: BatchProcessor,
@@ -75,14 +75,14 @@ class AnalysisManagerAbstract(abc.ABC):
             try:
                 next(iter(DataLoader(train_data)))
                 train_data = DataLoader(train_data)
-            except:
+            except Exception:
                 pass
 
         if val_data is not None and not isinstance(val_data, DataLoader):
             try:
                 next(iter(DataLoader(val_data)))
                 val_data = DataLoader(val_data)
-            except:
+            except Exception:
                 pass
 
         self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
