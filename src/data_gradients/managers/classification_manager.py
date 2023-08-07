@@ -2,15 +2,16 @@ from typing import Optional, Iterable, Callable, List
 
 import torch
 
+from data_gradients.batch_processors.classification import ClassificationBatchProcessor
+from data_gradients.config.data.data_config import ClassificationDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.batch_processors.detection import DetectionDatasetAdapter
 
 
-class DetectionAnalysisManager(AnalysisManagerAbstract):
-    """Main detection manager class.
+class ClassificationAnalysisManager(AnalysisManagerAbstract):
+    """Implementation of analysys manager for image classification task.
     Definition of task name, task-related preprocessor and parsing related configuration file
     """
 
@@ -18,8 +19,8 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        train_data: Iterable[SupportedDataType],
-        val_data: Optional[Iterable[SupportedDataType]] = None,
+        train_data: Iterable,
+        val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
         feature_extractors: Optional[FeatureExtractorsType] = None,
@@ -30,8 +31,6 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
-        is_label_first: Optional[bool] = None,
-        bbox_format: Optional[str] = None,
         n_image_channels: int = 3,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
@@ -65,41 +64,44 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
-        if not isinstance(train_data, DetectionDatasetAdapter):
-            train_data = DetectionDatasetAdapter(
-                data_iterable=train_data,
-                class_names=class_names,
-                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-                class_names_to_use=class_names_to_use,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                is_label_first=is_label_first,
-                bbox_format=bbox_format,
-                n_image_channels=n_image_channels,
-            )
+        data_config = ClassificationDataConfig(
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+        )
 
-        if not isinstance(val_data, DetectionDatasetAdapter):
-            val_data = DetectionDatasetAdapter(
-                data_iterable=val_data,
-                class_names=class_names,
-                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
-                class_names_to_use=class_names_to_use,
-                n_classes=n_classes,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                is_label_first=is_label_first,
-                bbox_format=bbox_format,
-                n_image_channels=n_image_channels,
-            )
+        # Check values of `n_classes` and `class_names` to define `class_names`.
+        if n_classes and class_names:
+            raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
+        elif n_classes is None and class_names is None:
+            raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+        class_names = class_names if class_names else list(map(str, range(n_classes)))
+
+        # Define `class_names_to_use`
+        if class_names_to_use:
+            invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
+            if invalid_class_names_to_use != set():
+                raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
+        class_names_to_use = class_names_to_use or class_names
 
         grouped_feature_extractors = get_grouped_feature_extractors(
-            default_config_name="detection",
+            default_config_name="classification",
             config_path=config_path,
             feature_extractors=feature_extractors,
         )
+
+        batch_processor = ClassificationBatchProcessor(
+            data_config=data_config,
+            n_image_channels=n_image_channels,
+            class_names=class_names,
+            class_names_to_use=class_names_to_use,
+        )
+
         super().__init__(
             train_data=train_data,
             val_data=val_data,
+            data_config=data_config,
+            batch_processor=batch_processor,
             summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
             batches_early_stop=batches_early_stop,

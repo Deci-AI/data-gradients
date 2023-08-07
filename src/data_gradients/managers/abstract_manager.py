@@ -5,6 +5,8 @@ import traceback
 from typing import List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
+
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
@@ -14,6 +16,7 @@ from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.batch_processors.base import BaseDatasetAdapter
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,8 +49,6 @@ class AnalysisManagerAbstract(abc.ABC):
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
-        self.train_data = train_data
-        self.val_data = val_data
 
         self.renderer = SeabornRenderer()
         self.summary_writer = summary_writer
@@ -56,8 +57,33 @@ class AnalysisManagerAbstract(abc.ABC):
         if batches_early_stop:
             logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
-        self.train_size = len(train_data)
-        self.val_size = len(val_data)
+
+        # Check if train_data and val_data are DataLoader objects.
+        # If not, try to convert them to DataLoader objects.
+        # Generally this should work fine, with only caveat that detection datasets may require custom collate_fn.
+        # However since we are using bs=1 this should not be a problem, but just in case we try to get a singe batch
+        # from the dataset and see if it works.
+        if not isinstance(train_data, DataLoader):
+            try:
+                next(iter(DataLoader(train_data)))
+                train_data = DataLoader(train_data)
+            except Exception:
+                pass
+
+        if val_data is not None and not isinstance(val_data, DataLoader):
+            try:
+                next(iter(DataLoader(val_data)))
+                val_data = DataLoader(val_data)
+            except Exception:
+                pass
+
+        self.train_data = train_data
+        self.val_data = val_data
+        self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
+        self.val_size = len(val_data) if hasattr(val_data, "__len__") else None
+
+        self.train_iter = iter(train_data)
+        self.val_iter = iter(val_data) if val_data is not None else iter([])
 
         # FEATURES
         self.grouped_feature_extractors = grouped_feature_extractors
@@ -199,6 +225,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print("The results can be seen in:")
         print(f"    - {self.summary_writer.log_dir}")
         print(f"    - {self.summary_writer.archive_dir}")
+        self.data_config.close()
 
     def run(self):
         """

@@ -30,18 +30,22 @@ class DataConfig(ABC):
     """
 
     cache_filename: Optional[str] = None
-    cache_dir: str = field(default=DEFAULT_CACHE_DIR)
+    cache_dir: Optional[str] = None
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
+    DEFAULT_CACHE_DIR: str = field(default_factory=lambda: platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+
     def __post_init__(self):
+        self.cache_dir = self.cache_dir if self.cache_dir is not None else self.DEFAULT_CACHE_DIR
+
         # Once the object is initialized, we check if the cache is activated or not.
         if self.cache_filename is not None:
+            cache_path = os.path.join(self.cache_dir, self.cache_filename)
             logger.info(
                 f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                f'Caching to `cache_dir="{self.cache_dir}"` and `cache_filename="{self.cache_filename}"`.'
+                f'Caching to "{cache_path}"'
             )
-            cache_path = os.path.join(self.cache_dir, self.cache_filename)
             self._fill_missing_params_with_cache(cache_path)
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
@@ -137,6 +141,11 @@ class DataConfig(ABC):
         if self.cache_filename is not None:
             logger.info(f"Saving cache to {self.cache_filename}")
             self.write_to_json(self.cache_filename)
+
+
+@dataclass
+class ClassificationDataConfig(DataConfig):
+    pass
 
 
 @dataclass

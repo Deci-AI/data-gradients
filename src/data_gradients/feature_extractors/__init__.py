@@ -20,6 +20,14 @@ from .object_detection import (
     DetectionClassesPerImageCount,
     DetectionSampleVisualization,
     DetectionBoundingBoxIoU,
+    DetectionResizeImpact,
+)
+
+from .classification import (
+    ClassificationClassFrequency,
+    ClassificationSummaryStats,
+    ClassificationClassDistributionVsArea,
+    ClassificationClassDistributionVsAreaPlot,
 )
 
 __all__ = [
@@ -46,4 +54,9 @@ __all__ = [
     "DetectionClassesPerImageCount",
     "DetectionSampleVisualization",
     "DetectionBoundingBoxIoU",
+    "DetectionResizeImpact",
+    "ClassificationClassFrequency",
+    "ClassificationSummaryStats",
+    "ClassificationClassDistributionVsArea",
+    "ClassificationClassDistributionVsAreaPlot",
 ]

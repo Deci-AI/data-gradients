@@ -28,18 +28,37 @@ def ask_question(question: Optional[Question], hint: str = "") -> Any:
         return question.options[answer]
 
 
-def ask_user(main_question: str, options: List[str], optional_description: str = "") -> str:
+def is_notebook() -> bool:
+    try:
+        from IPython import get_ipython
+
+        shell = get_ipython().__class__.__name__
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except ImportError:
+        return False
+    except NameError:
+        return False  # Probably standard Python interpreter
+
+
+def ask_user_via_stdin(main_question: str, options: List[str], optional_description: str = "") -> str:
     """Prompt the user to choose an option from a list of options.
     :param main_question:   The main question or instruction for the user.
     :param options:         List of options to chose from.
     :param optional_description:  Optional description to display to the user.
     :return:                The chosen option (key from the options_described dictionary).
     """
+
     numbers_to_chose_from = range(len(options))
 
     options_formatted = "\n".join([f"[{text_to_blue(number)}] | {option_description}" for number, option_description in zip(numbers_to_chose_from, options)])
 
     user_answer = None
+
     while user_answer not in numbers_to_chose_from:
         print("\n------------------------------------------------------------------------")
         print(f"{main_question}")
@@ -63,3 +82,62 @@ def ask_user(main_question: str, options: List[str], optional_description: str =
     print(f"Great! You chose: {text_to_yellow(selected_option)}\n")
 
     return selected_option
+
+
+def ask_user_via_jupyter(main_question: str, options: List[str], optional_description: str = "") -> str:
+    numbers_to_chose_from = range(len(options))
+
+    options_formatted = "\n".join([f"[{text_to_blue(number)}] | {option_description}" for number, option_description in zip(numbers_to_chose_from, options)])
+
+    user_answer = None
+
+    print("\n------------------------------------------------------------------------")
+    print(f"{main_question}")
+    print("------------------------------------------------------------------------")
+    if optional_description:
+        print(optional_description)
+    print("\nOptions:")
+    print(options_formatted)
+    print("")
+
+    import ipywidgets as widgets
+    from IPython.display import display
+    from data_gradients.utils.jupyter_utils import ui_events
+
+    for i, option in enumerate(options):
+        button = widgets.Button(description=option)
+        button.value = i
+        output = widgets.Output()
+
+        display(button, output)
+
+        def on_button_clicked(b):
+            with output:
+                nonlocal user_answer
+                user_answer = b.value
+                print("You selected option: " + b.value)
+
+        button.on_click(on_button_clicked)
+
+    with ui_events() as poll:
+        while user_answer is None:
+            poll(10)
+
+    selected_option = options[user_answer]
+    print(f"Great! You chose: {text_to_yellow(selected_option)}\n")
+    return selected_option
+
+
+def ask_user(main_question: str, options: List[str], optional_description: str = "") -> str:
+    """Prompt the user to choose an option from a list of options.
+    Depending on the environment, the user will be prompted via stdin or via a Jupyter widget.
+    :param main_question:   The main question or instruction for the user.
+    :param options:         List of options to chose from.
+    :param optional_description:  Optional description to display to the user.
+    :return:                The chosen option (key from the options_described dictionary).
+    """
+
+    if is_notebook():
+        return ask_user_via_jupyter(main_question, options, optional_description)
+    else:
+        return ask_user_via_stdin(main_question, options, optional_description)
