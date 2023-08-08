@@ -1,16 +1,15 @@
 from typing import Optional, Iterable, Callable, List, Union
 
 import torch
+from torch.utils.data import DataLoader
 
 from data_gradients.batch_processors.detection import DetectionBatchProcessor
 from data_gradients.config.data.data_config import DetectionDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
-
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-
-from torch.utils.data import DataLoader
+from data_gradients.datasets import COCOFormatDetectionDataset, VOCDetectionDataset, COCODetectionDataset
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -131,8 +130,25 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import COCODetectionDataset
+        """
+        Class method to create a detection manager instance from COCO dataset.
 
+        :param root_dir:                    Directory containing the COCO dataset.
+        :param year:                        Year or version of the COCO dataset.
+        :param report_title:                Title of the report. Will be used to save the report.
+        :param report_subtitle:             Subtitle of the report.
+        :param config_path:                 Full path the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
+                                            with feature_extractors.
+        :param feature_extractors:          One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
+                                            with config_path.
+        :param log_dir:                     Directory where to save the logs. By default, uses the current working directory.
+        :param use_cache:                   Whether to use cache or not for the configuration of the data.
+        :param class_names_to_use:          List of class names that we should use for analysis.
+        :param batches_early_stop:          Maximum number of batches to run in training (early stop).
+        :param remove_plots_after_report:   Delete the plots from the report directory after the report is generated. By default, True.
+
+        :return:                            An instance of the detection manager configured for the specified COCO dataset.
+        """
         train_data = COCODetectionDataset(root_dir=root_dir, split="train", year=year)
         val_data = COCODetectionDataset(root_dir=root_dir, split="val", year=year)
 
@@ -180,8 +196,28 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import COCOFormatDetectionDataset
+        """
+        Class method to create a detection manager instance from data in COCO format.
 
+        :param root_dir:                       Directory containing the COCO formatted dataset.
+        :param train_images_subdir:            Subdirectory containing training images.
+        :param train_annotation_file_path:     Path to the annotation file for training images.
+        :param val_images_subdir:              Subdirectory containing validation images.
+        :param val_annotation_file_path:       Path to the annotation file for validation images.
+        :param report_title:                   Title of the report. Will be used to save the report.
+        :param report_subtitle:                Subtitle of the report.
+        :param config_path:                    Full path to the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
+                                               with feature_extractors.
+        :param feature_extractors:             One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
+                                               with config_path.
+        :param log_dir:                        Directory where to save the logs. By default, uses the current working directory.
+        :param use_cache:                      Whether to use cache or not for the configuration of the data.
+        :param class_names_to_use:             List of class names that we should use for analysis.
+        :param batches_early_stop:             Maximum number of batches to run in training (early stop).
+        :param remove_plots_after_report:      Delete the plots from the report directory after the report is generated. By default, True.
+
+        :return:                               An instance of the detection manager configured for the specified COCO-formatted dataset.
+        """
         train_data = COCOFormatDetectionDataset(
             root_dir=root_dir,
             images_subdir=train_images_subdir,
@@ -232,8 +268,25 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import VOCDetectionDataset
+        """
+        Class method to create a detection manager instance from the Pascal VOC dataset.
 
+        :param root_dir:                    Directory containing the Pascal VOC dataset.
+        :param year:                        Year or version of the Pascal VOC dataset.
+        :param report_title:                Title of the report. Will be used to save the report.
+        :param report_subtitle:             Subtitle of the report.
+        :param config_path:                 Full path to the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
+                                            with feature_extractors.
+        :param feature_extractors:          One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
+                                            with config_path.
+        :param log_dir:                     Directory where to save the logs. By default, uses the current working directory.
+        :param use_cache:                   Whether to use cache or not for the configuration of the data.
+        :param class_names_to_use:          List of class names that we should use for analysis.
+        :param batches_early_stop:          Maximum number of batches to run in training (early stop).
+        :param remove_plots_after_report:   Delete the plots from the report directory after the report is generated. By default, True.
+
+        :return:                            An instance of the detection manager configured for the specified Pascal VOC dataset.
+        """
         train_data = VOCDetectionDataset(root_dir=root_dir, split="train", year=year)
         val_data = VOCDetectionDataset(root_dir=root_dir, split="val", year=year)
 
@@ -254,7 +307,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             class_names=train_data.class_names,
             class_names_to_use=class_names_to_use,
             is_label_first=True,
-            bbox_format="xyxy",  # COCO format
+            bbox_format="xyxy",  # VOC format
             #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,

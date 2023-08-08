@@ -1,5 +1,6 @@
 from typing import Optional, Iterable, Callable, List, Union
 import torch
+from torch.utils.data import DataLoader
 
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
@@ -7,6 +8,7 @@ from data_gradients.batch_processors.segmentation import SegmentationBatchProces
 from data_gradients.config.data.data_config import SegmentationDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.utils.summary_writer import SummaryWriter
+from data_gradients.datasets import COCOSegmentationDataset, COCOFormatSegmentationDataset, VOCSegmentationDataset
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -51,7 +53,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param feature_extractors:      One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
                                         with config_path
         :param log_dir:                 Directory where to save the logs. By default uses the current working directory
-        :param id_to_name:              Class ID to class names mapping (Dictionary)
         :param batches_early_stop:      Maximum number of batches to run in training (early stop)
         :param use_cache:               Whether to use cache or not for the configuration of the data.
         :param images_extractor:        Function extracting the image(s) out of the data output.
@@ -126,8 +127,25 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import COCOSegmentationDataset
-        from torch.utils.data import DataLoader
+        """
+        Class method to create a semantic-segmentation manager instance from data in COCO format.
+
+        :param root_dir:                       Directory containing the COCO formatted dataset.
+        :param year:                           Year or version of the COCO dataset.
+        :param report_title:                   Title of the report. Will be used to save the report.
+        :param report_subtitle:                Subtitle of the report.
+        :param config_path:                    Full path to the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
+                                               with feature_extractors.
+        :param feature_extractors:             One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
+                                               with config_path.
+        :param log_dir:                        Directory where to save the logs. By default, uses the current working directory.
+        :param use_cache:                      Whether to use cache or not for the configuration of the data.
+        :param class_names_to_use:             List of class names that we should use for analysis.
+        :param batches_early_stop:             Maximum number of batches to run in training (early stop).
+        :param remove_plots_after_report:      Delete the plots from the report directory after the report is generated. By default, True.
+
+        :return:                               An instance of the semantic-segmentation manager configured for the specified COCO-formatted dataset.
+        """
 
         train_data = COCOSegmentationDataset(root_dir=root_dir, split="train", year=year)
         val_data = COCOSegmentationDataset(root_dir=root_dir, split="val", year=year)
@@ -174,7 +192,28 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import COCOFormatSegmentationDataset
+        """
+        Class method to create a semantic-segmentation manager instance from data in custom COCO format.
+
+        :param root_dir:                      Root directory containing the COCO formatted dataset.
+        :param train_images_subdir:           Subdirectory containing the training images.
+        :param train_annotation_file_path:    Path to the training annotation file.
+        :param val_images_subdir:             Subdirectory containing the validation images.
+        :param val_annotation_file_path:      Path to the validation annotation file.
+        :param report_title:                  Title of the report. Will be used to save the report.
+        :param report_subtitle:               Subtitle of the report.
+        :param config_path:                   Full path to the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
+                                              with feature_extractors.
+        :param feature_extractors:            One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
+                                              with config_path.
+        :param log_dir:                       Directory where to save the logs. By default, uses the current working directory.
+        :param use_cache:                     Whether to use cache or not for the configuration of the data.
+        :param class_names_to_use:            List of class names that we should use for analysis.
+        :param batches_early_stop:            Maximum number of batches to run in training (early stop).
+        :param remove_plots_after_report:     Delete the plots from the report directory after the report is generated. By default, True.
+
+        :return:                              An instance of the semantic-segmentation manager configured for the specified custom COCO-formatted dataset.
+        """
 
         train_data = COCOFormatSegmentationDataset(
             root_dir=root_dir,
@@ -221,7 +260,25 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
-        from data_gradients.datasets import VOCSegmentationDataset
+        """
+        Class method to create a semantic-segmentation manager instance from data in VOC format.
+
+        :param root_dir:                  Root directory containing the VOC formatted dataset.
+        :param year:                      Dataset release year or specific identifier for the VOC dataset.
+        :param report_title:              Title of the report. Will be used to save the report.
+        :param report_subtitle:           Subtitle of the report.
+        :param config_path:               Full path to the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
+                                          with feature_extractors.
+        :param feature_extractors:        One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
+                                          with config_path.
+        :param log_dir:                   Directory where to save the logs. By default, uses the current working directory.
+        :param use_cache:                 Whether to use cache or not for the configuration of the data.
+        :param class_names_to_use:        List of class names that we should use for analysis.
+        :param batches_early_stop:        Maximum number of batches to run in training (early stop).
+        :param remove_plots_after_report: Delete the plots from the report directory after the report is generated. By default, True.
+
+        :return:                          An instance of the semantic-segmentation manager configured for the specified VOC-formatted dataset.
+        """
 
         train_data = VOCSegmentationDataset(root_dir=root_dir, split="train", year=year)
         val_data = VOCSegmentationDataset(root_dir=root_dir, split="val", year=year)
