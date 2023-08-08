@@ -5,9 +5,6 @@ report_sections:
       - ImagesResolution
       - ImageColorDistribution
       - ImagesAverageBrightness
-      - ImageDuplicates:
-          train_image_dir: /data/coco/images/train2017/
-          valid_image_dir: /data/coco/images/val2017/
   - name: Object Detection Features
     features:
       - DetectionSampleVisualization:
