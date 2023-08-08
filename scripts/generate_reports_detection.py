@@ -24,38 +24,51 @@ from data_gradients.feature_extractors import (
 )
 
 
+def _get_all_report_features(train_image_dir: str, valid_image_dir: str):
+    """Features defined manually in order to dynamically define `ImageDuplicates(train_image_dir=..., valid_image_dir=...)`"""
+    features = [
+        SummaryStats(),
+        ImagesResolution(),
+        ImageColorDistribution(),
+        ImagesAverageBrightness(),
+        ImageDuplicates(train_image_dir=train_image_dir, valid_image_dir=valid_image_dir),
+        DetectionSampleVisualization(n_rows=3, n_cols=4, stack_splits_vertically=True),
+        DetectionClassHeatmap(n_rows=6, n_cols=2, heatmap_shape=(200, 200)),
+        DetectionBoundingBoxArea(topk=30, prioritization_mode="train_val_diff"),
+        DetectionBoundingBoxPerImageCount(),
+        DetectionBoundingBoxSize(),
+        DetectionClassFrequency(topk=30, prioritization_mode="train_val_diff"),
+        DetectionClassesPerImageCount(topk=30, prioritization_mode="train_val_diff"),
+        DetectionBoundingBoxIoU(num_bins=10, class_agnostic=True),
+    ]
+    return features
+
+
 if __name__ == "__main__":
 
-    analyzer = DetectionAnalysisManager.from_coco(root_dir="/data/coco", year=2017, report_title="COCO")
+    analyzer = DetectionAnalysisManager.from_coco(
+        root_dir="/data/coco",
+        year=2017,
+        report_title="COCO",
+        feature_extractors=_get_all_report_features(train_image_dir="/data/coco/images/train2017/", valid_image_dir="/data/coco/images/val2017/"),
+    )
     analyzer.run()
 
-    analyzer = DetectionAnalysisManager.from_voc(root_dir="/data/voc/VOCdevkit", year=2012, report_title="VOC")
+    # VOC dataset does not clearly split the train/valid sets so we cannot run duplicate analysis
+    analyzer = DetectionAnalysisManager.from_voc(
+        root_dir="/data/voc/VOCdevkit",
+        year=2012,
+        report_title="VOC",
+    )
     analyzer.run()
 
     # Running on all the Roboflow100 datasets
     for dataset_name in os.listdir("/data/rf100"):
         dataset_path = os.path.join("/data/rf100", dataset_name)
 
-        # Features defined manually in order to dynamically define `ImageDuplicates(train_image_dir=..., valid_image_dir=...)`
-        features = [
-            SummaryStats(),
-            ImagesResolution(),
-            ImageColorDistribution(),
-            ImagesAverageBrightness(),
-            ImageDuplicates(train_image_dir=f"{dataset_path}/train/", valid_image_dir=f"{dataset_path}/valid/"),
-            DetectionSampleVisualization(n_rows=3, n_cols=4, stack_splits_vertically=True),
-            DetectionClassHeatmap(n_rows=6, n_cols=2, heatmap_shape=(200, 200)),
-            DetectionBoundingBoxArea(topk=30, prioritization_mode="train_val_diff"),
-            DetectionBoundingBoxPerImageCount(),
-            DetectionBoundingBoxSize(),
-            DetectionClassFrequency(topk=30, prioritization_mode="train_val_diff"),
-            DetectionClassesPerImageCount(topk=30, prioritization_mode="train_val_diff"),
-            DetectionBoundingBoxIoU(num_bins=10, class_agnostic=True),
-        ]
-
         analyzer = DetectionAnalysisManager.from_coco_format(
             root_dir=dataset_path,
-            feature_extractors=features,
+            feature_extractors=_get_all_report_features(train_image_dir=f"{dataset_path}/train/", valid_image_dir=f"{dataset_path}/valid/"),
             train_images_subdir="train",
             train_annotation_file_path="train/_annotations.coco.json",
             val_images_subdir="valid",

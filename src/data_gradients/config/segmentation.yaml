@@ -28,4 +28,4 @@ report_sections:
           topk: 30
           prioritization_mode: train_val_diff
       - SegmentationComponentsConvexity
-#      - SegmentationComponentsErosion
+      - SegmentationComponentsErosion
