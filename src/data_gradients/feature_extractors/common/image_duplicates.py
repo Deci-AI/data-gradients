@@ -82,12 +82,6 @@ class ImageDuplicates(AbstractFeatureExtractor):
         self.train_image_dir = train_image_dir
         self.valid_image_dir = valid_image_dir
 
-        if not os.path.isdir(self.train_image_dir):
-            raise FileNotFoundError(f'"Directory `train_image_dir="{self.train_image_dir}"` does not exist.')
-
-        if not os.path.isdir(self.valid_image_dir):
-            raise FileNotFoundError(f'"Directory `valid_image_dir="{self.valid_image_dir}"` does not exist.')
-
     def setup_data_sources(self, train_data: Iterable, val_data: Iterable):
         """
         Called in AbstractManager.__init__
