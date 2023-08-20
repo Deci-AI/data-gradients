@@ -4,12 +4,10 @@ import torch
 
 from data_gradients.config.data.typing import SupportedDataType
 
-from data_gradients.batch_processors.base import BaseDatasetAdapter
-from data_gradients.batch_processors.output_mapper.dataset_output_mapper import DatasetOutputMapper
-from data_gradients.batch_processors.preprocessors.segmentation import SegmentationBatchPreprocessor
-from data_gradients.batch_processors.formatters.segmentation import SegmentationBatchFormatter
+from data_gradients.dataset_adapter.base_adapter import BaseDatasetAdapter
+from data_gradients.dataset_adapter.output_mapper.dataset_output_mapper import DatasetOutputMapper
+from data_gradients.dataset_adapter.formatters.segmentation import SegmentationBatchFormatter
 from data_gradients.config.data.data_config import SegmentationDataConfig
-from data_gradients.utils.data_classes.data_samples import SegmentationSample
 
 
 class SegmentationDatasetAdapter(BaseDatasetAdapter):
@@ -57,15 +55,10 @@ class SegmentationDatasetAdapter(BaseDatasetAdapter):
             n_image_channels=n_image_channels,
             threshold_value=threshold_soft_labels,
         )
-        super().__init__(data_iterable=data_iterable, dataset_output_mapper=dataset_output_mapper, formatter=formatter, data_config=data_config)
-
-        self.preprocessor = SegmentationBatchPreprocessor(class_names=class_names)
-
-    def samples_iterator(self, split_name: str) -> Iterable[SegmentationSample]:
-        """Iterate over each sample of the original data iterator, sample by sample.
-
-        :param split_name:  The name of the split to iterate over.
-        :return:            Single image sample, with its associated labels (Mask).
-        """
-        for (images, labels) in self:
-            yield from self.preprocessor.preprocess(images, labels, split=split_name)
+        super().__init__(
+            data_iterable=data_iterable,
+            dataset_output_mapper=dataset_output_mapper,
+            formatter=formatter,
+            data_config=data_config,
+            class_names=class_names,
+        )

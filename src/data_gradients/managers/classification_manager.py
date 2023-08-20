@@ -2,12 +2,12 @@ from typing import Optional, Iterable, Callable, List
 
 import torch
 
-from data_gradients.batch_processors.classification import ClassificationBatchProcessor
-from data_gradients.config.data.data_config import ClassificationDataConfig
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
+from data_gradients.sample_iterable.classification import ClassificationSampleIterable
+from data_gradients.dataset_adapter.classification_adapter import ClassificationDatasetAdapter
 
 
 class ClassificationAnalysisManager(AnalysisManagerAbstract):
@@ -19,8 +19,8 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        train_data: Iterable,
-        val_data: Optional[Iterable] = None,
+        train_iterator: Iterable,
+        val_iterator: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
         feature_extractors: Optional[FeatureExtractorsType] = None,
@@ -42,8 +42,8 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         :param class_names:             List of all class names in the dataset. The index should represent the class_id.
         :param class_names_to_use:      List of class names that we should use for analysis.
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
-        :param train_data:              Iterable object contains images and labels of the training dataset
-        :param val_data:                Iterable object contains images and labels of the validation dataset
+        :param train_iterator:              Iterable object contains images and labels of the training dataset
+        :param val_iterator:                Iterable object contains images and labels of the validation dataset
         :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
                                         with feature_extractors
         :param feature_extractors:      One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
@@ -59,30 +59,34 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         :param n_image_channels:        Number of channels for each image in the dataset
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
+
         if feature_extractors is not None and config_path is not None:
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
-        data_config = ClassificationDataConfig(
-            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-            images_extractor=images_extractor,
-            labels_extractor=labels_extractor,
-        )
+        if not isinstance(train_iterator, ClassificationDatasetAdapter):
+            train_iterator = ClassificationDatasetAdapter(
+                data_iterable=train_iterator,
+                class_names=class_names,
+                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+                class_names_to_use=class_names_to_use,
+                images_extractor=images_extractor,
+                labels_extractor=labels_extractor,
+                n_image_channels=n_image_channels,
+            )
 
-        # Check values of `n_classes` and `class_names` to define `class_names`.
-        if n_classes and class_names:
-            raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
-        elif n_classes is None and class_names is None:
-            raise RuntimeError("Either `class_names` or `n_classes` must be specified")
-        class_names = class_names if class_names else list(map(str, range(n_classes)))
-
-        # Define `class_names_to_use`
-        if class_names_to_use:
-            invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
-            if invalid_class_names_to_use != set():
-                raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
-        class_names_to_use = class_names_to_use or class_names
+        if not isinstance(val_iterator, ClassificationDatasetAdapter):
+            val_iterator = ClassificationDatasetAdapter(
+                data_iterable=val_iterator,
+                class_names=class_names,
+                data_config=train_iterator.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
+                class_names_to_use=class_names_to_use,
+                n_classes=n_classes,
+                images_extractor=images_extractor,
+                labels_extractor=labels_extractor,
+                n_image_channels=n_image_channels,
+            )
 
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="classification",
@@ -90,18 +94,23 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
             feature_extractors=feature_extractors,
         )
 
-        batch_processor = ClassificationBatchProcessor(
-            data_config=data_config,
+        # This will yield Sample objects
+        train_sample_iterable = ClassificationSampleIterable(
+            dataset=train_iterator,
+            class_names=train_iterator.class_names,
             n_image_channels=n_image_channels,
-            class_names=class_names,
-            class_names_to_use=class_names_to_use,
+            split="train",
+        )
+        val_sample_iterable = ClassificationSampleIterable(
+            dataset=val_iterator,
+            class_names=val_iterator.class_names,
+            n_image_channels=n_image_channels,
+            split="val",
         )
 
         super().__init__(
-            train_data=train_data,
-            val_data=val_data,
-            data_config=data_config,
-            batch_processor=batch_processor,
+            train_data=train_sample_iterable,
+            val_data=val_sample_iterable,
             summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
             batches_early_stop=batches_early_stop,

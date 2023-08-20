@@ -36,8 +36,8 @@ class EndToEndTest(unittest.TestCase):
             valid_samples += [(dummy_image, 0)]
 
         manager = ClassificationAnalysisManager(
-            train_data=DataLoader(train_samples),
-            val_data=DataLoader(valid_samples),
+            train_iterator=DataLoader(train_samples),
+            val_iterator=DataLoader(valid_samples),
             report_title="End to End Classification Test",
             class_names=class_names,
             batches_early_stop=None,

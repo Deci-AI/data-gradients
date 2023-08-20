@@ -14,8 +14,7 @@ from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.batch_processors.base import BaseDatasetAdapter
-
+from data_gradients.sample_iterable.base import BaseSampleIterable
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,8 +29,8 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
-        train_data: BaseDatasetAdapter,
-        val_data: BaseDatasetAdapter,
+        train_data: BaseSampleIterable,
+        val_data: BaseSampleIterable,
         summary_writer: SummaryWriter,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,
@@ -95,7 +94,7 @@ class AnalysisManagerAbstract(abc.ABC):
         )
 
         datasets_tqdm = tqdm(
-            zip_longest(self.train_data.samples_iterator(split_name="train"), self.val_data.samples_iterator(split_name="val"), fillvalue=None),
+            zip_longest(self.train_iter, self.val_iter, fillvalue=None),
             desc="Analyzing... ",
             total=self.n_batches,
         )
@@ -184,7 +183,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
         self.summary_writer.set_pdf_summary(pdf_summary=summary)
-        self.summary_writer.set_data_config(data_config_dict=self.train_data.data_config.to_json())
+        self.summary_writer.set_data_config(data_config_dict=self.train_data.dataset.data_config.to_json())
         self.summary_writer.write()
 
         # Cleanup of generated images
@@ -201,7 +200,6 @@ class AnalysisManagerAbstract(abc.ABC):
         print("The results can be seen in:")
         print(f"    - {self.summary_writer.log_dir}")
         print(f"    - {self.summary_writer.archive_dir}")
-        self.data_config.close()
 
     def run(self):
         """

@@ -1,14 +1,13 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import List, Iterable, Sized, Tuple
 
 import torch
 
 from data_gradients.config.data.typing import SupportedDataType
 from data_gradients.config.data.data_config import DataConfig
-from data_gradients.utils.data_classes.data_samples import ImageSample
 
-from data_gradients.batch_processors.formatters.base import BatchFormatter
-from data_gradients.batch_processors.output_mapper.dataset_output_mapper import DatasetOutputMapper
+from data_gradients.dataset_adapter.formatters.base import BatchFormatter
+from data_gradients.dataset_adapter.output_mapper.dataset_output_mapper import DatasetOutputMapper
 
 
 class BaseDatasetAdapter(ABC):
@@ -27,12 +26,14 @@ class BaseDatasetAdapter(ABC):
         dataset_output_mapper: DatasetOutputMapper,
         formatter: BatchFormatter,
         data_config: DataConfig,
+        class_names: List[str],
     ):
         self.data_iterable = data_iterable
         self.data_config = data_config
 
         self.dataset_output_mapper = dataset_output_mapper
         self.formatter = formatter
+        self.class_names = class_names
 
     @staticmethod
     def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
@@ -67,12 +68,3 @@ class BaseDatasetAdapter(ABC):
             images, labels = self.dataset_output_mapper.extract(data)
             images, labels = self.formatter.format(images, labels)
             yield images, labels
-
-    @abstractmethod
-    def samples_iterator(self, split_name: str) -> Iterable[ImageSample]:
-        """Iterate over each sample of the original data iterator, sample by sample.
-
-        :param split_name:  The name of the split to iterate over.
-        :return:            Single image sample.
-        """
-        ...

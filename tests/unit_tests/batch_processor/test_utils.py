@@ -1,6 +1,6 @@
 import torch
 import unittest
-from data_gradients.batch_processors.utils import to_one_hot
+from data_gradients.dataset_adapter.utils import to_one_hot
 
 
 class ToOneHotTest(unittest.TestCase):

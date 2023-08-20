@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torchvision.transforms import transforms
 
-from data_gradients.batch_processors.output_mapper.tensor_extractor import get_tensor_extractor_options
+from data_gradients.dataset_adapter.output_mapper.tensor_extractor import get_tensor_extractor_options
 from data_gradients.config.data.data_config import DataConfig
 from data_gradients.config.data.questions import Question, text_to_yellow
 
