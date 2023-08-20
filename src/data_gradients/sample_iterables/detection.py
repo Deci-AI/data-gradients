@@ -14,7 +14,7 @@ class DetectionSampleIterable(BaseSampleIterable):
         dataset: DetectionDatasetAdapter,
         class_names: List[str],
         split: str,
-        image_format: ImageChannelFormat = ImageChannelFormat.GRAYSCALE,
+        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
     ):
         """
         :param dataset: Dataset Adapter to iterate over.
