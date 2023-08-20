@@ -51,11 +51,10 @@ if __name__ == "__main__":
         year=2017,
         report_title="COCO",
         feature_extractors=_get_all_report_features(train_image_dir="/data/coco/images/train2017/", valid_image_dir="/data/coco/images/val2017/"),
-        batches_early_stop=10,
     )
 
     # VOC dataset does not clearly split the train/valid sets so we cannot run duplicate analysis
-    DetectionAnalysisManager.analyze_voc(root_dir="/data/voc/VOCdevkit", year=2012, report_title="VOC", batches_early_stop=10)
+    DetectionAnalysisManager.analyze_voc(root_dir="/data/voc/VOCdevkit", year=2012, report_title="VOC")
 
     # Running on all the Roboflow100 datasets
     for dataset_name in os.listdir("/data/rf100"):
@@ -69,5 +68,4 @@ if __name__ == "__main__":
             val_images_subdir="valid",
             val_annotation_file_path="valid/_annotations.coco.json",
             report_title=f"DET RF100 {dataset_name}",
-            batches_early_stop=10,
         )
