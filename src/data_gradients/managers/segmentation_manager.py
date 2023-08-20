@@ -97,8 +97,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             feature_extractors=feature_extractors,
         )
 
-        train_sample_iterable = SegmentationSampleIterable(dataset=train_data, class_names=train_data.class_names)
-        val_sample_iterable = SegmentationSampleIterable(dataset=val_data, class_names=val_data.class_names)
+        train_sample_iterable = SegmentationSampleIterable(dataset=train_data, class_names=train_data.class_names, split="train")
+        val_sample_iterable = SegmentationSampleIterable(dataset=val_data, class_names=val_data.class_names, split="val")
 
         super().__init__(
             train_data=train_sample_iterable,
