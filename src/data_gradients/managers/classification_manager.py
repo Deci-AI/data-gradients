@@ -6,8 +6,8 @@ from data_gradients.config.data.typing import SupportedDataType, FeatureExtracto
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterable.classification import ClassificationSampleIterable
-from data_gradients.dataset_adapter.classification_adapter import ClassificationDatasetAdapter
+from data_gradients.sample_iterables.classification import ClassificationSampleIterable
+from data_gradients.dataset_adapters.classification_adapter import ClassificationDatasetAdapter
 
 
 class ClassificationAnalysisManager(AnalysisManagerAbstract):

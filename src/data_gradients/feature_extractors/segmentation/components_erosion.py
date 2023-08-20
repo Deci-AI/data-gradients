@@ -8,7 +8,7 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.visualize.seaborn_renderer import KDEPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
-from data_gradients.sample_iterable import contours
+from data_gradients.sample_iterables import contours
 
 
 @register_feature_extractor()

@@ -3,10 +3,10 @@ import time
 import numpy as np
 
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.sample_iterable.base import BaseSampleIterable
-from data_gradients.sample_iterable.contours import get_contours
+from data_gradients.sample_iterables.base import BaseSampleIterable
+from data_gradients.sample_iterables.contours import get_contours
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
-from data_gradients.dataset_adapter.segmentation_adapter import SegmentationDatasetAdapter
+from data_gradients.dataset_adapters.segmentation_adapter import SegmentationDatasetAdapter
 
 
 class SegmentationSampleIterable(BaseSampleIterable):

@@ -3,9 +3,9 @@ import numpy as np
 import time
 
 from data_gradients.utils.data_classes import DetectionSample
-from data_gradients.sample_iterable.base import BaseSampleIterable
+from data_gradients.sample_iterables.base import BaseSampleIterable
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
-from data_gradients.dataset_adapter.detection_adapter import DetectionDatasetAdapter
+from data_gradients.dataset_adapters.detection_adapter import DetectionDatasetAdapter
 
 
 class DetectionSampleIterable(BaseSampleIterable):

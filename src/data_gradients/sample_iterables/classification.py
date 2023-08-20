@@ -2,9 +2,9 @@ from typing import Iterable, List, Optional
 import numpy as np
 
 from data_gradients.utils.data_classes import DetectionSample
-from data_gradients.sample_iterable.base import BaseSampleIterable
+from data_gradients.sample_iterables.base import BaseSampleIterable
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat, ClassificationSample
-from data_gradients.dataset_adapter.classification_adapter import ClassificationDatasetAdapter
+from data_gradients.dataset_adapters.classification_adapter import ClassificationDatasetAdapter
 
 
 class ClassificationSampleIterable(BaseSampleIterable):

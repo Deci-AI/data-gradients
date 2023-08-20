@@ -3,7 +3,7 @@ from typing import Iterable
 
 from data_gradients.utils.data_classes import ImageSample
 from data_gradients.config.data.data_config import DataConfig
-from data_gradients.dataset_adapter.base_adapter import BaseDatasetAdapter
+from data_gradients.dataset_adapters.base_adapter import BaseDatasetAdapter
 
 
 class BaseSampleIterable(ABC):

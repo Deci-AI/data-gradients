@@ -1,15 +1,16 @@
 from typing import List, Optional, Iterable, Callable
+
 import torch
 
 from data_gradients.config.data.typing import SupportedDataType
-from data_gradients.dataset_adapter.base_adapter import BaseDatasetAdapter
-from data_gradients.dataset_adapter.output_mapper.dataset_output_mapper import DatasetOutputMapper
-from data_gradients.config.data.data_config import ClassificationDataConfig
-from data_gradients.dataset_adapter.formatters.classification import ClassificationBatchFormatter
+from data_gradients.dataset_adapters.base_adapter import BaseDatasetAdapter
+from data_gradients.dataset_adapters.output_mapper.dataset_output_mapper import DatasetOutputMapper
+from data_gradients.dataset_adapters.formatters.detection import DetectionBatchFormatter
+from data_gradients.config.data.data_config import DetectionDataConfig
 
 
-class ClassificationDatasetAdapter(BaseDatasetAdapter):
-    """Wrap a classification dataset so that it would return standardized tensors.
+class DetectionDatasetAdapter(BaseDatasetAdapter):
+    """Wrap a detection dataset so that it would return standardized tensors.
 
     :param data_iterable:       Iterable object that yields data points from the dataset.
     :param cache_filename:      The filename of the cache file.
@@ -18,6 +19,8 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
     :param class_names_to_use:  List of class names to use.
     :param images_extractor:    Callable function for extracting images.
     :param labels_extractor:    Callable function for extracting labels.
+    :param is_label_first:      A flag to indicate if labels are the first entity in the dataset.
+    :param bbox_format:         Callable function for formatting bounding boxes.
     :param n_image_channels:    Number of image channels.
     :param data_config:         Instance of DetectionDataConfig class that manages dataset/dataloader configurations.
     """
@@ -31,8 +34,10 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
         class_names_to_use: Optional[List[str]] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        is_label_first: Optional[bool] = None,
+        bbox_format: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
         n_image_channels: int = 3,
-        data_config: Optional[ClassificationDataConfig] = None,
+        data_config: Optional[DetectionDataConfig] = None,
     ):
         self.data_iterable = data_iterable
 
@@ -40,14 +45,16 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
         class_names_to_use = self.resolve_class_names_to_use(class_names=class_names, class_names_to_use=class_names_to_use)
 
         if data_config is None:
-            data_config = ClassificationDataConfig(
+            data_config = DetectionDataConfig(
                 cache_filename=cache_filename,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
+                is_label_first=is_label_first,
+                xyxy_converter=bbox_format,
             )
 
         dataset_output_mapper = DatasetOutputMapper(data_config=data_config)
-        formatter = ClassificationBatchFormatter(
+        formatter = DetectionBatchFormatter(
             data_config=data_config,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
