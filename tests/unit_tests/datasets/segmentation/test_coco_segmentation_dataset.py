@@ -15,8 +15,8 @@ class COCOSegmentationDatasetTest(unittest.TestCase):
     def test_coco_dataset(self):
         da = SegmentationAnalysisManager(
             report_title="Testing Data-Gradients NEW",
-            train_iterator=self.train_set,
-            val_iterator=self.val_set,
+            train_data=self.train_set,
+            val_data=self.val_set,
             class_names=self.train_set.class_names,
             batches_early_stop=10,
             use_cache=False,
@@ -28,8 +28,8 @@ class COCOSegmentationDatasetTest(unittest.TestCase):
 
         da = SegmentationAnalysisManager(
             report_title="Testing Data-Gradients NEW",
-            train_iterator=DataLoader(self.train_set, batch_size=1),
-            val_iterator=DataLoader(self.val_set, batch_size=1),
+            train_data=DataLoader(self.train_set, batch_size=1),
+            val_data=DataLoader(self.val_set, batch_size=1),
             class_names=self.train_set.class_names,
             batches_early_stop=10,
             use_cache=False,

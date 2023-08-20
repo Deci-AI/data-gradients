@@ -19,8 +19,8 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        train_iterator: Iterable,
-        val_iterator: Optional[Iterable] = None,
+        train_data: Iterable,
+        val_data: Optional[Iterable] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
         feature_extractors: Optional[FeatureExtractorsType] = None,
@@ -42,8 +42,8 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         :param class_names:             List of all class names in the dataset. The index should represent the class_id.
         :param class_names_to_use:      List of class names that we should use for analysis.
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
-        :param train_iterator:              Iterable object contains images and labels of the training dataset
-        :param val_iterator:                Iterable object contains images and labels of the validation dataset
+        :param train_data:              Iterable object contains images and labels of the training dataset
+        :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
                                         with feature_extractors
         :param feature_extractors:      One or more feature extractors to use. If None, the default configuration will be used. Mutually exclusive
@@ -65,9 +65,9 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
-        if not isinstance(train_iterator, ClassificationDatasetAdapter):
-            train_iterator = ClassificationDatasetAdapter(
-                data_iterable=train_iterator,
+        if not isinstance(train_data, ClassificationDatasetAdapter):
+            train_data = ClassificationDatasetAdapter(
+                data_iterable=train_data,
                 class_names=class_names,
                 cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
                 class_names_to_use=class_names_to_use,
@@ -76,11 +76,11 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
                 n_image_channels=n_image_channels,
             )
 
-        if not isinstance(val_iterator, ClassificationDatasetAdapter):
-            val_iterator = ClassificationDatasetAdapter(
-                data_iterable=val_iterator,
+        if not isinstance(val_data, ClassificationDatasetAdapter):
+            val_data = ClassificationDatasetAdapter(
+                data_iterable=val_data,
                 class_names=class_names,
-                data_config=train_iterator.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
+                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
                 class_names_to_use=class_names_to_use,
                 n_classes=n_classes,
                 images_extractor=images_extractor,
@@ -96,14 +96,14 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
 
         # This will yield Sample objects
         train_sample_iterable = ClassificationSampleIterable(
-            dataset=train_iterator,
-            class_names=train_iterator.class_names,
+            dataset=train_data,
+            class_names=train_data.class_names,
             n_image_channels=n_image_channels,
             split="train",
         )
         val_sample_iterable = ClassificationSampleIterable(
-            dataset=val_iterator,
-            class_names=val_iterator.class_names,
+            dataset=val_data,
+            class_names=val_data.class_names,
             n_image_channels=n_image_channels,
             split="val",
         )
