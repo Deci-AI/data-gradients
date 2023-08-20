@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 
-from data_gradients.batch_processors.utils import channels_last_to_first
+from data_gradients.dataset_adapters.utils import channels_last_to_first
 
 
 class DatasetFormatError(Exception):

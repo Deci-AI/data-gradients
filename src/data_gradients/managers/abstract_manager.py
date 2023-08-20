@@ -2,23 +2,19 @@ import os
 import abc
 import logging
 import traceback
-from typing import Iterable, List, Dict, Optional
+from typing import List, Dict, Optional
 from itertools import zip_longest
 from logging import getLogger
 
-from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from data_gradients.feature_extractors import AbstractFeatureExtractor
-from data_gradients.batch_processors.base import BatchProcessor
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.config.data.data_config import DataConfig
-from data_gradients.config.data.typing import SupportedDataType
-
+from data_gradients.sample_iterables.base import BaseSampleIterable
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,58 +29,31 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
-        train_data: Iterable[SupportedDataType],
-        val_data: Optional[Iterable[SupportedDataType]] = None,
-        data_config: DataConfig,
+        train_data: BaseSampleIterable,
+        val_data: BaseSampleIterable,
         summary_writer: SummaryWriter,
-        batch_processor: BatchProcessor,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
         """
-        :param report_title:        Title of the report. Will be used to save the report
-        :param report_subtitle:     Subtitle of the report
         :param train_data:          Iterable object contains images and labels of the training dataset
         :param val_data:            Iterable object contains images and labels of the validation dataset
-        :param log_dir:             Directory where to save the logs. By default uses the current working directory
-        :param batch_processor:     Batch processor object to be used before extracting features
         :param grouped_feature_extractors:  List of feature extractors to be used
-        :param id_to_name:          Dictionary mapping class IDs to class names
         :param batches_early_stop:  Maximum number of batches to run in training (early stop)
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
-        self.train_data = train_data
-        self.val_data = val_data
 
         self.renderer = SeabornRenderer()
         self.summary_writer = summary_writer
-        self.data_config = data_config
 
         # DATA
         if batches_early_stop:
             logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
 
-        # Check if train_data and val_data are DataLoader objects.
-        # If not, try to convert them to DataLoader objects.
-        # Generally this should work fine, with only caveat that detection datasets may require custom collate_fn.
-        # However since we are using bs=1 this should not be a problem, but just in case we try to get a singe batch
-        # from the dataset and see if it works.
-        if not isinstance(train_data, DataLoader):
-            try:
-                next(iter(DataLoader(train_data)))
-                train_data = DataLoader(train_data)
-            except Exception:
-                pass
-
-        if val_data is not None and not isinstance(val_data, DataLoader):
-            try:
-                next(iter(DataLoader(val_data)))
-                val_data = DataLoader(val_data)
-            except Exception:
-                pass
-
+        self.train_data = train_data
+        self.val_data = val_data
         self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
         self.val_size = len(val_data) if hasattr(val_data, "__len__") else None
 
@@ -92,7 +61,6 @@ class AnalysisManagerAbstract(abc.ABC):
         self.val_iter = iter(val_data) if val_data is not None else iter([])
 
         # FEATURES
-        self.batch_processor = batch_processor
         self.grouped_feature_extractors = grouped_feature_extractors
         self._remove_plots_after_report = remove_plots_after_report
         for _, grouped_feature_list in self.grouped_feature_extractors.items():
@@ -134,28 +102,26 @@ class AnalysisManagerAbstract(abc.ABC):
         self._train_iters_done, self._val_iters_done = 0, 0
         self._stopped_early = False
 
-        for i, (train_batch, val_batch) in enumerate(datasets_tqdm):
+        for i, (train_sample, val_sample) in enumerate(datasets_tqdm):
 
             if i == self.batches_early_stop:
                 self._stopped_early = True
                 break
 
-            if train_batch is not None:
-                for sample in self.batch_processor.process(train_batch, split="train"):
-                    for feature_extractors in self.grouped_feature_extractors.values():
-                        for feature_extractor in feature_extractors:
-                            feature_extractor.update(sample)
-                    self._train_iters_done += 1
+            if train_sample is not None:
+                for feature_extractors in self.grouped_feature_extractors.values():
+                    for feature_extractor in feature_extractors:
+                        feature_extractor.update(train_sample)
+                self._train_iters_done += 1
 
             if self._train_batch_size is None:
                 self._train_batch_size = self._train_iters_done
 
-            if val_batch is not None:
-                for sample in self.batch_processor.process(val_batch, split="val"):
-                    for feature_extractors in self.grouped_feature_extractors.values():
-                        for feature_extractor in feature_extractors:
-                            feature_extractor.update(sample)
-                    self._val_iters_done += 1
+            if val_sample is not None:
+                for feature_extractors in self.grouped_feature_extractors.values():
+                    for feature_extractor in feature_extractors:
+                        feature_extractor.update(val_sample)
+                self._val_iters_done += 1
 
             if self._val_batch_size is None:
                 self._val_batch_size = self._val_iters_done
@@ -217,7 +183,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
         self.summary_writer.set_pdf_summary(pdf_summary=summary)
-        self.summary_writer.set_data_config(data_config_dict=self.data_config.to_json())
+        self.summary_writer.set_data_config(data_config_dict=self.train_data.dataset.data_config.to_json())
         self.summary_writer.write()
 
         # Cleanup of generated images
@@ -227,13 +193,14 @@ class AnalysisManagerAbstract(abc.ABC):
 
     def close(self):
         """Safe logging closing"""
+        self.train_data.close()
+        self.val_data.close()
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print()
         print("The results can be seen in:")
         print(f"    - {self.summary_writer.log_dir}")
         print(f"    - {self.summary_writer.archive_dir}")
-        self.data_config.close()
 
     def run(self):
         """
