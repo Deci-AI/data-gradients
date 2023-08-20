@@ -14,10 +14,13 @@ class DetectionSampleIterable(BaseSampleIterable):
         dataset: DetectionDatasetAdapter,
         class_names: List[str],
         split: str,
-        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
+        image_format: ImageChannelFormat = ImageChannelFormat.GRAYSCALE,
     ):
         """
+        :param dataset: Dataset Adapter to iterate over.
         :param class_names: List of all class names in the dataset. The index should represent the class_id.
+        :param split: Dataset split. ("train", "val")
+        :param image_format: Format of the images. ("RGB", "BGR", "GRAYSCALE", ...)
         """
         super().__init__(dataset=dataset)
         self.dataset = dataset

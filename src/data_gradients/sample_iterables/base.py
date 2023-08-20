@@ -7,21 +7,22 @@ from data_gradients.dataset_adapters.base_adapter import BaseDatasetAdapter
 
 
 class BaseSampleIterable(ABC):
-    """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing."""
+    """
+    Iterate over a dataset adapter and yield Sample objects one at a time.
+    """
 
     def __init__(self, dataset: BaseDatasetAdapter):
         self.dataset = dataset
 
     @abstractmethod
     def __iter__(self) -> Iterable[ImageSample]:
-        """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
-        :return:            Ready to analyse batch object, that depends on the current task (detection, segmentation, classification).
+        """
+        :return:            Ready to analyse sample object, that depends on the current task (detection, segmentation, classification).
         """
         pass
 
-    @abstractmethod
     def __len__(self) -> int:
-        pass
+        return len(self.dataset)
 
     @property
     def config(self) -> DataConfig:

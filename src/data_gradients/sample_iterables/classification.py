@@ -17,7 +17,11 @@ class ClassificationSampleIterable(BaseSampleIterable):
         image_format: Optional[ImageChannelFormat] = None,
     ):
         """
+        :param dataset: Dataset Adapter to iterate over.
         :param class_names: List of all class names in the dataset. The index should represent the class_id.
+        :param n_image_channels: Number of image channels.
+        :param split: Dataset split. ("train", "val")
+        :param image_format: Format of the images. ("RGB", "BGR", "GRAYSCALE", ...)
         """
         super().__init__(dataset=dataset)
         if n_image_channels not in [1, 3]:
@@ -51,6 +55,3 @@ class ClassificationSampleIterable(BaseSampleIterable):
                 )
                 sample.sample_id = str(id(sample))
                 yield sample
-
-    def __len__(self) -> int:
-        return len(self.dataset)

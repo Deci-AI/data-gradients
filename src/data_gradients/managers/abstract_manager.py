@@ -194,6 +194,7 @@ class AnalysisManagerAbstract(abc.ABC):
     def close(self):
         """Safe logging closing"""
         self.train_data.close()
+        self.val_data.close()
         print(f'{"*" * 100}')
         print("We have finished evaluating your dataset!")
         print()
