@@ -3,11 +3,11 @@ from typing import Tuple, Optional, Callable, List
 import torch
 from torch import Tensor
 
-from data_gradients.batch_processors.utils import check_all_integers
-from data_gradients.batch_processors.formatters.base import BatchFormatter
-from data_gradients.batch_processors.formatters.utils import check_images_shape, ensure_channel_first, drop_nan
+from data_gradients.dataset_adapters.utils import check_all_integers
+from data_gradients.dataset_adapters.formatters.base import BatchFormatter
+from data_gradients.dataset_adapters.formatters.utils import check_images_shape, ensure_channel_first, drop_nan
 from data_gradients.config.data.data_config import DetectionDataConfig
-from data_gradients.batch_processors.formatters.utils import DatasetFormatError
+from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError
 
 
 class UnsupportedDetectionBatchFormatError(DatasetFormatError):

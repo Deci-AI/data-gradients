@@ -4,9 +4,9 @@ import torch
 from torch import Tensor
 
 from data_gradients.config.data.questions import ask_user
-from data_gradients.batch_processors.formatters.base import BatchFormatter
-from data_gradients.batch_processors.utils import check_all_integers, to_one_hot
-from data_gradients.batch_processors.formatters.utils import DatasetFormatError, check_images_shape, ensure_channel_first, drop_nan
+from data_gradients.dataset_adapters.formatters.base import BatchFormatter
+from data_gradients.dataset_adapters.utils import check_all_integers, to_one_hot
+from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError, check_images_shape, ensure_channel_first, drop_nan
 
 
 class SegmentationBatchFormatter(BatchFormatter):

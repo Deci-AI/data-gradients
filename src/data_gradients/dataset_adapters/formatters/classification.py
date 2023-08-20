@@ -4,9 +4,9 @@ from typing import Tuple, List
 import torch
 from torch import Tensor
 
-from data_gradients.batch_processors.formatters.base import BatchFormatter
-from data_gradients.batch_processors.formatters.utils import DatasetFormatError, check_images_shape
-from data_gradients.batch_processors.formatters.utils import ensure_channel_first
+from data_gradients.dataset_adapters.formatters.base import BatchFormatter
+from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError, check_images_shape
+from data_gradients.dataset_adapters.formatters.utils import ensure_channel_first
 from data_gradients.config.data.data_config import ClassificationDataConfig
 
 
