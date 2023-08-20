@@ -33,9 +33,6 @@ class ClassificationSampleIterable(BaseSampleIterable):
         self.image_format = image_format
 
     def __iter__(self) -> Iterable[DetectionSample]:
-        """Group batch images and labels into a single ready-to-analyze batch object, including all relevant preprocessing.
-        :return:            Iterable of ready to analyse detection samples.
-        """
         for images, labels in self.dataset:
             images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
