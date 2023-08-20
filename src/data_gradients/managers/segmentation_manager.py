@@ -110,7 +110,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         )
 
     @classmethod
-    def from_coco(
+    def analyze_coco(
         cls,
         *,
         root_dir: str,
@@ -151,7 +151,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         train_data = DataLoader(train_data, num_workers=8, batch_size=1)
         val_data = DataLoader(val_data, num_workers=8, batch_size=1)
 
-        return cls(
+        cls(
             train_data=train_data,
             val_data=val_data,
             #
@@ -167,10 +167,10 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
-        )
+        ).run()
 
     @classmethod
-    def from_coco_format(
+    def analyze_coco_format(
         cls,
         *,
         # DATA
@@ -224,7 +224,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             annotation_file_path=val_annotation_file_path,
         )
 
-        return cls(
+        cls(
             train_data=train_data,
             val_data=val_data,
             #
@@ -240,10 +240,10 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
-        )
+        ).run()
 
     @classmethod
-    def from_voc(
+    def analyze_voc(
         cls,
         *,
         root_dir: str,
@@ -281,7 +281,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         train_data = VOCSegmentationDataset(root_dir=root_dir, split="train", year=year)
         val_data = VOCSegmentationDataset(root_dir=root_dir, split="val", year=year)
 
-        return cls(
+        cls(
             train_data=train_data,
             val_data=val_data,
             #
@@ -297,4 +297,4 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
-        )
+        ).run()

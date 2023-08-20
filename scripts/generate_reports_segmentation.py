@@ -46,30 +46,27 @@ def _get_all_report_features(train_image_dir: str, valid_image_dir: str):
 
 if __name__ == "__main__":
 
-    analyzer = SegmentationAnalysisManager.from_coco(
+    SegmentationAnalysisManager.analyze_coco(
         root_dir="/data/coco",
         year=2017,
         report_title="SEG COCO",
         feature_extractors=_get_all_report_features(train_image_dir="/data/coco/images/train2017/", valid_image_dir="/data/coco/images/val2017/"),
     )
-    analyzer.run()
 
     # VOC dataset does not clearly split the train/valid sets so we cannot run duplicate analysis
-    analyzer = SegmentationAnalysisManager.from_voc(
+    SegmentationAnalysisManager.analyze_voc(
         root_dir="/data/voc/VOCdevkit",
         year=2012,
         report_title="SEG VOC",
     )
-    analyzer.run()
 
     # Cityscape does not support image duplicate out of the box because it is made of multiple image sets
     trainset = cityscapes_train()
     val_set = cityscapes_val()
-    analyzer = SegmentationAnalysisManager(
+    SegmentationAnalysisManager(
         train_data=trainset,
         val_data=val_set,
         report_title="SEG Cityspace",
         class_names=trainset.dataset.classes + ["Ignore"],
         feature_extractors=_get_all_report_features(train_image_dir="/data/coco/images/train2017/", valid_image_dir="/data/coco/images/val2017/"),
     )
-    analyzer.run()

@@ -114,7 +114,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         )
 
     @classmethod
-    def from_coco(
+    def analyze_coco(
         cls,
         *,
         root_dir: str,
@@ -154,7 +154,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         train_loader = DataLoader(train_data, num_workers=8, batch_size=1)
         val_loader = DataLoader(val_data, num_workers=8, batch_size=1)
 
-        return cls(
+        cls(
             train_data=train_loader,
             val_data=val_loader,
             #
@@ -172,10 +172,10 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
-        )
+        ).run()
 
     @classmethod
-    def from_coco_format(
+    def analyze_coco_format(
         cls,
         *,
         # DATA
@@ -231,7 +231,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         train_loader = DataLoader(train_data, num_workers=8, batch_size=1)
         val_loader = DataLoader(val_data, num_workers=8, batch_size=1)
 
-        return cls(
+        cls(
             train_data=train_loader,
             val_data=val_loader,
             #
@@ -249,10 +249,10 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
-        )
+        ).run()
 
     @classmethod
-    def from_voc(
+    def analyze_voc(
         cls,
         *,
         root_dir: str,
@@ -292,7 +292,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         train_loader = DataLoader(train_data, num_workers=8, batch_size=1)
         val_loader = DataLoader(val_data, num_workers=8, batch_size=1)
 
-        return cls(
+        cls(
             train_data=train_loader,
             val_data=val_loader,
             #
@@ -310,4 +310,4 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             #
             batches_early_stop=batches_early_stop,
             remove_plots_after_report=remove_plots_after_report,
-        )
+        ).run()

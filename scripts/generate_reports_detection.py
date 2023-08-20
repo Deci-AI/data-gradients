@@ -46,27 +46,25 @@ def _get_all_report_features(train_image_dir: str, valid_image_dir: str):
 
 if __name__ == "__main__":
 
-    analyzer = DetectionAnalysisManager.from_coco(
+    DetectionAnalysisManager.analyze_coco(
         root_dir="/data/coco",
         year=2017,
         report_title="COCO",
         feature_extractors=_get_all_report_features(train_image_dir="/data/coco/images/train2017/", valid_image_dir="/data/coco/images/val2017/"),
     )
-    analyzer.run()
 
     # VOC dataset does not clearly split the train/valid sets so we cannot run duplicate analysis
-    analyzer = DetectionAnalysisManager.from_voc(
+    DetectionAnalysisManager.analyze_voc(
         root_dir="/data/voc/VOCdevkit",
         year=2012,
         report_title="VOC",
     )
-    analyzer.run()
 
     # Running on all the Roboflow100 datasets
     for dataset_name in os.listdir("/data/rf100"):
         dataset_path = os.path.join("/data/rf100", dataset_name)
 
-        analyzer = DetectionAnalysisManager.from_coco_format(
+        DetectionAnalysisManager.analyze_coco_format(
             root_dir=dataset_path,
             feature_extractors=_get_all_report_features(train_image_dir=f"{dataset_path}/train/", valid_image_dir=f"{dataset_path}/valid/"),
             train_images_subdir="train",
@@ -75,4 +73,3 @@ if __name__ == "__main__":
             val_annotation_file_path="valid/_annotations.coco.json",
             report_title=f"DET RF100 {dataset_name}",
         )
-        analyzer.run()
