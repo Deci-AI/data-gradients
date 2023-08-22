@@ -26,24 +26,25 @@ and calibrate metrics to monitor your unique dataset.
     To better understand how to tackle the data issues highlighted by DataGradients, explore our comprehensive <a href="https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course">online course</a> on analyzing computer vision datasets.
 </div>
 
-- [Features](https://dgreports.deci.ai/detection/#features)
-- [Installation](https://dgreports.deci.ai/detection/#installation)
-- [Quick Start](https://dgreports.deci.ai/detection/#quick-start)
-   - [Prerequisites](https://dgreports.deci.ai/detection/#prerequisites)
-   - [Dataset Analysis](https://dgreports.deci.ai/detection/#dataset-analysis)
-   - [Report](https://dgreports.deci.ai/detection/#report)
-- [Feature Configuration](https://dgreports.deci.ai/detection/#feature-configuration)
-- [Dataset Adapters](https://dgreports.deci.ai/detection/#dataset-adapters)
-   - [Image Adapter](https://dgreports.deci.ai/detection/#image-adapter)
-   - [Label Adapter](https://dgreports.deci.ai/detection/#label-adapter)
-   - [Example](https://dgreports.deci.ai/detection/#example)
-- [License](https://dgreports.deci.ai/detection/#license)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+   - [Prerequisites](#prerequisites)
+   - [Dataset Analysis](#dataset-analysis)
+   - [Report](#report)
+- [Feature Configuration](#feature-configuration)
+- [Dataset Adapters](#dataset-adapters)
+   - [Image Adapter](#image-adapter)
+   - [Label Adapter](#label-adapter)
+   - [Example](#example)
+- [Pre-computed Dataset Analysis](#precomputed-dataset-analysis)
+- [License](#license)
 
 ## Features
 - Image-Level Evaluation: DataGradients evaluates key image features such as resolution, color distribution, and average brightness.
 - Class Distribution: The library extracts stats allowing you to know which classes are the most used, how many objects do you have per image, how many image without any label, ...
 - Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks, allowing you to understand if the objects are positioned in the right area.
-- And [many more](https://dgreports.deci.ai/detection/./documentation/feature_description.md)!
+- And [many more](./documentation/feature_description.md)!
 
 <div align="center">
   <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png" width="250px"></a>
@@ -62,9 +63,9 @@ and calibrate metrics to monitor your unique dataset.
 </div>
 
 ## Examples 
-[COCO 2017 Detection report](https://dgreports.deci.ai/detection/documentation/assets/Report_COCO.pdf)
+[COCO 2017 Detection report](documentation/assets/Report_COCO.pdf)
 
-- [Cityscapes Segmentation report](https://dgreports.deci.ai/detection/documentation/assets/Report_CityScapes.pdf)
+- [Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
 
 <table style="border: 0">
   <tr>
@@ -101,8 +102,8 @@ Please ensure all the points above are checked before you proceed with **DataGra
 - In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
 
 **Heads up**: We currently don't provide out-of-the-box dataset/dataloader implementation. 
-You can find multiple dataset implementations in [PyTorch](https://dgreports.deci.ai/detection/https://pytorch.org/vision/stable/datasets.html) 
-or [SuperGradients](https://dgreports.deci.ai/detection/https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
+You can find multiple dataset implementations in [PyTorch](https://pytorch.org/vision/stable/datasets.html) 
+or [SuperGradients](https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
 
 **Example**
 ``` python
@@ -156,7 +157,7 @@ analyzer.run()
 
 **Example**
 
-You can test the segmentation analysis tool in the following [example](https://dgreports.deci.ai/detection/https://github.com/Deci-AI/data-gradients/blob/master/examples/segmentation_example.py)
+You can test the segmentation analysis tool in the following [example](https://github.com/Deci-AI/data-gradients/blob/master/examples/segmentation_example.py)
 which does not require you to download any additional data.
 
 
@@ -167,7 +168,7 @@ Once the analysis is done, the path to your pdf report will be printed.
 ## Feature Configuration
  
 The feature configuration allows you to run the analysis on a subset of features or adjust the parameters of existing features. 
-If you are interested in customizing this configuration, you can check out the [documentation](https://dgreports.deci.ai/detection/documentation/feature_configuration.md) on that topic.
+If you are interested in customizing this configuration, you can check out the [documentation](documentation/feature_configuration.md) on that topic.
 
 
 ## Dataset Adapters
@@ -262,20 +263,6 @@ SegmentationAnalysisManager(
 )
 ```
 
-## Community
-<table style="border: 0">
-  <tr>
-    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/discord.png" width="60pt"></td>
-    <td><a href="https://discord.gg/2v6cEGMREN"> Click here to join our Discord Community</a></td>
-  </tr>
-</table>
-
-## License
-
-This project is released under the [Apache 2.0 license](https://dgreports.deci.ai/detection/LICENSE.md).
-
-
----
 
 ## Pre-computed Dataset Analysis
 
@@ -505,3 +492,15 @@ Common Datasets
 - [VOC](https://dgreports.deci.ai/segmentation/VOC/Report.pdf)
 
 </details>
+
+## Community
+<table style="border: 0">
+  <tr>
+    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/discord.png" width="60pt"></td>
+    <td><a href="https://discord.gg/2v6cEGMREN"> Click here to join our Discord Community</a></td>
+  </tr>
+</table>
+
+## License
+
+This project is released under the [Apache 2.0 license](https://dgreports.deci.ai/detection/LICENSE.md).
