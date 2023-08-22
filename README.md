@@ -37,7 +37,7 @@ and calibrate metrics to monitor your unique dataset.
    - [Image Adapter](#image-adapter)
    - [Label Adapter](#label-adapter)
    - [Example](#example)
-- [Pre-computed Dataset Analysis](#precomputed-dataset-analysis)
+- [Pre-computed Dataset Analysis](#pre-computed-dataset-analysis)
 - [License](#license)
 
 ## Features
@@ -65,7 +65,7 @@ and calibrate metrics to monitor your unique dataset.
 ## Examples 
 [COCO 2017 Detection report](documentation/assets/Report_COCO.pdf)
 
-- [Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
+[Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
 
 <table style="border: 0">
   <tr>
