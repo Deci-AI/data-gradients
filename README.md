@@ -9,7 +9,9 @@
 </div>
 
 
-DataGradients is an open-source python based library designed for **computer vision dataset analysis**. Extract valuable insights from your datasets and get comprehensive reports effortlessly.
+DataGradients is an open-source python based library designed for **computer vision dataset analysis**. 
+
+Extract **valuable insights** from your datasets and get **comprehensive reports effortlessly**.
 
 ### 🔍 Detect Common Data Issues
 - Corrupted data
@@ -26,30 +28,20 @@ DataGradients is an open-source python based library designed for **computer vis
 - Identify class distribution issues.
 - Calibrate metrics for your unique dataset.
 
-> 📘 **Deep Dive** - Intrigued by the dataset challenges DataGradients uncovers?
-> 
-> Dive deeper with our **[free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm-content=DG-Report-to-course)**.
-> Embark on a journey into **dataset profiling**, navigate through its **challenges**, and fully leverage **DataGradients' capabilities**.
+## 🛠 Capabilities 
+Non-exhaustive list of supported features.
+- **General Image Metrics**: Explore key attributes like resolution, color distribution, and average brightness.
+- **Class Overview**: Get a snapshot of class distributions, most frequent classes, and unlabelled images.
+- **Positional Heatmaps**: Visualize where objects tend to appear within your images.
+- **Bounding Box & Mask Details**: Delve into dimensions, area coverages, and resolutions of objects.
+- **Class Frequencies Deep Dive**: Dive deeper into class distributions, understanding anomalies and rare classes.
+- **Detailed Object Counts**: Examine the granularity of components per image, identifying patterns and outliers.
+- And **[many more](./documentation/feature_description.md)**!
 
-- [Features](#features)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-   - [Prerequisites](#prerequisites)
-   - [Dataset Analysis](#dataset-analysis)
-   - [Report](#report)
-- [Feature Configuration](#feature-configuration)
-- [Dataset Adapters](#dataset-adapters)
-   - [Image Adapter](#image-adapter)
-   - [Label Adapter](#label-adapter)
-   - [Example](#example)
-- [Pre-computed Dataset Analysis](#pre-computed-dataset-analysis)
-- [License](#license)
+> 📘 **Deep Dive into Data Profiling**  
+> Puzzled by some dataset challenges while using DataGradients? We've got you covered.  
+> Enrich your understanding with our **[🎓free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course)**. Dive into dataset profiling, confront its complexities, and harness the full potential of DataGradients.
 
-## Features
-- Image-Level Evaluation: DataGradients evaluates key image features such as resolution, color distribution, and average brightness.
-- Class Distribution: The library extracts stats allowing you to know which classes are the most used, how many objects do you have per image, how many image without any label, ...
-- Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks, allowing you to understand if the objects are positioned in the right area.
-- And [many more](./documentation/feature_description.md)!
 
 <div align="center">
   <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png" width="250px"></a>
@@ -67,17 +59,23 @@ DataGradients is an open-source python based library designed for **computer vis
   <p><em>Example of specific features</em>
 </div>
 
-## Examples 
-[COCO 2017 Detection report](documentation/assets/Report_COCO.pdf)
+> Check out the [pre-computed dataset analysis](#pre-computed-dataset-analysis) for a deeper dive into reports.
 
-[Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
 
-<table style="border: 0">
-  <tr>
-    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/colab.png" width="80pt"></td>
-    <td><a href="https://colab.research.google.com/drive/1dswgeK0KF-n61p6ixRdFgbQKHEtOu8SE?usp=sharing"> Example notebook on Colab</a></td>
-  </tr>
-</table>
+## Table of Contents
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+   - [Prerequisites](#prerequisites)
+   - [Dataset Analysis](#dataset-analysis)
+   - [Report](#report)
+- [Feature Configuration](#feature-configuration)
+- [Dataset Adapters](#dataset-adapters)
+   - [Image Adapter](#image-adapter)
+   - [Label Adapter](#label-adapter)
+   - [Example](#example)
+- [Pre-computed Dataset Analysis](#pre-computed-dataset-analysis)
+- [License](#license)
+
 
 
 ## Installation
@@ -270,6 +268,13 @@ SegmentationAnalysisManager(
 
 
 ## Pre-computed Dataset Analysis
+
+<table style="border: 0">
+  <tr>
+    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/colab.png" width="80pt"></td>
+    <td><a href="https://colab.research.google.com/drive/1dswgeK0KF-n61p6ixRdFgbQKHEtOu8SE?usp=sharing"> Example notebook on Colab</a></td>
+  </tr>
+</table>
 
 <details>
 
