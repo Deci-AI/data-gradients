@@ -27,9 +27,9 @@ DataGradients is an open-source python based library designed for **computer vis
 - Calibrate metrics for your unique dataset.
 
 > 📘 **Deep Dive** - Intrigued by the dataset challenges DataGradients uncovers?
->
-> Dive deeper with our free [online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm-content=DG-Report-to-course).
-> Embark on a journey into dataset profiling, navigate through its challenges, and fully leverage DataGradients' capabilities.
+> 
+> Dive deeper with our **[free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm-content=DG-Report-to-course)**.
+> Embark on a journey into **dataset profiling**, navigate through its **challenges**, and fully leverage **DataGradients' capabilities**.
 
 - [Features](#features)
 - [Installation](#installation)
