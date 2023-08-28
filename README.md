@@ -21,10 +21,10 @@ object size and location distributions, number of object in an image and high fr
 class distribution issues and define loss function weights accordingly, define proper augmentations according to data variability, 
 and calibrate metrics to monitor your unique dataset.
 
+<div style="padding: 15px; background: rgba(33,114,255,0.05); border-left: 4px solid #2172ff; border-radius: 5px; margin-top: 15px;">
+    📘 <strong>Deep Dive:</strong> Want to thoroughly understand the data challenges highlighted by DataGradients?
 
-<div style="padding: 20px; background: rgba(33,114,255,0.23) no-repeat 10px 50%; border: 1px solid #2172ff;">
-    To better understand how to tackle the data issues highlighted by DataGradients, explore our comprehensive <a href="https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course">online course</a> on analyzing computer vision datasets.
-</div>
+Our comprehensive <a href="https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course">online course</a> offers an in-depth look into analyzing computer vision datasets, ensuring you get the most out of DataGradients.</div>
 
 - [Features](#features)
 - [Installation](#installation)
