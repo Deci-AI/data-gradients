@@ -23,9 +23,8 @@ report_sections:
 ### 2. Available Features
 
 Please refer to the default configuration files to explore the available features and their names.
-
-- [Object Detection features](src/data_gradients/config/detection.yaml)
-- [Semantic Segmentation features](src/data_gradients/config/segmentation.yaml)
+- [Object Detection features](https://github.com/Deci-AI/data-gradients/blob/9e3a2eb248f4dc95137d94a7d5596fb27c1de3c1/src/data_gradients/config/detection.yaml) - located in `src/data_gradients/config/detection.yaml`
+- [Semantic Segmentation features](https://github.com/Deci-AI/data-gradients/blob/b715fdf9ff2b34c3d50ab0a4326516f04e0499e2/src/data_gradients/config/segmentation.yaml) - located in `src/data_gradients/config/segmentation.yaml`
 
 For a more in-depth explanation of each feature, please check out [this page](feature_description.md).
 
