@@ -59,7 +59,7 @@ for category, module in zip(categories, modules):
     dataset_descriptions += "\n"
 
 # Combine table of contents and dataset descriptions
-summary = f"""# Datasets Description
+summary = f"""# Built-in Datasets
 
 DataGradients offer a few basic datasets which can help you load your data without needing to provide any additional code.
 

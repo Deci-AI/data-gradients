@@ -1,4 +1,4 @@
-# Datasets Description
+# Built-in Datasets
 
 DataGradients offer a few basic datasets which can help you load your data without needing to provide any additional code. 
 
