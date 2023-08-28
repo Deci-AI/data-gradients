@@ -8,23 +8,28 @@
 </p>   
 </div>
 
-DataGradients is an open-source python based library specifically designed for computer vision dataset analysis. 
 
-It automatically extracts features from your datasets and combines them all into a single user-friendly report.
+DataGradients is an open-source python based library designed for **computer vision dataset analysis**. Extract valuable insights from your datasets and get comprehensive reports effortlessly.
 
-**Detect Common Data Issues** - corrupted data, labeling errors, underlying biases, data leakage, duplications, faulty augmentations, and disparities between train and validation sets. 
+### 🔍 Detect Common Data Issues
+- Corrupted data
+- Labeling errors
+- Underlying biases, and more.
 
-**Extract Insights for Better Model Design** - take informed decisions when designing your model, based on data characteristics such as 
-object size and location distributions, number of object in an image and high frequency details.
+### 💡 Extract Insights for Better Model Design
+- Informed decisions based on data characteristics.
+- Object size and location distributions.
+- High frequency details.
 
-**Reduce Guesswork Searching For The Right Hyperparameters** - define the correct NMS and filtering parameters, identify 
-class distribution issues and define loss function weights accordingly, define proper augmentations according to data variability, 
-and calibrate metrics to monitor your unique dataset.
+### 🎯 Reduce Guesswork for Hyperparameters
+- Define the correct NMS and filtering parameters.
+- Identify class distribution issues.
+- Calibrate metrics for your unique dataset.
 
-<div style="padding: 15px; background: rgba(33,114,255,0.05); border-left: 4px solid #2172ff; border-radius: 5px; margin-top: 15px;">
-    📘 <strong>Deep Dive:</strong> Want to thoroughly understand the data challenges highlighted by DataGradients?
-
-Our comprehensive <a href="https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course">online course</a> offers an in-depth look into analyzing computer vision datasets, ensuring you get the most out of DataGradients.</div>
+> 📘 **Deep Dive** - Intrigued by the dataset challenges DataGradients uncovers?
+>
+> Dive deeper with our free [online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm-content=DG-Report-to-course).
+> Embark on a journey into dataset profiling, navigate through its challenges, and fully leverage DataGradients' capabilities.
 
 - [Features](#features)
 - [Installation](#installation)
