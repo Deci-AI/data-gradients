@@ -19,6 +19,11 @@ class Feature:
 
     json: Union[dict, list]
 
+    title: str
+    description: str
+    notice: Optional[str] = None
+    warning: Optional[str] = None
+
 
 class AbstractFeatureExtractor(ABC):
     @abstractmethod
@@ -29,22 +34,6 @@ class AbstractFeatureExtractor(ABC):
     @abstractmethod
     def aggregate(self) -> Feature:
         raise NotImplementedError()
-
-    @property
-    def description(self) -> str:
-        raise NotImplementedError()
-
-    @property
-    def title(self) -> str:
-        raise NotImplementedError()
-
-    @property
-    def notice(self) -> Optional[str]:
-        return None
-
-    @property
-    def warning(self) -> Optional[str]:
-        return None
 
     def setup_data_sources(self, tran_data: Iterable, val_data: Iterable):
         """

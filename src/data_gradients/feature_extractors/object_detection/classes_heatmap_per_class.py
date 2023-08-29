@@ -32,12 +32,10 @@ class DetectionClassHeatmap(BaseClassHeatmap):
 
         self.heatmaps_per_split[sample.split] = split_heatmap
 
-    @property
-    def title(self) -> str:
+    def _generate_title(self) -> str:
         return "Bounding Box Density"
 
-    @property
-    def description(self) -> str:
+    def _generate_description(self) -> str:
         return (
             "The heatmap represents areas of high object density within the images, providing insights into the spatial distribution of objects. "
             "By examining the heatmap, you can quickly detect whether objects are predominantly concentrated in specific regions or if they are evenly "
@@ -47,8 +45,7 @@ class DetectionClassHeatmap(BaseClassHeatmap):
             "This is done to focus on localization of objects in the scene (e.g. top-right, center, ...) independently of the original image sizes."
         )
 
-    @property
-    def notice(self) -> Optional[str]:
+    def _generate_notice(self) -> Optional[str]:
         if len(self.class_names) > self.n_cols * self.n_rows:
             return (
                 f"Only the {self.n_cols * self.n_rows} classes with highest density are shown.<br/>"

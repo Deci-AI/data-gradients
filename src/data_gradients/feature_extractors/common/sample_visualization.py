@@ -42,7 +42,7 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
         ...
 
     def aggregate(self) -> Feature:
-        plot_options = FigureRenderer(title=self.title)
+        plot_options = FigureRenderer()
 
         # Generate a single image per split
         combined_images_per_split = {
@@ -57,23 +57,18 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
             stack_vertically=self.stack_splits_vertically,
         )
 
-        feature = Feature(data=fig, plot_options=plot_options, json={})
+        feature = Feature(
+            data=fig,
+            plot_options=plot_options,
+            json={},
+            title="Visualization of Samples",
+            description=(
+                "The sample visualization feature provides a visual representation of images and labels. "
+                "This visualization aids in understanding of the composition of the dataset."
+            ),
+            notice=(
+                f"Only {self.n_cols * self.n_rows} random samples are shown.<br/>"
+                f"You can increase the number of images by changing `n_cols` and `n_rows` in the configuration file."
+            ),
+        )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Visualization of Samples"
-
-    @property
-    def description(self) -> str:
-        return (
-            "The sample visualization feature provides a visual representation of images and labels. "
-            "This visualization aids in understanding of the composition of the dataset."
-        )
-
-    @property
-    def notice(self) -> str:
-        return (
-            f"Only {self.n_cols * self.n_rows} random samples are shown.<br/>"
-            f"You can increase the number of images by changing `n_cols` and `n_rows` in the configuration file."
-        )

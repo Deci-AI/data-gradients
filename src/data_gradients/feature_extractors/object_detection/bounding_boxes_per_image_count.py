@@ -30,7 +30,6 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
         plot_options = Hist2DPlotOptions(
             x_label_key="n_bbox",
             x_label_name="Number of bounding box per Image",
-            title=self.title,
             kde=False,
             labels_key="split",
             individual_plots_key="split",
@@ -45,17 +44,15 @@ class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
             val=dict(df[df["split"] == "val"]["n_bbox"].describe()),
         )
 
-        feature = Feature(data=df, plot_options=plot_options, json=json)
-        return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Bounding Box per image"
-
-    @property
-    def description(self) -> str:
-        return (
-            "These graphs shows how many bounding boxes appear in images. \n"
-            "This can typically be valuable to know when you observe a very high number of bounding boxes per image, "
-            "as some models include a parameter to filter the top k results."
+        feature = Feature(
+            data=df,
+            plot_options=plot_options,
+            json=json,
+            title="Distribution of Bounding Box per image",
+            description=(
+                "These graphs shows how many bounding boxes appear in images. \n"
+                "This can typically be valuable to know when you observe a very high number of bounding boxes per image, "
+                "as some models include a parameter to filter the top k results."
+            ),
         )
+        return feature

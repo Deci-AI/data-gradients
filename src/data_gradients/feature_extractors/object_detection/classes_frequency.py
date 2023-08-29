@@ -57,7 +57,6 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
-            title=self.title,
             figsize=(figsize_x, figsize_y),
             x_ticks_rotation=None,
             labels_key="split",
@@ -71,17 +70,11 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
             data=df_class_count,
             plot_options=plot_options,
             json=json,
+            title="Class Frequency",
+            description=(
+                "Frequency of appearance of each class. This may highlight class distribution gap between training and validation splits. \n"
+                "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
+                "learn to predict that class."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Class Frequency"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Frequency of appearance of each class. This may highlight class distribution gap between training and validation splits. \n"
-            "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
-            "learn to predict that class."
-        )

@@ -1,4 +1,3 @@
-import collections
 from typing import Optional
 
 import pandas as pd
@@ -67,7 +66,6 @@ class ClassificationClassFrequency(AbstractFeatureExtractor):
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
-            title=self.title,
             figsize=(figsize_x, figsize_y),
             x_ticks_rotation=None,
             labels_key="split",
@@ -81,18 +79,12 @@ class ClassificationClassFrequency(AbstractFeatureExtractor):
             data=df_class_count,
             plot_options=plot_options,
             json=json,
+            title="Class Frequency",
+            description=(
+                "This bar plot represents the frequency of appearance of each class. "
+                "This may highlight class distribution gap between training and validation splits. "
+                "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
+                "learn to predict that class."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Class Frequency"
-
-    @property
-    def description(self) -> str:
-        return (
-            "This bar plot represents the frequency of appearance of each class. "
-            "This may highlight class distribution gap between training and validation splits. "
-            "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
-            "learn to predict that class."
-        )

@@ -29,7 +29,6 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
         plot_options = Hist2DPlotOptions(
             x_label_key="n_components",
             x_label_name="Number of component per Image",
-            title=self.title,
             kde=False,
             labels_key="split",
             individual_plots_key="split",
@@ -43,17 +42,15 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
             val=dict(df[df["split"] == "val"]["n_components"].describe()),
         )
 
-        feature = Feature(data=df, plot_options=plot_options, json=json)
-        return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Objects per Image"
-
-    @property
-    def description(self) -> str:
-        return (
-            "These graphs shows how many different objects appear in images. \n"
-            "This can typically be valuable to know when you observe a very high number of objects per image, "
-            "as some models include a parameter to filter the top k results."
+        feature = Feature(
+            data=df,
+            plot_options=plot_options,
+            json=json,
+            title="Distribution of Objects per Image",
+            description=(
+                "These graphs shows how many different objects appear in images. \n"
+                "This can typically be valuable to know when you observe a very high number of objects per image, "
+                "as some models include a parameter to filter the top k results."
+            ),
         )
+        return feature

@@ -43,7 +43,6 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
         plot_options = KDEPlotOptions(
             x_label_key="percent_change_of_n_components",
             x_label_name="Increase of number of components in %",
-            title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
             common_norm=False,
@@ -56,20 +55,18 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
             val=dict(df[df["split"] == "val"]["percent_change_of_n_components"].describe()),
         )
 
-        return Feature(data=df, plot_options=plot_options, json=json)
-
-    @property
-    def title(self) -> str:
-        return "Object Stability to Erosion"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Assessment of object stability under morphological opening - erosion followed by dilation. "
-            "When a lot of components are small then the number of components decrease which means we might have "
-            "noise in our annotations (i.e 'sprinkles')."
+        feature = Feature(
+            data=df,
+            plot_options=plot_options,
+            json=json,
+            title="Object Stability to Erosion",
+            description=(
+                "Assessment of object stability under morphological opening - erosion followed by dilation. "
+                "When a lot of components are small then the number of components decrease which means we might have "
+                "noise in our annotations (i.e 'sprinkles')."
+            ),
         )
-        # FIXME: Can this also lead to increase of components, when breaking existing component into 2?
+        return feature
 
     def apply_mask_opening(self, mask: np.ndarray, kernel_shape: Tuple[int, int]) -> np.ndarray:
         """Opening is just another name of erosion followed by dilation.

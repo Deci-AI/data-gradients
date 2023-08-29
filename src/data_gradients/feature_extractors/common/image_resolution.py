@@ -32,7 +32,6 @@ class ImagesResolution(AbstractFeatureExtractor):
                 x_label_name="Width",
                 y_label_key="height",
                 y_label_name="Height",
-                title=self.title,
                 x_lim=(0, max_size + 100),
                 y_lim=(0, max_size + 100),
                 x_ticks_rotation=None,
@@ -48,7 +47,6 @@ class ImagesResolution(AbstractFeatureExtractor):
                 x_label_name="Width",
                 y_label_key="height",
                 y_label_name="Height",
-                title=self.title,
                 x_lim=(0, max_size + 100),
                 y_lim=(0, max_size + 100),
                 x_ticks_rotation=None,
@@ -71,17 +69,11 @@ class ImagesResolution(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Image Width and Height Distribution",
+            description=(
+                "These histograms depict the distributions of image height and width. "
+                "It's important to note that if certain images have been rescaled or padded, the histograms will represent the size after "
+                "these operations."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Image Width and Height Distribution"
-
-    @property
-    def description(self) -> str:
-        return (
-            "These histograms depict the distributions of image height and width. "
-            "It's important to note that if certain images have been rescaled or padded, the histograms will represent the size after "
-            "these operations."
-        )

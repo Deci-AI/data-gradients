@@ -41,7 +41,27 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
                     normalized_heatmaps_per_split_per_cls[class_name][split] = (255 * (heatmap / (heatmap.max() + 1e-6))).astype(np.uint8)
 
         fig = combine_images_per_split_per_class(images_per_split_per_class=normalized_heatmaps_per_split_per_cls, n_cols=self.n_cols)
-        plot_options = FigureRenderer(title=self.title)
+        plot_options = FigureRenderer()
         json = {class_name: "No Data" for class_name in normalized_heatmaps_per_split_per_cls.keys()}
 
-        return Feature(data=fig, plot_options=plot_options, json=json)
+        feature = Feature(
+            data=fig,
+            plot_options=plot_options,
+            json=json,
+            title=self._generate_title(),
+            description=self._generate_description(),
+            notice=self._generate_notice(),
+        )
+        return feature
+
+    @abstractmethod
+    def _generate_title(self) -> str:
+        ...
+
+    @abstractmethod
+    def _generate_description(self) -> str:
+        ...
+
+    @abstractmethod
+    def _generate_notice(self) -> str:
+        ...

@@ -66,7 +66,6 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             x_label_key="pixel_value",
             x_label_name="Color Intensity",
             weights="n",
-            title=self.title,
             x_lim=(0, 255),
             x_ticks_rotation=None,
             labels_key="Color",
@@ -88,17 +87,11 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Color Distribution",
+            description=(
+                "Here's a comparison of RGB or grayscale intensity intensity (0-255) distributions across the entire dataset, assuming RGB channel ordering. \n"
+                "It can reveal discrepancies in the image characteristics between the two datasets, as well as potential flaws in the augmentation process. \n"
+                "E.g., a notable difference in the mean value of a specific color between the two datasets may indicate an issue with the augmentation process."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Color Distribution"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Here's a comparison of RGB or grayscale intensity intensity (0-255) distributions across the entire dataset, assuming RGB channel ordering. \n"
-            "It can reveal discrepancies in the image characteristics between the two datasets, as well as potential flaws in the augmentation process. \n"
-            "E.g., a notable difference in the mean value of a specific color between the two datasets may indicate an issue with the augmentation process."
-        )

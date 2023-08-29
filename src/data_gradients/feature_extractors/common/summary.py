@@ -107,16 +107,10 @@ class SummaryStats(AbstractFeatureExtractor):
             data=None,
             plot_options=None,
             json=json_res,
+            title="General Statistics",
+            description=self.template.render(**self.stats),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "General Statistics"
-
-    @property
-    def description(self) -> str:
-        return self.template.render(**self.stats)
 
     @staticmethod
     def format_resolution(array: np.ndarray) -> str:

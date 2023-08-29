@@ -63,7 +63,7 @@ class DetectionResizeImpact(AbstractFeatureExtractor):
                 }
             )
 
-    def aggregate(self) -> pd.DataFrame:
+    def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
         median_size = (int(df["image_width"].median()), int(df["image_height"].median()))
@@ -106,31 +106,25 @@ class DetectionResizeImpact(AbstractFeatureExtractor):
             figsize=(figsize_x, figsize_y),
             tight_layout=True,
             x_ticks_rotation=90,
-            title=self.title,
         )
 
         feature = Feature(
             data=data,
             plot_options=plot_options,
             json={},
+            title="Distribution of Bounding Boxes smaller than a given Threshold",
+            description=(
+                "This visualization demonstrates the consequences of rescaling images on the visibility of their bounding boxes. <br/>"
+                ""
+                "By showcasing how bounding box sizes are affected upon varying the image resizing dimensions, we address a critical question: "
+                '"<em>How far can we resize an image without causing its bounding boxes to shrink beyond a certain size, '
+                'especially to less than 1px?</em>".<br/>'
+                ""
+                "Since an object, when scaled down to less than 1px, essentially disappears from the image, "
+                "this analysis serves as a guide in identifying the optimal resizing limits that prevent crucial object data loss. <br/>"
+                ""
+                "Understanding this is crucial, as inappropriate resizing can result in significant object detail loss, "
+                "thereby adversely affecting the performance of your model. "
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Bounding Boxes smaller than a given Threshold"
-
-    @property
-    def description(self) -> str:
-        return (
-            "This visualization demonstrates the consequences of rescaling images on the visibility of their bounding boxes. <br/>"
-            ""
-            "By showcasing how bounding box sizes are affected upon varying the image resizing dimensions, we address a critical question: "
-            '"<em>How far can we resize an image without causing its bounding boxes to shrink beyond a certain size, especially to less than 1px?</em>".<br/>'
-            ""
-            "Since an object, when scaled down to less than 1px, essentially disappears from the image, "
-            "this analysis serves as a guide in identifying the optimal resizing limits that prevent crucial object data loss. <br/>"
-            ""
-            "Understanding this is crucial, as inappropriate resizing can result in significant object detail loss, "
-            "thereby adversely affecting the performance of your model. "
-        )

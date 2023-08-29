@@ -1,6 +1,3 @@
-import collections
-from functools import partial
-
 import numpy as np
 import pandas as pd
 
@@ -8,7 +5,6 @@ from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes.data_samples import ClassificationSample
 from data_gradients.visualize.plot_options import ViolinPlotOptions
-from data_gradients.visualize.seaborn_renderer import BarPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 
 
@@ -47,12 +43,9 @@ class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
-            title=self.title,
             figsize=(figsize_x, figsize_y),
-            # x_lim=(0, df_class_count["n_appearance"].max() * 1.2),
             x_ticks_rotation=None,
             labels_key="split" if num_splits > 1 else None,
-            # orient="h",
             tight_layout=True,
         )
 
@@ -64,19 +57,14 @@ class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Image size distribution per class",
+            description=(
+                "Distribution of image size (mean value of image width & height) with respect to assigned image label and (when possible) a split.\n"
+                "This may highlight issues when classes in train/val has different image resolution which may negatively affect the accuracy of the model.\n"
+                "If you see a large difference in image size between classes and splits - you may need to adjust data collection process or training regime:\n"
+                " - When splitting data into train/val/test - make sure that the image size distribution is similar between splits.\n"
+                " - If size distribution overlap between splits to too big - you can address this (to some extent) by using "
+                "more agressize values for zoom-in/zoo-out augmentation at training time.\n"
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Image size distribution per class"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Distribution of image size (mean value of image width & height) with respect to assigned image label and (when possible) a split.\n"
-            "This may highlight issues when classes in train/val has different image resolution which may negatively affect the accuracy of the model.\n"
-            "If you see a large difference in image size between classes and splits - you may need to adjust data collection process or training regime:\n"
-            " - When splitting data into train/val/test - make sure that the image size distribution is similar between splits.\n"
-            " - If size distribution overlap between splits to too big - you can address this (to some extent) by using more agressize values for zoom-in/zoo-out augmentation at training time.\n"
-        )

@@ -60,7 +60,6 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             y_label_key="class_name",
             y_label_name="Class Names",
             order_key="class_id",
-            title=self.title,
             x_lim=(0, max_n_appearance * 1.2),  # Cut the max_x at 120% of the highest max n_appearance to increase readability
             figsize=(figsize_x, figsize_y),
             bandwidth=0.4,
@@ -75,17 +74,11 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             data=df_class_count,
             plot_options=plot_options,
             json=json,
+            title="Distribution of Class Frequency per Image",
+            description=(
+                "This graph shows how many times each class appears in an image. "
+                "It highlights whether each class has a constant number of appearances per image, "
+                "or whether there is variability in the number of appearances from image to image."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Class Frequency per Image"
-
-    @property
-    def description(self) -> str:
-        return (
-            "This graph shows how many times each class appears in an image. "
-            "It highlights whether each class has a constant number of appearances per image, "
-            "or whether there is variability in the number of appearances from image to image."
-        )
