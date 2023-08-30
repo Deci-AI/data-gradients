@@ -28,6 +28,10 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
 
+        self.hist_transform_name = 'sqrt'
+        transforms = {'sqrt': lambda bbox_area: int(math.sqrt(bbox_area))}
+        self.hist_transform = transforms[self.hist_transform_name]
+
     def update(self, sample: DetectionSample):
         image_area = sample.image.shape[0] * sample.image.shape[1]
         for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
@@ -39,14 +43,15 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                     "class_id": class_id,
                     "class_name": class_name,
                     "relative_bbox_area": 100 * (bbox_area / image_area),
-                    "bbox_area_sqrt": int(math.sqrt(bbox_area)),
+                    f"bbox_area_{self.hist_transform_name}": self.hist_transform(bbox_area),
                 }
             )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        dict_bincount = self._compute_histogarm(df=df)
+        dict_bincount = self._compute_histogram(df=df, transform_name=self.hist_transform_name)
+
         df = self.value_extractor.select(df=df, id_col="class_id", split_col="split", value_col="relative_bbox_area")
 
         # Height of the plot is proportional to the number of classes
@@ -84,15 +89,27 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         return feature
 
     @staticmethod
-    def _compute_histogarm(df: pd.DataFrame, min_bin_val=1) -> dict:
+    def _compute_histogram(df: pd.DataFrame, transform_name: str, min_bin_val: int = 1) -> dict:
         """
-        Compute histograms for bounding box sqrt areas per class.
+        Compute histograms for bounding box areas per class.
 
         :param df: DataFrame containing bounding box data.
-        :param min_bin_val: Minimum bin value for the histogram.
-        :return: A dictionary containing histograms per class.
+        :param transform_name: Type of transformation (like 'sqrt').
+        :param min_bin_val: Minimum size value for the histogram.
+        :return: A dictionary containing relevant histogram information.
+            Example:
+            {
+                'train': {
+                    'transform': 'sqrt',
+                    'bin_width': width between histogram bins,
+                    'min_value': min size value in the histogram,
+                    'max_value': max size value in the histogram,
+                    'histograms': a dictionary of class name and its matching histogram
+                }
+                ...
+            }
         """
-        max_bin_val = df['bbox_area_sqrt'].max() + 1
+        max_bin_val = df[f'bbox_area_{transform_name}'].max() + 1
         max_bin_val = int(max_bin_val)
 
         assert max_bin_val > min_bin_val, \
@@ -103,18 +120,21 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             dict_bincount[split] = {}
             split_data = df[df['split'] == split]
 
+            dict_bincount[split] = {
+                'transform': transform_name,
+                'bin_width': 1,
+                'min_value': min_bin_val,
+                'max_value': max_bin_val,
+                'histograms': {},
+            }
+
             for class_label in split_data['class_name'].unique():
                 class_data = split_data[split_data['class_name'] == class_label]
 
-                bin_counts = np.bincount(class_data['bbox_area_sqrt'], minlength=max_bin_val)
+                bin_counts = np.bincount(class_data[f'bbox_area_{transform_name}'], minlength=max_bin_val)
                 histogram = bin_counts[min_bin_val:].tolist()
 
-                dict_bincount[split][class_label] = {
-                    'bin_width': 1,
-                    'min_bin_val': min_bin_val,
-                    'max_bin_val': max_bin_val,
-                    'histogram': histogram
-                }
+                dict_bincount[split]['histograms'][class_label] = histogram
 
         return dict_bincount
 

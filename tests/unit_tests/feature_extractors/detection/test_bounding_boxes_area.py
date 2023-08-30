@@ -13,41 +13,28 @@ class TestComputeHistogram(unittest.TestCase):
             'class_name': ['A', 'B', 'A', 'A', 'B', 'A', 'C']
         })
 
-        result = DetectionBoundingBoxArea._compute_histogarm(test_df, min_bin_val=1)
+        result = DetectionBoundingBoxArea._compute_histogram(test_df, transform_name='sqrt', min_bin_val=1)
 
         expected_result = {
             'train': {
-                'A': {
-                    'bin_width': 1,
-                    'min_bin_val': 1,
-                    'max_bin_val': 4,
-                    'histogram': [1, 0, 2]
-                },
-                'B': {
-                    'bin_width': 1,
-                    'min_bin_val': 1,
-                    'max_bin_val': 4,
-                    'histogram': [0, 1, 0]
+                'transform': 'sqrt',
+                'bin_width': 1,
+                'min_value': 1,
+                'max_value': 4,
+                'histograms': {
+                    'A': [1, 0, 2],
+                    'B': [0, 1, 0]
                 }
             },
             'val': {
-                'A': {
-                    'bin_width': 1,
-                    'min_bin_val': 1,
-                    'max_bin_val': 4,
-                    'histogram': [0, 1, 0]
-                },
-                'B': {
-                    'bin_width': 1,
-                    'min_bin_val': 1,
-                    'max_bin_val': 4,
-                    'histogram': [0, 0, 1]
-                },
-                'C': {
-                    'bin_width': 1,
-                    'min_bin_val': 1,
-                    'max_bin_val': 4,
-                    'histogram': [0, 0, 1]
+                'transform': 'sqrt',
+                'bin_width': 1,
+                'min_value': 1,
+                'max_value': 4,
+                'histograms': {
+                    'A': [0, 1, 0],
+                    'B': [0, 0, 1],
+                    'C': [0, 0, 1]
                 }
             }
         }
@@ -56,15 +43,16 @@ class TestComputeHistogram(unittest.TestCase):
 
     def test_single_data_point(self):
         test_df = pd.DataFrame({'bbox_area_sqrt': [1], 'split': ['train'], 'class_name': ['A']})
-        result = DetectionBoundingBoxArea._compute_histogarm(test_df, min_bin_val=1)
+        result = DetectionBoundingBoxArea._compute_histogram(test_df, transform_name='sqrt', min_bin_val=1)
 
         expected_result = {
             'train': {
-                'A': {
-                    'bin_width': 1,
-                    'min_bin_val': 1,
-                    'max_bin_val': 2,
-                    'histogram': [1]
+                'transform': 'sqrt',
+                'bin_width': 1,
+                'min_value': 1,
+                'max_value': 2,
+                'histograms': {
+                    'A': [1]
                 }
             }
         }
@@ -77,15 +65,16 @@ class TestComputeHistogram(unittest.TestCase):
             'split': ['val', 'val'],
             'class_name': ['A', 'A']
         })
-        result = DetectionBoundingBoxArea._compute_histogarm(test_df, min_bin_val=1)
+        result = DetectionBoundingBoxArea._compute_histogram(test_df, transform_name='sqrt', min_bin_val=1)
 
         expected_result = {
             'val': {
-                'A': {
-                    'bin_width': 1,
-                    'min_bin_val': 1,
-                    'max_bin_val': 101,
-                    'histogram': [1] + [0] * 98 + [1]
+                'transform': 'sqrt',
+                'bin_width': 1,
+                'min_value': 1,
+                'max_value': 101,
+                'histograms': {
+                    'A': [1] + [0] * 98 + [1]
                 }
             }
         }
@@ -98,15 +87,16 @@ class TestComputeHistogram(unittest.TestCase):
             'split': ['val', 'val', 'val'],
             'class_name': ['A', 'A', 'A']
         })
-        result = DetectionBoundingBoxArea._compute_histogarm(test_df, min_bin_val=2)
+        result = DetectionBoundingBoxArea._compute_histogram(test_df, transform_name='sqrt', min_bin_val=2)
 
         expected_result = {
             'val': {
-                'A': {
-                    'bin_width': 1,
-                    'min_bin_val': 2,
-                    'max_bin_val': 4,
-                    'histogram': [0, 3]
+                'transform': 'sqrt',
+                'bin_width': 1,
+                'min_value': 2,
+                'max_value': 4,
+                'histograms': {
+                    'A': [0, 3]
                 }
             }
         }
