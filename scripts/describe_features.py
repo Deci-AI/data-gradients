@@ -46,7 +46,7 @@ for task, module in zip(tasks, modules):
         feature_title = f"{i+1}. {feature.title}"
         table_of_contents += f"    - {section_name_to_md_link(feature_title)}\n"
         feature_descriptions += f"#### {feature_title}\n\n"
-        feature_descriptions += f"{feature.description}\n"
+        feature_descriptions += f"{feature.description}\n\n"
         feature_descriptions += f"*[source code]({class_to_github_url(class_obj)})*\n\n<br/>\n\n"
 
     # Add empty line between modules
