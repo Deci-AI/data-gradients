@@ -1,11 +1,14 @@
+import math
+
+import numpy as np
 import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
+from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
+from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.seaborn_renderer import ViolinPlotOptions
-from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
-from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 
 @register_feature_extractor()
@@ -36,12 +39,14 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                     "class_id": class_id,
                     "class_name": class_name,
                     "relative_bbox_area": 100 * (bbox_area / image_area),
+                    "bbox_area_sqrt": int(math.sqrt(bbox_area)),
                 }
             )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
+        dict_bincount = self._compute_histogarm(df=df)
         df = self.value_extractor.select(df=df, id_col="class_id", split_col="split", value_col="relative_bbox_area")
 
         # Height of the plot is proportional to the number of classes
@@ -66,7 +71,10 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = {split: dict(df[df["split"] == split]["relative_bbox_area"].describe()) for split in df["split"].unique()}
+        json = {}
+        for split in df["split"].unique():
+            basic_stats = dict(df[df["split"] == split]["relative_bbox_area"].describe())
+            json[split] = {**basic_stats, "histogram_per_class": dict_bincount[split]}
 
         feature = Feature(
             data=df,
@@ -74,6 +82,41 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             json=json,
         )
         return feature
+
+    @staticmethod
+    def _compute_histogarm(df: pd.DataFrame, min_bin_val=1) -> dict:
+        """
+        Compute histograms for bounding box sqrt areas per class.
+
+        :param df: DataFrame containing bounding box data.
+        :param min_bin_val: Minimum bin value for the histogram.
+        :return: A dictionary containing histograms per class.
+        """
+        max_bin_val = df['bbox_area_sqrt'].max() + 1
+        max_bin_val = int(max_bin_val)
+
+        assert max_bin_val > min_bin_val, \
+            "Maximum bin value must be greater than the minimum bin value for computing the histogram."
+
+        dict_bincount = {}
+        for split in df['split'].unique():
+            dict_bincount[split] = {}
+            split_data = df[df['split'] == split]
+
+            for class_label in split_data['class_name'].unique():
+                class_data = split_data[split_data['class_name'] == class_label]
+
+                bin_counts = np.bincount(class_data['bbox_area_sqrt'], minlength=max_bin_val)
+                histogram = bin_counts[min_bin_val:].tolist()
+
+                dict_bincount[split][class_label] = {
+                    'bin_width': 1,
+                    'min_bin_val': min_bin_val,
+                    'max_bin_val': max_bin_val,
+                    'histogram': histogram
+                }
+
+        return dict_bincount
 
     @property
     def title(self) -> str:
@@ -87,3 +130,4 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
             "low resolution that is not appropriate for your objects."
         )
+
