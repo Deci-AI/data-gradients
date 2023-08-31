@@ -40,7 +40,7 @@ Non-exhaustive list of supported features.
 
 > 📘 **Deep Dive into Data Profiling**  
 > Puzzled by some dataset challenges while using DataGradients? We've got you covered.  
-> Enrich your understanding with our **[🎓free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course)**. Dive into dataset profiling, confront its complexities, and harness the full potential of DataGradients.
+> Enrich your understanding with this **[🎓free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course)**. Dive into dataset profiling, confront its complexities, and harness the full potential of DataGradients.
 
 
 <div align="center">
@@ -69,10 +69,7 @@ Non-exhaustive list of supported features.
    - [Dataset Analysis](#dataset-analysis)
    - [Report](#report)
 - [Feature Configuration](#feature-configuration)
-- [Dataset Adapters](#dataset-adapters)
-   - [Image Adapter](#image-adapter)
-   - [Label Adapter](#label-adapter)
-   - [Example](#example)
+- [Dataset Extractors](#dataset-extractors)
 - [Pre-computed Dataset Analysis](#pre-computed-dataset-analysis)
 - [License](#license)
 
@@ -91,22 +88,16 @@ pip install data-gradients
 ### Prerequisites
 
 - **Dataset**: Includes a **Train** set and a **Validation** or a **Test** set.
-- **Class Names**: A list of the unique categories present in your dataset.
-- **Iterable**: A method to iterate over your Dataset providing images and labels. Can be any of the following:
-  - PyTorch Dataloader
-  - PyTorch Dataset
+- **Dataset Iterable**: A method to iterate over your Dataset providing images and labels. Can be any of the following:
+  - PyTorch **Dataloader**
+  - PyTorch **Dataset**
   - Generator that yields image/label pairs
   - Any other iterable you use for model training/validation
+- One of:
+  - **Class Names**: A list of the unique categories present in your dataset.
+  - **Number of classes**:  Indicate how many unique classes are in your dataset. Ensure this number is greater than the highest class index (e.g., if your highest class index is 9, the number of classes should be at least 10).
 
 Please ensure all the points above are checked before you proceed with **DataGradients**.
-
-**Good to Know**: DataGradients will try to find out how the dataset returns images and labels.
-- If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
-- In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
-
-**Heads up**: We currently don't provide out-of-the-box dataset/dataloader implementation. 
-You can find multiple dataset implementations in [PyTorch](https://pytorch.org/vision/stable/datasets.html) 
-or [SuperGradients](https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
 
 **Example**
 ``` python
@@ -117,17 +108,43 @@ val_data = CocoDetection(...)
 class_names = ["person", "bicycle", "car", "motorcycle", ...]
 ```
 
+> **Good to Know** - DataGradients will try to find out how the dataset returns images and labels.
+> - If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
+> - In some extreme cases, the process will crash and invite you to implement a custom [dataset extractor](#dataset-extractors)
 
-### Dataset Analysis
+> **Heads up** - DataGradients provides a few out-of-the-box [dataset/dataloader](./documentation/datasets.md) implementation. 
+> You can find more dataset implementations in [PyTorch](https://pytorch.org/vision/stable/datasets.html) 
+> or [SuperGradients](https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
+
+
+## Dataset Analysis
 You are now ready to go, chose the relevant analyzer for your task and run it over your datasets!
+
+**Image Classification**
+```python
+from data_gradients.managers.classification_manager import ClassificationAnalysisManager 
+
+train_data = ...  # Your dataset iterable (torch dataset/dataloader/...)
+val_data = ...    # Your dataset iterable (torch dataset/dataloader/...)
+class_names = ... # [<class-1>, <class-2>, ...]
+
+analyzer = ClassificationAnalysisManager(
+    report_title="Testing Data-Gradients Classification",
+    train_data=train_data,
+    val_data=val_data,
+    class_names=class_names,
+)
+
+analyzer.run()
+```
 
 **Object Detection**
 ```python
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
-train_data = ...
-val_data = ...
-class_names = ...
+train_data = ...  # Your dataset iterable (torch dataset/dataloader/...)
+val_data = ...    # Your dataset iterable (torch dataset/dataloader/...)
+class_names = ... # [<class-1>, <class-2>, ...]
 
 analyzer = DetectionAnalysisManager(
     report_title="Testing Data-Gradients Object Detection",
@@ -144,9 +161,9 @@ analyzer.run()
 ```python
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager 
 
-train_data = ...
-val_data = ...
-class_names = ...
+train_data = ...  # Your dataset iterable (torch dataset/dataloader/...)
+val_data = ...    # Your dataset iterable (torch dataset/dataloader/...)
+class_names = ... # [<class-1>, <class-2>, ...]
 
 analyzer = SegmentationAnalysisManager(
     report_title="Testing Data-Gradients Segmentation",
@@ -164,8 +181,8 @@ You can test the segmentation analysis tool in the following [example](https://g
 which does not require you to download any additional data.
 
 
-### Report
-Once the analysis is done, the path to your pdf report will be printed.
+## Report
+Once the analysis is done, the path to your pdf report will be printed. You can find here examples of [pre-computed dataset analysis reports](#pre-computed-dataset-analysis).
 
 
 ## Feature Configuration
@@ -174,97 +191,15 @@ The feature configuration allows you to run the analysis on a subset of features
 If you are interested in customizing this configuration, you can check out the [documentation](documentation/feature_configuration.md) on that topic.
 
 
-## Dataset Adapters
-Before implementing a Dataset Adapter try running without it, in many cases DataGradient will support your dataset without any code.
+## Dataset Extractors
+**Ensuring Comprehensive Dataset Compatibility**
 
-Two type of Dataset Adapters are available: `images_extractor` and `labels_extractor`. These functions should be passed to the main Analyzer function init.
+DataGradients is adept at automatic dataset inference; however, certain specificities, such as nested annotations structures or unique annotation format, may necessitate a tailored approach.
 
-```python
-from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
+To address this, DataGradients offers `extractors` tailored for enhancing compatibility with diverse dataset formats.
 
-train_data = ...
-val_data = ...
+For an in-depth understanding and implementation details, we encourage a thorough review of the [Dataset Extractors Documentation](./documentation/dataset_extractors.md).
 
-# Let Assume that in this case, the  train_data and val_data return data in this format:
-# (image, {"masks", "bboxes"})
-images_extractor = lambda data: data[0]             # Extract the image
-labels_extractor = lambda data: data[1]['masks']    # Extract the masks
-
-# In case of segmentation. 
-SegmentationAnalysisManager(
-    report_title="Test with Adapters",
-    train_data=train_data,
-    val_data=val_data,
-    images_extractor=images_extractor, 
-    labels_extractor=labels_extractor, 
-)
-
-# For Detection, just change the Manager and the label_extractor definition.
-```
-
-### Image Adapter
-Image Adapter functions should respect the following:
-
-`images_extractor(data: Any) -> torch.Tensor`
-
-- `data` being the output of the dataset/dataloader that you provided.
-- The function should return a Tensor representing your image(s). One of:
-  - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch
-  - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image
-    - With `C`: number of channels (3 for RGB)
-
-
-### Label Adapter
-Label Adapter functions should respect the following: 
-
-`labels_extractor(data: Any) -> torch.Tensor`
-
-- `data` being the output of the dataset/dataloader that you provided.
-- The function should return a Tensor representing your labels(s):
-  - For **Segmentation**, one of: 
-    - `(BS, C, H, W)`, `(BS, H, W, C)`, `(BS, H, W)` for batch
-    - `(C, H, W)`, `(H, W, C)`, `(H, W)` for single image
-      - `BS`: Batch Size
-      - `C`: number of channels - 3 for RGB
-      - `H`, `W`: Height and Width
-  - For **Detection**, one of:
-    - `(BS, N, 5)`, `(N, 6)` for batch
-    - `(N, 5)` for single image
-      - `BS`: Batch Size
-      - `N`: Padding size
-      - The last dimension should include your `class_id` and `bbox` - `class_id, x, y, x, y` for instance
-
-
-### Example
-
-Let's imagine that your dataset returns a couple of `(image, annotation)` with `annotation` as below:
-``` python
-annotation = [
-    {"bbox_coordinates": [1.08, 187.69, 611.59, 285.84], "class_id": 51},
-    {"bbox_coordinates": [5.02, 321.39, 234.33, 365.42], "class_id": 52},
-    ...
-]
-```
-
-Because this dataset includes a very custom type of `annotation`, you will need to implement your own custom `labels_extractor` as below:
-``` python
-from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager
-
-def labels_extractor(data: Tuple[PIL.Image.Image, List[Dict]]) -> torch.Tensor:
-    _image, annotations = data[:2]
-    labels = []
-    for annotation in annotations:
-        class_id = annotation["class_id"]
-        bbox = annotation["bbox_coordinates"]
-        labels.append((class_id, *bbox))
-    return torch.Tensor(labels)
-
-
-SegmentationAnalysisManager(
-    ...,
-    labels_extractor=labels_extractor
-)
-```
 
 
 ## Pre-computed Dataset Analysis
