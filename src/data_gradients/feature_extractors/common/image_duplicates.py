@@ -242,20 +242,28 @@ class ImageDuplicates(AbstractFeatureExtractor):
 
     @property
     def description(self) -> str:
-        desc = self._get_split_description(self.train_dups, "Train", self.train_dups_appearences)
-        if self.valid_image_dir is not None:
-            desc += self._get_split_description(self.valid_dups, "Validation", self.validation_dups_appearences)
-            desc += f"\n\nThere are {len(self.intersection_dups)} duplicates between train and validation."
-            if len(self.intersection_dups):
-                desc = desc.replace(
-                    "train and validation.",
-                    f"train and validation appearing {self.intersection_train_appearnces} times in the train image directory,"
-                    f" and {self.intersection_val_appearnces} times in the validation image directory.",
-                )
+        if self.train_dups:
+            desc = self._get_split_description(self.train_dups, "Train", self.train_dups_appearences)
+            if self.valid_image_dir is not None:
+                desc += self._get_split_description(self.valid_dups, "Validation", self.validation_dups_appearences)
+                desc += f"\n\nThere are {len(self.intersection_dups)} duplicates between train and validation."
+                if len(self.intersection_dups):
+                    desc = desc.replace(
+                        "train and validation.",
+                        f"train and validation appearing {self.intersection_train_appearnces} times in the train image directory,"
+                        f" and {self.intersection_val_appearnces} times in the validation image directory.",
+                    )
 
+            else:
+                desc += "\n"
+            return desc
         else:
-            desc += "\n"
-        return desc
+            return (
+                "Shows how may duplicate images you have in your dataset:\n"
+                "- How many images in your training set are duplicate.\n"
+                "- How many images in your validation set are duplicate.\n"
+                "- How many images are in both your validation and training set."
+            )
 
     def _get_split_description(self, dups: List, split: str, appearences: int) -> str:
         desc = f"<strong>{split} duplicated images</strong>:\n There are {len(dups)} duplicated images.\n"
