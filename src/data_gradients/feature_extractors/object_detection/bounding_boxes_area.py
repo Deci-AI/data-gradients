@@ -1,3 +1,6 @@
+import math
+
+import numpy as np
 import pandas as pd
 
 from data_gradients.common.registry.registry import register_feature_extractor
@@ -25,6 +28,10 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
 
+        self.hist_transform_name = 'sqrt'
+        transforms = {'sqrt': lambda bbox_area: int(math.sqrt(bbox_area))}
+        self.hist_transform = transforms[self.hist_transform_name]
+
     def update(self, sample: DetectionSample):
         image_area = sample.image.shape[0] * sample.image.shape[1]
         for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
@@ -36,11 +43,14 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                     "class_id": class_id,
                     "class_name": class_name,
                     "relative_bbox_area": 100 * (bbox_area / image_area),
+                    f"bbox_area_{self.hist_transform_name}": self.hist_transform(bbox_area),
                 }
             )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
+
+        dict_bincount = self._compute_histogram(df=df, transform_name=self.hist_transform_name)
 
         df = self.value_extractor.select(df=df, id_col="class_id", split_col="split", value_col="relative_bbox_area")
 
@@ -66,7 +76,10 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             tight_layout=True,
         )
 
-        json = {split: dict(df[df["split"] == split]["relative_bbox_area"].describe()) for split in df["split"].unique()}
+        json = {}
+        for split in df["split"].unique():
+            basic_stats = dict(df[df["split"] == split]["relative_bbox_area"].describe())
+            json[split] = {**basic_stats, "histogram_per_class": dict_bincount[split]}
 
         feature = Feature(
             data=df,
@@ -74,6 +87,54 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             json=json,
         )
         return feature
+
+    @staticmethod
+    def _compute_histogram(df: pd.DataFrame, transform_name: str) -> dict:
+        """
+        Compute histograms for bounding box areas per class.
+
+        :param df:                  DataFrame containing bounding box data.
+        :param transform_name:      Type of transformation (like 'sqrt').
+        :return:                    A dictionary containing relevant histogram information.
+            Example:
+            {
+                'train': {
+                    'transform': 'sqrt', # Transformation applied to the bbox area
+                    'bin_width': 1,      # width between histogram bins. This depends on how the histogram is created.
+                    'max_value': 3,      # max (transformed) area value included in the histogram
+                    'histograms': {      # Dictionary of class name and its corresponding histogram
+                        'A': [0, 1, 0, 2],
+                        'B': [0, 0, 1, 0]
+                    }
+                },
+                'val': ...
+        }
+        """
+        max_value = df[f'bbox_area_{transform_name}'].max()
+        max_value = int(max_value)
+
+        dict_bincount = {}
+        for split in df['split'].unique():
+            dict_bincount[split] = {}
+            split_data = df[df['split'] == split]
+
+            dict_bincount[split] = {
+                'transform': transform_name,
+                'bin_width': 1,
+                'max_value': max_value,
+                'histograms': {},
+            }
+
+            for class_label in split_data['class_name'].unique():
+                class_data = split_data[split_data['class_name'] == class_label]
+
+                # Compute histograms for bin_width = 1
+                bin_counts = np.bincount(class_data[f'bbox_area_{transform_name}'], minlength=max_value + 1)
+                histogram = bin_counts.tolist()
+
+                dict_bincount[split]['histograms'][class_label] = histogram
+
+        return dict_bincount
 
     @property
     def title(self) -> str:
@@ -87,3 +148,4 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
             "low resolution that is not appropriate for your objects."
         )
+
