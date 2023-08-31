@@ -1,7 +1,9 @@
 import inspect
+import re
+import os
+
 from data_gradients.datasets import detection as detection_datasets
 from data_gradients.datasets import segmentation as segmentation_datasets
-import re
 
 
 def remove_first_indentation(s: str) -> str:
@@ -70,5 +72,6 @@ They are meant to be used within SuperGradients and are not recommended to be us
 
 {dataset_descriptions}"""
 
-with open("../documentation/datasets.md", "w") as f:
+root_dir = os.path.dirname(os.path.dirname(__file__))
+with open(os.path.join(root_dir, "documentation", "datasets.md"), "w") as f:
     f.write(summary)
