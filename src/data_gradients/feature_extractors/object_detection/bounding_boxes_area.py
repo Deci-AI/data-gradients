@@ -89,34 +89,29 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         return feature
 
     @staticmethod
-    def _compute_histogram(df: pd.DataFrame, transform_name: str, min_bin_val: int = 1) -> dict:
+    def _compute_histogram(df: pd.DataFrame, transform_name: str) -> dict:
         """
         Compute histograms for bounding box areas per class.
 
         :param df:                  DataFrame containing bounding box data.
         :param transform_name:      Type of transformation (like 'sqrt').
-        :param min_bin_val:         Minimum size value for the histogram.
         :return:                    A dictionary containing relevant histogram information.
             Example:
             {
                 'train': {
                     'transform': 'sqrt', # Transformation applied to the bbox area
-                    'bin_width': 1,      # width between histogram bins
-                    'min_value': 1,      # min size value in the histogram
-                    'max_value': 4,      # max size value in the histogram
-                    'histograms': {      # Dictionary of class name and its matching histogram
-                        'A': [1, 0, 2],
-                        'B': [0, 1, 0]
+                    'bin_width': 1,      # width between histogram bins. This depends on how the histogram is created.
+                    'max_value': 3,      # max (transformed) area value included in the histogram
+                    'histograms': {      # Dictionary of class name and its corresponding histogram
+                        'A': [0, 1, 0, 2],
+                        'B': [0, 0, 1, 0]
                     }
                 },
                 'val': ...
         }
         """
-        max_bin_val = df[f'bbox_area_{transform_name}'].max() + 1
-        max_bin_val = int(max_bin_val)
-
-        assert max_bin_val > min_bin_val, \
-            "Maximum bin value must be greater than the minimum bin value for computing the histogram."
+        max_value = df[f'bbox_area_{transform_name}'].max()
+        max_value = int(max_value)
 
         dict_bincount = {}
         for split in df['split'].unique():
@@ -126,16 +121,16 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             dict_bincount[split] = {
                 'transform': transform_name,
                 'bin_width': 1,
-                'min_value': min_bin_val,
-                'max_value': max_bin_val,
+                'max_value': max_value,
                 'histograms': {},
             }
 
             for class_label in split_data['class_name'].unique():
                 class_data = split_data[split_data['class_name'] == class_label]
 
-                bin_counts = np.bincount(class_data[f'bbox_area_{transform_name}'], minlength=max_bin_val)
-                histogram = bin_counts[min_bin_val:].tolist()
+                # Compute histograms for bin_width = 1
+                bin_counts = np.bincount(class_data[f'bbox_area_{transform_name}'], minlength=max_value + 1)
+                histogram = bin_counts.tolist()
 
                 dict_bincount[split]['histograms'][class_label] = histogram
 
