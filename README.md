@@ -40,7 +40,7 @@ Non-exhaustive list of supported features.
 
 > 📘 **Deep Dive into Data Profiling**  
 > Puzzled by some dataset challenges while using DataGradients? We've got you covered.  
-> Enrich your understanding with our **[🎓free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course)**. Dive into dataset profiling, confront its complexities, and harness the full potential of DataGradients.
+> Enrich your understanding with this **[🎓free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course)**. Dive into dataset profiling, confront its complexities, and harness the full potential of DataGradients.
 
 
 <div align="center">
@@ -88,24 +88,16 @@ pip install data-gradients
 ### Prerequisites
 
 - **Dataset**: Includes a **Train** set and a **Validation** or a **Test** set.
-- One of
-  - **Class Names**: A list of the unique categories present in your dataset.
-  - **Number of classes**: How many unique classes appear in your dataset (make sure that this number is greater than the highest class index)
 - **Dataset Iterable**: A method to iterate over your Dataset providing images and labels. Can be any of the following:
   - PyTorch **Dataloader**
   - PyTorch **Dataset**
   - Generator that yields image/label pairs
   - Any other iterable you use for model training/validation
+- One of:
+  - **Class Names**: A list of the unique categories present in your dataset.
+  - **Number of classes**:  Indicate how many unique classes are in your dataset. Ensure this number is greater than the highest class index (e.g., if your highest class index is 9, the number of classes should be at least 10).
 
 Please ensure all the points above are checked before you proceed with **DataGradients**.
-
-**Good to Know**: DataGradients will try to find out how the dataset returns images and labels.
-- If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
-- In some extreme cases, the process will crash and invite you to implement a custom dataset adapter (see relevant section)
-
-**Heads up**: We currently provide a few out-of-the-box [dataset/dataloader](./documentation/datasets.md) implementation. 
-You can find more dataset implementations in [PyTorch](https://pytorch.org/vision/stable/datasets.html) 
-or [SuperGradients](https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
 
 **Example**
 ``` python
@@ -116,16 +108,24 @@ val_data = CocoDetection(...)
 class_names = ["person", "bicycle", "car", "motorcycle", ...]
 ```
 
+> **Good to Know** - DataGradients will try to find out how the dataset returns images and labels.
+> - If something cannot be automatically determined, you will be asked to provide some extra information through a text input.
+> - In some extreme cases, the process will crash and invite you to implement a custom [dataset extractor](#dataset-extractors)
 
-### Dataset Analysis
+> **Heads up** - DataGradients provides a few out-of-the-box [dataset/dataloader](./documentation/datasets.md) implementation. 
+> You can find more dataset implementations in [PyTorch](https://pytorch.org/vision/stable/datasets.html) 
+> or [SuperGradients](https://docs.deci.ai/super-gradients/src/super_gradients/training/datasets/Dataset_Setup_Instructions.html). 
+
+
+## Dataset Analysis
 You are now ready to go, chose the relevant analyzer for your task and run it over your datasets!
 
 **Image Classification**
 ```python
 from data_gradients.managers.classification_manager import ClassificationAnalysisManager 
 
-train_data = ... # Your dataset iterable (torch dataset/dataloader/...)
-val_data = ... # Your dataset iterable (torch dataset/dataloader/...)
+train_data = ...  # Your dataset iterable (torch dataset/dataloader/...)
+val_data = ...    # Your dataset iterable (torch dataset/dataloader/...)
 class_names = ... # [<class-1>, <class-2>, ...]
 
 analyzer = ClassificationAnalysisManager(
@@ -142,8 +142,8 @@ analyzer.run()
 ```python
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
-train_data = ... # Your dataset iterable (torch dataset/dataloader/...)
-val_data = ... # Your dataset iterable (torch dataset/dataloader/...)
+train_data = ...  # Your dataset iterable (torch dataset/dataloader/...)
+val_data = ...    # Your dataset iterable (torch dataset/dataloader/...)
 class_names = ... # [<class-1>, <class-2>, ...]
 
 analyzer = DetectionAnalysisManager(
@@ -161,8 +161,8 @@ analyzer.run()
 ```python
 from data_gradients.managers.segmentation_manager import SegmentationAnalysisManager 
 
-train_data = ... # Your dataset iterable (torch dataset/dataloader/...)
-val_data = ... # Your dataset iterable (torch dataset/dataloader/...)
+train_data = ...  # Your dataset iterable (torch dataset/dataloader/...)
+val_data = ...    # Your dataset iterable (torch dataset/dataloader/...)
 class_names = ... # [<class-1>, <class-2>, ...]
 
 analyzer = SegmentationAnalysisManager(
@@ -181,8 +181,8 @@ You can test the segmentation analysis tool in the following [example](https://g
 which does not require you to download any additional data.
 
 
-### Report
-Once the analysis is done, the path to your pdf report will be printed.
+## Report
+Once the analysis is done, the path to your pdf report will be printed. You can find here examples of [pre-computed dataset analysis reports](#pre-computed-dataset-analysis).
 
 
 ## Feature Configuration
@@ -194,12 +194,9 @@ If you are interested in customizing this configuration, you can check out the [
 ## Dataset Extractors
 **Ensuring Comprehensive Dataset Compatibility**
 
-Integrating datasets with unique structures can present challenges. 
-To address this, DataGradients offers `extractors` tailored for enhancing compatibility with diverse dataset formats.
+DataGradients is adept at automatic dataset inference; however, certain specificities, such as nested annotations structures or unique annotation format, may necessitate a tailored approach.
 
-**Highlights**:
-- Customized dataset outputs or distinctive annotation methodologies can be seamlessly accommodated using extractors.
-- DataGradients is adept at automatic dataset inference; however, certain specificities, such as distinct image channel orders or bounding box definitions, may necessitate a tailored approach.
+To address this, DataGradients offers `extractors` tailored for enhancing compatibility with diverse dataset formats.
 
 For an in-depth understanding and implementation details, we encourage a thorough review of the [Dataset Extractors Documentation](./documentation/dataset_extractors.md).
 
