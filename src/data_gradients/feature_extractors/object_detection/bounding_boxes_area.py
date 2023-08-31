@@ -93,21 +93,24 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         """
         Compute histograms for bounding box areas per class.
 
-        :param df: DataFrame containing bounding box data.
-        :param transform_name: Type of transformation (like 'sqrt').
-        :param min_bin_val: Minimum size value for the histogram.
-        :return: A dictionary containing relevant histogram information.
+        :param df:                  DataFrame containing bounding box data.
+        :param transform_name:      Type of transformation (like 'sqrt').
+        :param min_bin_val:         Minimum size value for the histogram.
+        :return:                    A dictionary containing relevant histogram information.
             Example:
             {
                 'train': {
-                    'transform': 'sqrt',
-                    'bin_width': width between histogram bins,
-                    'min_value': min size value in the histogram,
-                    'max_value': max size value in the histogram,
-                    'histograms': a dictionary of class name and its matching histogram
-                }
-                ...
-            }
+                    'transform': 'sqrt', # Transformation applied to the bbox area
+                    'bin_width': 1,      # width between histogram bins
+                    'min_value': 1,      # min size value in the histogram
+                    'max_value': 4,      # max size value in the histogram
+                    'histograms': {      # Dictionary of class name and its matching histogram
+                        'A': [1, 0, 2],
+                        'B': [0, 1, 0]
+                    }
+                },
+                'val': ...
+        }
         """
         max_bin_val = df[f'bbox_area_{transform_name}'].max() + 1
         max_bin_val = int(max_bin_val)
