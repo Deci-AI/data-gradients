@@ -8,43 +8,40 @@
 </p>   
 </div>
 
-DataGradients is an open-source python based library specifically designed for computer vision dataset analysis. 
 
-It automatically extracts features from your datasets and combines them all into a single user-friendly report.
+DataGradients is an open-source python based library designed for **computer vision dataset analysis**. 
 
-**Detect Common Data Issues** - corrupted data, labeling errors, underlying biases, data leakage, duplications, faulty augmentations, and disparities between train and validation sets. 
+Extract **valuable insights** from your datasets and get **comprehensive reports effortlessly**.
 
-**Extract Insights for Better Model Design** - take informed decisions when designing your model, based on data characteristics such as 
-object size and location distributions, number of object in an image and high frequency details.
+### 🔍 Detect Common Data Issues
+- Corrupted data
+- Labeling errors
+- Underlying biases, and more.
 
-**Reduce Guesswork Searching For The Right Hyperparameters** - define the correct NMS and filtering parameters, identify 
-class distribution issues and define loss function weights accordingly, define proper augmentations according to data variability, 
-and calibrate metrics to monitor your unique dataset.
+### 💡 Extract Insights for Better Model Design
+- Informed decisions based on data characteristics.
+- Object size and location distributions.
+- High frequency details.
 
+### 🎯 Reduce Guesswork for Hyperparameters
+- Define the correct NMS and filtering parameters.
+- Identify class distribution issues.
+- Calibrate metrics for your unique dataset.
 
-<div style="padding: 20px; background: rgba(33,114,255,0.23) no-repeat 10px 50%; border: 1px solid #2172ff;">
-    To better understand how to tackle the data issues highlighted by DataGradients, explore our comprehensive <a href="https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course">online course</a> on analyzing computer vision datasets.
-</div>
+## 🛠 Capabilities 
+Non-exhaustive list of supported features.
+- **General Image Metrics**: Explore key attributes like resolution, color distribution, and average brightness.
+- **Class Overview**: Get a snapshot of class distributions, most frequent classes, and unlabelled images.
+- **Positional Heatmaps**: Visualize where objects tend to appear within your images.
+- **Bounding Box & Mask Details**: Delve into dimensions, area coverages, and resolutions of objects.
+- **Class Frequencies Deep Dive**: Dive deeper into class distributions, understanding anomalies and rare classes.
+- **Detailed Object Counts**: Examine the granularity of components per image, identifying patterns and outliers.
+- And **[many more](./documentation/feature_description.md)**!
 
-- [Features](#features)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-   - [Prerequisites](#prerequisites)
-   - [Dataset Analysis](#dataset-analysis)
-   - [Report](#report)
-- [Feature Configuration](#feature-configuration)
-- [Dataset Adapters](#dataset-adapters)
-   - [Image Adapter](#image-adapter)
-   - [Label Adapter](#label-adapter)
-   - [Example](#example)
-- [Pre-computed Dataset Analysis](#pre-computed-dataset-analysis)
-- [License](#license)
+> 📘 **Deep Dive into Data Profiling**  
+> Puzzled by some dataset challenges while using DataGradients? We've got you covered.  
+> Enrich your understanding with our **[🎓free online course](https://deci.ai/course/profiling-computer-vision-datasets-overview/?utm_campaign[…]=DG-PDF-report&utm_medium=DG-repo&utm_content=DG-Report-to-course)**. Dive into dataset profiling, confront its complexities, and harness the full potential of DataGradients.
 
-## Features
-- Image-Level Evaluation: DataGradients evaluates key image features such as resolution, color distribution, and average brightness.
-- Class Distribution: The library extracts stats allowing you to know which classes are the most used, how many objects do you have per image, how many image without any label, ...
-- Heatmap Generation: DataGradients produces heatmaps of bounding boxes or masks, allowing you to understand if the objects are positioned in the right area.
-- And [many more](./documentation/feature_description.md)!
 
 <div align="center">
   <a href="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png"><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/report_image_stats.png" width="250px"></a>
@@ -62,17 +59,23 @@ and calibrate metrics to monitor your unique dataset.
   <p><em>Example of specific features</em>
 </div>
 
-## Examples 
-[COCO 2017 Detection report](documentation/assets/Report_COCO.pdf)
+> Check out the [pre-computed dataset analysis](#pre-computed-dataset-analysis) for a deeper dive into reports.
 
-[Cityscapes Segmentation report](documentation/assets/Report_CityScapes.pdf)
 
-<table style="border: 0">
-  <tr>
-    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/colab.png" width="80pt"></td>
-    <td><a href="https://colab.research.google.com/drive/1dswgeK0KF-n61p6ixRdFgbQKHEtOu8SE?usp=sharing"> Example notebook on Colab</a></td>
-  </tr>
-</table>
+## Table of Contents
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+   - [Prerequisites](#prerequisites)
+   - [Dataset Analysis](#dataset-analysis)
+   - [Report](#report)
+- [Feature Configuration](#feature-configuration)
+- [Dataset Adapters](#dataset-adapters)
+   - [Image Adapter](#image-adapter)
+   - [Label Adapter](#label-adapter)
+   - [Example](#example)
+- [Pre-computed Dataset Analysis](#pre-computed-dataset-analysis)
+- [License](#license)
+
 
 
 ## Installation
@@ -265,6 +268,13 @@ SegmentationAnalysisManager(
 
 
 ## Pre-computed Dataset Analysis
+
+<table style="border: 0">
+  <tr>
+    <td><img src="https://github.com/Deci-AI/data-gradients/raw/master/documentation/assets/colab.png" width="80pt"></td>
+    <td><a href="https://colab.research.google.com/drive/1dswgeK0KF-n61p6ixRdFgbQKHEtOu8SE?usp=sharing"> Example notebook on Colab</a></td>
+  </tr>
+</table>
 
 <details>
 
