@@ -2,6 +2,7 @@ import sys
 import unittest
 
 from tests.unit_tests.average_brightness_test import AverageBrightnessTest
+from tests.unit_tests.feature_extractors.detection.test_bounding_boxes_area import TestComputeHistogram
 
 
 class CoreUnitTestSuiteRunner:
@@ -19,6 +20,7 @@ class CoreUnitTestSuiteRunner:
             :return:
         """
         self.unit_tests_suite.addTest(self.test_loader.loadTestsFromModule(AverageBrightnessTest))
+        self.unit_tests_suite.addTest(self.test_loader.loadTestsFromModule(TestComputeHistogram))
 
 
 if __name__ == "__main__":
