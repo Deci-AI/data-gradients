@@ -27,7 +27,7 @@ class SegmentationDatasetAdapter(BaseDatasetAdapter):
 
     def __init__(
         self,
-        data_iterable: Iterable[SupportedDataType],
+        data_iterable: Optional[Iterable[SupportedDataType]] = None,
         cache_filename: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,

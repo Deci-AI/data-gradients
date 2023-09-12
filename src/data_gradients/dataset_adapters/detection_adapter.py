@@ -27,7 +27,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
 
     def __init__(
         self,
-        data_iterable: Iterable[SupportedDataType],
+        data_iterable: Optional[Iterable[SupportedDataType]] = None,
         cache_filename: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
@@ -39,8 +39,6 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
         n_image_channels: int = 3,
         data_config: Optional[DetectionDataConfig] = None,
     ):
-        self.data_iterable = data_iterable
-
         class_names = self.resolve_class_names(class_names=class_names, n_classes=n_classes)
         class_names_to_use = self.resolve_class_names_to_use(class_names=class_names, class_names_to_use=class_names_to_use)
 

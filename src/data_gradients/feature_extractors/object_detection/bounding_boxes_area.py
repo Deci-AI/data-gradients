@@ -13,7 +13,7 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class DetectionBoundingBoxArea(AbstractFeatureExtractor):
-    """Feature Extractor to compute the area covered Bounding Boxes."""
+    """Compute the Bounding box area."""
 
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
@@ -28,8 +28,8 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         self.value_extractor = MostImportantValuesSelector(topk=topk, prioritization_mode=prioritization_mode)
         self.data = []
 
-        self.hist_transform_name = 'sqrt'
-        transforms = {'sqrt': lambda bbox_area: int(math.sqrt(bbox_area))}
+        self.hist_transform_name = "sqrt"
+        transforms = {"sqrt": lambda bbox_area: int(math.sqrt(bbox_area))}
         self.hist_transform = transforms[self.hist_transform_name]
 
     def update(self, sample: DetectionSample):
@@ -110,29 +110,29 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                 'val': ...
         }
         """
-        max_value = df[f'bbox_area_{transform_name}'].max()
+        max_value = df[f"bbox_area_{transform_name}"].max()
         max_value = int(max_value)
 
         dict_bincount = {}
-        for split in df['split'].unique():
+        for split in df["split"].unique():
             dict_bincount[split] = {}
-            split_data = df[df['split'] == split]
+            split_data = df[df["split"] == split]
 
             dict_bincount[split] = {
-                'transform': transform_name,
-                'bin_width': 1,
-                'max_value': max_value,
-                'histograms': {},
+                "transform": transform_name,
+                "bin_width": 1,
+                "max_value": max_value,
+                "histograms": {},
             }
 
-            for class_label in split_data['class_name'].unique():
-                class_data = split_data[split_data['class_name'] == class_label]
+            for class_label in split_data["class_name"].unique():
+                class_data = split_data[split_data["class_name"] == class_label]
 
                 # Compute histograms for bin_width = 1
-                bin_counts = np.bincount(class_data[f'bbox_area_{transform_name}'], minlength=max_value + 1)
+                bin_counts = np.bincount(class_data[f"bbox_area_{transform_name}"], minlength=max_value + 1)
                 histogram = bin_counts.tolist()
 
-                dict_bincount[split]['histograms'][class_label] = histogram
+                dict_bincount[split]["histograms"][class_label] = histogram
 
         return dict_bincount
 
@@ -148,4 +148,3 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
             "low resolution that is not appropriate for your objects."
         )
-
