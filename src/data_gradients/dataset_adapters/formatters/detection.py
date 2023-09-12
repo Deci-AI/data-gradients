@@ -47,7 +47,7 @@ class DetectionBatchFormatter(BatchFormatter):
         self.xyxy_converter = xyxy_converter
         self.label_first = label_first
 
-    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
+    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, List[Tensor]]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
 
         :param images: Batch of images, in (BS, ...) format
@@ -56,6 +56,7 @@ class DetectionBatchFormatter(BatchFormatter):
             - images: Batch of images already formatted into (BS, C, H, W)
             - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
+
         if labels.numel() == 0:
             # First thing is to make sure that, if we have empty labels, they are in a correct format
             labels = self.format_empty_labels(annotated_bboxes=labels)
@@ -66,19 +67,14 @@ class DetectionBatchFormatter(BatchFormatter):
             labels = labels.unsqueeze(0)
 
         labels = drop_nan(labels)
+
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         images = check_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(annotated_bboxes=labels, batch_size=images.shape[0])
 
-        # This condition is not required because self.data_config caches answers,
-        # But adding this condition avoids unnecessary compute.
-        if self.label_first is None or self.xyxy_converter is None:
-            flat = labels.reshape(-1, labels.shape[-1])
-            signature = flat.sum(-1)
-            target_sample = flat[torch.where(signature != 0)[0][:4]]
-            targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{target_sample}"
-            self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
-            self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
+        targets_sample_str = f"Here's a sample of how your labels look like:\nEach line corresponds to a bounding box.\n{labels[0, :4, :]}"
+        self.label_first = self.data_config.get_is_label_first(hint=targets_sample_str)
+        self.xyxy_converter = self.data_config.get_xyxy_converter(hint=targets_sample_str)
 
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
@@ -154,7 +150,7 @@ class DetectionBatchFormatter(BatchFormatter):
         return torch.cat([labels, xyxy_bboxes], dim=-1)
 
     @staticmethod
-    def filter_non_relevant_annotations(bboxes: torch.Tensor, class_ids_to_use: List[int]) -> torch.Tensor:
+    def filter_non_relevant_annotations(bboxes: torch.Tensor, class_ids_to_use: List[int]) -> List[torch.Tensor]:
         """Filter the bounding box tensors to keep only the ones with relevant label; also removes padding.
 
         :param bboxes:              Bounding box tensors with shape [batch_size, padding_size, 5], where 5 represents (label, x, y, x, y).
@@ -173,15 +169,9 @@ class DetectionBatchFormatter(BatchFormatter):
             non_zero_indices = torch.any(filtered_bbox[:, 1:] != 0, dim=1)
             filtered_bbox = filtered_bbox[non_zero_indices]  # Shape [?, 5]
 
-            # Padding the filtered_bbox to match the original size
-            pad_size = len(sample_bboxes) - len(filtered_bbox)
-            if pad_size > 0:
-                padding = torch.zeros(pad_size, 5)
-                filtered_bbox = torch.cat([filtered_bbox, padding], dim=0)
+            filtered_bbox_tensors.append(filtered_bbox)
 
-            filtered_bbox_tensors.append(filtered_bbox.unsqueeze(0))
-
-        return torch.concat(filtered_bbox_tensors, dim=0)
+        return filtered_bbox_tensors
 
     @staticmethod
     def group_detection_batch(flat_batch: torch.Tensor, batch_size: int) -> torch.Tensor:
