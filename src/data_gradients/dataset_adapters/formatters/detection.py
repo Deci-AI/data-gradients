@@ -70,7 +70,7 @@ class DetectionBatchFormatter(BatchFormatter):
 
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         images = check_images_shape(images, n_image_channels=self.n_image_channels)
-        labels = self.ensure_labels_shape(annotated_bboxes=labels)
+        labels = self.ensure_labels_shape(annotated_bboxes=labels, batch_size=images.shape[0])
 
         # This condition is not required because self.data_config caches answers,
         # But adding this condition avoids unnecessary compute.
@@ -114,13 +114,13 @@ class DetectionBatchFormatter(BatchFormatter):
         return annotated_bboxes
 
     @staticmethod
-    def ensure_labels_shape(annotated_bboxes: Tensor) -> Tensor:
+    def ensure_labels_shape(annotated_bboxes: Tensor, batch_size: int) -> Tensor:
         """Make sure that the labels have the correct shape, i.e. (BS, N, 5)."""
         if annotated_bboxes.ndim == 2:
             if annotated_bboxes.shape[-1] != 6:
                 raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
             else:
-                return DetectionBatchFormatter.group_detection_batch(annotated_bboxes)
+                return DetectionBatchFormatter.group_detection_batch(annotated_bboxes, batch_size=batch_size)
         elif annotated_bboxes.ndim != 3 or annotated_bboxes.shape[-1] != 5:
             raise UnsupportedDetectionBatchFormatError(batch_format=annotated_bboxes.shape)
         else:
@@ -186,7 +186,7 @@ class DetectionBatchFormatter(BatchFormatter):
         return torch.concat(filtered_bbox_tensors, dim=0)
 
     @staticmethod
-    def group_detection_batch(flat_batch: torch.Tensor) -> torch.Tensor:
+    def group_detection_batch(flat_batch: torch.Tensor, batch_size: int) -> torch.Tensor:
         """Convert a flat batch of detections (N, 6) into a grouped batch of detections (B, P, 4)
 
         :param flat_batch: Flat batch of detections (N, 6) with 6: (image_id + class_id + 4 bbox coordinates)
@@ -195,7 +195,6 @@ class DetectionBatchFormatter(BatchFormatter):
                     P: Padding size
                     5: (class_id + 4 bbox coordinates)
         """
-        batch_size = int(torch.max(flat_batch[:, 0])) + 1
         batch_targets = [[] for _ in range(batch_size)]
 
         for target in flat_batch:
