@@ -1,8 +1,10 @@
+import os
 from typing import Optional, Iterable, Callable, List, Union
 
 import torch
 from torch.utils.data import DataLoader
 
+from data_gradients.config.data.data_config import get_default_cache_dir
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
@@ -69,10 +71,12 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
         if not isinstance(train_data, DetectionDatasetAdapter):
+
+            cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
             train_data = DetectionDatasetAdapter(
                 data_iterable=train_data,
                 class_names=class_names,
-                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+                cache_path=cache_path,
                 class_names_to_use=class_names_to_use,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,

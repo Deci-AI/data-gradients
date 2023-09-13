@@ -4,7 +4,7 @@ import logging
 import platformdirs
 import torch
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Optional, Callable, Union
 
 import data_gradients
@@ -18,6 +18,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def get_default_cache_dir() -> str:
+    return platformdirs.user_cache_dir("DataGradients", "Deci")
+
+
 @dataclass
 class DataConfig(ABC):
     """Data class for handling Dataset/Dataloader configuration.
@@ -28,73 +32,39 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
-    cache_filename: Optional[str] = None
-    cache_dir: Optional[str] = None
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
 
-    DEFAULT_CACHE_DIR: str = field(default_factory=lambda: platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+    cache_path: Optional[str] = None
 
     def __post_init__(self):
-        self.cache_dir = self.cache_dir if self.cache_dir is not None else self.DEFAULT_CACHE_DIR
-        if self.cache_filename is not None:
-            # Once the object is initialized, we check if the cache is activated or not.
+        # Once the object is initialized, we check if the cache is activated or not.
+        if self.cache_path is not None and os.path.isfile(self.cache_path):
             self.update_from_cache_file()
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
-    @property
-    def is_cache_file_used(self):
-        return self.cache_filename is not None
-
-    @property
-    def cache_path(self):
-        if not self.cache_filename:
-            raise ValueError(f"Cannot load/save cache from `{self.__class__.__name__}`. Please set `cache_filename=...`")
-        return os.path.join(self.cache_dir, self.cache_filename)
-
     def update_from_cache_file(self):
         """Update the values that are not set yet, using the cache file."""
         if os.path.isfile(self.cache_path):
-            print(
-                f"Using cache to update `{self.__class__.__name__}` from:\n"
-                f"    - cache_dir:      {self.cache_dir}\n"
-                f"    - cache_filename: {self.cache_filename}"
-            )
+            print(f"`{self.__class__.__name__}` will load cache from `cache_path={self.cache_path}`.")
             self._fill_missing_params_with_cache(self.cache_path)
         else:
-            logger.warning(
-                f"Expected cache file at {self.cache_path} but none was found. Ensure the correct path is set. "
-                f"You can set `{self.__class__.__name__}(cache_filename=..., cache_dir=...)`."
-            )
+            logger.warning(f"Expected cache file at `cache_path={self.cache_path}` but none was found. Ensure the correct path is set.")
 
     def dump_cache_file(self):
         """Save the current state to the cache file."""
-        if os.path.isfile(self.cache_path):
-            self.write_to_json(self.cache_path)
-            print(
-                f"Successfully saved cache from `{self.__class__.__name__}` to:\n"
-                f"    - cache_dir:      {self.cache_dir}\n"
-                f"    - cache_filename: {self.cache_filename}"
-            )
-        else:
-            logger.warning(
-                f"Expected cache file at path `cache_dir='{self.cache_dir}'` and `cache_filename='{self.cache_filename}'` - but none was found.\n"
-                f"Please ensure the correct path is set.\n"
-                f"You can set `{self.__class__.__name__}(cache_filename=..., cache_dir=...)`."
-            )
+        self.write_to_json(self.cache_path)
+        print(f"Successfully saved cache from `{self.__class__.__name__}` to `cache_path={self.cache_path}`.")
 
     @classmethod
-    def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
+    def load_from_json(cls, cache_path: str) -> "DataConfig":
         """Load an instance of DataConfig directly from a cache file.
-        :param filename: Name of the cache file. This should include ".json" extension.
-        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param cache_path: Path to the cache file. This should include ".json" extension.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = dir_path or cls.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, filename)
         try:
-            return cls(**cls._load_json_dict(path=path))
+            return cls(**cls._load_json_dict(path=cache_path))
         except TypeError as e:
             raise TypeError(f"{e}\n\t => Could not load `{cls.__name__}` from cache.") from e
 
@@ -114,18 +84,15 @@ class DataConfig(ABC):
             )
             return {}
 
-    def write_to_json(self, filename: str, dir_path: Optional[str] = None):
+    def write_to_json(self, cache_path: str):
         """Save the serializable representation of the class to a .json file.
-        :param filename: Name of the cache file. This should include ".json" extension.
-        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param cache_path: Full path to the cache file. This should end with ".json" extension
         """
-        dir_path = dir_path or self.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, filename)
-        if not path.endswith(".json"):
-            raise ValueError(f"`{path}` should end with `.json`")
+        if not cache_path.endswith(".json"):
+            raise ValueError(f"`{cache_path}` should end with `.json`")
 
         json_dict = {"metadata": {"__version__": data_gradients.__version__}, "attributes": self.to_json()}
-        write_json(json_dict=json_dict, path=path)
+        write_json(json_dict=json_dict, path=cache_path)
 
     def to_json(self) -> JSONDict:
         """Convert the dataclass into a serializable representation that can be saved and loaded safely.
@@ -169,7 +136,7 @@ class DataConfig(ABC):
 
     def close(self):
         """Run any action required to cleanly close the object. May include saving cache."""
-        if self.is_cache_file_used is not None:
+        if self.cache_path is not None:
             self.dump_cache_file()
 
 
