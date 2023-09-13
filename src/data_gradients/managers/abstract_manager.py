@@ -193,14 +193,37 @@ class AnalysisManagerAbstract(abc.ABC):
 
     def close(self):
         """Safe logging closing"""
-        self.train_data.close()
-        self.val_data.close()
-        print(f'{"*" * 100}')
-        print("We have finished evaluating your dataset!")
         print()
-        print("The results can be seen in:")
-        print(f"    - {self.summary_writer.log_dir}")
-        print(f"    - {self.summary_writer.archive_dir}")
+        print(f'{"=" * 100}')
+        print("Your dataset evaluation has been completed!")
+        print()
+
+        print(f'{"-" * 100}')
+        print("Training Configuration...")
+        self.train_data.close()
+
+        print()
+        print("Validation Configuration...")
+        self.val_data.close()
+
+        print()
+        print(f'{"-" * 100}')
+        print("Report Location:")
+        print("    - Temporary Folder (will be overwritten next run):")
+        print(f"        └─ {self.summary_writer.log_dir}")
+        print(f"                ├─ {os.path.basename(self.summary_writer.report_archive_path)}")
+        print(f"                └─ {os.path.basename(self.summary_writer.summary_archive_path)}")
+        print("    - Archive Folder:")
+        print(f"        └─ {self.summary_writer.archive_dir}")
+        print(f"                ├─ {os.path.basename(self.summary_writer.report_archive_path)}")
+        print(f"                └─ {os.path.basename(self.summary_writer.summary_archive_path)}")
+
+        print("")
+        print(f'{"=" * 100}')
+        print(
+            "2. Seen a glitch? Have a suggestion? Visit https://github.com/Deci-AI/data-gradients - "
+            "your interaction is our stepping stone to potential improvements. "
+        )
 
     def run(self):
         """

@@ -26,6 +26,7 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
         self,
         data_iterable: Iterable[SupportedDataType],
         cache_filename: Optional[str] = None,
+        cache_dir: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
@@ -42,6 +43,7 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
         if data_config is None:
             data_config = ClassificationDataConfig(
                 cache_filename=cache_filename,
+                cache_dir=cache_dir,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
             )

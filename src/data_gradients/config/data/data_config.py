@@ -44,6 +44,10 @@ class DataConfig(ABC):
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
     @property
+    def is_cache_file_used(self):
+        return self.cache_filename is not None
+
+    @property
     def cache_path(self):
         if not self.cache_filename:
             raise ValueError(f"Cannot load/save cache from `{self.__class__.__name__}`. Please set `cache_filename=...`")
@@ -51,10 +55,12 @@ class DataConfig(ABC):
 
     def update_from_cache_file(self):
         """Update the values that are not set yet, using the cache file."""
-        logger.info(f"Attempting to use cache for `{self.__class__.__name__}` at path: {self.cache_path}")
-
         if os.path.isfile(self.cache_path):
-            logger.info(f"Using cache file at {self.cache_path} to update missing attributes for `{self.__class__.__name__}`.")
+            print(
+                f"Using cache to update `{self.__class__.__name__}` from:\n"
+                f"    - cache_dir:      {self.cache_dir}\n"
+                f"    - cache_filename: {self.cache_filename}"
+            )
             self._fill_missing_params_with_cache(self.cache_path)
         else:
             logger.warning(
@@ -64,13 +70,17 @@ class DataConfig(ABC):
 
     def dump_cache_file(self):
         """Save the current state to the cache file."""
-        logger.info(f"Attempting to save cache for `{self.__class__.__name__}` to path: {self.cache_path}")
         if os.path.isfile(self.cache_path):
             self.write_to_json(self.cache_path)
-            logger.info(f"Successfully loaded cache for `{self.__class__.__name__}` to {self.cache_path}")
+            print(
+                f"Successfully saved cache from `{self.__class__.__name__}` to:\n"
+                f"    - cache_dir:      {self.cache_dir}\n"
+                f"    - cache_filename: {self.cache_filename}"
+            )
         else:
             logger.warning(
-                f"Expected cache file at {self.cache_path} but none was found. Ensure the correct path is set. "
+                f"Expected cache file at path `cache_dir='{self.cache_dir}'` and `cache_filename='{self.cache_filename}'` - but none was found.\n"
+                f"Please ensure the correct path is set.\n"
                 f"You can set `{self.__class__.__name__}(cache_filename=..., cache_dir=...)`."
             )
 
@@ -159,7 +169,8 @@ class DataConfig(ABC):
 
     def close(self):
         """Run any action required to cleanly close the object. May include saving cache."""
-        print("Cache closed")
+        if self.is_cache_file_used is not None:
+            self.dump_cache_file()
 
 
 @dataclass

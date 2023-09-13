@@ -29,6 +29,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
         self,
         data_iterable: Iterable[SupportedDataType],
         cache_filename: Optional[str] = None,
+        cache_dir: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
@@ -47,6 +48,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
         if data_config is None:
             data_config = DetectionDataConfig(
                 cache_filename=cache_filename,
+                cache_dir=cache_dir,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
                 is_label_first=is_label_first,
