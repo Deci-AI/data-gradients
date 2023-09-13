@@ -46,16 +46,21 @@ class DataConfig(ABC):
 
     def update_from_cache_file(self):
         """Update the values that are not set yet, using the cache file."""
-        if os.path.isfile(self.cache_path):
+        if self.cache_path is None:
+            print(f"Cache deactivated for `{self.__class__.__name__}`. To activate the cache, please set `cache_path`.")
+        elif not os.path.isfile(self.cache_path):
+            logger.warning(f"Expected cache file at `cache_path={self.cache_path}` but none was found. Ensure the correct path is set.")
+        else:
             print(f"`{self.__class__.__name__}` will load cache from `cache_path={self.cache_path}`.")
             self._fill_missing_params_with_cache(self.cache_path)
-        else:
-            logger.warning(f"Expected cache file at `cache_path={self.cache_path}` but none was found. Ensure the correct path is set.")
 
     def dump_cache_file(self):
         """Save the current state to the cache file."""
-        self.write_to_json(self.cache_path)
-        print(f"Successfully saved `{self.__class__.__name__}` cache to `cache_path={self.cache_path}`.")
+        if self.cache_path is None:
+            logger.warning(f"`{self.__class__.__name__}` cache is not saved because `cache_path={self.cache_path}` is not set.")
+        else:
+            self.write_to_json(self.cache_path)
+            print(f"Successfully saved `{self.__class__.__name__}` cache to `cache_path={self.cache_path}`.")
 
     @classmethod
     def load_from_json(cls, cache_path: str) -> "DataConfig":
