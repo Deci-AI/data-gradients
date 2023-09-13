@@ -43,12 +43,36 @@ class DataConfig(ABC):
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
+    @property
+    def cache_path(self):
+        if not self.cache_filename:
+            raise ValueError(f"Cannot load/save cache from `{self.__class__.__name__}`. Please set `cache_filename=...`")
+        return os.path.join(self.cache_dir, self.cache_filename)
+
     def update_from_cache_file(self):
-        cache_path = os.path.join(self.cache_dir, self.cache_filename)
-        logger.info(
-            f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. " f'Caching to "{cache_path}"'
-        )
-        self._fill_missing_params_with_cache(cache_path)
+        """Update the values that are not set yet, using the cache file."""
+        logger.info(f"Attempting to use cache for `{self.__class__.__name__}` at path: {self.cache_path}")
+
+        if os.path.isfile(self.cache_path):
+            logger.info(f"Using cache file at {self.cache_path} to update missing attributes for `{self.__class__.__name__}`.")
+            self._fill_missing_params_with_cache(self.cache_path)
+        else:
+            logger.warning(
+                f"Expected cache file at {self.cache_path} but none was found. Ensure the correct path is set. "
+                f"You can set `{self.__class__.__name__}(cache_filename=..., cache_dir=...)`."
+            )
+
+    def dump_cache_file(self):
+        """Save the current state to the cache file."""
+        logger.info(f"Attempting to save cache for `{self.__class__.__name__}` to path: {self.cache_path}")
+        if os.path.isfile(self.cache_path):
+            self.write_to_json(self.cache_path)
+            logger.info(f"Successfully loaded cache for `{self.__class__.__name__}` to {self.cache_path}")
+        else:
+            logger.warning(
+                f"Expected cache file at {self.cache_path} but none was found. Ensure the correct path is set. "
+                f"You can set `{self.__class__.__name__}(cache_filename=..., cache_dir=...)`."
+            )
 
     @classmethod
     def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
@@ -103,14 +127,11 @@ class DataConfig(ABC):
         }
         return json_dict
 
-    def _fill_missing_params_with_cache(self, cache_filename: str, cache_dir_path: Optional[str] = None):
+    def _fill_missing_params_with_cache(self, path: str):
         """Load an instance of DataConfig directly from a cache file.
-        :param cache_filename: Name of the cache file. This should include ".json" extension.
-        :param cache_dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param path: Full path of the cache file. This should end with ".json" extension.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = cache_dir_path or self.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, cache_filename)
         cache_dict = self._load_json_dict(path=path)
         if cache_dict:
             self._fill_missing_params(json_dict=cache_dict)
@@ -138,9 +159,7 @@ class DataConfig(ABC):
 
     def close(self):
         """Run any action required to cleanly close the object. May include saving cache."""
-        if self.cache_filename is not None:
-            logger.info(f"Saving cache to {self.cache_filename}")
-            self.write_to_json(self.cache_filename)
+        print("Cache closed")
 
 
 @dataclass
