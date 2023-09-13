@@ -37,17 +37,18 @@ class DataConfig(ABC):
 
     def __post_init__(self):
         self.cache_dir = self.cache_dir if self.cache_dir is not None else self.DEFAULT_CACHE_DIR
-
-        # Once the object is initialized, we check if the cache is activated or not.
         if self.cache_filename is not None:
-            cache_path = os.path.join(self.cache_dir, self.cache_filename)
-            logger.info(
-                f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                f'Caching to "{cache_path}"'
-            )
-            self._fill_missing_params_with_cache(cache_path)
+            # Once the object is initialized, we check if the cache is activated or not.
+            self.update_from_cache_file()
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
+
+    def update_from_cache_file(self):
+        cache_path = os.path.join(self.cache_dir, self.cache_filename)
+        logger.info(
+            f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. " f'Caching to "{cache_path}"'
+        )
+        self._fill_missing_params_with_cache(cache_path)
 
     @classmethod
     def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
