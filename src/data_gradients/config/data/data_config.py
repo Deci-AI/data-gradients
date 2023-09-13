@@ -55,7 +55,7 @@ class DataConfig(ABC):
     def dump_cache_file(self):
         """Save the current state to the cache file."""
         self.write_to_json(self.cache_path)
-        print(f"Successfully saved cache from `{self.__class__.__name__}` to `cache_path={self.cache_path}`.")
+        print(f"Successfully saved `{self.__class__.__name__}` cache to `cache_path={self.cache_path}`.")
 
     @classmethod
     def load_from_json(cls, cache_path: str) -> "DataConfig":
