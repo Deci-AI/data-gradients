@@ -58,7 +58,7 @@ class DataConfig(ABC):
     def get_caching_info(self) -> str:
         """Get information about the status of the caching."""
         if self.cache_path is None:
-            return f"`{self.__class__.__name__}` cache is not saved because `cache_path={self.cache_path}` was not set."
+            return f"`{self.__class__.__name__}` cache is not enabled because `cache_path={self.cache_path}` was not set."
         return f"`{self.__class__.__name__}` cache is set to `cache_path={self.cache_path}`."
 
     @classmethod
