@@ -45,27 +45,21 @@ class DataConfig(ABC):
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
-    def update_from_cache_file(self) -> str:
-        """Update the values that are not set yet, using the cache file.
-        :return: A string with information about the cache update.
-        """
-        if self.cache_path is None:
-            return f"Cache deactivated for `{self.__class__.__name__}`. To activate the cache, please set `cache_path`."
-        elif not os.path.isfile(self.cache_path):
-            return f"Expected cache file at `cache_path={self.cache_path}` but none was found. Ensure the correct path is set."
-        else:
+    def update_from_cache_file(self):
+        """Update the values that are not set yet, using the cache file."""
+        if self.cache_path is not None and os.path.isfile(self.cache_path):
             self._fill_missing_params_with_cache(self.cache_path)
-            return f"`{self.__class__.__name__}` loaded cache from `cache_path={self.cache_path}`."
 
-    def dump_cache_file(self) -> str:
-        """Save the current state to the cache file.
-        :return: A string with information about the cache update.
-        """
-        if self.cache_path is None:
-            return f"`{self.__class__.__name__}` cache is not saved because `cache_path={self.cache_path}` is not set."
-        else:
+    def dump_cache_file(self):
+        """Save the current state to the cache file."""
+        if self.cache_path is not None:
             self.write_to_json(self.cache_path)
-            return f"Successfully saved `{self.__class__.__name__}` cache to `cache_path={self.cache_path}`."
+
+    def get_caching_info(self) -> str:
+        """Get information about the status of the caching."""
+        if self.cache_path is None:
+            return f"`{self.__class__.__name__}` cache is not saved because `cache_path={self.cache_path}` was not set."
+        return f"`{self.__class__.__name__}` cache is set to `cache_path={self.cache_path}`."
 
     @classmethod
     def load_from_json(cls, cache_path: str) -> "DataConfig":
@@ -158,15 +152,6 @@ class DataConfig(ABC):
             )
             self.is_batch: bool = ask_question(question=question, hint=hint)
         return self.is_batch
-
-    def close(self) -> str:
-        """Run any action required to cleanly close the object. May include saving cache.
-        :return: A string with information about the cache update.
-        """
-        if self.cache_path is not None:
-            return self.dump_cache_file()
-        else:
-            return ""
 
 
 @dataclass

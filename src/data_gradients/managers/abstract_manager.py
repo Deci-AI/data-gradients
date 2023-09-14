@@ -193,16 +193,19 @@ class AnalysisManagerAbstract(abc.ABC):
 
     def close(self):
         """Safe logging closing"""
+        self.train_data.config.dump_cache_file()
+        self.val_data.config.dump_cache_file()
+
         print()
         print(f'{"=" * 100}')
         print("Your dataset evaluation has been completed!")
         print()
         print(f'{"-" * 100}')
         print("Training Configuration...")
-        print(self.train_data.close())
+        print(self.train_data.config.get_caching_info())
         print()
         print("Validation Configuration...")
-        print(self.val_data.close())
+        print(self.val_data.config.get_caching_info())
         print()
         print(f'{"-" * 100}')
         print("Report Location:")
