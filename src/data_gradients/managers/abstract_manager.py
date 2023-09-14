@@ -191,11 +191,28 @@ class AnalysisManagerAbstract(abc.ABC):
             for image_created in images_created:
                 os.remove(image_created)
 
-    def close(self):
-        """Safe logging closing"""
+    def run(self):
+        """
+        Run method activating build, execute, post process and close the manager.
+        """
+        interrupted = False
+        try:
+            self.execute()
+        except KeyboardInterrupt as e:
+            logger.info(
+                "[EXECUTION HAS BEEN INTERRUPTED]... "
+                "Please wait until SOFT-TERMINATION process finishes and saves the report and log files before terminating..."
+            )
+            logger.info("For HARD Termination - Stop the process again")
+            interrupted = e is not None
+        self.post_process(interrupted=interrupted)
+
         self.train_data.config.dump_cache_file()
         self.val_data.config.dump_cache_file()
 
+        self.print_summary()
+
+    def print_summary(self):
         print()
         print(f'{"=" * 100}')
         print("Your dataset evaluation has been completed!")
@@ -220,23 +237,6 @@ class AnalysisManagerAbstract(abc.ABC):
         print("")
         print(f'{"=" * 100}')
         print("Seen a glitch? Have a suggestion? Visit https://github.com/Deci-AI/data-gradients !")
-
-    def run(self):
-        """
-        Run method activating build, execute, post process and close the manager.
-        """
-        interrupted = False
-        try:
-            self.execute()
-        except KeyboardInterrupt as e:
-            logger.info(
-                "[EXECUTION HAS BEEN INTERRUPTED]... "
-                "Please wait until SOFT-TERMINATION process finishes and saves the report and log files before terminating..."
-            )
-            logger.info("For HARD Termination - Stop the process again")
-            interrupted = e is not None
-        self.post_process(interrupted=interrupted)
-        self.close()
 
     @property
     def n_batches(self) -> Optional[int]:
