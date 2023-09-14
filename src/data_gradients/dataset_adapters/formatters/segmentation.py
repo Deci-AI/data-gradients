@@ -80,7 +80,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         labels = ensure_channel_first(labels, n_image_channels=self.n_image_channels)
 
         images = check_images_shape(images, n_image_channels=self.n_image_channels)
-        labels = self.validate_labels_dim(labels, n_classes=self.n_image_channels, ignore_labels=self.ignore_labels)
+        labels = self.validate_labels_dim(labels, n_classes=len(self.class_names), ignore_labels=self.ignore_labels)
 
         labels = self.ensure_hard_labels(labels, n_classes=len(self.class_names), threshold_value=self.threshold_value)
 
