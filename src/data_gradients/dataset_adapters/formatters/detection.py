@@ -61,8 +61,7 @@ class DetectionBatchFormatter(BatchFormatter):
             # First thing is to make sure that, if we have empty labels, they are in a correct format
             labels = self.format_empty_labels(annotated_bboxes=labels)
 
-        # If the label is of shape [N, 5] we can assume that it represents the targets of a single sample (class_name + 4 bbox coordinates)
-        if labels.ndim == 2 and labels.shape[1] == 5:
+        if not self.check_is_batch(images=images, labels=labels):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
@@ -90,6 +89,18 @@ class DetectionBatchFormatter(BatchFormatter):
             labels = self.filter_non_relevant_annotations(bboxes=labels, class_ids_to_use=self.class_ids_to_use)
 
         return images, labels
+
+    def check_is_batch(self, images: Tensor, labels: Tensor) -> bool:
+        if images.ndim == 4:
+            self.data_config.is_batch = True
+            return self.data_config.is_batch
+        elif images.ndim == 2 or (labels.ndim == 2 and labels.shape[1] == 5):
+            # If the label is of shape [N, 5] we can assume that it represents the targets of a single sample (class_name + 4 bbox coordinates)
+            self.data_config.is_batch = False
+            return self.data_config.is_batch
+        else:
+            hint = f"    - Image shape: {images.shape}\n    - Label shape:  {labels.shape}"
+            return self.data_config.get_is_batch(hint=hint)
 
     @staticmethod
     def format_empty_labels(annotated_bboxes: Tensor) -> Tensor:

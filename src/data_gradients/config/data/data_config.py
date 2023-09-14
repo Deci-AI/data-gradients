@@ -34,6 +34,7 @@ class DataConfig(ABC):
 
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
+    is_batch: Union[None, bool] = None
 
     cache_path: Optional[str] = None
 
@@ -106,6 +107,7 @@ class DataConfig(ABC):
         json_dict = {
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
+            "is_batch": self.is_batch,
         }
         return json_dict
 
@@ -128,6 +130,8 @@ class DataConfig(ABC):
             self.images_extractor = json_dict.get("images_extractor")
         if self.labels_extractor is None:
             self.labels_extractor = json_dict.get("labels_extractor")
+        if self.is_batch is None:
+            self.is_batch = json_dict.get("is_batch")
 
     def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -138,6 +142,18 @@ class DataConfig(ABC):
         if self.labels_extractor is None:
             self.labels_extractor = ask_question(question=question, hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
+
+    def get_is_batch(self, hint: str = "") -> bool:
+        if self.is_batch is None:
+            question = Question(
+                question="Does your dataset provide a batch or a single sample?",
+                options={
+                    "Batch of Samples (e.g. torch Dataloader)": True,
+                    "Single Sample (e.g. torch Dataset)": False,
+                },
+            )
+            self.is_batch: bool = ask_question(question=question, hint=hint)
+        return self.is_batch
 
     def close(self):
         """Run any action required to cleanly close the object. May include saving cache."""
