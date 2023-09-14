@@ -6,8 +6,8 @@ import torch
 
 from data_gradients.config.data.typing import SupportedDataType
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.sample_preprocessor.base import BaseSamplePreprocessor
-from data_gradients.sample_preprocessor.contours import get_contours
+from data_gradients.sample_preprocessor.base_sample_preprocessor import BaseSamplePreprocessor
+from data_gradients.sample_preprocessor.utils.contours import get_contours
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 from data_gradients.dataset_adapters.segmentation_adapter import SegmentationDatasetAdapter
 

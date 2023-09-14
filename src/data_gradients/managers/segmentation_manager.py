@@ -6,7 +6,7 @@ from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_preprocessor.segmentation import SegmentationSampleProcessor
+from data_gradients.sample_preprocessor.segmentation_sample_preprocessor import SegmentationSampleProcessor
 from data_gradients.datasets import COCOSegmentationDataset, COCOFormatSegmentationDataset, VOCSegmentationDataset
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 

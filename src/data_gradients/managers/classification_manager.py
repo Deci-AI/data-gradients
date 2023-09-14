@@ -6,7 +6,7 @@ from data_gradients.config.data.typing import SupportedDataType, FeatureExtracto
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_preprocessor.classification import ClassificationSamplePreprocessor
+from data_gradients.sample_preprocessor.classification_sample_preprocessor import ClassificationSamplePreprocessor
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
