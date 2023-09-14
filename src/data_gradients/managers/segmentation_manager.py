@@ -5,10 +5,10 @@ from torch.utils.data import DataLoader
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
-from data_gradients.dataset_adapters.segmentation_adapter import SegmentationDatasetAdapter
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterables.segmentation import SegmentationSampleIterable
+from data_gradients.sample_iterables.segmentation import SegmentationSampleProcessor
 from data_gradients.datasets import COCOSegmentationDataset, COCOFormatSegmentationDataset, VOCSegmentationDataset
+from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -37,6 +37,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         threshold_soft_labels: float = 0.5,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
+        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -65,44 +66,26 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
-        if not isinstance(train_data, SegmentationDatasetAdapter):
-            train_data = SegmentationDatasetAdapter(
-                data_iterable=train_data,
-                class_names=class_names,
-                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-                class_names_to_use=class_names_to_use,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=num_image_channels,
-                threshold_soft_labels=threshold_soft_labels,
-            )
-
-        if not isinstance(val_data, SegmentationDatasetAdapter):
-            val_data = SegmentationDatasetAdapter(
-                data_iterable=val_data,
-                class_names=class_names,
-                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
-                class_names_to_use=class_names_to_use,
-                n_classes=n_classes,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=num_image_channels,
-                threshold_soft_labels=threshold_soft_labels,
-            )
-
-        grouped_feature_extractors = get_grouped_feature_extractors(
-            default_config_name="segmentation",
-            config_path=config_path,
-            feature_extractors=feature_extractors,
+        sample_preprocessor = SegmentationSampleProcessor(
+            class_names=class_names,
+            n_classes=n_classes,
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+            class_names_to_use=class_names_to_use,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            num_image_channels=num_image_channels,
+            threshold_soft_labels=threshold_soft_labels,
+            image_format=image_format,
         )
 
-        train_sample_iterable = SegmentationSampleIterable(dataset=train_data, class_names=train_data.class_names, split="train")
-        val_sample_iterable = SegmentationSampleIterable(dataset=val_data, class_names=val_data.class_names, split="val")
+        grouped_feature_extractors = get_grouped_feature_extractors(
+            default_config_name="segmentation", config_path=config_path, feature_extractors=feature_extractors
+        )
 
         super().__init__(
-            train_data=train_sample_iterable,
-            val_data=val_sample_iterable,
+            train_data=train_data,
+            val_data=val_data,
+            sample_preprocessor=sample_preprocessor,
             summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
             batches_early_stop=batches_early_stop,

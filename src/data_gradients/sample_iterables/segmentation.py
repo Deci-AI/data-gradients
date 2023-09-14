@@ -1,36 +1,48 @@
-from typing import List, Iterable
+from typing import Iterable, List, Optional, Iterator, Callable
 import time
-import numpy as np
 
+import numpy as np
+import torch
+
+from data_gradients.config.data.typing import SupportedDataType
 from data_gradients.utils.data_classes import SegmentationSample
-from data_gradients.sample_iterables.base import BaseSampleIterable
+from data_gradients.sample_iterables.base import BaseSamplePreprocessor
 from data_gradients.sample_iterables.contours import get_contours
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 from data_gradients.dataset_adapters.segmentation_adapter import SegmentationDatasetAdapter
 
 
-class SegmentationSampleIterable(BaseSampleIterable):
+class SegmentationSampleProcessor(BaseSamplePreprocessor):
     def __init__(
         self,
-        dataset: SegmentationDatasetAdapter,
-        class_names: List[str],
-        split: str,
-        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
+        cache_filename: str,
+        class_names: Optional[List[str]],
+        n_classes: Optional[int],
+        images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]],
+        labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]],
+        class_names_to_use: List[str],
+        num_image_channels: int,
+        threshold_soft_labels: float,
+        image_format: Optional[ImageChannelFormat],
     ):
-        """
-        :param dataset: Dataset Adapter to iterate over.
-        :param class_names: List of all class names in the dataset. The index should represent the class_id.
-        :param split: Dataset split. ("train", "val")
-        :param image_format: Format of the images. ("RGB", "BGR", "GRAYSCALE", ...)
-        """
-        super().__init__(dataset=dataset)
-        self.dataset = dataset
-        self.class_names = class_names
-        self.split = split
-        self.image_format = image_format
+        self.adapter = SegmentationDatasetAdapter(
+            class_names=class_names,
+            n_classes=n_classes,
+            cache_filename=cache_filename,
+            class_names_to_use=class_names_to_use,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            n_image_channels=num_image_channels,
+            threshold_soft_labels=threshold_soft_labels,
+        )
 
-    def __iter__(self) -> Iterable[SegmentationSample]:
-        for images, labels in self.dataset:
+        self.class_names = class_names
+        self.image_format = image_format
+        super().__init__(config=self.adapter.data_config)
+
+    def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[SegmentationSample]:
+        for data in dataset:
+            images, labels = self.adapter.adapt(data)
             images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
             labels = np.uint8(labels.cpu().numpy())
 
@@ -42,10 +54,7 @@ class SegmentationSampleIterable(BaseSampleIterable):
                     mask=mask,
                     contours=contours,
                     class_names=self.class_names,
-                    split=self.split,
+                    split=split,
                     image_format=self.image_format,
                     sample_id=str(time.time()),
                 )
-
-    def __len__(self) -> int:
-        return len(self.dataset)

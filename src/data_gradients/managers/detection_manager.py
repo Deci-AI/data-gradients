@@ -7,9 +7,9 @@ from data_gradients.config.data.typing import SupportedDataType, FeatureExtracto
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.dataset_adapters.detection_adapter import DetectionDatasetAdapter
-from data_gradients.sample_iterables.detection import DetectionSampleIterable
+from data_gradients.sample_iterables.detection import DetectionSamplePreprocessor
 from data_gradients.datasets import COCOFormatDetectionDataset, VOCDetectionDataset, COCODetectionDataset
+from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -38,6 +38,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         n_image_channels: int = 3,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
+        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
     ):
         """
         Constructor of detection manager which controls the analyzer
@@ -67,46 +68,27 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
-        if not isinstance(train_data, DetectionDatasetAdapter):
-            train_data = DetectionDatasetAdapter(
-                data_iterable=train_data,
-                class_names=class_names,
-                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-                class_names_to_use=class_names_to_use,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                is_label_first=is_label_first,
-                bbox_format=bbox_format,
-                n_image_channels=n_image_channels,
-            )
-
-        if not isinstance(val_data, DetectionDatasetAdapter):
-            val_data = DetectionDatasetAdapter(
-                data_iterable=val_data,
-                class_names=class_names,
-                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
-                class_names_to_use=class_names_to_use,
-                n_classes=n_classes,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                is_label_first=is_label_first,
-                bbox_format=bbox_format,
-                n_image_channels=n_image_channels,
-            )
-
-        grouped_feature_extractors = get_grouped_feature_extractors(
-            default_config_name="detection",
-            config_path=config_path,
-            feature_extractors=feature_extractors,
+        sample_preprocessor = DetectionSamplePreprocessor(
+            class_names=class_names,
+            n_classes=n_classes,
+            cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
+            class_names_to_use=class_names_to_use,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            is_label_first=is_label_first,
+            bbox_format=bbox_format,
+            n_image_channels=n_image_channels,
+            image_format=image_format,
         )
 
-        train_sample_iterable = DetectionSampleIterable(dataset=train_data, class_names=train_data.class_names, split="train")
-        val_sample_iterable = DetectionSampleIterable(dataset=val_data, class_names=val_data.class_names, split="val")
+        grouped_feature_extractors = get_grouped_feature_extractors(
+            default_config_name="detection", config_path=config_path, feature_extractors=feature_extractors
+        )
 
         super().__init__(
-            train_data=train_sample_iterable,
-            val_data=val_sample_iterable,
+            train_data=train_data,
+            val_data=val_data,
+            sample_preprocessor=sample_preprocessor,
             summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
             batches_early_stop=batches_early_stop,

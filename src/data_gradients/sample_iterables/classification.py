@@ -1,39 +1,47 @@
-from typing import Iterable, List, Optional
-import numpy as np
+from typing import Iterable, List, Optional, Iterator, Callable
+import time
 
-from data_gradients.utils.data_classes import DetectionSample
-from data_gradients.sample_iterables.base import BaseSampleIterable
+import numpy as np
+import torch
+
+from data_gradients.config.data.typing import SupportedDataType
+from data_gradients.sample_iterables.base import BaseSamplePreprocessor
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat, ClassificationSample
 from data_gradients.dataset_adapters.classification_adapter import ClassificationDatasetAdapter
 
 
-class ClassificationSampleIterable(BaseSampleIterable):
+class ClassificationSamplePreprocessor(BaseSamplePreprocessor):
     def __init__(
         self,
-        dataset: ClassificationDatasetAdapter,
-        class_names: List[str],
+        cache_filename: str,
+        class_names: Optional[List[str]],
+        n_classes: Optional[int],
+        images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]],
+        labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]],
+        class_names_to_use: List[str],
         n_image_channels: int,
-        split: str,
-        image_format: Optional[ImageChannelFormat] = None,
+        image_format: Optional[ImageChannelFormat],
     ):
-        """
-        :param dataset: Dataset Adapter to iterate over.
-        :param class_names: List of all class names in the dataset. The index should represent the class_id.
-        :param n_image_channels: Number of image channels.
-        :param split: Dataset split. ("train", "val")
-        :param image_format: Format of the images. ("RGB", "BGR", "GRAYSCALE", ...)
-        """
-        super().__init__(dataset=dataset)
         if n_image_channels not in [1, 3]:
             raise ValueError(f"n_image_channels should be either 1 or 3, but got {n_image_channels}")
-        self.dataset = dataset
+
+        self.adapter = ClassificationDatasetAdapter(
+            class_names=class_names,
+            n_classes=n_classes,
+            cache_filename=cache_filename,
+            class_names_to_use=class_names_to_use,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            n_image_channels=n_image_channels,
+        )
         self.class_names = class_names
         self.n_image_channels = n_image_channels
-        self.split = split
         self.image_format = image_format
+        super().__init__(config=self.adapter.data_config)
 
-    def __iter__(self) -> Iterable[DetectionSample]:
-        for images, labels in self.dataset:
+    def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[ClassificationSample]:
+        for data in dataset:
+            images, labels = self.adapter.adapt(data)
             images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
             if self.image_format is None:
@@ -46,9 +54,8 @@ class ClassificationSampleIterable(BaseSampleIterable):
                     image=image,
                     class_id=class_id,
                     class_names=self.class_names,
-                    split=self.split,
+                    split=split,
                     image_format=self.image_format,
-                    sample_id=None,
+                    sample_id=str(time.time()),
                 )
-                sample.sample_id = str(id(sample))
                 yield sample

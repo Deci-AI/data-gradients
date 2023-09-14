@@ -1,4 +1,4 @@
-from typing import List, Optional, Iterable, Callable
+from typing import List, Optional, Callable
 
 import torch
 
@@ -12,7 +12,6 @@ from data_gradients.config.data.data_config import DetectionDataConfig
 class DetectionDatasetAdapter(BaseDatasetAdapter):
     """Wrap a detection dataset so that it would return standardized tensors.
 
-    :param data_iterable:       Iterable object that yields data points from the dataset.
     :param cache_filename:      The filename of the cache file.
     :param n_classes:           The number of classes.
     :param class_names:         List of class names.
@@ -27,7 +26,6 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
 
     def __init__(
         self,
-        data_iterable: Optional[Iterable[SupportedDataType]] = None,
         cache_filename: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
@@ -59,7 +57,6 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
             n_image_channels=n_image_channels,
         )
         super().__init__(
-            data_iterable=data_iterable,
             dataset_output_mapper=dataset_output_mapper,
             formatter=formatter,
             data_config=data_config,
