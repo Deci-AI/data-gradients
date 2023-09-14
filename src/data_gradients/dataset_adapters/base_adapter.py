@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List, Iterable, Tuple, Sequence
+from typing import List, Tuple
 
 import torch
 
@@ -7,7 +7,6 @@ from data_gradients.config.data.data_config import DataConfig
 
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.output_mapper.dataset_output_mapper import DatasetOutputMapper
-from data_gradients.utils.utils import IterableMapper, SequenceMapper
 from data_gradients.config.data.typing import SupportedDataType
 
 
@@ -56,14 +55,16 @@ class BaseDatasetAdapter(ABC):
         self.data_config.close()
 
     def adapt(self, data: SupportedDataType) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Iterate over the dataset and return a batch of images and labels."""
-        # data can be a batch or a sample
+        """Adapt an input data (Batch or Sample) into a standard format.
+
+        :param data:     Input data to be adapted.
+                            - Can represent a batch or a sample.
+                            - Can be structured in a wide range of formats. (list, dict, ...)
+                            - Can be formatted in a wide range of formats. (image: HWC, CHW, ... - label: label_cxcywh, xyxy_label, ...)
+        :return:         Tuple of images and labels.
+                            - Image will be formatted to (BS, H, W, C) - BS = 1 if original data is a single sample
+                            - Label will be formatted to a standard format that depends on the task.
+        """
         images, labels = self.dataset_output_mapper.extract(data)
         images, labels = self.formatter.format(images, labels)
         return images, labels
-
-    def adapt_iterable(self, dataset: Iterable[SupportedDataType]) -> Iterable[Tuple[torch.Tensor, torch.Tensor]]:
-        """Wrap the iterable to apply the adapter transformation on each element of the dataset.
-        Note: If the iterable is a sequence (i.e. iterable with `__len__`), the output wrapper will remain a sequence.
-        """
-        return SequenceMapper(self.adapt, dataset) if isinstance(dataset, Sequence) else IterableMapper(self.adapt, dataset)

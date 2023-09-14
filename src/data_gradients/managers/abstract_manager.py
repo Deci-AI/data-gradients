@@ -39,11 +39,11 @@ class AnalysisManagerAbstract(abc.ABC):
         remove_plots_after_report: Optional[bool] = True,
     ):
         """
-        :param train_data:          Iterator object contains images and labels of the training dataset
-        :param val_data:            Iterator object contains images and labels of the validation dataset
+        :param train_data:                  Iterable object contains images and labels of the training dataset
+        :param val_data:                    Iterable object contains images and labels of the validation dataset
         :param grouped_feature_extractors:  List of feature extractors to be used
-        :param batches_early_stop:  Maximum number of batches to run in training (early stop)
-        :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
+        :param batches_early_stop:          Maximum number of batches to run in training (early stop)
+        :param remove_plots_after_report:   Delete the plots from the report directory after the report is generated. By default, True
         """
 
         self.renderer = SeabornRenderer()

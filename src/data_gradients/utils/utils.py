@@ -2,42 +2,7 @@ import os
 import re
 import shutil
 import json
-from typing import Iterable, Callable, TypeVar, Iterator, Dict, Mapping, List, Sequence
-
-T = TypeVar("T")  # Input type
-U = TypeVar("U")  # Output type
-
-
-class IterableMapper(Iterable[U]):
-    """
-    Utility that maps a function over an iterable lazily and supports
-    multiple iterations over the results without re-evaluation.
-    """
-
-    def __init__(self, _func: Callable[[T], U], _iterable: Iterable[T]):
-        """
-        :param _func: The function to map over the iterable.
-        :param _iterable: The iterable to be processed.
-        """
-        self._func = _func
-        self._iterable = _iterable
-
-    def __iter__(self) -> Iterator[U]:
-        """
-        Get an iterator that applies the function on-the-fly over the iterable.
-
-        :return: An iterator over the processed items.
-        """
-        for item in self._iterable:
-            yield self._func(item)
-
-
-class SequenceMapper(IterableMapper):
-    def __init__(self, _func: Callable[[T], U], _iterable: Sequence[T]):
-        super().__init__(_func, _iterable)
-
-    def __len__(self) -> int:
-        return len(self._iterable)  # noqa
+from typing import Dict, Mapping, List
 
 
 def write_json(path: str, json_dict: Dict):
