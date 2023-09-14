@@ -3,9 +3,9 @@ from typing import Optional, List, Tuple
 import torch
 from torch import Tensor
 
-from data_gradients.config.data.questions import ask_user
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.utils import check_all_integers, to_one_hot
+from data_gradients.config.data.data_config import SegmentationDataConfig
 from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError, check_images_shape, ensure_channel_first, drop_nan
 
 
@@ -16,6 +16,7 @@ class SegmentationBatchFormatter(BatchFormatter):
 
     def __init__(
         self,
+        data_config: SegmentationDataConfig,
         class_names: List[str],
         class_names_to_use: List[str],
         n_image_channels: int,
@@ -39,7 +40,7 @@ class SegmentationBatchFormatter(BatchFormatter):
 
         self.threshold_value = threshold_value
         self.is_input_soft_label = None
-        self.is_batch = None
+        self.data_config = data_config
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for segmentation.
@@ -51,25 +52,7 @@ class SegmentationBatchFormatter(BatchFormatter):
             - labels: Batch of labels already formatted into (BS, N, H, W)
         """
 
-        if self.is_batch is None:
-            # if less any dim is 4, we know it's a batch
-            if images.ndim == 4 or labels.ndim == 4:
-                self.is_batch = True
-            # If image or mask only includes 2 dims, we can guess it's a single sample
-            elif images.ndim == 2 or labels.ndim == 2:
-                self.is_batch = False
-            # Otherwise, we need to ask the user
-            else:
-                is_batch_descriptions = {"Batch Data": True, "Single Image Data": False}
-                selected_option = ask_user(
-                    main_question=(
-                        f"Do your tensors represent a batch or a single image data?\n    - Image shape: {images.shape}\n    - Mask shape:  {labels.shape}"
-                    ),
-                    options=list(is_batch_descriptions.keys()),
-                )
-                self.is_batch = is_batch_descriptions[selected_option]
-
-        if not self.is_batch:
+        if not self.check_is_batch(images=images, labels=labels):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
@@ -100,6 +83,20 @@ class SegmentationBatchFormatter(BatchFormatter):
             images = images.to(torch.uint8)
 
         return images, labels
+
+    def check_is_batch(self, images: Tensor, labels: Tensor) -> bool:
+        if images.ndim == 4 or labels.ndim == 4:
+            # if less any dim is 4, we know it's a batch
+            self.data_config.is_batch = True
+            return self.data_config.is_batch
+        elif images.ndim == 2 or labels.ndim == 2:
+            # If image or mask only includes 2 dims, we can guess it's a single sample
+            self.data_config.is_batch = False
+            return self.data_config.is_batch
+        else:
+            # Otherwise, we need to ask the user
+            hint = f"    - Image shape: {images.shape}\n    - Mask shape:  {labels.shape}"
+            return self.data_config.get_is_batch(hint=hint)
 
     @staticmethod
     def ensure_hard_labels(labels: Tensor, n_classes: int, threshold_value: float) -> Tensor:

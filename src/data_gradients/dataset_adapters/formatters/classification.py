@@ -47,6 +47,10 @@ class ClassificationBatchFormatter(BatchFormatter):
             - labels: Batch of targets (BS)
         """
 
+        if not self.check_is_batch(images=images, labels=labels):
+            images = images.unsqueeze(0)
+            labels = labels.unsqueeze(0)
+
         images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
         images = check_images_shape(images, n_image_channels=self.n_image_channels)
         labels = self.ensure_labels_shape(images=images, labels=labels)
@@ -67,6 +71,17 @@ class ClassificationBatchFormatter(BatchFormatter):
             )
 
         return images, labels
+
+    def check_is_batch(self, images: Tensor, labels: Tensor) -> bool:
+        if images.ndim == 4:
+            self.data_config.is_batch = True
+            return self.data_config.is_batch
+        elif images.ndim == 2 or labels.ndim == 1:
+            self.data_config.is_batch = False
+            return self.data_config.is_batch
+        else:
+            hint = f"    - Image shape: {images.shape}\n    - Label shape:  {labels.shape}"
+            return self.data_config.get_is_batch(hint=hint)
 
     @staticmethod
     def ensure_labels_shape(labels: Tensor, images: Tensor) -> Tensor:
