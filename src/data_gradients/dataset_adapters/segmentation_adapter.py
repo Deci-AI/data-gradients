@@ -48,6 +48,7 @@ class SegmentationDatasetAdapter(BaseDatasetAdapter):
 
         dataset_output_mapper = DatasetOutputMapper(data_config=data_config)
         formatter = SegmentationBatchFormatter(
+            data_config=data_config,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
             n_image_channels=n_image_channels,
