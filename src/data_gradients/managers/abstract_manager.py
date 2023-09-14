@@ -51,16 +51,16 @@ class AnalysisManagerAbstract(abc.ABC):
         self.config = sample_preprocessor.config
 
         # DATA
+        if batches_early_stop:
+            logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
+        self.batches_early_stop = batches_early_stop
+
         val_data = val_data or iter([])
         self.train_size = len(train_data) if isinstance(train_data, Sized) else None
         self.val_size = len(val_data) if isinstance(val_data, Sized) else None
 
         self.train_samples_iterator = sample_preprocessor.preprocess_samples(train_data, split="train")
         self.val_samples_iterator = sample_preprocessor.preprocess_samples(val_data, split="val")
-
-        if batches_early_stop:
-            logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
-        self.batches_early_stop = batches_early_stop
 
         # FEATURES
         self.grouped_feature_extractors = grouped_feature_extractors

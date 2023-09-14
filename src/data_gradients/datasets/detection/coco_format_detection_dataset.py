@@ -97,6 +97,4 @@ class COCOFormatDetectionDataset:
 
         labels = np.array(labels, dtype=np.float32).reshape(-1, 5)
 
-        _labels = np.zeros((400, 5))
-        _labels[: labels.shape[0]] = labels
-        return image, _labels
+        return image, labels

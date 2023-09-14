@@ -57,9 +57,7 @@ class BaseImageLabelDirectoryDataset(Dataset, ABC):
         image_path, labels_path = self.image_label_tuples[index]
         image = self.load_image(path=image_path)
         labels = self.load_labels(path=labels_path)
-        _labels = np.zeros((400, 5))
-        _labels[: labels.shape[0]] = labels
-        return image, _labels
+        return image, labels
 
     def __iter__(self) -> Tuple[np.ndarray, np.ndarray]:
         for i in range(len(self)):

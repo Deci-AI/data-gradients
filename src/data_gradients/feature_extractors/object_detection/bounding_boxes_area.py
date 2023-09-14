@@ -13,7 +13,7 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class DetectionBoundingBoxArea(AbstractFeatureExtractor):
-    """Compute the Bounding box area."""
+    """Feature Extractor to compute the area covered Bounding Boxes."""
 
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
