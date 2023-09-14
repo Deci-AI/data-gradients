@@ -22,8 +22,9 @@ report_sections:
 
 ### 2. Available Features
 
-Please refer to the default configuration files to explore the available features and their names.
-* [Object Detection features](../src/data_gradients/config/detection.yaml) - located in `src/data_gradients/config/detection.yaml` 
+Please refer to the default configuration files to explore the available features and their names. <br/>
+
+* [Object Detection features](../src/data_gradients/config/detection.yaml) - located in `src/data_gradients/config/detection.yaml`
 * [Semantic Segmentation features](../src/data_gradients/config/segmentation.yaml) - located in `src/data_gradients/config/segmentation.yaml`
 
 For a more in-depth explanation of each feature, please check out [this page](feature_description.md).
