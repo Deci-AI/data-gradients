@@ -29,4 +29,4 @@ class BaseSampleIterable(ABC):
         return self.dataset.data_config
 
     def close(self):
-        self.config.close()
+        return self.config.close()
