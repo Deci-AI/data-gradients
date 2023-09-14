@@ -187,10 +187,10 @@ class DetectionBatchFormatter(BatchFormatter):
             filtered_bbox = filtered_bbox[non_zero_indices]  # Shape [?, 5]
 
             # Padding the filtered_bbox to match the original size
-            pad_size = len(sample_bboxes) - len(filtered_bbox)
-            if pad_size > 0:
-                padding = torch.zeros(pad_size, 5)
-                filtered_bbox = torch.cat([filtered_bbox, padding], dim=0)
+            if len(filtered_bbox) < len(sample_bboxes):
+                padded_bbox = torch.zeros_like(sample_bboxes)
+                padded_bbox[: len(filtered_bbox)] = filtered_bbox
+                filtered_bbox = padded_bbox
 
             filtered_bbox_tensors.append(filtered_bbox.unsqueeze(0))
 
