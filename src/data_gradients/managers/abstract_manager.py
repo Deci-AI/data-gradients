@@ -15,7 +15,7 @@ from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterables.base import BaseSamplePreprocessor
+from data_gradients.sample_preprocessor.base import BaseSamplePreprocessor
 
 logging.basicConfig(level=logging.INFO)
 

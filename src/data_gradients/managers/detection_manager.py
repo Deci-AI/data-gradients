@@ -7,7 +7,7 @@ from data_gradients.config.data.typing import SupportedDataType, FeatureExtracto
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterables.detection import DetectionSamplePreprocessor
+from data_gradients.sample_preprocessor.detection import DetectionSamplePreprocessor
 from data_gradients.datasets import COCOFormatDetectionDataset, VOCDetectionDataset, COCODetectionDataset
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
