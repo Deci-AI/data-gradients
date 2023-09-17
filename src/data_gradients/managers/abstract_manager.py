@@ -78,21 +78,26 @@ class AnalysisManagerAbstract(abc.ABC):
         Method finish it work after both train & val iterables are exhausted.
         """
 
-        print(
-            f"  - Executing analysis with: \n"
-            f"  - batches_early_stop: {self.batches_early_stop} \n"
-            f"  - len(train_data): {self.train_size} \n"
-            f"  - len(val_data): {self.val_size} \n"
-            f"  - log directory: {self.summary_writer.log_dir} \n"
-            f"  - Archive directory: {self.summary_writer.archive_dir} \n"
-            f"  - feature extractor list: {self.grouped_feature_extractors}"
-        )
+        print("[Configuration]")
+        print(f"  • batches_early_stop    : {self.batches_early_stop}")
+        print(f"  • len(train_data)       : {self.train_size}")
+        print(f"  • len(val_data)         : {self.val_size}")
+        print(f"  • log directory         : {self.summary_writer.log_dir}")
+        print(f"  • Archive directory     : {self.summary_writer.archive_dir}")
+        print()
+        print("[Feature Extractors Used]")
+        for feature_category, extractors in self.grouped_feature_extractors.items():
+            print(f"■ {feature_category}:")
+            for extractor in extractors:
+                print(f"    • {extractor}")
+        print()
 
         print_in_box(
             "To better understand how to tackle the data issues highlighted in this report, explore our comprehensive course on analyzing "
             "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0"
         )
 
+        print(flush=True)  # `flush=True` ensures that all the print statements are printed before adding tqdm. Otherwise, TQDM shows first.
         datasets_tqdm = tqdm(
             zip_longest(self.train_iter, self.val_iter, fillvalue=None),
             desc="Analyzing... ",

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from data_gradients.common.utils import InitAwareRepr
 from data_gradients.utils.data_classes.data_samples import ImageSample
 from data_gradients.visualize.plot_options import CommonPlotOptions
 
@@ -20,7 +21,7 @@ class Feature:
     json: Union[dict, list]
 
 
-class AbstractFeatureExtractor(ABC):
+class AbstractFeatureExtractor(InitAwareRepr, ABC):
     @abstractmethod
     def update(self, sample: ImageSample):
         """Accumulate information about samples"""
@@ -52,6 +53,3 @@ class AbstractFeatureExtractor(ABC):
          to the feature in case some information is needed.
         """
         pass
-
-    def __repr__(self):
-        return self.__class__.__name__
