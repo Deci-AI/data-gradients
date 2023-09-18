@@ -4,7 +4,7 @@ import logging
 import platformdirs
 import torch
 from abc import ABC
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Optional, Callable, Union
 
 import data_gradients
@@ -18,6 +18,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def get_default_cache_dir() -> str:
+    return platformdirs.user_cache_dir("DataGradients", "Deci")
+
+
 @dataclass
 class DataConfig(ABC):
     """Data class for handling Dataset/Dataloader configuration.
@@ -28,39 +32,43 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
-    cache_filename: Optional[str] = None
-    cache_dir: Optional[str] = None
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     is_batch: Union[None, bool] = None
 
-    DEFAULT_CACHE_DIR: str = field(default_factory=lambda: platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+    cache_path: Optional[str] = None
 
     def __post_init__(self):
-        self.cache_dir = self.cache_dir if self.cache_dir is not None else self.DEFAULT_CACHE_DIR
-
         # Once the object is initialized, we check if the cache is activated or not.
-        if self.cache_filename is not None:
-            cache_path = os.path.join(self.cache_dir, self.cache_filename)
-            logger.info(
-                f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                f'Caching to "{cache_path}"'
-            )
-            self._fill_missing_params_with_cache(cache_path)
+        if self.cache_path is not None and os.path.isfile(self.cache_path):
+            self.update_from_cache_file()
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
+    def update_from_cache_file(self):
+        """Update the values that are not set yet, using the cache file."""
+        if self.cache_path is not None and os.path.isfile(self.cache_path):
+            self._fill_missing_params_with_cache(self.cache_path)
+
+    def dump_cache_file(self):
+        """Save the current state to the cache file."""
+        if self.cache_path is not None:
+            self.write_to_json(self.cache_path)
+
+    def get_caching_info(self) -> str:
+        """Get information about the status of the caching."""
+        if self.cache_path is None:
+            return f"`{self.__class__.__name__}` cache is not enabled because `cache_path={self.cache_path}` was not set."
+        return f"`{self.__class__.__name__}` cache is set to `cache_path={self.cache_path}`."
+
     @classmethod
-    def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
+    def load_from_json(cls, cache_path: str) -> "DataConfig":
         """Load an instance of DataConfig directly from a cache file.
-        :param filename: Name of the cache file. This should include ".json" extension.
-        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param cache_path: Path to the cache file. This should include ".json" extension.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = dir_path or cls.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, filename)
         try:
-            return cls(**cls._load_json_dict(path=path))
+            return cls(**cls._load_json_dict(path=cache_path))
         except TypeError as e:
             raise TypeError(f"{e}\n\t => Could not load `{cls.__name__}` from cache.") from e
 
@@ -80,18 +88,15 @@ class DataConfig(ABC):
             )
             return {}
 
-    def write_to_json(self, filename: str, dir_path: Optional[str] = None):
+    def write_to_json(self, cache_path: str):
         """Save the serializable representation of the class to a .json file.
-        :param filename: Name of the cache file. This should include ".json" extension.
-        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param cache_path: Full path to the cache file. This should end with ".json" extension
         """
-        dir_path = dir_path or self.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, filename)
-        if not path.endswith(".json"):
-            raise ValueError(f"`{path}` should end with `.json`")
+        if not cache_path.endswith(".json"):
+            raise ValueError(f"`{cache_path}` should end with `.json`")
 
         json_dict = {"metadata": {"__version__": data_gradients.__version__}, "attributes": self.to_json()}
-        write_json(json_dict=json_dict, path=path)
+        write_json(json_dict=json_dict, path=cache_path)
 
     def to_json(self) -> JSONDict:
         """Convert the dataclass into a serializable representation that can be saved and loaded safely.
@@ -104,14 +109,11 @@ class DataConfig(ABC):
         }
         return json_dict
 
-    def _fill_missing_params_with_cache(self, cache_filename: str, cache_dir_path: Optional[str] = None):
+    def _fill_missing_params_with_cache(self, path: str):
         """Load an instance of DataConfig directly from a cache file.
-        :param cache_filename: Name of the cache file. This should include ".json" extension.
-        :param cache_dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param path: Full path of the cache file. This should end with ".json" extension.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = cache_dir_path or self.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, cache_filename)
         cache_dict = self._load_json_dict(path=path)
         if cache_dict:
             self._fill_missing_params(json_dict=cache_dict)
@@ -150,12 +152,6 @@ class DataConfig(ABC):
             )
             self.is_batch: bool = ask_question(question=question, hint=hint)
         return self.is_batch
-
-    def close(self):
-        """Run any action required to cleanly close the object. May include saving cache."""
-        if self.cache_filename is not None:
-            logger.info(f"Saving cache to {self.cache_filename}")
-            self.write_to_json(self.cache_filename)
 
 
 @dataclass

@@ -191,17 +191,6 @@ class AnalysisManagerAbstract(abc.ABC):
             for image_created in images_created:
                 os.remove(image_created)
 
-    def close(self):
-        """Safe logging closing"""
-        self.train_data.close()
-        self.val_data.close()
-        print(f'{"*" * 100}')
-        print("We have finished evaluating your dataset!")
-        print()
-        print("The results can be seen in:")
-        print(f"    - {self.summary_writer.log_dir}")
-        print(f"    - {self.summary_writer.archive_dir}")
-
     def run(self):
         """
         Run method activating build, execute, post process and close the manager.
@@ -217,7 +206,37 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.info("For HARD Termination - Stop the process again")
             interrupted = e is not None
         self.post_process(interrupted=interrupted)
-        self.close()
+
+        self.train_data.config.dump_cache_file()
+        self.val_data.config.dump_cache_file()
+
+        self.print_summary()
+
+    def print_summary(self):
+        print()
+        print(f'{"=" * 100}')
+        print("Your dataset evaluation has been completed!")
+        print()
+        print(f'{"-" * 100}')
+        print("Training Configuration...")
+        print(self.train_data.config.get_caching_info())
+        print()
+        print("Validation Configuration...")
+        print(self.val_data.config.get_caching_info())
+        print()
+        print(f'{"-" * 100}')
+        print("Report Location:")
+        print("    - Temporary Folder (will be overwritten next run):")
+        print(f"        └─ {self.summary_writer.log_dir}")
+        print(f"                ├─ {os.path.basename(self.summary_writer.report_archive_path)}")
+        print(f"                └─ {os.path.basename(self.summary_writer.summary_archive_path)}")
+        print("    - Archive Folder:")
+        print(f"        └─ {self.summary_writer.archive_dir}")
+        print(f"                ├─ {os.path.basename(self.summary_writer.report_archive_path)}")
+        print(f"                └─ {os.path.basename(self.summary_writer.summary_archive_path)}")
+        print("")
+        print(f'{"=" * 100}')
+        print("Seen a glitch? Have a suggestion? Visit https://github.com/Deci-AI/data-gradients !")
 
     @property
     def n_batches(self) -> Optional[int]:

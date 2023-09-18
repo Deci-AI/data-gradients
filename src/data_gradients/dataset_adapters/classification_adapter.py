@@ -12,7 +12,7 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
     """Wrap a classification dataset so that it would return standardized tensors.
 
     :param data_iterable:       Iterable object that yields data points from the dataset.
-    :param cache_filename:      The filename of the cache file.
+    :param cache_path:          The filename of the cache file.
     :param n_classes:           The number of classes.
     :param class_names:         List of class names.
     :param class_names_to_use:  List of class names to use.
@@ -25,7 +25,7 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
     def __init__(
         self,
         data_iterable: Iterable[SupportedDataType],
-        cache_filename: Optional[str] = None,
+        cache_path: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
@@ -41,7 +41,7 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
 
         if data_config is None:
             data_config = ClassificationDataConfig(
-                cache_filename=cache_filename,
+                cache_path=cache_path,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
             )
