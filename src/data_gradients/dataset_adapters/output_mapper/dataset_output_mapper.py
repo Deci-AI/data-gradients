@@ -88,5 +88,7 @@ class DatasetOutputMapper:
             return torch.from_numpy(tensor)
         elif isinstance(tensor, PIL.Image.Image):
             return transforms.ToTensor()(tensor)
+        elif np.isscalar(tensor):
+            return torch.tensor(tensor)
         else:
             return tensor
