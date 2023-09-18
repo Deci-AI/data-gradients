@@ -15,7 +15,7 @@ from data_gradients.dataset_adapters.segmentation_adapter import SegmentationDat
 class SegmentationSampleProcessor(BaseSamplePreprocessor):
     def __init__(
         self,
-        cache_filename: str,
+        cache_path: str,
         class_names: Optional[List[str]],
         n_classes: Optional[int],
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]],
@@ -28,7 +28,7 @@ class SegmentationSampleProcessor(BaseSamplePreprocessor):
         self.adapter = SegmentationDatasetAdapter(
             class_names=class_names,
             n_classes=n_classes,
-            cache_filename=cache_filename,
+            cache_path=cache_path,
             class_names_to_use=class_names_to_use,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
