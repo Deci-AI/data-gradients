@@ -239,14 +239,25 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Seen a glitch? Have a suggestion? Visit https://github.com/Deci-AI/data-gradients !")
 
     @property
-    def n_batches(self) -> Optional[int]:
-        """Number of batches to analyze if available, None otherwise."""
-        if self.train_size is None or self.val_size is None:
-            return self.batches_early_stop
+    def n_batches(self):
+        # If either train_size or val_size is None (indicating we don't know its size),
+        # we will prioritize the value we know. If both are unknown, we cannot determine the max.
+        if self.train_size is None and self.val_size is None:
+            # If batches_early_stop is set, return that. Otherwise, it's undeterminable.
+            return self.batches_early_stop if self.batches_early_stop is not None else float("inf")
 
-        n_batches_available = max(self.train_size, self.val_size)
-        n_batches_early_stop = self.batches_early_stop or float("inf")
-        return min(n_batches_early_stop, n_batches_available)
+        if self.train_size is None:
+            max_size = self.val_size
+        elif self.val_size is None:
+            max_size = self.train_size
+        else:
+            max_size = max(self.train_size, self.val_size)
+
+        # If batches_early_stop is set, take the minimum of batches_early_stop and the max_size
+        # Otherwise, return max_size
+        if self.batches_early_stop is not None:
+            return min(max_size, self.batches_early_stop)
+        return max_size
 
     def _create_samples_iterated_warning(self) -> str:
         if self.train_size is None or self._train_batch_size is None:
