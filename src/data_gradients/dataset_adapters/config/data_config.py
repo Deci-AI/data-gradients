@@ -8,9 +8,9 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Callable, Union
 
 import data_gradients
-from data_gradients.config.data.questions import Question, ask_question, text_to_yellow
-from data_gradients.config.data.caching_utils import TensorExtractorResolver, XYXYConverterResolver
-from data_gradients.config.data.typing import SupportedDataType, JSONDict
+from data_gradients.dataset_adapters.config.questions import Question, ask_question, text_to_yellow
+from data_gradients.dataset_adapters.config.caching_utils import TensorExtractorResolver, XYXYConverterResolver
+from data_gradients.dataset_adapters.config.typing import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
 

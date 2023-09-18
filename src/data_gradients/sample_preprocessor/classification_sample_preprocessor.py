@@ -4,7 +4,7 @@ import time
 import numpy as np
 import torch
 
-from data_gradients.config.data.typing import SupportedDataType
+from data_gradients.dataset_adapters.config.typing import SupportedDataType
 from data_gradients.sample_preprocessor.base_sample_preprocessor import BaseSamplePreprocessor
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat, ClassificationSample
 from data_gradients.dataset_adapters.classification_adapter import ClassificationDatasetAdapter
