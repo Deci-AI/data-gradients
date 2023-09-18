@@ -12,7 +12,7 @@ from data_gradients.config.data.data_config import DetectionDataConfig
 class DetectionDatasetAdapter(BaseDatasetAdapter):
     """Wrap a detection dataset so that it would return standardized tensors.
 
-    :param cache_filename:      The filename of the cache file.
+    :param cache_path:          The filename of the cache file.
     :param n_classes:           The number of classes.
     :param class_names:         List of class names.
     :param class_names_to_use:  List of class names to use.
@@ -26,7 +26,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
 
     def __init__(
         self,
-        cache_filename: Optional[str] = None,
+        cache_path: Optional[str] = None,
         n_classes: Optional[int] = None,
         class_names: Optional[List[str]] = None,
         class_names_to_use: Optional[List[str]] = None,
@@ -42,7 +42,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
 
         if data_config is None:
             data_config = DetectionDataConfig(
-                cache_filename=cache_filename,
+                cache_path=cache_path,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
                 is_label_first=is_label_first,

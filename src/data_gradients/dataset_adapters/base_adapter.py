@@ -50,10 +50,6 @@ class BaseDatasetAdapter(ABC):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         return class_names_to_use or class_names
 
-    def close(self):
-        """Run any action required to cleanly close the object. May include saving cache."""
-        self.data_config.close()
-
     def adapt(self, data: SupportedDataType) -> Tuple[torch.Tensor, torch.Tensor]:
         """Adapt an input data (Batch or Sample) into a standard format.
 
