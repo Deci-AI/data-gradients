@@ -22,7 +22,7 @@ class VOCSegmentationDatasetTest(unittest.TestCase):
 
     def test_coco_dataset(self):
         da = SegmentationAnalysisManager(
-            report_title="Testing Data-Gradients NEW",
+            report_title="TEST_COCO_DATASET_SEGMENTATION",
             train_data=self.train_set_2007,
             val_data=self.val_set_2007,
             class_names=VOCSegmentationDataset.CLASS_NAMES,
@@ -33,9 +33,8 @@ class VOCSegmentationDatasetTest(unittest.TestCase):
         da.run()
 
     def test_coco_dataset_batch(self):
-
         da = SegmentationAnalysisManager(
-            report_title="Testing Data-Gradients NEW",
+            report_title="TEST_COCO_DATALOADER_SEGMENTATION",
             train_data=DataLoader(self.train_set_2007, batch_size=1),
             val_data=DataLoader(self.val_set_2007, batch_size=1),
             class_names=VOCSegmentationDataset.CLASS_NAMES,

@@ -209,7 +209,7 @@ class AnalysisManagerAbstract(abc.ABC):
             interrupted = e is not None
         self.post_process(interrupted=interrupted)
 
-        self.config.config.dump_cache_file()
+        self.config.dump_cache_file()
 
         self.print_summary()
 
@@ -220,10 +220,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print()
         print(f'{"-" * 100}')
         print("Training Configuration...")
-        print(self.train_data.config.get_caching_info())
-        print()
-        print("Validation Configuration...")
-        print(self.val_data.config.get_caching_info())
+        print(self.config.get_caching_info())
         print()
         print(f'{"-" * 100}')
         print("Report Location:")
