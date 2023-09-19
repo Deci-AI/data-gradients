@@ -2,9 +2,10 @@
 In this tutorial, we will explore how to utilize the ImageDuplicates class to identify duplicate images within a specified directory containing images. The ImageDuplicates class is a feature extractor that employs Difference Hashing to detect duplicate images based on their hash codes. We will guide you through the process of initializing and using this class to find duplicates within the COCO2017 detection dataset and examine the results.
 
 
-## Step 1: Adding the ImageDuplicates to the Image Features Report Section Features List
+## 1. Adding the ImageDuplicates to the Image Features Report Section Features List
 Just like any other feature extractor, you need to include it in your feature list within the appropriate report section.
 Since finding duplicates is not task-specific, it belongs in the "Image Features" report section. In your detection.yaml configuration file, add it as follows:
+Note that this feature is not in the default features since it requires explicit train_image_dir, while other features don't require to change the .yaml.
 
 ````yaml
 report_sections:
@@ -26,12 +27,13 @@ Please note that train_image_dir and valid_image_dir should point to the directo
 respectively. It's essential to understand that this feature extractor does not account for any internal dataset modifications, such as image alterations or exclusions.
 It operates solely on the standard loading of images within those directories without preprocessing.
 
-# Step 2: Running Analysis
+## 2. Running Analysis
 
 Now that we have added ImageDuplicates to our feature list, running the analysis is straightforward. Here's an example:
 ````python
 
-# Note: This example will require you to install the super-gradients package
+# Note: This example will require you to install the super-gradients package.
+# Nevertheless, by replacing the data objects from super-gradients it would work with any dataset.
 from super_gradients.training.dataloaders.dataloaders import coco2017_train, coco2017_val
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
@@ -105,7 +107,7 @@ The results can be seen in:
     - /path/to/data-gradients/examples/logs/COCO2017DGAnalysis/archive_20230905-141929
 ```
 
-#Step 3: Examine Results
+## 3. Examine Results
 
 After completing Step 2, your Report.pdf can be found in ```/path/to/data-gradients/examples/logs/COCO2017DGAnalysis```:
 
@@ -162,5 +164,23 @@ Lastly, let's explore the intersection of the train and validation sets:
 ```
 
 As stated in the report, we found 2 pairs present in the intersection.
+
+Opening the above file paths, we indeed see we have duplicates between our train data and validation data:
+
+`/data/coco/images/train2017/000000080010.jpg`:
+
+![subsection](assets/000000080010.jpg)
+
+`/data/coco/images/val2017/000000140556.jpg`:
+![subsection](assets/000000080010.jpg)
+
+`/data/coco/images/train2017/000000535889.jpg`:
+
+![subsection](assets/000000535889.jpg)
+
+`/data/coco/images/val2017/000000465129.jpg`:
+![subsection](assets/000000465129.jpg)
+
+
 
 This concludes our tutorial on using the ImageDuplicates feature extractor.
