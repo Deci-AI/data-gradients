@@ -27,6 +27,3 @@ class BaseSampleIterable(ABC):
     @property
     def config(self) -> DataConfig:
         return self.dataset.data_config
-
-    def close(self):
-        self.config.close()
