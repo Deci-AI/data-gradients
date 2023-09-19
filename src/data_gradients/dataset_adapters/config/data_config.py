@@ -109,6 +109,11 @@ class DataConfig(ABC):
         }
         return json_dict
 
+    @property
+    def is_completely_initialized(self) -> bool:
+        """Check if all the attributes are set or not."""
+        return all(v is not None for v in self.to_json().values())
+
     def _fill_missing_params_with_cache(self, path: str):
         """Load an instance of DataConfig directly from a cache file.
         :param path: Full path of the cache file. This should end with ".json" extension.
