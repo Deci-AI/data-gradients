@@ -33,6 +33,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        is_batch: Optional[bool] = None,
         n_image_channels: int = 3,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
@@ -75,6 +76,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
             class_names_to_use=class_names_to_use,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
+            is_batch=is_batch,
             n_image_channels=n_image_channels,
             image_format=image_format,
         )

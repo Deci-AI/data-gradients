@@ -29,6 +29,7 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
         class_names_to_use: Optional[List[str]] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        is_batch: Optional[bool] = None,
         n_image_channels: int = 3,
         data_config: Optional[ClassificationDataConfig] = None,
     ):
@@ -40,6 +41,7 @@ class ClassificationDatasetAdapter(BaseDatasetAdapter):
                 cache_path=cache_path,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
+                is_batch=is_batch,
             )
 
         dataset_output_mapper = DatasetOutputMapper(data_config=data_config)

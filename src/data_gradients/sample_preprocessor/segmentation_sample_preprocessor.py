@@ -20,6 +20,7 @@ class SegmentationSampleProcessor(BaseSamplePreprocessor):
         n_classes: Optional[int],
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]],
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]],
+        is_batch: Optional[bool],
         class_names_to_use: List[str],
         num_image_channels: int,
         threshold_soft_labels: float,
@@ -32,6 +33,7 @@ class SegmentationSampleProcessor(BaseSamplePreprocessor):
             class_names_to_use=class_names_to_use,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
+            is_batch=is_batch,
             n_image_channels=num_image_channels,
             threshold_soft_labels=threshold_soft_labels,
         )

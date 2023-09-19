@@ -32,6 +32,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
         class_names_to_use: Optional[List[str]] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        is_batch: Optional[bool] = None,
         is_label_first: Optional[bool] = None,
         bbox_format: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
         n_image_channels: int = 3,
@@ -45,6 +46,7 @@ class DetectionDatasetAdapter(BaseDatasetAdapter):
                 cache_path=cache_path,
                 images_extractor=images_extractor,
                 labels_extractor=labels_extractor,
+                is_batch=is_batch,
                 is_label_first=is_label_first,
                 xyxy_converter=bbox_format,
             )
