@@ -7,9 +7,25 @@ from data_gradients.dataset_adapters.config.data_config import DataConfig
 
 
 class BaseSamplePreprocessor(ABC):
+    """Base class responsible for pre-processing dataset/dataloader output into a known sample format.
+
+    This class it the connector between users data and the feature extracting processes as it ensures that
+    all the data passed to these feature extractor are of the same known format.
+
+    :attr config: Configuration of the data adapter.
+    """
+
     def __init__(self, config: DataConfig):
+        """
+        :param config: Configuration of the data adapter.
+        """
         self.config = config
 
     @abstractmethod
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[ImageSample]:
+        """Pre-process the output of a dataset/dataloader into a known sample format.
+        :param dataset: Dataset/dataloader to be processed.
+        :param split:   Split of the dataset/dataloader. ("train", "val", ...)
+        :returns:       Iterator yielding the processed samples of the dataset/dataloader one by one.
+        """
         ...
