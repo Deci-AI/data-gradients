@@ -36,20 +36,19 @@ from super_gradients.training.dataloaders.dataloaders import coco2017_train, coc
 from data_gradients.managers.detection_manager import DetectionAnalysisManager
 
 
-if __name__ == "__main__":
 
-    train_loader = coco2017_train(dataset_params={"data_dir":"/path/to/coco/"})
-    val_loader = coco2017_val(dataset_params={"data_dir":"/path/to/coco/"})
+train_loader = coco2017_train(dataset_params={"data_dir":"/path/to/coco/"})
+val_loader = coco2017_val(dataset_params={"data_dir":"/path/to/coco/"})
 
-    analyzer = DetectionAnalysisManager(
-        report_title="COCO2017DGAnalysis",
-        train_data=train_loader,
-        val_data=val_loader,
-        class_names=train_loader.dataset.classes,
-        use_cache=True,  # With this we will be asked about the dataset information only once
-    )
+analyzer = DetectionAnalysisManager(
+    report_title="COCO2017DGAnalysis",
+    train_data=train_loader,
+    val_data=val_loader,
+    class_names=train_loader.dataset.classes,
+    use_cache=True,  # With this we will be asked about the dataset information only once
+)
 
-    analyzer.run()
+analyzer.run()
 ````
 
 When performing the analysis for the detection task, you will need to answer some questions, regardless of whether you are using ImageDuplicates or not.
