@@ -167,19 +167,10 @@ As stated in the report, we found 2 pairs present in the intersection.
 
 Opening the above file paths, we indeed see we have duplicates between our train data and validation data:
 
-`/data/coco/images/train2017/000000080010.jpg`:
-
-![subsection](assets/000000080010.jpg)
-
-`/data/coco/images/val2017/000000140556.jpg`:
-![subsection](assets/000000080010.jpg)
-
-`/data/coco/images/train2017/000000535889.jpg`:
-
-![subsection](assets/000000535889.jpg)
-
-`/data/coco/images/val2017/000000465129.jpg`:
-![subsection](assets/000000465129.jpg)
+| Train | Validation |
+|---------|---------|
+| `/data/coco/images/train2017/000000080010.jpg`<br>![subsection](assets/000000080010.jpg) | `/data/coco/images/val2017/000000140556.jpg`<br>![subsection](assets/000000080010.jpg) |
+| `/data/coco/images/train2017/000000535889.jpg`<br>![subsection](assets/000000535889.jpg) | `/data/coco/images/val2017/000000465129.jpg`<br>![subsection](assets/000000465129.jpg) |
 
 
 
