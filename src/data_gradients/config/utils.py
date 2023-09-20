@@ -77,7 +77,7 @@ def load_config(config_name: str, config_dir: str, overrides: Optional[Dict[str,
     """Load a Hydra configuration file and instantiate it.
 
     :param config_name: Name of the Hydra configuration file to load.
-    :param config_dir:  Directory where the Hydra configuration file is located. By default, uses the package data_config directory.
+    :param config_dir:  Directory where the Hydra configuration file is located. By default, uses the package config directory.
     :param overrides:   Dictionary with overrides for the configuration file. By default, no overrides will be applied.
     :return:            An instantiated configuration object.
     """

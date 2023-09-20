@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class SummaryWriter:
-    """Manager responsible for logging the Report (e.g. PDF), feature stats, errors and data_config cache."""
+    """Manager responsible for logging the Report (e.g. PDF), feature stats, errors and config cache."""
 
     def __init__(self, report_title: str, report_subtitle: Optional[str] = None, log_dir: Optional[str] = None):
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")

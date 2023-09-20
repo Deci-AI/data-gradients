@@ -38,7 +38,7 @@ class VOCFormatSegmentationDataset(BaseImageLabelDirectoryDataset):
     ```
     Each label image should be a color image where the color of each pixel corresponds to the class of that pixel.
 
-    The (optional) data_config file should include the list image ids to include.
+    The (optional) config file should include the list image ids to include.
     ```
     1
     5
@@ -97,7 +97,7 @@ class VOCFormatSegmentationDataset(BaseImageLabelDirectoryDataset):
         :param class_names:         List of class names. This is required to be able to parse the class names into class ids.
         :param color_map:           List of RGB colors associated with each class.
                                     The color of each pixel in the label images will be compared to this list to determine the class of the pixel.
-        :param config_path:         Path to an optional data_config file. This data_config file should contain the list of file ids to include.
+        :param config_path:         Path to an optional config file. This config file should contain the list of file ids to include.
                                     If None, all the available images and labels will be loaded.
         :param verbose:             Whether to show extra information during loading.
         :param image_extensions:    List of image file extensions to load from.

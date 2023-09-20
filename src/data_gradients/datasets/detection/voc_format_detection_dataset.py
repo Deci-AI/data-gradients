@@ -82,7 +82,7 @@ class VOCFormatDetectionDataset(BaseImageLabelDirectoryDataset):
     </annotation>
     ```
 
-    The (optional) data_config file should include the list image ids to include.
+    The (optional) config file should include the list image ids to include.
     ```
     1
     5
@@ -147,7 +147,7 @@ class VOCFormatDetectionDataset(BaseImageLabelDirectoryDataset):
         :param images_subdir:       Local path to directory that includes all the images. Path relative to `root_dir`. Can be the same as `labels_subdir`.
         :param labels_subdir:       Local path to directory that includes all the labels. Path relative to `root_dir`. Can be the same as `images_subdir`.
         :param class_names:         List of class names. This is required to be able to parse the class names into class ids.
-        :param config_path:         Path to an optional data_config file. This data_config file should contain the list of file ids to include.
+        :param config_path:         Path to an optional config file. This config file should contain the list of file ids to include.
                                     If None, all the available images and tagets will be loaded.
         :param verbose:             Whether to show extra information during loading.
         :param image_extensions:    List of image file extensions to load from.
