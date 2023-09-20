@@ -48,7 +48,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         self.renderer = SeabornRenderer()
         self.summary_writer = summary_writer
-        self.config = sample_preprocessor.config
+        self.data_config = sample_preprocessor.data_config
 
         # DATA
         if batches_early_stop:
@@ -185,7 +185,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
         self.summary_writer.set_pdf_summary(pdf_summary=summary)
-        self.summary_writer.set_data_config(data_config_dict=self.config.to_json())
+        self.summary_writer.set_data_config(data_config_dict=self.data_config.to_json())
         self.summary_writer.write()
 
         # Cleanup of generated images
@@ -209,7 +209,7 @@ class AnalysisManagerAbstract(abc.ABC):
             interrupted = e is not None
         self.post_process(interrupted=interrupted)
 
-        self.config.dump_cache_file()
+        self.data_config.dump_cache_file()
 
         self.print_summary()
 
@@ -220,7 +220,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print()
         print(f'{"-" * 100}')
         print("Training Configuration...")
-        print(self.config.get_caching_info())
+        print(self.data_config.get_caching_info())
         print()
         print(f'{"-" * 100}')
         print("Report Location:")

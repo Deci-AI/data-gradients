@@ -12,14 +12,14 @@ class BaseSamplePreprocessor(ABC):
     This class it the connector between users data and the feature extracting processes as it ensures that
     all the data passed to these feature extractor are of the same known format.
 
-    :attr config: Configuration of the data adapter.
+    :attr data_config: Configuration of the data adapter.
     """
 
-    def __init__(self, config: DataConfig):
+    def __init__(self, data_config: DataConfig):
         """
-        :param config: Configuration of the data adapter.
+        :param data_config: Configuration of the data adapter.
         """
-        self.config = config
+        self.data_config = data_config
 
     @abstractmethod
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[ImageSample]:

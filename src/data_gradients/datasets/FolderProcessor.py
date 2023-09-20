@@ -46,7 +46,7 @@ class ImageLabelFilesIterator:
         :param labels_dir:          The directory containing the labels.
         :param label_extensions:    The extensions of the labels. Only the labels with these extensions will be considered.
         :param image_extensions:    The extensions of the images. Only the images with these extensions will be considered.
-        :param config_path:         Path to the config file. This config file should contain the list of file ids to include.
+        :param config_path:         Path to the data_config file. This data_config file should contain the list of file ids to include.
                                         E.g. ['235', '532', ...], refering to ('235.jpg', '532.jpg') and ('235.txt', '532.txt') in their respective folders.
                                         If None, all the relevant files listed in images_dir/labels_dir will be used.
         :param verbose:             Whether to print extra messages.
@@ -68,7 +68,7 @@ class ImageLabelFilesIterator:
         """Gather all image and label files that are in the directories.
         :param images_dir:      The directory containing the images.
         :param labels_dir:      The directory containing the labels.
-        :param config_path:     Path to the config file. This config file should contain the list of file ids to include.
+        :param config_path:     Path to the data_config file. This data_config file should contain the list of file ids to include.
                                     If None, all the relevant files listed in images_dir/labels_dir will be used.
         :return:                A list of tuple(<path-to-image>, <path-to-label>).
         """
@@ -117,8 +117,8 @@ class ImageLabelFilesIterator:
     ) -> List[Tuple[str, str]]:
         """Filter all the files that are not listed in the `config_path`.
         :param images_with_labels_files:    List of tuple(<path-to-image>, <path-to-label>).
-        :param config_path:                 Path to the config file. This config file should contain the list of file ids to include.
-        :return:                            List of tuple(<path-to-image>, <path-to-label>) that were listed in the config.
+        :param config_path:                 Path to the data_config file. This data_config file should contain the list of file ids to include.
+        :return:                            List of tuple(<path-to-image>, <path-to-label>) that were listed in the data_config.
         """
         file_ids = self._config_file(config_path=config_path)
         filename_to_images_with_labels_files = {
@@ -153,12 +153,12 @@ class ImageLabelFilesIterator:
         return images_with_labels_files
 
     def _config_file(self, config_path: str) -> List[str]:
-        """Load the config file that includes the list of supported file ids.
-        :param config_path: Path to the config file. Should include file extension.
+        """Load the data_config file that includes the list of supported file ids.
+        :param config_path: Path to the data_config file. Should include file extension.
         :return:    List of relevant file ids. (e.g. ['235', '532', ...], refering to '235.jpg', '532.jpg', ...)
         """
         if not os.path.exists(config_path):
-            raise FileNotFoundError(f"The config file `{config_path}` does not exist.")
+            raise FileNotFoundError(f"The data_config file `{config_path}` does not exist.")
 
         with open(config_path, "r") as f:
             try:

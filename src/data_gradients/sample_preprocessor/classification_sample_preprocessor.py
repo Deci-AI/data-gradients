@@ -39,7 +39,7 @@ class ClassificationSamplePreprocessor(BaseSamplePreprocessor):
         self.class_names = class_names
         self.n_image_channels = n_image_channels
         self.image_format = image_format
-        super().__init__(config=self.adapter.data_config)
+        super().__init__(data_config=self.adapter.data_config)
 
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[ClassificationSample]:
         for data in dataset:

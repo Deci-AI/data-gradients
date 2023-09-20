@@ -40,7 +40,7 @@ class SegmentationSampleProcessor(BaseSamplePreprocessor):
 
         self.class_names = class_names
         self.image_format = image_format
-        super().__init__(config=self.adapter.data_config)
+        super().__init__(data_config=self.adapter.data_config)
 
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[SegmentationSample]:
         for data in dataset:
