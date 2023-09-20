@@ -34,6 +34,7 @@ class BDDDSegmentationDatasetTest(unittest.TestCase):
             class_names_to_use=BDDDataset.CLASS_NAMES[:-1],
             use_cache=False,
             batches_early_stop=5,
+            is_batch=False,
         )
         da.run()
 
@@ -46,6 +47,7 @@ class BDDDSegmentationDatasetTest(unittest.TestCase):
             class_names_to_use=BDDDataset.CLASS_NAMES[:-1],
             use_cache=False,
             batches_early_stop=5,
+            is_batch=True,
         )
         da.run()
 
