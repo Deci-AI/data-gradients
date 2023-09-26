@@ -1,21 +1,18 @@
-from typing import Iterable, Optional, Iterator
+from typing import Iterable, Iterator
 import time
 
 import numpy as np
 
 from data_gradients.dataset_adapters.config.typing import SupportedDataType
 from data_gradients.sample_preprocessor.base_sample_preprocessor import AbstractSamplePreprocessor
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat, ClassificationSample
+from data_gradients.utils.data_classes.data_samples import ClassificationSample
 from data_gradients.dataset_adapters.classification_adapter import ClassificationDatasetAdapter
 from data_gradients.dataset_adapters.config.data_config import ClassificationDataConfig
 
 
 class ClassificationSamplePreprocessor(AbstractSamplePreprocessor):
-    def __init__(self, data_config: ClassificationDataConfig, image_format: Optional[ImageChannelFormat]):
-
+    def __init__(self, data_config: ClassificationDataConfig):
         self.data_config = data_config
-        self.image_format = image_format
-
         self.adapter = ClassificationDatasetAdapter(data_config=data_config)
         super().__init__(data_config=self.adapter.data_config)
 
@@ -23,9 +20,6 @@ class ClassificationSamplePreprocessor(AbstractSamplePreprocessor):
         for data in dataset:
             images, labels = self.adapter.adapt(data)
             images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
-
-            if self.image_format is None:
-                self.image_format = {1: ImageChannelFormat.GRAYSCALE, 3: ImageChannelFormat.RGB}[self.data_config.n_image_channels]
 
             for image, target in zip(images, labels):
                 class_id = int(target)
@@ -35,7 +29,7 @@ class ClassificationSamplePreprocessor(AbstractSamplePreprocessor):
                     class_id=class_id,
                     class_names=self.data_config.class_names,
                     split=split,
-                    image_format=self.image_format,
+                    image_format=self.data_config.get_image_format(),
                     sample_id=str(time.time()),
                 )
                 yield sample
