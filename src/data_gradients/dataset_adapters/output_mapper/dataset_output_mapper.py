@@ -6,8 +6,8 @@ import torch
 from torchvision.transforms import transforms
 
 from data_gradients.dataset_adapters.output_mapper.tensor_extractor import get_tensor_extractor_options
-from data_gradients.config.data.data_config import DataConfig
-from data_gradients.config.data.questions import Question, text_to_yellow
+from data_gradients.dataset_adapters.config.data_config import DataConfig
+from data_gradients.dataset_adapters.config.questions import Question, text_to_yellow
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 

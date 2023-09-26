@@ -6,9 +6,14 @@ from typing import Dict, Mapping, List
 
 
 def write_json(path: str, json_dict: Dict):
-    dirname = os.path.dirname(path)
+    """Write a json dictionary to a file.
+    :param path:        Path to the file. Can be absolute or relative. Should contain '.json' extension.
+    :param json_dict:   Dictionary to be written to the file. Should be serializable.
+    """
+    full_path = os.path.abspath(path)
+    dirname = os.path.dirname(full_path)
     os.makedirs(dirname, exist_ok=True)
-    with open(path, "w") as f:
+    with open(full_path, "w") as f:
         json.dump(json_dict, f, indent=4)
 
 

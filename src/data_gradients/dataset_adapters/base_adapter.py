@@ -1,20 +1,19 @@
 from abc import ABC
-from typing import List, Iterable, Sized, Tuple
+from typing import List, Tuple
 
 import torch
 
-from data_gradients.config.data.typing import SupportedDataType
-from data_gradients.config.data.data_config import DataConfig
+from data_gradients.dataset_adapters.config.data_config import DataConfig
 
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.output_mapper.dataset_output_mapper import DatasetOutputMapper
+from data_gradients.dataset_adapters.config.typing import SupportedDataType
 
 
 class BaseDatasetAdapter(ABC):
     """Wrap a dataset and applies transformations on data points.
     It acts as a base class for specific dataset adapters that cater to specific data structures.
 
-    :param data_iterable:   Iterable object that yields data points from the dataset.
     :param formatter:       Instance of BatchFormatter that is used to validate and format the batches of images and labels
                             into the appropriate format for a given task.
     :param data_config:     Instance of DataConfig class that manages dataset/dataloader configurations.
@@ -22,13 +21,11 @@ class BaseDatasetAdapter(ABC):
 
     def __init__(
         self,
-        data_iterable: Iterable[SupportedDataType],
         dataset_output_mapper: DatasetOutputMapper,
         formatter: BatchFormatter,
         data_config: DataConfig,
         class_names: List[str],
     ):
-        self.data_iterable = data_iterable
         self.data_config = data_config
 
         self.dataset_output_mapper = dataset_output_mapper
@@ -53,14 +50,17 @@ class BaseDatasetAdapter(ABC):
                 raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
         return class_names_to_use or class_names
 
-    def __len__(self) -> int:
-        """Length of the dataset if available. Otherwise, None."""
-        return len(self.data_iterable) if isinstance(self.data_iterable, Sized) else None
+    def adapt(self, data: SupportedDataType) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Adapt an input data (Batch or Sample) into a standard format.
 
-    def __iter__(self) -> Iterable[Tuple[torch.Tensor, torch.Tensor]]:
-        """Iterate over the dataset and return a batch of images and labels."""
-        for data in self.data_iterable:
-            # data can be a batch or a sample
-            images, labels = self.dataset_output_mapper.extract(data)
-            images, labels = self.formatter.format(images, labels)
-            yield images, labels
+        :param data:     Input data to be adapted.
+                            - Can represent a batch or a sample.
+                            - Can be structured in a wide range of formats. (list, dict, ...)
+                            - Can be formatted in a wide range of formats. (image: HWC, CHW, ... - label: label_cxcywh, xyxy_label, ...)
+        :return:         Tuple of images and labels.
+                            - Image will be formatted to (BS, H, W, C) - BS = 1 if original data is a single sample
+                            - Label will be formatted to a standard format that depends on the task.
+        """
+        images, labels = self.dataset_output_mapper.extract(data)
+        images, labels = self.formatter.format(images, labels)
+        return images, labels

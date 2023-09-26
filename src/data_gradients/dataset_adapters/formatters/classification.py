@@ -7,7 +7,7 @@ from torch import Tensor
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError, check_images_shape
 from data_gradients.dataset_adapters.formatters.utils import ensure_channel_first
-from data_gradients.config.data.data_config import ClassificationDataConfig
+from data_gradients.dataset_adapters.config.data_config import ClassificationDataConfig
 
 
 class UnsupportedClassificationBatchFormatError(DatasetFormatError):

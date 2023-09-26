@@ -3,13 +3,13 @@ from typing import Optional, Iterable, Callable, List
 
 import torch
 
-from data_gradients.config.data.data_config import get_default_cache_dir
-from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
+from data_gradients.dataset_adapters.config.data_config import get_default_cache_dir
+from data_gradients.dataset_adapters.config.typing import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterables.classification import ClassificationSampleIterable
-from data_gradients.dataset_adapters.classification_adapter import ClassificationDatasetAdapter
+from data_gradients.sample_preprocessor.classification_sample_preprocessor import ClassificationSamplePreprocessor
+from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 
 class ClassificationAnalysisManager(AnalysisManagerAbstract):
@@ -21,8 +21,8 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         self,
         *,
         report_title: str,
-        train_data: Iterable,
-        val_data: Optional[Iterable] = None,
+        train_data: Iterable[SupportedDataType],
+        val_data: Optional[Iterable[SupportedDataType]] = None,
         report_subtitle: Optional[str] = None,
         config_path: Optional[str] = None,
         feature_extractors: Optional[FeatureExtractorsType] = None,
@@ -33,9 +33,11 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
+        is_batch: Optional[bool] = None,
         n_image_channels: int = 3,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
+        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
     ):
         """
         Constructor of detection manager which controls the analyzer
@@ -66,54 +68,27 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
-        if not isinstance(train_data, ClassificationDatasetAdapter):
-            cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
-            train_data = ClassificationDatasetAdapter(
-                data_iterable=train_data,
-                class_names=class_names,
-                cache_path=cache_path,
-                class_names_to_use=class_names_to_use,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=n_image_channels,
-            )
-
-        if not isinstance(val_data, ClassificationDatasetAdapter):
-            val_data = ClassificationDatasetAdapter(
-                data_iterable=val_data,
-                class_names=class_names,
-                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
-                class_names_to_use=class_names_to_use,
-                n_classes=n_classes,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=n_image_channels,
-            )
+        cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
+        sample_preprocessor = ClassificationSamplePreprocessor(
+            class_names=class_names,
+            n_classes=n_classes,
+            cache_path=cache_path,
+            class_names_to_use=class_names_to_use,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            is_batch=is_batch,
+            n_image_channels=n_image_channels,
+            image_format=image_format,
+        )
 
         grouped_feature_extractors = get_grouped_feature_extractors(
-            default_config_name="classification",
-            config_path=config_path,
-            feature_extractors=feature_extractors,
-        )
-
-        # This will yield Sample objects
-        train_sample_iterable = ClassificationSampleIterable(
-            dataset=train_data,
-            class_names=train_data.class_names,
-            n_image_channels=n_image_channels,
-            split="train",
-        )
-        val_sample_iterable = ClassificationSampleIterable(
-            dataset=val_data,
-            class_names=val_data.class_names,
-            n_image_channels=n_image_channels,
-            split="val",
+            default_config_name="classification", config_path=config_path, feature_extractors=feature_extractors
         )
 
         super().__init__(
-            train_data=train_sample_iterable,
-            val_data=val_sample_iterable,
+            train_data=train_data,
+            val_data=val_data,
+            sample_preprocessor=sample_preprocessor,
             summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
             batches_early_stop=batches_early_stop,
