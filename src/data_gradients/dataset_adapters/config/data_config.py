@@ -13,7 +13,6 @@ from data_gradients.dataset_adapters.config.caching_utils import TensorExtractor
 from data_gradients.dataset_adapters.config.typing import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,7 +37,6 @@ class DataConfig(ABC):
     is_batch: Union[None, bool] = None
 
     n_image_channels: Union[None, int] = None
-    image_format: Union[None, ImageChannelFormat] = None
 
     n_classes: Union[None, int] = None
     class_names: Union[None, List[str]] = None

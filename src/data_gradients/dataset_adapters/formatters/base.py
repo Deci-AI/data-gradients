@@ -1,11 +1,11 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Tuple
 
 import torch
 from data_gradients.dataset_adapters.config.questions import Question
 
 
-class BatchFormatter:
+class BatchFormatter(ABC):
     def __init__(self, data_config):
         self.data_config = data_config
         self._n_image_channels = None
@@ -27,7 +27,7 @@ class BatchFormatter:
         if self._n_image_channels is None:
             question = Question(
                 question="Which dimension corresponds the image channel? ",
-                options={i: images.shape[i] for i in range(images.shape)},
+                options={i: images.shape[i] for i in range(len(images.shape))},
             )
             hint = f"Image shape: {images.shape}"
             self._n_image_channels = self.data_config.get_n_image_channels(question=question, hint=hint)
