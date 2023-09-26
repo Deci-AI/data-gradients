@@ -56,9 +56,6 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         :param use_cache:               Whether to use cache or not for the configuration of the data.
         :param images_extractor:        Function extracting the image(s) out of the data output.
         :param labels_extractor:        Function extracting the label(s) out of the data output.
-        :param is_label_first:          Whether the labels are in the first dimension or not.
-                                            > (class_id, x, y, w, h) for instance, as opposed to (x, y, w, h, class_id)
-        :param bbox_format:             Format of the bounding boxes. 'xyxy', 'xywh' or 'cxcywh'
         :param n_image_channels:        Number of channels for each image in the dataset
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
@@ -70,6 +67,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
         data_config = ClassificationDataConfig(
             cache_path=cache_path,
+            n_image_channels=n_image_channels,
             n_classes=n_classes,
             class_names=class_names,
             images_extractor=images_extractor,
@@ -77,7 +75,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
             is_batch=is_batch,
         )
 
-        sample_preprocessor = ClassificationSamplePreprocessor(data_config=data_config, n_image_channels=n_image_channels, image_format=image_format)
+        sample_preprocessor = ClassificationSamplePreprocessor(data_config=data_config, image_format=image_format)
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="classification", config_path=config_path, feature_extractors=feature_extractors
         )
