@@ -6,8 +6,8 @@ from data_gradients.dataset_adapters.config.typing import SupportedDataType
 from data_gradients.dataset_adapters.config.data_config import DataConfig
 
 
-class BaseSamplePreprocessor(ABC):
-    """Base class responsible for pre-processing dataset/dataloader output into a known sample format.
+class AbstractSamplePreprocessor(ABC):
+    """Abstract class responsible for pre-processing dataset/dataloader output into a known sample format.
 
     This class it the connector between users data and the feature extracting processes as it ensures that
     all the data passed to these feature extractor are of the same known format.

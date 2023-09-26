@@ -25,24 +25,18 @@ class DetectionBatchFormatter(BatchFormatter):
     def __init__(
         self,
         data_config: DetectionDataConfig,
-        class_names: List[str],
-        class_names_to_use: List[str],
         n_image_channels: int,
         xyxy_converter: Optional[Callable[[Tensor], Tensor]] = None,
         label_first: Optional[bool] = None,
     ):
         """
-        :param class_names:         List of all class names in the dataset. The index should represent the class_id.
-        :param class_names_to_use:  List of class names that we should use for analysis.
         :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         :param xyxy_converter:      Function to convert the bboxes to the `xyxy` format.
         :param label_first:         Whether the annotated_bboxes states with labels, or with the bboxes. (typically label_xyxy vs xyxy_label)
         """
         self.data_config = data_config
 
-        class_names_to_use = set(class_names_to_use)
-        self.class_ids_to_use = [class_id for class_id, class_name in enumerate(class_names) if class_name in class_names_to_use]
-
+        self.class_ids_to_use = [data_config.class_names.index(class_name) for class_name in data_config.class_names_to_use]
         self.n_image_channels = n_image_channels
         self.xyxy_converter = xyxy_converter
         self.label_first = label_first

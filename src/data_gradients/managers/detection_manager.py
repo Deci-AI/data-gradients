@@ -12,6 +12,7 @@ from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.detection_sample_preprocessor import DetectionSamplePreprocessor
 from data_gradients.datasets import COCOFormatDetectionDataset, VOCDetectionDataset, COCODetectionDataset
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.dataset_adapters.config import DetectionDataConfig
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -73,20 +74,19 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
 
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
-        sample_preprocessor = DetectionSamplePreprocessor(
-            class_names=class_names,
-            n_classes=n_classes,
+        data_config = DetectionDataConfig(
             cache_path=cache_path,
+            n_classes=n_classes,
+            class_names=class_names,
             class_names_to_use=class_names_to_use,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_batch=is_batch,
             is_label_first=is_label_first,
-            bbox_format=bbox_format,
-            n_image_channels=n_image_channels,
-            image_format=image_format,
+            xyxy_converter=bbox_format,
         )
 
+        sample_preprocessor = DetectionSamplePreprocessor(data_config=data_config, n_image_channels=n_image_channels, image_format=image_format)
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="detection", config_path=config_path, feature_extractors=feature_extractors
         )

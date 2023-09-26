@@ -49,7 +49,7 @@ class DataConfig(ABC):
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
-        # Resolve class related params. This should be done after updating from the cache file.
+        # Resolve class related params. This should be done after updating from the cache file because the cache may include some of these parameters.
         self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
         self.n_classes = len(self.class_names)
         self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
@@ -176,18 +176,6 @@ class DataConfig(ABC):
             self.is_batch: bool = ask_question(question=question, hint=hint)
         return self.is_batch
 
-    def get_class_names(self, hint: str = "") -> bool:
-        if self.class_names is None:
-            question = Question(
-                question="Does your dataset provide a batch or a single sample?",
-                options={
-                    "Batch of Samples (e.g. torch Dataloader)": True,
-                    "Single Sample (e.g. torch Dataset)": False,
-                },
-            )
-            self.is_batch: bool = ask_question(question=question, hint=hint)
-        return self.is_batch
-
 
 @dataclass
 class ClassificationDataConfig(DataConfig):
@@ -245,12 +233,9 @@ def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
     """Ensure that either `class_names` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
     if n_classes and class_names:
         raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
-    if class_names:
-        return class_names
-    elif n_classes:
-        return list(map(str, range(n_classes)))
-    else:
-        return []
+    elif n_classes is None and class_names is None:
+        raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+    return class_names or list(map(str, range(n_classes)))
 
 
 def resolve_class_names_to_use(class_names: List[str], class_names_to_use: List[str]) -> List[str]:

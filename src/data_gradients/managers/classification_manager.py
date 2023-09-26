@@ -10,6 +10,7 @@ from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.classification_sample_preprocessor import ClassificationSamplePreprocessor
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.dataset_adapters.config.data_config import ClassificationDataConfig
 
 
 class ClassificationAnalysisManager(AnalysisManagerAbstract):
@@ -29,7 +30,6 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         log_dir: Optional[str] = None,
         use_cache: bool = False,
         class_names: Optional[List[str]] = None,
-        class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
@@ -44,7 +44,6 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         :param report_title:            Title of the report. Will be used to save the report
         :param report_subtitle:         Subtitle of the report
         :param class_names:             List of all class names in the dataset. The index should represent the class_id.
-        :param class_names_to_use:      List of class names that we should use for analysis.
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
@@ -69,18 +68,16 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
-        sample_preprocessor = ClassificationSamplePreprocessor(
-            class_names=class_names,
-            n_classes=n_classes,
+        data_config = ClassificationDataConfig(
             cache_path=cache_path,
-            class_names_to_use=class_names_to_use,
+            n_classes=n_classes,
+            class_names=class_names,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_batch=is_batch,
-            n_image_channels=n_image_channels,
-            image_format=image_format,
         )
 
+        sample_preprocessor = ClassificationSamplePreprocessor(data_config=data_config, n_image_channels=n_image_channels, image_format=image_format)
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="classification", config_path=config_path, feature_extractors=feature_extractors
         )
