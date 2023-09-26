@@ -15,7 +15,7 @@ from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_preprocessor.base_sample_preprocessor import BaseSamplePreprocessor
+from data_gradients.sample_preprocessor.base_sample_preprocessor import AbstractSamplePreprocessor
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,7 +32,7 @@ class AnalysisManagerAbstract(abc.ABC):
         *,
         train_data: Iterable[SupportedDataType],
         val_data: Optional[Iterable[SupportedDataType]],
-        sample_preprocessor: BaseSamplePreprocessor,
+        sample_preprocessor: AbstractSamplePreprocessor,
         summary_writer: SummaryWriter,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,

@@ -12,6 +12,7 @@ from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.segmentation_sample_preprocessor import SegmentationSampleProcessor
 from data_gradients.datasets import COCOSegmentationDataset, COCOFormatSegmentationDataset, VOCSegmentationDataset
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.dataset_adapters.config.data_config import SegmentationDataConfig
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -70,9 +71,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
-        sample_preprocessor = SegmentationSampleProcessor(
+        data_config = SegmentationDataConfig(
             class_names=class_names,
             n_classes=n_classes,
             cache_path=cache_path,
@@ -80,11 +80,11 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_batch=is_batch,
-            num_image_channels=num_image_channels,
-            threshold_soft_labels=threshold_soft_labels,
-            image_format=image_format,
         )
 
+        sample_preprocessor = SegmentationSampleProcessor(
+            data_config=data_config, num_image_channels=num_image_channels, threshold_soft_labels=threshold_soft_labels, image_format=image_format
+        )
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="segmentation", config_path=config_path, feature_extractors=feature_extractors
         )

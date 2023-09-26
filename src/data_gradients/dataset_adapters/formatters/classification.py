@@ -1,5 +1,5 @@
 import warnings
-from typing import Tuple, List
+from typing import Tuple
 
 import torch
 from torch import Tensor
@@ -8,6 +8,9 @@ from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError, check_images_shape
 from data_gradients.dataset_adapters.formatters.utils import ensure_channel_first
 from data_gradients.dataset_adapters.config.data_config import ClassificationDataConfig
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class UnsupportedClassificationBatchFormatError(DatasetFormatError):
@@ -21,21 +24,16 @@ class ClassificationBatchFormatter(BatchFormatter):
     def __init__(
         self,
         data_config: ClassificationDataConfig,
-        class_names: List[str],
-        class_names_to_use: List[str],
         n_image_channels: int,
     ):
         """
-        :param class_names:         List of all class names in the dataset. The index should represent the class_id.
-        :param class_names_to_use:  List of class names that we should use for analysis.
         :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         """
         self.data_config = data_config
-
-        class_names_to_use = set(class_names_to_use)
-        self.class_ids_to_use = [class_id for class_id, class_name in enumerate(class_names) if class_name in class_names_to_use]
-
         self.n_image_channels = n_image_channels
+
+        if data_config.class_names_to_use != data_config.class_names:
+            logger.warning("Classification task does NOT support class filtering, yet `class_names_to_use` was set. This will parameter will be ignored.")
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.

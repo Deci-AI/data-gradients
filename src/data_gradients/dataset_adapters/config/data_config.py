@@ -5,7 +5,7 @@ import platformdirs
 import torch
 from abc import ABC
 from dataclasses import dataclass
-from typing import Dict, Optional, Callable, Union
+from typing import Dict, Optional, Callable, Union, List
 
 import data_gradients
 from data_gradients.dataset_adapters.config.questions import Question, ask_question, text_to_yellow
@@ -36,6 +36,10 @@ class DataConfig(ABC):
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     is_batch: Union[None, bool] = None
 
+    n_classes: Union[None, int] = None
+    class_names: Union[None, List[str]] = None
+    class_names_to_use: Union[None, List[str]] = None
+
     cache_path: Optional[str] = None
 
     def __post_init__(self):
@@ -44,6 +48,11 @@ class DataConfig(ABC):
             self.update_from_cache_file()
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
+
+        # Resolve class related params. This should be done after updating from the cache file because the cache may include some of these parameters.
+        self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
+        self.n_classes = len(self.class_names)
+        self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
 
     def update_from_cache_file(self):
         """Update the values that are not set yet, using the cache file."""
@@ -106,6 +115,9 @@ class DataConfig(ABC):
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
+            "n_classes": self.n_classes,
+            "class_names": self.class_names,
+            "class_names_to_use": self.class_names_to_use,
         }
         return json_dict
 
@@ -135,6 +147,12 @@ class DataConfig(ABC):
             self.labels_extractor = json_dict.get("labels_extractor")
         if self.is_batch is None:
             self.is_batch = json_dict.get("is_batch")
+        if self.n_classes is None:
+            self.n_classes = json_dict.get("n_classes")
+        if self.class_names is None:
+            self.class_names = json_dict.get("class_names")
+        if self.class_names_to_use is not None:
+            self.class_names_to_use = json_dict.get("class_names_to_use")
 
     def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -209,3 +227,21 @@ class DetectionDataConfig(DataConfig):
             )
             self.xyxy_converter = ask_question(question=question, hint=hint)
         return XYXYConverterResolver.to_callable(self.xyxy_converter)
+
+
+def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
+    """Ensure that either `class_names` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
+    if n_classes and class_names:
+        raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
+    elif n_classes is None and class_names is None:
+        raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+    return class_names or list(map(str, range(n_classes)))
+
+
+def resolve_class_names_to_use(class_names: List[str], class_names_to_use: List[str]) -> List[str]:
+    """Define `class_names_to_use` from `class_names` if it is specified. Otherwise, return the list of class names that will be used."""
+    if class_names_to_use:
+        invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
+        if invalid_class_names_to_use != set():
+            raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
+    return class_names_to_use or class_names
