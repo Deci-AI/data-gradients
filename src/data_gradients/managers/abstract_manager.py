@@ -2,19 +2,20 @@ import os
 import abc
 import logging
 import traceback
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Iterable, Sized
 from itertools import zip_longest
 from logging import getLogger
 
 from tqdm import tqdm
 
+from data_gradients.dataset_adapters.config.typing import SupportedDataType
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterables.base import BaseSampleIterable
+from data_gradients.sample_preprocessor.base_sample_preprocessor import BaseSamplePreprocessor
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,36 +30,37 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
-        train_data: BaseSampleIterable,
-        val_data: BaseSampleIterable,
+        train_data: Iterable[SupportedDataType],
+        val_data: Optional[Iterable[SupportedDataType]],
+        sample_preprocessor: BaseSamplePreprocessor,
         summary_writer: SummaryWriter,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
         """
-        :param train_data:          Iterable object contains images and labels of the training dataset
-        :param val_data:            Iterable object contains images and labels of the validation dataset
+        :param train_data:                  Iterable object contains images and labels of the training dataset
+        :param val_data:                    Iterable object contains images and labels of the validation dataset
         :param grouped_feature_extractors:  List of feature extractors to be used
-        :param batches_early_stop:  Maximum number of batches to run in training (early stop)
-        :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
+        :param batches_early_stop:          Maximum number of batches to run in training (early stop)
+        :param remove_plots_after_report:   Delete the plots from the report directory after the report is generated. By default, True
         """
 
         self.renderer = SeabornRenderer()
         self.summary_writer = summary_writer
+        self.data_config = sample_preprocessor.data_config
 
         # DATA
         if batches_early_stop:
             logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
 
-        self.train_data = train_data
-        self.val_data = val_data
-        self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
-        self.val_size = len(val_data) if hasattr(val_data, "__len__") else None
+        val_data = val_data or iter([])
+        self.train_size = len(train_data) if isinstance(train_data, Sized) else None
+        self.val_size = len(val_data) if isinstance(val_data, Sized) else None
 
-        self.train_iter = iter(train_data)
-        self.val_iter = iter(val_data) if val_data is not None else iter([])
+        self.train_samples_iterator = sample_preprocessor.preprocess_samples(train_data, split="train")
+        self.val_samples_iterator = sample_preprocessor.preprocess_samples(val_data, split="val")
 
         # FEATURES
         self.grouped_feature_extractors = grouped_feature_extractors
@@ -94,7 +96,7 @@ class AnalysisManagerAbstract(abc.ABC):
         )
 
         datasets_tqdm = tqdm(
-            zip_longest(self.train_iter, self.val_iter, fillvalue=None),
+            zip_longest(self.train_samples_iterator, self.val_samples_iterator, fillvalue=None),
             desc="Analyzing... ",
             total=self.n_batches,
         )
@@ -183,7 +185,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
         self.summary_writer.set_pdf_summary(pdf_summary=summary)
-        self.summary_writer.set_data_config(data_config_dict=self.train_data.dataset.data_config.to_json())
+        self.summary_writer.set_data_config(data_config_dict=self.data_config.to_json())
         self.summary_writer.write()
 
         # Cleanup of generated images
@@ -207,8 +209,7 @@ class AnalysisManagerAbstract(abc.ABC):
             interrupted = e is not None
         self.post_process(interrupted=interrupted)
 
-        self.train_data.config.dump_cache_file()
-        self.val_data.config.dump_cache_file()
+        self.data_config.dump_cache_file()
 
         self.print_summary()
 
@@ -219,10 +220,7 @@ class AnalysisManagerAbstract(abc.ABC):
         print()
         print(f'{"-" * 100}')
         print("Training Configuration...")
-        print(self.train_data.config.get_caching_info())
-        print()
-        print("Validation Configuration...")
-        print(self.val_data.config.get_caching_info())
+        print(self.data_config.get_caching_info())
         print()
         print(f'{"-" * 100}')
         print("Report Location:")
