@@ -120,7 +120,7 @@ class DataConfig(ABC):
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
             "n_image_channels": self.n_image_channels,
-            "image_format": self.image_format,
+            "image_format": self.image_format.name,
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
