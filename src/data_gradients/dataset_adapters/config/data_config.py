@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Callable, Union, List
 
 import data_gradients
-from data_gradients.dataset_adapters.config.questions import OptionQuestion, OpenEndedQuestion, text_to_yellow
+from data_gradients.dataset_adapters.config.questions import FixedOptionsQuestion, OpenEndedQuestion, text_to_yellow
 from data_gradients.dataset_adapters.config.caching_utils import TensorExtractorResolver, XYXYConverterResolver
 from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
@@ -149,19 +149,19 @@ class DataConfig(ABC):
         if self.class_names_to_use is not None:
             self.class_names_to_use = json_dict.get("class_names_to_use")
 
-    def get_images_extractor(self, question: Optional[OptionQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
+    def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
             self.images_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.images_extractor)
 
-    def get_labels_extractor(self, question: Optional[OptionQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
+    def get_labels_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.labels_extractor is None:
             self.labels_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
 
     def get_is_batch(self, hint: str = "") -> bool:
         if self.is_batch is None:
-            question = OptionQuestion(
+            question = FixedOptionsQuestion(
                 question="Does your dataset provide a batch or a single sample?",
                 options={
                     "Batch of Samples (e.g. torch Dataloader)": True,
@@ -228,7 +228,7 @@ class DetectionDataConfig(DataConfig):
 
     def get_is_label_first(self, hint: str = "") -> bool:
         if self.is_label_first is None:
-            question = OptionQuestion(
+            question = FixedOptionsQuestion(
                 question=f"{text_to_yellow('Which comes first')} in your annotations, the class id or the bounding box?",
                 options={
                     "Label comes first (e.g. [class_id, x1, y1, x2, y2])": True,
@@ -240,7 +240,7 @@ class DetectionDataConfig(DataConfig):
 
     def get_xyxy_converter(self, hint: str = "") -> Callable[[torch.Tensor], torch.Tensor]:
         if self.xyxy_converter is None:
-            question = OptionQuestion(
+            question = FixedOptionsQuestion(
                 question=f"What is the {text_to_yellow('bounding box format')}?",
                 options=XYXYConverter.get_available_options(),
             )

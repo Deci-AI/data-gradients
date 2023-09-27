@@ -46,7 +46,7 @@ class OpenEndedQuestion(Question):
             return ask_open_ended_via_stdin(question=self, hint=hint)
 
 
-class OptionQuestion(Question):
+class FixedOptionsQuestion(Question):
     """
     Represents a question with multiple options for the user to choose from.
 
@@ -54,7 +54,7 @@ class OptionQuestion(Question):
     :param options:     A dictionary where keys represent options and values give descriptions or corresponding data.
 
     Example:
-        >>> option_question = OptionQuestion("Choose a color:", {"R": "Red", "G": "Green", "B": "Blue"})
+        >>> option_question = FixedOptionsQuestion("Choose a color:", {"R": "Red", "G": "Green", "B": "Blue"})
         >>> chosen_color = option_question.ask()
     """
 
@@ -136,11 +136,11 @@ def ask_open_ended_via_stdin(question: OpenEndedQuestion, hint: str) -> str:
     return user_answer
 
 
-def ask_option_via_stdin(question: OptionQuestion, hint: str) -> Any:
+def ask_option_via_stdin(question: FixedOptionsQuestion, hint: str) -> Any:
     """
     Capture responses for option-based questions from the command line.
 
-    :param question:    An instance of OptionQuestion.
+    :param question:    An instance of FixedOptionsQuestion.
     :param hint:        A hint or additional instruction for the question.
     :return:            User's selected option.
     """
@@ -205,11 +205,11 @@ def ask_open_ended_via_jupyter(question: OpenEndedQuestion, hint: str) -> str:
     return user_answer
 
 
-def ask_option_via_jupyter(question: OptionQuestion, hint: str) -> str:
+def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
     """
     Capture responses for option-based questions within a Jupyter notebook environment using buttons.
 
-    :param question:    An instance of OptionQuestion.
+    :param question:    An instance of FixedOptionsQuestion.
     :param hint:        A hint or additional instruction for the question.
     :return:            User's selected option.
     """
@@ -265,7 +265,7 @@ def ask_option_via_jupyter(question: OptionQuestion, hint: str) -> str:
 
 if __name__ == "__main__":
     # Example usage:
-    option_q = OptionQuestion("Choose an option:", {"A": "Option A", "B": "Option B"})
+    option_q = FixedOptionsQuestion("Choose an option:", {"A": "Option A", "B": "Option B"})
     closed_response = option_q.ask()
     print(closed_response)
 
