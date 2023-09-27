@@ -19,10 +19,10 @@ class ImageDuplicates(AbstractFeatureExtractor):
       (i.e BGR, RGB greyscale) duplicates will be found, but might result (rarely) in false positives.
 
     Attributes:
-        train_image_dir: str, The directory containing all train images. When None, will ask the user using question for input.
+        train_image_dir: str, The directory containing all train images. When None, will ask the user using prompt for input.
 
         valid_image_dir: str. Ignored when val_data of the AbstractManager is None. The directory containing all
-         valid images. When None, will ask the user using question for input.
+         valid images. When None, will ask the user using prompt for input.
 
 
         The following attributes are populated after calling self.aggreagate():
@@ -70,10 +70,10 @@ class ImageDuplicates(AbstractFeatureExtractor):
     def __init__(self, train_image_dir: Optional[str] = None, valid_image_dir: Optional[str] = None):
         """
         :param train_image_dir: str = None, The directory containing all train images. When None, will ask the user
-            using question for input.
+            using prompt for input.
 
         :param valid_image_dir: str = None. Ignored when val_data of the AbstractManager is None. The directory containing all
-            valid images. When None, will ask the user using question for input.
+            valid images. When None, will ask the user using prompt for input.
         """
         super().__init__()
         self.train_dups = None
