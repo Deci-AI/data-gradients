@@ -8,7 +8,7 @@ from logging import getLogger
 
 from tqdm import tqdm
 
-from data_gradients.dataset_adapters.config.typing import SupportedDataType
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import print_in_box
