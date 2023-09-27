@@ -88,13 +88,14 @@ def is_notebook() -> bool:
         return False  # Probably standard Python interpreter
 
 
-def ask_via_stdin(question: str, optional_description: str, validate_func: Optional[callable] = None) -> str:
+def ask_via_stdin(question: str, optional_description: str, validate_func: Optional[callable] = None, input_message: str = "Enter your response >>> ") -> str:
     """
     Get user input from the command line with optional validation.
 
     :param question:                The main content of the question.
     :param optional_description:    Additional instruction or context for the question.
     :param validate_func:           An optional function to validate user input.
+    :param input_message:           Message to display before the user provides an input.
     :return:                        User's input after successful validation or after the user provides an input.
 
     Example:
@@ -111,9 +112,7 @@ def ask_via_stdin(question: str, optional_description: str, validate_func: Optio
     answer = None
     while answer is None:
         try:
-            input_description = f"Your selection (Enter the {text_to_blue('corresponding number')}) >>> "
-            "Enter your response >>> "
-            answer = input(f"\n{input_description}")
+            answer = input(f"\n{input_message}")
             if validate_func and not validate_func(answer):
                 print(f"{text_to_red(f'`{answer}` is not a valid input!')} Please check the instruction and try again.")
                 answer = None
@@ -148,7 +147,8 @@ def ask_option_via_stdin(question: FixedOptionsQuestion, hint: str) -> Any:
     description = f"{hint if hint else ''}\n{text_to_blue('Options')}:\n{options_display}"
 
     validate_func = lambda x: x.isdigit() and 0 <= int(x) <= len(question.options) - 1
-    selected_index = int(ask_via_stdin(question=question.question, optional_description=description, validate_func=validate_func))
+    input_message = f"Your selection (Enter the {text_to_blue('corresponding number')}) >>> "
+    selected_index = int(ask_via_stdin(question=question.question, optional_description=description, validate_func=validate_func, input_message=input_message))
 
     potential_values = list(question.options.values())
     selected_value = potential_values[selected_index]
