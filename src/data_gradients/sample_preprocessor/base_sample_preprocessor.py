@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Iterator, Iterable
 
 from data_gradients.utils.data_classes import ImageSample
-from data_gradients.dataset_adapters.config.typing import SupportedDataType
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType
 from data_gradients.dataset_adapters.config.data_config import DataConfig
 
 

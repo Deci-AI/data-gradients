@@ -88,8 +88,12 @@ def text_to_blue(text: str) -> str:
     return f"\033[34;1m{text}\033[0m"
 
 
-def text_to_yellow(text: str):
+def text_to_yellow(text: str) -> str:
     return f"\033[33;1m{text}\033[0m"
+
+
+def text_to_red(text: str) -> str:
+    return f"\033[31;1m{text}\033[0m"
 
 
 def break_text(text: str, line_length: int):
