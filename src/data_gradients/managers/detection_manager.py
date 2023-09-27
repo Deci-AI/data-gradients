@@ -76,6 +76,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
         data_config = DetectionDataConfig(
             cache_path=cache_path,
+            n_image_channels=n_image_channels,
             n_classes=n_classes,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
@@ -86,7 +87,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             xyxy_converter=bbox_format,
         )
 
-        sample_preprocessor = DetectionSamplePreprocessor(data_config=data_config, n_image_channels=n_image_channels, image_format=image_format)
+        sample_preprocessor = DetectionSamplePreprocessor(data_config=data_config, image_format=image_format)
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="detection", config_path=config_path, feature_extractors=feature_extractors
         )

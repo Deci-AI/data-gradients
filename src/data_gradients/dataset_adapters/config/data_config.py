@@ -36,6 +36,8 @@ class DataConfig(ABC):
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     is_batch: Union[None, bool] = None
 
+    n_image_channels: Union[None, int] = None
+
     n_classes: Union[None, int] = None
     class_names: Union[None, List[str]] = None
     class_names_to_use: Union[None, List[str]] = None
@@ -115,6 +117,7 @@ class DataConfig(ABC):
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
+            "n_image_channels": self.n_image_channels,
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
@@ -151,8 +154,10 @@ class DataConfig(ABC):
             self.n_classes = json_dict.get("n_classes")
         if self.class_names is None:
             self.class_names = json_dict.get("class_names")
-        if self.class_names_to_use is not None:
+        if self.class_names_to_use is None:
             self.class_names_to_use = json_dict.get("class_names_to_use")
+        if self.n_image_channels is None:
+            self.n_image_channels = json_dict.get("n_image_channels")
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -175,6 +180,11 @@ class DataConfig(ABC):
             )
             self.is_batch: bool = question.ask(hint=hint)
         return self.is_batch
+
+    def get_n_image_channels(self, question: Optional[Question] = None, hint: str = "") -> int:
+        if self.n_image_channels is None:
+            self.n_image_channels = ask_question(question=question, hint=hint)
+        return self.n_image_channels
 
 
 @dataclass
