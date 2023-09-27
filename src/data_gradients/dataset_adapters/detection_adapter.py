@@ -8,13 +8,12 @@ from data_gradients.dataset_adapters.config.data_config import DetectionDataConf
 
 class DetectionDatasetAdapter(BaseDatasetAdapter):
     """Wrap a detection dataset so that it would return standardized tensors.
-    :param n_image_channels:    Number of image channels.
     :param data_config:         Instance of DetectionDataConfig class that manages dataset/dataloader configurations.
     """
 
-    def __init__(self, data_config: Optional[DetectionDataConfig] = None, n_image_channels: int = 3):
+    def __init__(self, data_config: Optional[DetectionDataConfig] = None):
         dataset_output_mapper = DatasetOutputMapper(data_config=data_config)
-        formatter = DetectionBatchFormatter(data_config=data_config, n_image_channels=n_image_channels)
+        formatter = DetectionBatchFormatter(data_config=data_config)
         super().__init__(dataset_output_mapper=dataset_output_mapper, formatter=formatter, data_config=data_config)
 
     @classmethod

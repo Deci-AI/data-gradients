@@ -21,19 +21,13 @@ class UnsupportedClassificationBatchFormatError(DatasetFormatError):
 class ClassificationBatchFormatter(BatchFormatter):
     """Classification formatter class"""
 
-    def __init__(
-        self,
-        data_config: ClassificationDataConfig,
-        n_image_channels: int,
-    ):
-        """
-        :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
-        """
+    def __init__(self, data_config: ClassificationDataConfig):
         self.data_config = data_config
-        self.n_image_channels = n_image_channels
 
         if data_config.get_class_names_to_use() != data_config.get_class_names():
             logger.warning("Classification task does NOT support class filtering, yet `class_names_to_use` was set. This will parameter will be ignored.")
+
+        super().__init__(data_config=data_config)
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
@@ -49,8 +43,9 @@ class ClassificationBatchFormatter(BatchFormatter):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
-        images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
-        images = check_images_shape(images, n_image_channels=self.n_image_channels)
+        images = ensure_channel_first(images, n_image_channels=self.get_n_image_channels(images=images))
+        images = check_images_shape(images, n_image_channels=self.get_n_image_channels(images=images))
+
         labels = self.ensure_labels_shape(images=images, labels=labels)
 
         if 0 <= images.min() and images.max() <= 1:

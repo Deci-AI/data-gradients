@@ -12,16 +12,11 @@ from data_gradients.dataset_adapters.config import DetectionDataConfig
 
 
 class DetectionSamplePreprocessor(AbstractSamplePreprocessor):
-    def __init__(
-        self,
-        data_config: DetectionDataConfig,
-        n_image_channels: int,
-        image_format: Optional[ImageChannelFormat],
-    ):
+    def __init__(self, data_config: DetectionDataConfig, image_format: Optional[ImageChannelFormat]):
         self.data_config = data_config
         self.image_format = image_format
 
-        self.adapter = DetectionDatasetAdapter(data_config=data_config, n_image_channels=n_image_channels)
+        self.adapter = DetectionDatasetAdapter(data_config=data_config)
         super().__init__(data_config=data_config)
 
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[DetectionSample]:

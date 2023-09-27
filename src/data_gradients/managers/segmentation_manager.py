@@ -74,6 +74,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
         data_config = SegmentationDataConfig(
             class_names=class_names,
+            n_image_channels=num_image_channels,
             n_classes=n_classes,
             cache_path=cache_path,
             class_names_to_use=class_names_to_use,
@@ -82,9 +83,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             is_batch=is_batch,
         )
 
-        sample_preprocessor = SegmentationSampleProcessor(
-            data_config=data_config, num_image_channels=num_image_channels, threshold_soft_labels=threshold_soft_labels, image_format=image_format
-        )
+        sample_preprocessor = SegmentationSampleProcessor(data_config=data_config, threshold_soft_labels=threshold_soft_labels, image_format=image_format)
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="segmentation", config_path=config_path, feature_extractors=feature_extractors
         )

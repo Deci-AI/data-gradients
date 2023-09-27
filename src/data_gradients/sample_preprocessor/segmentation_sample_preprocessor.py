@@ -13,11 +13,11 @@ from data_gradients.dataset_adapters.config.data_config import SegmentationDataC
 
 
 class SegmentationSampleProcessor(AbstractSamplePreprocessor):
-    def __init__(self, data_config: SegmentationDataConfig, num_image_channels: int, threshold_soft_labels: float, image_format: Optional[ImageChannelFormat]):
+    def __init__(self, data_config: SegmentationDataConfig, threshold_soft_labels: float, image_format: Optional[ImageChannelFormat]):
         self.data_config = data_config
         self.image_format = image_format
 
-        self.adapter = SegmentationDatasetAdapter(data_config=data_config, n_image_channels=num_image_channels, threshold_soft_labels=threshold_soft_labels)
+        self.adapter = SegmentationDatasetAdapter(data_config=data_config, threshold_soft_labels=threshold_soft_labels)
         super().__init__(data_config=self.adapter.data_config)
 
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[SegmentationSample]:

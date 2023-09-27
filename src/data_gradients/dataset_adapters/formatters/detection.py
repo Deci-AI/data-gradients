@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Callable, List
+from typing import Tuple, Callable, List, Optional
 
 import torch
 from torch import Tensor
@@ -22,25 +22,14 @@ class UnsupportedDetectionBatchFormatError(DatasetFormatError):
 class DetectionBatchFormatter(BatchFormatter):
     """Detection formatter class"""
 
-    def __init__(
-        self,
-        data_config: DetectionDataConfig,
-        n_image_channels: int,
-        xyxy_converter: Optional[Callable[[Tensor], Tensor]] = None,
-        label_first: Optional[bool] = None,
-    ):
-        """
-        :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
-        :param xyxy_converter:      Function to convert the bboxes to the `xyxy` format.
-        :param label_first:         Whether the annotated_bboxes states with labels, or with the bboxes. (typically label_xyxy vs xyxy_label)
-        """
+    def __init__(self, data_config: DetectionDataConfig):
         self.data_config = data_config
 
-        self.n_image_channels = n_image_channels
-        self.xyxy_converter = xyxy_converter
-        self.label_first = label_first
-
         self.class_ids_to_use: Optional[List[str]] = None  # This will be initialized in `format()`
+
+        self.xyxy_converter = None
+        self.label_first = None
+        super().__init__(data_config=data_config)
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
@@ -65,8 +54,8 @@ class DetectionBatchFormatter(BatchFormatter):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
-        images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
-        images = check_images_shape(images, n_image_channels=self.n_image_channels)
+        images = ensure_channel_first(images, n_image_channels=self.get_n_image_channels(images=images))
+        images = check_images_shape(images, n_image_channels=self.get_n_image_channels(images=images))
         if 0 <= images.min() and images.max() <= 1:
             images *= 255
             images = images.to(torch.uint8)

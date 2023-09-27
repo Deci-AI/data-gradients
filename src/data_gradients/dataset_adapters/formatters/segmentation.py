@@ -17,23 +17,20 @@ class SegmentationBatchFormatter(BatchFormatter):
     def __init__(
         self,
         data_config: SegmentationDataConfig,
-        n_image_channels: int,
         threshold_value: float,
         ignore_labels: Optional[List[int]] = None,
     ):
         """
-        :param n_image_channels:    Number of image channels (3 for RGB, 1 for Gray Scale, ...)
         :param threshold_value:     Threshold
         :param ignore_labels:       Numbers that we should avoid from analyzing as valid classes, such as background
         """
-        self.n_image_channels = n_image_channels
+        self.class_ids_to_ignore: Optional[List[str]] = None  # This will be initialized in `format()`
         self.ignore_labels = ignore_labels or []
 
         self.threshold_value = threshold_value
         self.is_input_soft_label = None
         self.data_config = data_config
-
-        self.class_ids_to_ignore: Optional[List[str]] = None  # This will be initialized in `format()`
+        super().__init__(data_config=data_config)
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for segmentation.
@@ -58,10 +55,10 @@ class SegmentationBatchFormatter(BatchFormatter):
         images = drop_nan(images)
         labels = drop_nan(labels)
 
-        images = ensure_channel_first(images, n_image_channels=self.n_image_channels)
-        labels = ensure_channel_first(labels, n_image_channels=self.n_image_channels)
+        images = ensure_channel_first(images, n_image_channels=self.get_n_image_channels(images=images))
+        labels = ensure_channel_first(labels, n_image_channels=self.get_n_image_channels(images=images))
 
-        images = check_images_shape(images, n_image_channels=self.n_image_channels)
+        images = check_images_shape(images, n_image_channels=self.get_n_image_channels(images=images))
 
         labels = self.validate_labels_dim(labels, n_classes=self.data_config.get_n_classes(), ignore_labels=self.ignore_labels)
         labels = self.ensure_hard_labels(labels, n_classes=self.data_config.get_n_classes(), threshold_value=self.threshold_value)
