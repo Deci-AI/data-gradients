@@ -231,8 +231,8 @@ class DetectionDataConfig(DataConfig):
 
 def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
     """Ensure that either `class_names` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
-    if n_classes and class_names:
-        raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
+    if n_classes and class_names and (len(class_names) != n_classes):
+        raise RuntimeError(f"`len(class_names)={len(class_names)} != n_classes`.")
     elif n_classes is None and class_names is None:
         raise RuntimeError("Either `class_names` or `n_classes` must be specified")
     return class_names or list(map(str, range(n_classes)))
