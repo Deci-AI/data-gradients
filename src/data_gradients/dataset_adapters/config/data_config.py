@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Callable, Union, List
 
 import data_gradients
-from data_gradients.dataset_adapters.config.questions import OptionQuestion, text_to_yellow
+from data_gradients.dataset_adapters.config.questions import OptionQuestion, OpenEndedQuestion, text_to_yellow
 from data_gradients.dataset_adapters.config.caching_utils import TensorExtractorResolver, XYXYConverterResolver
 from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
@@ -48,11 +48,6 @@ class DataConfig(ABC):
             self.update_from_cache_file()
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
-
-        # Resolve class related params. This should be done after updating from the cache file because the cache may include some of these parameters.
-        self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
-        self.n_classes = len(self.class_names)
-        self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
 
     def update_from_cache_file(self):
         """Update the values that are not set yet, using the cache file."""
@@ -176,6 +171,30 @@ class DataConfig(ABC):
             self.is_batch: bool = question.ask(hint=hint)
         return self.is_batch
 
+    def get_class_names(self) -> List[str]:
+        if self.class_names is None:
+            self._setup_class_related_params()
+        return self.class_names
+
+    def get_n_classes(self) -> int:
+        if self.n_classes is None:
+            self._setup_class_related_params()
+        return self.n_classes
+
+    def get_class_names_to_use(self) -> List[str]:
+        if self.class_names_to_use is None:
+            self._setup_class_related_params()
+        return self.class_names_to_use
+
+    def _setup_class_related_params(self):
+        """Resolve class related params.
+
+        All the parameters are set up together because strongly related - knowing only `class_names` or `n_classes` is enough to set the values of the other 2.
+        """
+        self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
+        self.n_classes = len(self.class_names)
+        self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
+
 
 @dataclass
 class ClassificationDataConfig(DataConfig):
@@ -234,7 +253,12 @@ def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
     if n_classes and class_names:
         raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
     elif n_classes is None and class_names is None:
-        raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+        question = OpenEndedQuestion(
+            question="How many classes does your dataset include?",
+            validation=lambda answer: answer.isdigit() and int(answer) >= 0,
+        )
+        n_classes = int(question.ask())
+
     return class_names or list(map(str, range(n_classes)))
 
 

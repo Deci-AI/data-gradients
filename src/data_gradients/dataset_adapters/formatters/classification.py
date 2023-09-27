@@ -32,7 +32,7 @@ class ClassificationBatchFormatter(BatchFormatter):
         self.data_config = data_config
         self.n_image_channels = n_image_channels
 
-        if data_config.class_names_to_use != data_config.class_names:
+        if data_config.get_class_names_to_use() != data_config.get_class_names():
             logger.warning("Classification task does NOT support class filtering, yet `class_names_to_use` was set. This will parameter will be ignored.")
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:

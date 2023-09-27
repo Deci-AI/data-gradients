@@ -33,7 +33,7 @@ class SegmentationSampleProcessor(AbstractSamplePreprocessor):
                     image=image,
                     mask=mask,
                     contours=contours,
-                    class_names=self.data_config.class_names,
+                    class_names=self.data_config.get_class_names(),
                     split=split,
                     image_format=self.image_format,
                     sample_id=str(time.time()),

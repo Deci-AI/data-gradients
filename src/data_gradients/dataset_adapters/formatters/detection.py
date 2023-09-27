@@ -36,10 +36,11 @@ class DetectionBatchFormatter(BatchFormatter):
         """
         self.data_config = data_config
 
-        self.class_ids_to_use = [data_config.class_names.index(class_name) for class_name in data_config.class_names_to_use]
         self.n_image_channels = n_image_channels
         self.xyxy_converter = xyxy_converter
         self.label_first = label_first
+
+        self.class_ids_to_use: Optional[List[str]] = None  # This will be initialized in `format()`
 
     def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
@@ -50,6 +51,11 @@ class DetectionBatchFormatter(BatchFormatter):
             - images: Batch of images already formatted into (BS, C, H, W)
             - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
+
+        if self.class_ids_to_use is None:
+            # This may trigger questions to the user, so we prefer to set it inside `former()` and not `__init__`
+            # to avoid asking questions even before the analysis starts.
+            self.class_ids_to_use = [self.data_config.get_class_names().index(class_name) for class_name in self.data_config.get_class_names_to_use()]
 
         if labels.numel() == 0:
             # First thing is to make sure that, if we have empty labels, they are in a correct format

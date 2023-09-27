@@ -37,7 +37,7 @@ class DetectionSamplePreprocessor(AbstractSamplePreprocessor):
                     image=image,
                     class_ids=class_ids,
                     bboxes_xyxy=bboxes_xyxy,
-                    class_names=self.data_config.class_names,
+                    class_names=self.data_config.get_class_names(),
                     split=split,
                     image_format=self.image_format,
                     sample_id=str(time.time()),
