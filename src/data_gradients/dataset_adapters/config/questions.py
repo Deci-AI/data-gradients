@@ -111,9 +111,11 @@ def ask_via_stdin(question: str, optional_description: str, validate_func: Optio
     answer = None
     while answer is None:
         try:
-            answer = input("\nEnter your response >>> ")
+            input_description = f"Your selection (Enter the {text_to_blue('corresponding number')}) >>> "
+            "Enter your response >>> "
+            answer = input(f"\n{input_description}")
             if validate_func and not validate_func(answer):
-                print(f"`{answer}` is not a valid input! Please check the instruction and try again.")
+                print(f"{text_to_red(f'`{answer}` is not a valid input!')} Please check the instruction and try again.")
                 answer = None
         except Exception as e:
             print(text_to_red(f"Oops! {e}. Let's try again."))
@@ -129,7 +131,9 @@ def ask_open_ended_via_stdin(question: OpenEndedQuestion, hint: str) -> str:
     :param hint:        A hint or additional instruction for the question.
     :return:            User's response to the question.
     """
-    return ask_via_stdin(question=question.question, optional_description=hint, validate_func=question.validation)
+    user_answer = ask_via_stdin(question=question.question, optional_description=hint, validate_func=question.validation)
+    print(f"Great! {text_to_yellow(f'You chose: `{user_answer}`')}")
+    return user_answer
 
 
 def ask_option_via_stdin(question: OptionQuestion, hint: str) -> Any:
@@ -147,7 +151,9 @@ def ask_option_via_stdin(question: OptionQuestion, hint: str) -> Any:
     selected_index = int(ask_via_stdin(question=question.question, optional_description=description, validate_func=validate_func))
 
     potential_values = list(question.options.values())
-    return potential_values[selected_index]
+    selected_value = potential_values[selected_index]
+    print(f"Great! {text_to_yellow(f'You chose: `{selected_value}`')}")
+    return selected_value
 
 
 def ask_open_ended_via_jupyter(question: OpenEndedQuestion, hint: str) -> str:
@@ -171,7 +177,7 @@ def ask_open_ended_via_jupyter(question: OpenEndedQuestion, hint: str) -> str:
             user_answer = text_widget.value
             print(f"You entered: `{user_answer}`")
         else:
-            validation_message.value = f"`{text_widget.value}` is not a valid input! Please check the instruction and try again."
+            validation_message.value = f"`{text_to_red(f'{text_widget.value} is not a valid input!')} Please check the instruction and try again."
 
     # If there's a hint, display it using a Label widget
     hint_label = widgets.Label(value=hint) if hint else None
