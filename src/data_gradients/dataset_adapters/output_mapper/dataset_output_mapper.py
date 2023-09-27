@@ -7,7 +7,7 @@ from torchvision.transforms import transforms
 
 from data_gradients.dataset_adapters.output_mapper.tensor_extractor import get_tensor_extractor_options
 from data_gradients.dataset_adapters.config.data_config import DataConfig
-from data_gradients.dataset_adapters.config.questions import ClosedQuestion, text_to_yellow
+from data_gradients.dataset_adapters.config.questions import FixedOptionsQuestion, text_to_yellow
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
@@ -51,7 +51,7 @@ class DatasetOutputMapper:
         # Otherwise, we ask the user how to map data -> image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
             description, options = get_tensor_extractor_options(data)
-            question = ClosedQuestion(question=f"Which tensor represents your {text_to_yellow('Image(s)')} ?", options=options)
+            question = FixedOptionsQuestion(question=f"Which tensor represents your {text_to_yellow('Image(s)')} ?", options=options)
             return self.data_config.get_images_extractor(question=question, hint=description)
 
         raise NotImplementedError(
@@ -73,7 +73,7 @@ class DatasetOutputMapper:
         # Otherwise, we ask the user how to map data -> labels
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
             description, options = get_tensor_extractor_options(data)
-            question = ClosedQuestion(question=f"Which tensor represents your {text_to_yellow('Label(s)')} ?", options=options)
+            question = FixedOptionsQuestion(question=f"Which tensor represents your {text_to_yellow('Label(s)')} ?", options=options)
             return self.data_config.get_labels_extractor(question=question, hint=description)
 
         raise NotImplementedError(
