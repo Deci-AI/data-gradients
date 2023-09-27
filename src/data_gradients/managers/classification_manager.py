@@ -4,7 +4,7 @@ from typing import Optional, Iterable, Callable, List
 import torch
 
 from data_gradients.dataset_adapters.config.data_config import get_default_cache_dir
-from data_gradients.dataset_adapters.config.typing import SupportedDataType, FeatureExtractorsType
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, FeatureExtractorsType
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
