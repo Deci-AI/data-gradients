@@ -213,7 +213,6 @@ def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
     :param hint:        A hint or additional instruction for the question.
     :return:            User's selected option.
     """
-
     import ipywidgets as widgets
     from IPython.display import display
 
@@ -238,8 +237,6 @@ def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
             def callback(button):
                 nonlocal user_selected_index
                 user_selected_index = index
-                with output:
-                    print(f"You selected: {options[index]}")
 
             return callback
 
@@ -260,7 +257,11 @@ def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
         while user_selected_index is None:
             poll(10)
 
-    return options[user_selected_index]
+    potential_values = list(question.options.values())
+    selected_value = potential_values[user_selected_index]
+    print(f"Great! {text_to_yellow(f'You chose: `{selected_value}`')}")
+
+    return selected_value
 
 
 if __name__ == "__main__":
