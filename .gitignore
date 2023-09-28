@@ -11,3 +11,5 @@ __pycache__
 outputs
 .DS_Store
 full
+*.egg-info
+.ipynb_checkpoints
