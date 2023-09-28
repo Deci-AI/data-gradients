@@ -8,9 +8,9 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Callable, Union, List
 
 import data_gradients
-from data_gradients.dataset_adapters.config.questions import Question, ask_question, text_to_yellow
+from data_gradients.dataset_adapters.config.questions import FixedOptionsQuestion, text_to_yellow
 from data_gradients.dataset_adapters.config.caching_utils import TensorExtractorResolver, XYXYConverterResolver
-from data_gradients.dataset_adapters.config.typing import SupportedDataType, JSONDict
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
 from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
@@ -164,36 +164,36 @@ class DataConfig(ABC):
         if self.image_format is None:
             self.image_format = ImageChannelFormat(json_dict.get("image_format"))  # Load the string and convert to Enum
 
-    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
+    def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
-            self.images_extractor = ask_question(question=question, hint=hint)
+            self.images_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.images_extractor)
 
-    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
+    def get_labels_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.labels_extractor is None:
-            self.labels_extractor = ask_question(question=question, hint=hint)
+            self.labels_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
 
     def get_is_batch(self, hint: str = "") -> bool:
         if self.is_batch is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question="Does your dataset provide a batch or a single sample?",
                 options={
                     "Batch of Samples (e.g. torch Dataloader)": True,
                     "Single Sample (e.g. torch Dataset)": False,
                 },
             )
-            self.is_batch: bool = ask_question(question=question, hint=hint)
+            self.is_batch: bool = question.ask(hint=hint)
         return self.is_batch
 
-    def get_n_image_channels(self, question: Optional[Question] = None, hint: str = "") -> int:
+    def get_n_image_channels(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> int:
         if self.n_image_channels is None:
-            self.n_image_channels = ask_question(question=question, hint=hint)
+            self.n_image_channels = question.ask(hint=hint)
         return self.n_image_channels
 
     def get_image_format(self, hint: str = "") -> ImageChannelFormat:
         if self.image_format is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question="With which format were the images loaded ?",
                 options={
                     "RGB": ImageChannelFormat.RGB,
@@ -202,7 +202,7 @@ class DataConfig(ABC):
                     "UNKNOWN": ImageChannelFormat.UNKNOWN,
                 },
             )
-            self.image_format = ask_question(question=question, hint=hint)
+            self.image_format = question.ask(hint=hint)
         return self.image_format
 
 
@@ -238,30 +238,30 @@ class DetectionDataConfig(DataConfig):
 
     def get_is_label_first(self, hint: str = "") -> bool:
         if self.is_label_first is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question=f"{text_to_yellow('Which comes first')} in your annotations, the class id or the bounding box?",
                 options={
                     "Label comes first (e.g. [class_id, x1, y1, x2, y2])": True,
                     "Bounding box comes first (e.g. [x1, y1, x2, y2, class_id])": False,
                 },
             )
-            self.is_label_first: bool = ask_question(question=question, hint=hint)
+            self.is_label_first: bool = question.ask(hint=hint)
         return self.is_label_first
 
     def get_xyxy_converter(self, hint: str = "") -> Callable[[torch.Tensor], torch.Tensor]:
         if self.xyxy_converter is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question=f"What is the {text_to_yellow('bounding box format')}?",
                 options=XYXYConverter.get_available_options(),
             )
-            self.xyxy_converter = ask_question(question=question, hint=hint)
+            self.xyxy_converter = question.ask(hint=hint)
         return XYXYConverterResolver.to_callable(self.xyxy_converter)
 
 
 def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
     """Ensure that either `class_names` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
-    if n_classes and class_names:
-        raise RuntimeError("`class_names` and `n_classes` cannot be specified at the same time")
+    if n_classes and class_names and (len(class_names) != n_classes):
+        raise RuntimeError(f"`len(class_names)={len(class_names)} != n_classes`.")
     elif n_classes is None and class_names is None:
         raise RuntimeError("Either `class_names` or `n_classes` must be specified")
     return class_names or list(map(str, range(n_classes)))

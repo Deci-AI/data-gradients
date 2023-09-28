@@ -7,7 +7,7 @@ from data_gradients.dataset_adapters.config.data_config import DataConfig
 
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.output_mapper.dataset_output_mapper import DatasetOutputMapper
-from data_gradients.dataset_adapters.config.typing import SupportedDataType
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType
 
 
 class BaseDatasetAdapter(ABC):

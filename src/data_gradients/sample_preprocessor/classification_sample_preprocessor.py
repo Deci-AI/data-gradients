@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 
-from data_gradients.dataset_adapters.config.typing import SupportedDataType
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType
 from data_gradients.sample_preprocessor.base_sample_preprocessor import AbstractSamplePreprocessor
 from data_gradients.utils.data_classes.data_samples import ClassificationSample
 from data_gradients.dataset_adapters.classification_adapter import ClassificationDatasetAdapter
