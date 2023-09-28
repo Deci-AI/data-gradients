@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, Iterator
+from typing import Iterable, Iterator
 import time
 
 import numpy as np
@@ -7,16 +7,13 @@ from data_gradients.dataset_adapters.config.typing_utils import SupportedDataTyp
 from data_gradients.utils.data_classes import SegmentationSample
 from data_gradients.sample_preprocessor.base_sample_preprocessor import AbstractSamplePreprocessor
 from data_gradients.sample_preprocessor.utils.contours import get_contours
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 from data_gradients.dataset_adapters.segmentation_adapter import SegmentationDatasetAdapter
 from data_gradients.dataset_adapters.config.data_config import SegmentationDataConfig
 
 
 class SegmentationSampleProcessor(AbstractSamplePreprocessor):
-    def __init__(self, data_config: SegmentationDataConfig, threshold_soft_labels: float, image_format: Optional[ImageChannelFormat]):
+    def __init__(self, data_config: SegmentationDataConfig, threshold_soft_labels: float):
         self.data_config = data_config
-        self.image_format = image_format
-
         self.adapter = SegmentationDatasetAdapter(data_config=data_config, threshold_soft_labels=threshold_soft_labels)
         super().__init__(data_config=self.adapter.data_config)
 
@@ -35,6 +32,6 @@ class SegmentationSampleProcessor(AbstractSamplePreprocessor):
                     contours=contours,
                     class_names=self.data_config.class_names,
                     split=split,
-                    image_format=self.image_format,
+                    image_format=self.data_config.get_image_format(),
                     sample_id=str(time.time()),
                 )
