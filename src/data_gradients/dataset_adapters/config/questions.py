@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, List, Callable
 
 from data_gradients.utils.utils import text_to_blue, text_to_yellow, text_to_red
-from data_gradients.utils.jupyter_utils import ui_events
 
 
 class Question(ABC):
@@ -164,6 +163,7 @@ def ask_open_ended_via_jupyter(question: OpenEndedQuestion, hint: str) -> str:
     :param hint:        A hint or additional instruction for the question.
     :return:            User's response to the question.
     """
+    from data_gradients.utils.jupyter_utils import ui_events
 
     import ipywidgets as widgets
     from IPython.display import display
@@ -213,6 +213,7 @@ def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
     :param hint:        A hint or additional instruction for the question.
     :return:            User's selected option.
     """
+    from data_gradients.utils.jupyter_utils import ui_events
 
     import ipywidgets as widgets
     from IPython.display import display
@@ -238,8 +239,6 @@ def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
             def callback(button):
                 nonlocal user_selected_index
                 user_selected_index = index
-                with output:
-                    print(f"You selected: {options[index]}")
 
             return callback
 
@@ -260,7 +259,11 @@ def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
         while user_selected_index is None:
             poll(10)
 
-    return options[user_selected_index]
+    potential_values = list(question.options.values())
+    selected_value = potential_values[user_selected_index]
+    print(f"Great! {text_to_yellow(f'You chose: `{selected_value}`')}")
+
+    return selected_value
 
 
 if __name__ == "__main__":
