@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple
 
 import torch
-from data_gradients.dataset_adapters.config.questions import Question
+from data_gradients.dataset_adapters.config.questions import FixedOptionsQuestion
 
 
 class BatchFormatter(ABC):
@@ -25,7 +25,7 @@ class BatchFormatter(ABC):
     def get_n_image_channels(self, images: torch.Tensor) -> int:
         """Get the number of image channels in the batch. If not set yet, it will be asked to the user."""
         if self._n_image_channels is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question="Which dimension corresponds the image channel? ",
                 options={i: images.shape[i] for i in range(len(images.shape))},
             )

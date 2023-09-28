@@ -13,6 +13,7 @@ from data_gradients.dataset_adapters.config.caching_utils import TensorExtractor
 from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
+from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ class DataConfig(ABC):
     is_batch: Union[None, bool] = None
 
     n_image_channels: Union[None, int] = None
+    image_format: Union[None, ImageChannelFormat] = None
 
     n_classes: Union[None, int] = None
     class_names: Union[None, List[str]] = None
@@ -113,6 +115,7 @@ class DataConfig(ABC):
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
             "n_image_channels": self.n_image_channels,
+            "image_format": self.image_format.name,
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
@@ -153,6 +156,8 @@ class DataConfig(ABC):
             self.class_names_to_use = json_dict.get("class_names_to_use")
         if self.n_image_channels is None:
             self.n_image_channels = json_dict.get("n_image_channels")
+        if self.image_format is None:
+            self.image_format = ImageChannelFormat(json_dict.get("image_format"))  # Load the string and convert to Enum
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -204,6 +209,20 @@ class DataConfig(ABC):
         if self.n_image_channels is None:
             self.n_image_channels = question.ask(hint=hint)
         return self.n_image_channels
+
+    def get_image_format(self, hint: str = "") -> ImageChannelFormat:
+        if self.image_format is None:
+            question = FixedOptionsQuestion(
+                question="With which format were the images loaded ?",
+                options={
+                    "RGB": ImageChannelFormat.RGB,
+                    "BGR": ImageChannelFormat.BGR,
+                    "GRAYSCALE": ImageChannelFormat.GRAYSCALE,
+                    "UNKNOWN": ImageChannelFormat.UNKNOWN,
+                },
+            )
+            self.image_format = question.ask(hint=hint)
+        return self.image_format
 
 
 @dataclass

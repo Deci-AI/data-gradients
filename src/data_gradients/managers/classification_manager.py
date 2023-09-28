@@ -68,6 +68,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         data_config = ClassificationDataConfig(
             cache_path=cache_path,
             n_image_channels=n_image_channels,
+            image_format=image_format,
             n_classes=n_classes,
             class_names=class_names,
             images_extractor=images_extractor,
@@ -75,7 +76,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
             is_batch=is_batch,
         )
 
-        sample_preprocessor = ClassificationSamplePreprocessor(data_config=data_config, image_format=image_format)
+        sample_preprocessor = ClassificationSamplePreprocessor(data_config=data_config)
         grouped_feature_extractors = get_grouped_feature_extractors(
             default_config_name="classification", config_path=config_path, feature_extractors=feature_extractors
         )
