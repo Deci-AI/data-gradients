@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, List, Callable
 
 from data_gradients.utils.utils import text_to_blue, text_to_yellow, text_to_red
-from data_gradients.utils.jupyter_utils import ui_events
 
 
 class Question(ABC):
@@ -164,6 +163,7 @@ def ask_open_ended_via_jupyter(question: OpenEndedQuestion, hint: str) -> str:
     :param hint:        A hint or additional instruction for the question.
     :return:            User's response to the question.
     """
+    from data_gradients.utils.jupyter_utils import ui_events
 
     import ipywidgets as widgets
     from IPython.display import display
@@ -213,6 +213,8 @@ def ask_option_via_jupyter(question: FixedOptionsQuestion, hint: str) -> str:
     :param hint:        A hint or additional instruction for the question.
     :return:            User's selected option.
     """
+    from data_gradients.utils.jupyter_utils import ui_events
+
     import ipywidgets as widgets
     from IPython.display import display
 
