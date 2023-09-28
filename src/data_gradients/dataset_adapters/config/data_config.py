@@ -4,18 +4,22 @@ import logging
 import platformdirs
 import torch
 from abc import ABC
-from dataclasses import dataclass, field
-from typing import Dict, Optional, Callable, Union
+from dataclasses import dataclass
+from typing import Dict, Optional, Callable, Union, List
 
 import data_gradients
-from data_gradients.config.data.questions import Question, ask_question, text_to_yellow
-from data_gradients.config.data.caching_utils import TensorExtractorResolver, XYXYConverterResolver
-from data_gradients.config.data.typing import SupportedDataType, JSONDict
+from data_gradients.dataset_adapters.config.questions import FixedOptionsQuestion, text_to_yellow
+from data_gradients.dataset_adapters.config.caching_utils import TensorExtractorResolver, XYXYConverterResolver
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def get_default_cache_dir() -> str:
+    return platformdirs.user_cache_dir("DataGradients", "Deci")
 
 
 @dataclass
@@ -28,39 +32,54 @@ class DataConfig(ABC):
             Also supports saving and loading from callable defined within DataGradients.
     """
 
-    cache_filename: Optional[str] = None
-    cache_dir: Optional[str] = None
     images_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     is_batch: Union[None, bool] = None
 
-    DEFAULT_CACHE_DIR: str = field(default_factory=lambda: platformdirs.user_cache_dir("DataGradients", "Deci"), init=False)
+    n_image_channels: Union[None, int] = None
+
+    n_classes: Union[None, int] = None
+    class_names: Union[None, List[str]] = None
+    class_names_to_use: Union[None, List[str]] = None
+
+    cache_path: Optional[str] = None
 
     def __post_init__(self):
-        self.cache_dir = self.cache_dir if self.cache_dir is not None else self.DEFAULT_CACHE_DIR
-
         # Once the object is initialized, we check if the cache is activated or not.
-        if self.cache_filename is not None:
-            cache_path = os.path.join(self.cache_dir, self.cache_filename)
-            logger.info(
-                f"Cache activated for `{self.__class__.__name__}`. This will be used to set attributes that you did not set manually. "
-                f'Caching to "{cache_path}"'
-            )
-            self._fill_missing_params_with_cache(cache_path)
+        if self.cache_path is not None and os.path.isfile(self.cache_path):
+            self.update_from_cache_file()
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
 
+        # Resolve class related params. This should be done after updating from the cache file because the cache may include some of these parameters.
+        self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
+        self.n_classes = len(self.class_names)
+        self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
+
+    def update_from_cache_file(self):
+        """Update the values that are not set yet, using the cache file."""
+        if self.cache_path is not None and os.path.isfile(self.cache_path):
+            self._fill_missing_params_with_cache(self.cache_path)
+
+    def dump_cache_file(self):
+        """Save the current state to the cache file."""
+        if self.cache_path is not None:
+            self.write_to_json(self.cache_path)
+
+    def get_caching_info(self) -> str:
+        """Get information about the status of the caching."""
+        if self.cache_path is None:
+            return f"`{self.__class__.__name__}` cache is not enabled because `cache_path={self.cache_path}` was not set."
+        return f"`{self.__class__.__name__}` cache is set to `cache_path={self.cache_path}`."
+
     @classmethod
-    def load_from_json(cls, filename: str, dir_path: Optional[str] = None) -> "DataConfig":
+    def load_from_json(cls, cache_path: str) -> "DataConfig":
         """Load an instance of DataConfig directly from a cache file.
-        :param filename: Name of the cache file. This should include ".json" extension.
-        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param cache_path: Path to the cache file. This should include ".json" extension.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = dir_path or cls.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, filename)
         try:
-            return cls(**cls._load_json_dict(path=path))
+            return cls(**cls._load_json_dict(path=cache_path))
         except TypeError as e:
             raise TypeError(f"{e}\n\t => Could not load `{cls.__name__}` from cache.") from e
 
@@ -80,18 +99,15 @@ class DataConfig(ABC):
             )
             return {}
 
-    def write_to_json(self, filename: str, dir_path: Optional[str] = None):
+    def write_to_json(self, cache_path: str):
         """Save the serializable representation of the class to a .json file.
-        :param filename: Name of the cache file. This should include ".json" extension.
-        :param dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param cache_path: Full path to the cache file. This should end with ".json" extension
         """
-        dir_path = dir_path or self.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, filename)
-        if not path.endswith(".json"):
-            raise ValueError(f"`{path}` should end with `.json`")
+        if not cache_path.endswith(".json"):
+            raise ValueError(f"`{cache_path}` should end with `.json`")
 
         json_dict = {"metadata": {"__version__": data_gradients.__version__}, "attributes": self.to_json()}
-        write_json(json_dict=json_dict, path=path)
+        write_json(json_dict=json_dict, path=cache_path)
 
     def to_json(self) -> JSONDict:
         """Convert the dataclass into a serializable representation that can be saved and loaded safely.
@@ -101,17 +117,23 @@ class DataConfig(ABC):
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
+            "n_image_channels": self.n_image_channels,
+            "n_classes": self.n_classes,
+            "class_names": self.class_names,
+            "class_names_to_use": self.class_names_to_use,
         }
         return json_dict
 
-    def _fill_missing_params_with_cache(self, cache_filename: str, cache_dir_path: Optional[str] = None):
+    @property
+    def is_completely_initialized(self) -> bool:
+        """Check if all the attributes are set or not."""
+        return all(v is not None for v in self.to_json().values())
+
+    def _fill_missing_params_with_cache(self, path: str):
         """Load an instance of DataConfig directly from a cache file.
-        :param cache_filename: Name of the cache file. This should include ".json" extension.
-        :param cache_dir_path: Path to the folder where the cache file is located. By default, the cache file will be loaded from the user cache directory.
+        :param path: Full path of the cache file. This should end with ".json" extension.
         :return: An instance of DataConfig loaded from the cache file.
         """
-        dir_path = cache_dir_path or self.DEFAULT_CACHE_DIR
-        path = os.path.join(dir_path, cache_filename)
         cache_dict = self._load_json_dict(path=path)
         if cache_dict:
             self._fill_missing_params(json_dict=cache_dict)
@@ -128,34 +150,41 @@ class DataConfig(ABC):
             self.labels_extractor = json_dict.get("labels_extractor")
         if self.is_batch is None:
             self.is_batch = json_dict.get("is_batch")
+        if self.n_classes is None:
+            self.n_classes = json_dict.get("n_classes")
+        if self.class_names is None:
+            self.class_names = json_dict.get("class_names")
+        if self.class_names_to_use is None:
+            self.class_names_to_use = json_dict.get("class_names_to_use")
+        if self.n_image_channels is None:
+            self.n_image_channels = json_dict.get("n_image_channels")
 
-    def get_images_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
+    def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
-            self.images_extractor = ask_question(question=question, hint=hint)
+            self.images_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.images_extractor)
 
-    def get_labels_extractor(self, question: Optional[Question] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
+    def get_labels_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.labels_extractor is None:
-            self.labels_extractor = ask_question(question=question, hint=hint)
+            self.labels_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
 
     def get_is_batch(self, hint: str = "") -> bool:
         if self.is_batch is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question="Does your dataset provide a batch or a single sample?",
                 options={
                     "Batch of Samples (e.g. torch Dataloader)": True,
                     "Single Sample (e.g. torch Dataset)": False,
                 },
             )
-            self.is_batch: bool = ask_question(question=question, hint=hint)
+            self.is_batch: bool = question.ask(hint=hint)
         return self.is_batch
 
-    def close(self):
-        """Run any action required to cleanly close the object. May include saving cache."""
-        if self.cache_filename is not None:
-            logger.info(f"Saving cache to {self.cache_filename}")
-            self.write_to_json(self.cache_filename)
+    def get_n_image_channels(self, question: Optional[Question] = None, hint: str = "") -> int:
+        if self.n_image_channels is None:
+            self.n_image_channels = ask_question(question=question, hint=hint)
+        return self.n_image_channels
 
 
 @dataclass
@@ -190,21 +219,39 @@ class DetectionDataConfig(DataConfig):
 
     def get_is_label_first(self, hint: str = "") -> bool:
         if self.is_label_first is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question=f"{text_to_yellow('Which comes first')} in your annotations, the class id or the bounding box?",
                 options={
                     "Label comes first (e.g. [class_id, x1, y1, x2, y2])": True,
                     "Bounding box comes first (e.g. [x1, y1, x2, y2, class_id])": False,
                 },
             )
-            self.is_label_first: bool = ask_question(question=question, hint=hint)
+            self.is_label_first: bool = question.ask(hint=hint)
         return self.is_label_first
 
     def get_xyxy_converter(self, hint: str = "") -> Callable[[torch.Tensor], torch.Tensor]:
         if self.xyxy_converter is None:
-            question = Question(
+            question = FixedOptionsQuestion(
                 question=f"What is the {text_to_yellow('bounding box format')}?",
                 options=XYXYConverter.get_available_options(),
             )
-            self.xyxy_converter = ask_question(question=question, hint=hint)
+            self.xyxy_converter = question.ask(hint=hint)
         return XYXYConverterResolver.to_callable(self.xyxy_converter)
+
+
+def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
+    """Ensure that either `class_names` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
+    if n_classes and class_names and (len(class_names) != n_classes):
+        raise RuntimeError(f"`len(class_names)={len(class_names)} != n_classes`.")
+    elif n_classes is None and class_names is None:
+        raise RuntimeError("Either `class_names` or `n_classes` must be specified")
+    return class_names or list(map(str, range(n_classes)))
+
+
+def resolve_class_names_to_use(class_names: List[str], class_names_to_use: List[str]) -> List[str]:
+    """Define `class_names_to_use` from `class_names` if it is specified. Otherwise, return the list of class names that will be used."""
+    if class_names_to_use:
+        invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
+        if invalid_class_names_to_use != set():
+            raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
+    return class_names_to_use or class_names
