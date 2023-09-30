@@ -11,7 +11,7 @@ class ImageChannelFormat(Enum):
     RGB = "RGB"
     BGR = "BGR"
     GRAYSCALE = "GRAYSCALE"
-    UNKNOWN = "UNKNOWN"
+    UNKNOWN = None
     UNCHANGED = "UNCHANGED"
 
 
