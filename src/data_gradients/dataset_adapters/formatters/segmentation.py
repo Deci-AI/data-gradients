@@ -24,9 +24,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         :param threshold_value:     Threshold
         :param ignore_labels:       Numbers that we should avoid from analyzing as valid classes, such as background
         """
-        classes_to_ignore = set(data_config.class_names) - set(data_config.class_names_to_use)
-        self.class_ids_to_ignore = [data_config.class_names.index(class_name_to_ignore) for class_name_to_ignore in classes_to_ignore]
-
+        self.class_ids_to_ignore: Optional[List[str]] = None  # This will be initialized in `format()`
         self.ignore_labels = ignore_labels or []
 
         self.threshold_value = threshold_value
@@ -44,6 +42,12 @@ class SegmentationBatchFormatter(BatchFormatter):
             - labels: Batch of labels already formatted into (BS, N, H, W)
         """
 
+        if self.class_ids_to_ignore is None:
+            # This may trigger questions to the user, so we prefer to set it inside `former()` and not `__init__`
+            # to avoid asking questions even before the analysis starts.
+            classes_to_ignore = set(self.data_config.get_class_names()) - set(self.data_config.get_class_names_to_use())
+            self.class_ids_to_ignore = [self.data_config.get_class_names().index(class_name_to_ignore) for class_name_to_ignore in classes_to_ignore]
+
         if not self.check_is_batch(images=images, labels=labels):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
@@ -56,11 +60,11 @@ class SegmentationBatchFormatter(BatchFormatter):
 
         images = check_images_shape(images, n_image_channels=self.get_n_image_channels(images=images))
 
-        labels = self.validate_labels_dim(labels, n_classes=self.data_config.n_classes, ignore_labels=self.ignore_labels)
-        labels = self.ensure_hard_labels(labels, n_classes=self.data_config.n_classes, threshold_value=self.threshold_value)
+        labels = self.validate_labels_dim(labels, n_classes=self.data_config.get_n_classes(), ignore_labels=self.ignore_labels)
+        labels = self.ensure_hard_labels(labels, n_classes=self.data_config.get_n_classes(), threshold_value=self.threshold_value)
 
-        if self.require_onehot(labels=labels, n_classes=self.data_config.n_classes):
-            labels = to_one_hot(labels, n_classes=self.data_config.n_classes)
+        if self.require_onehot(labels=labels, n_classes=self.data_config.get_n_classes()):
+            labels = to_one_hot(labels, n_classes=self.data_config.get_n_classes())
 
         for class_id_to_ignore in self.class_ids_to_ignore:
             labels[:, class_id_to_ignore, ...] = 0
