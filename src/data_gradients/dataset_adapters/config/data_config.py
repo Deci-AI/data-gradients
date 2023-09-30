@@ -157,7 +157,7 @@ class DataConfig(ABC):
         if self.n_image_channels is None:
             self.n_image_channels = json_dict.get("n_image_channels")
         if self.image_format is None:
-            self.image_format = ImageChannelFormat(json_dict.get("image_format"))  # Load the string and convert to Enum
+            self.image_format = ImageChannelFormat(json_dict.get("image_format", ImageChannelFormat.UNKNOWN.value))  # Load the string and convert to Enum
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
