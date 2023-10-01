@@ -282,9 +282,19 @@ def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
     if n_classes and class_names and (len(class_names) != n_classes):
         raise RuntimeError(f"`len(class_names)={len(class_names)} != n_classes`.")
     elif n_classes is None and class_names is None:
+
+        def _represents_int(s: str) -> bool:
+            """Check if a string represents an integer."""
+            try:
+                int(s)
+            except ValueError:
+                return False
+            else:
+                return True
+
         question = OpenEndedQuestion(
             question="How many classes does your dataset include?",
-            validation=lambda answer: answer.isdigit() and int(answer) >= 0,
+            validation=lambda answer: _represents_int(answer) and int(answer) > 0,
         )
         n_classes = int(question.ask())
 
