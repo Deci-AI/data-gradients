@@ -24,7 +24,7 @@ class ClassificationBatchFormatter(BatchFormatter):
     def __init__(self, data_config: ClassificationDataConfig):
         self.data_config = data_config
 
-        if data_config.class_names_to_use != data_config.class_names:
+        if data_config.get_class_names_to_use() != data_config.get_class_names():
             logger.warning("Classification task does NOT support class filtering, yet `class_names_to_use` was set. This will parameter will be ignored.")
 
         super().__init__(data_config=data_config)
