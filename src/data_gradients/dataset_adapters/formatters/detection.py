@@ -31,7 +31,7 @@ class DetectionBatchFormatter(BatchFormatter):
         self.label_first = None
         super().__init__(data_config=data_config)
 
-    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
+    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, List[Tensor]]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
 
         :param images: Batch of images, in (BS, ...) format
@@ -156,26 +156,26 @@ class DetectionBatchFormatter(BatchFormatter):
         return torch.cat([labels, xyxy_bboxes], dim=-1)
 
     @staticmethod
-    def filter_non_relevant_annotations(bboxes: torch.Tensor, class_ids_to_use: List[int]) -> torch.Tensor:
+    def filter_non_relevant_annotations(bboxes: torch.Tensor, class_ids_to_use: List[int]) -> List[torch.Tensor]:
         """Filter the bounding box tensors to keep only the ones with relevant label; retains original tensor shape.
 
         :param bboxes:              Bounding box tensors with shape [batch_size, padding_size, 5], where 5 represents (label, x, y, x, y).
         :param class_ids_to_use:    List of class ids to keep.
         :return: Tensor of bounding boxes with the same shape as input, with non-relevant class IDs zeroed out, and pushed to the bottom.
         """
-        class_ids_to_use_tensor = torch.tensor(class_ids_to_use, device=bboxes.device, dtype=bboxes.dtype)
-        result_bboxes = []
+        filtered_bbox_tensors = []
+        class_ids_to_use_tensor = torch.tensor(class_ids_to_use)
 
-        for sample_bboxes in bboxes:
-            valid_mask = torch.isin(sample_bboxes[:, 0], class_ids_to_use_tensor)
+        for sample_bboxes in bboxes:  # sample_bboxes of shape [padding_size, 5]
+            sample_class_ids = sample_bboxes[:, 0]
+            valid_indices = torch.nonzero(torch.isin(sample_class_ids, class_ids_to_use_tensor)).squeeze(-1)
+            filtered_bbox = sample_bboxes[valid_indices]  # Shape [?, 5]
 
-            valid_bboxes = sample_bboxes[valid_mask]
-            invalid_bboxes = sample_bboxes[~valid_mask]
-            reordered_sample = torch.cat((valid_bboxes, torch.zeros_like(invalid_bboxes)), dim=0)
+            non_zero_indices = torch.any(filtered_bbox[:, 1:] != 0, dim=1)
+            filtered_bbox = filtered_bbox[non_zero_indices]  # Shape [?, 5]
 
-            result_bboxes.append(reordered_sample.unsqueeze(0))
-
-        return torch.cat(result_bboxes, dim=0)
+            filtered_bbox_tensors.append(filtered_bbox)
+        return filtered_bbox_tensors
 
     @staticmethod
     def group_detection_batch(flat_batch: torch.Tensor, batch_size: int) -> torch.Tensor:
