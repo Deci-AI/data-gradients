@@ -38,7 +38,7 @@ class DataConfig(ABC):
     is_batch: Union[None, bool] = None
 
     n_image_channels: Union[None, int] = None
-    image_format: Union[None, ImageChannelFormat] = None
+    image_format: ImageChannelFormat = ImageChannelFormat.UNKNOWN
 
     n_classes: Union[None, int] = None
     class_names: Union[None, List[str]] = None
@@ -115,7 +115,7 @@ class DataConfig(ABC):
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
             "n_image_channels": self.n_image_channels,
-            "image_format": self.image_format.name,
+            "image_format": self.image_format.value,
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
@@ -157,7 +157,7 @@ class DataConfig(ABC):
         if self.n_image_channels is None:
             self.n_image_channels = json_dict.get("n_image_channels")
         if self.image_format is None:
-            self.image_format = ImageChannelFormat(json_dict.get("image_format"))  # Load the string and convert to Enum
+            self.image_format = ImageChannelFormat(json_dict.get("image_format", ImageChannelFormat.UNKNOWN.value))  # Load the string and convert to Enum
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
