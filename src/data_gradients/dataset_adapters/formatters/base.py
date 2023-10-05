@@ -27,7 +27,7 @@ class BatchFormatter(ABC):
         if self._n_image_channels is None:
             question = FixedOptionsQuestion(
                 question="Which dimension corresponds the image channel? ",
-                options={i: images.shape[i] for i in range(len(images.shape))},
+                options={dim: dim for dim in images.shape},
             )
             hint = f"Image shape: {images.shape}"
             self._n_image_channels = self.data_config.get_n_image_channels(question=question, hint=hint)
