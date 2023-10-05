@@ -149,9 +149,12 @@ def ask_option_via_stdin(question: FixedOptionsQuestion, hint: str) -> Any:
     input_message = f"Your selection (Enter the {text_to_blue('corresponding number')}) >>> "
     selected_index = int(ask_via_stdin(question=question.question, optional_description=description, validate_func=validate_func, input_message=input_message))
 
-    potential_values = list(question.options.values())
-    selected_value = potential_values[selected_index]
-    print(f"Great! {text_to_yellow(f'You chose: `{selected_value}`')}")
+    options_descriptions, options_values = zip(*question.options.items())
+
+    selected_description = options_descriptions[selected_index]
+    selected_value = options_values[selected_index]
+
+    print(f"Great! {text_to_yellow(f'You chose: `{selected_description}`')}")
     return selected_value
 
 
