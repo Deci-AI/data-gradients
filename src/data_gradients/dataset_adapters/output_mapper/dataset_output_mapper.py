@@ -33,23 +33,21 @@ class DatasetOutputMapper:
         images_extractor = self._get_images_extractor(data)
         images = images_extractor(data)
         try:
-            self._to_torch(images)
+            return self._to_torch(images)
         except TypeError:
             raise TypeError(f"{type(images)} is not a supported format for images!")
         except Exception as e:
             raise RuntimeError("Error while loading images!") from e  # Here we want the traceback
-        return images
 
     def _extract_labels_as_tensor(self, data: SupportedData) -> torch.Tensor:
         labels_extractor = self._get_labels_extractor(data)
         labels = labels_extractor(data)
         try:
-            self._to_torch(labels)
+            return self._to_torch(labels)
         except TypeError:
             raise TypeError(f"{type(labels)} is not a supported format for labels!")
         except Exception as e:
             raise RuntimeError("Error while loading labels!") from e  # Here we want the traceback
-        return labels
 
     def _get_images_extractor(self, data: SupportedData) -> Callable[[SupportedData], torch.Tensor]:
         if self.data_config.images_extractor is not None:
