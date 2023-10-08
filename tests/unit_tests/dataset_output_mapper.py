@@ -1,4 +1,8 @@
+import os.path
 import unittest
+import tempfile
+import shutil
+
 import numpy as np
 from PIL import Image
 import torch
@@ -7,12 +11,21 @@ from data_gradients.dataset_adapters.output_mapper.dataset_output_mapper import 
 
 class TestImageConverter(unittest.TestCase):
     def setUp(self):
-        self.rbg_image_path = "dummy_rgb_image.jpg"
-        self.grayscale_image_path = "dummy_rgb_image.jpg"
+        self.tmp_dir = tempfile.mkdtemp()
+        self.rbg_image_path = os.path.join(self.tmp_dir, "dummy_rgb_image.jpg")
+        self.grayscale_image_path = os.path.join(self.tmp_dir, "dummy_grayscale_image.jpg")
 
-        data = np.random.randint(0, 256, (128, 128, 3), dtype=np.uint8)
+        data = np.random.randint(0, 256, (100, 100, 3), dtype=np.uint8)
         Image.fromarray(data, "RGB").save(self.rbg_image_path)
         Image.fromarray(data[:, :, 0], "L").save(self.grayscale_image_path)
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmp_dir)
+
+    def test_int_input(self):
+        tensor = 3
+        output = DatasetOutputMapper._to_torch(tensor)
+        self.assertTrue(torch.equal(output, torch.tensor(tensor, dtype=torch.int64)))
 
     def test_pytorch_tensor_input(self):
         tensor = torch.randn((3, 100, 100))
@@ -38,10 +51,10 @@ class TestImageConverter(unittest.TestCase):
         self.assertIsInstance(output, torch.Tensor)
 
     def test_list_input(self):
-        data = [np.random.rand(100, 100, 3), Image.new("RGB", (100, 100)), self.rbg_image_path]
+        data = [np.random.rand(100, 100, 3), Image.new("RGB", (100, 100)), self.rbg_image_path, self.rbg_image_path]
         output = DatasetOutputMapper._to_torch(data)
         self.assertIsInstance(output, torch.Tensor)
-        self.assertEqual(output.shape, (3, 3, 100, 100))
+        self.assertEqual(output.shape, (4, 100, 100, 3))
 
     def test_unsupported_type_input(self):
         with self.assertRaises(TypeError):

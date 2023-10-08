@@ -116,7 +116,9 @@ class DatasetOutputMapper:
             return torch.from_numpy(np.array(data))
         elif isinstance(data, str):
             with PIL.Image.open(data) as img:
-                return torch.from_numpy(np.array(img)).permute(2, 0, 1)
+                return torch.from_numpy(np.array(img))
+        elif np.isscalar(data):
+            return torch.tensor(data)
         elif isinstance(data, list):
             tensors = [cls._to_torch(t) for t in data]
 
