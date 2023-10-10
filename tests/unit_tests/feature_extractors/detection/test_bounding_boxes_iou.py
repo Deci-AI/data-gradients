@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from data_gradients.feature_extractors.object_detection.bounding_boxes_iou import DetectionBoundingBoxIoU
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat, DetectionSample
+from data_gradients.utils.data_classes.data_samples import str, DetectionSample
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
@@ -22,7 +22,7 @@ class BoundingBoxesIoUTest(unittest.TestCase):
                 sample_id=str(sample_index),
                 split="train" if random.random() < 0.8 else "val",
                 image=np.zeros((640, 640, 3)),
-                image_format=ImageChannelFormat.RGB,
+                image_format=str.RGB,
                 bboxes_xyxy=bboxes_xyxy,
                 class_ids=class_ids,
                 class_names=class_names,
@@ -35,7 +35,7 @@ class BoundingBoxesIoUTest(unittest.TestCase):
             sample_id="sample_1",
             split="train",
             image=np.zeros((100, 100, 3)),
-            image_format=ImageChannelFormat.RGB,
+            image_format=str.RGB,
             bboxes_xyxy=np.array(
                 [
                     [10, 10, 20, 20],
@@ -54,7 +54,7 @@ class BoundingBoxesIoUTest(unittest.TestCase):
             sample_id="sample_1",
             split="valid",
             image=np.zeros((100, 100, 3)),
-            image_format=ImageChannelFormat.RGB,
+            image_format=str.RGB,
             bboxes_xyxy=np.array(
                 [
                     [40, 40, 50, 50],

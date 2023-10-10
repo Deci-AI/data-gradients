@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from data_gradients.utils.data_classes.data_samples import SegmentationSample, ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import SegmentationSample, str
 from data_gradients.utils.data_classes.contour import Contour
 from data_gradients.feature_extractors.segmentation.bounding_boxes_area import SegmentationBoundingBoxArea
 from data_gradients.feature_extractors.segmentation.bounding_boxes_resolution import SegmentationBoundingBoxResolution
@@ -16,7 +16,7 @@ class SegmentationBBoxTest(unittest.TestCase):
             sample_id="sample_1",
             split="train",
             image=np.zeros((100, 100, 3)),
-            image_format=ImageChannelFormat.RGB,
+            image_format=str.RGB,
             mask=np.zeros((3, 100, 100)),
             contours=[
                 [
@@ -102,7 +102,7 @@ class SegmentationBBoxTest(unittest.TestCase):
             sample_id="sample_2",
             split="valid",
             image=np.zeros((100, 100, 3)),
-            image_format=ImageChannelFormat.RGB,
+            image_format=str.RGB,
             mask=np.zeros((3, 100, 100)),
             contours=[
                 [
