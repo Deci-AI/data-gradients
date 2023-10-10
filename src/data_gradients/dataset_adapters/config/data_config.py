@@ -13,7 +13,8 @@ from data_gradients.dataset_adapters.config.caching_utils import TensorExtractor
 from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import str
+from enum import Enum
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,8 +38,7 @@ class DataConfig(ABC):
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     is_batch: Union[None, bool] = None
 
-    n_image_channels: Union[None, int] = None
-    image_format: ImageChannelFormat = ImageChannelFormat.UNKNOWN
+    image_format: Union[None, str] = None
 
     n_classes: Union[None, int] = None
     class_names: Union[None, List[str]] = None
@@ -114,7 +114,6 @@ class DataConfig(ABC):
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
-            "n_image_channels": self.n_image_channels,
             "image_format": self.image_format.value,
             "n_classes": self.n_classes,
             "class_names": self.class_names,
@@ -154,10 +153,8 @@ class DataConfig(ABC):
             self.class_names = json_dict.get("class_names")
         if self.class_names_to_use is None:
             self.class_names_to_use = json_dict.get("class_names_to_use")
-        if self.n_image_channels is None:
-            self.n_image_channels = json_dict.get("n_image_channels")
         if self.image_format is None:
-            self.image_format = ImageChannelFormat(json_dict.get("image_format", ImageChannelFormat.UNKNOWN.value))  # Load the string and convert to Enum
+            self.image_format = str(json_dict.get("image_format", str.UNKNOWN.value))  # Load the string and convert to Enum
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -205,24 +202,116 @@ class DataConfig(ABC):
         self.n_classes = len(self.class_names)
         self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
 
-    def get_n_image_channels(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> int:
-        if self.n_image_channels is None:
-            self.n_image_channels = question.ask(hint=hint)
-        return self.n_image_channels
-
-    def get_image_format(self, hint: str = "") -> ImageChannelFormat:
+    def get_image_format(self, hint: str = "") -> str:
         if self.image_format is None:
-            question = FixedOptionsQuestion(
-                question="With which format were the images loaded ?",
-                options={
-                    "RGB": ImageChannelFormat.RGB,
-                    "BGR": ImageChannelFormat.BGR,
-                    "GRAYSCALE": ImageChannelFormat.GRAYSCALE,
-                    "UNKNOWN": ImageChannelFormat.UNKNOWN,
-                },
-            )
-            self.image_format = question.ask(hint=hint)
+            pass
+            # from functools import partial
+
+            # TODO: ask from OUTSIDE
+            # question = OpenEndedQuestion(
+            #     question="What is the format of your images? (R, G, B, L, O)",
+            #     validation=partial(validate_channels, n_channels=3),  # TODO
+            # )
+            # self.image_format = question.ask(hint=hint)
         return self.image_format
+
+
+class ImageFormat(Enum):
+    RGB = "RGB"
+    BGR = "BGR"
+    GRAYSCALE = "GRAYSCALE"
+    LAB = "LAB"
+
+
+class ImageChannels:
+    def __init__(self, channels_str: str, n_channels: int):
+        self.channels_str = channels_str
+        self.n_channels = n_channels
+        self.validate_channels(channels_str=channels_str, n_channels=n_channels)
+
+    @staticmethod
+    def validate_channels(channels_str: str, n_channels: int) -> bool:
+        """
+        Validate the channel string based on the following rules:
+        1. The string includes at most one 'R', one 'G', and one 'B'.
+        2. The string includes at most one 'L'.
+        3. 'R', 'G', and 'B' are not used along with 'L'.
+        4. No characters outside the set ['R', 'G', 'B', 'L', 'O'] are allowed.
+        5. The string is not empty.
+        6. The string length matches n_channels.
+
+        :param channels_str: The channel string to validate.
+        :param n_channels: Expected number of channels.
+        :return: True if the string is valid, raises ValueError otherwise.
+        """
+
+        # Check for rule 5
+        if not channels_str:
+            raise ValueError("The channel string is empty.")
+
+        # Check for rule 6
+        if len(channels_str) != n_channels:
+            raise ValueError(f"The channel string length ({len(channels_str)}) does not match the expected number of channels ({n_channels}).")
+
+        # Check for rule 1 and 2
+        for ch in ["R", "G", "B", "L"]:
+            if channels_str.count(ch) > 1:
+                raise ValueError(f"Multiple occurrences of '{ch}' found. Each channel should appear at most once.")
+
+        # Check for rule 3
+        if "L" in channels_str and any(ch in channels_str for ch in ["R", "G", "B"]):
+            raise ValueError("Grayscale ('L') cannot be used in combination with RGB channels.")
+
+        # Check for rule 4
+        if any(ch not in ["R", "G", "B", "L", "O"] for ch in channels_str):
+            invalid_chars = ", ".join(set(ch for ch in channels_str if ch not in ["R", "G", "B", "L", "O"]))
+            raise ValueError(f"Invalid characters in channel string: {invalid_chars}. Allowed characters are: R, G, B, L, O.")
+
+        return True
+
+    @property
+    def cv2_format(self) -> ImageFormat:
+        pass
+
+    @property
+    def _is_lab(self) -> bool:
+        return "LAB" in self.channels_str
+
+    @property
+    def _is_grayscale(self) -> bool:
+        return "L" in self.channels_str and not self._is_lab
+
+    def get_visualization_channel_idx(self):
+        """
+        Retrieve the order and indices of color channels, either RGB for RGB/BGR or
+        """
+        if self._include_r_g_b_channels:
+            return
+
+        return [(ch, idx) for idx, ch in enumerate(self.channels_str) if ch in "RGB"]
+
+    def convert_image_to_rgb(self, image):
+        import cv2  # Assuming you're using OpenCV
+
+        format_type = self.cv2_format
+
+        if format_type == ImageFormat.RGB:
+            return image[:, :, [self.channels_str.index(ch) for ch in "RGB"]]
+
+        elif format_type == ImageFormat.BGR:
+            bgr_image = image[:, :, [self.channels_str.index(ch) for ch in "BGR"]]
+            return cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
+
+        elif format_type == ImageFormat.GRAYSCALE:
+            grayscale_image = image[:, :, self.channels_str.index("L")]
+            return cv2.cvtColor(grayscale_image, cv2.COLOR_GRAY2RGB)
+
+        elif format_type == ImageFormat.LAB:
+            lab_image = image[:, :, [self.channels_str.index(ch) for ch in "LAB"]]
+            return cv2.cvtColor(lab_image, cv2.COLOR_LAB2RGB)
+
+        else:
+            raise ValueError("Cannot convert the given image format to RGB.")
 
 
 @dataclass

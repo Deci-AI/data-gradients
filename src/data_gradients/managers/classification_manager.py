@@ -9,7 +9,7 @@ from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.classification_sample_preprocessor import ClassificationSamplePreprocessor
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import str
 from data_gradients.dataset_adapters.config.data_config import ClassificationDataConfig
 
 
@@ -34,10 +34,10 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         is_batch: Optional[bool] = None,
-        n_image_channels: int = 3,
+        n_image_channels: Optional[int] = None,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
-        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
+        image_format: str = str.RGB,
     ):
         """
         Constructor of detection manager which controls the analyzer

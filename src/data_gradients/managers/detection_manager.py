@@ -11,7 +11,7 @@ from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.detection_sample_preprocessor import DetectionSamplePreprocessor
 from data_gradients.datasets import COCOFormatDetectionDataset, VOCDetectionDataset, COCODetectionDataset
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import str
 from data_gradients.dataset_adapters.config import DetectionDataConfig
 
 
@@ -39,10 +39,10 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         is_batch: Optional[bool] = None,
         is_label_first: Optional[bool] = None,
         bbox_format: Optional[str] = None,
-        n_image_channels: int = 3,
+        n_image_channels: Optional[int] = None,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
-        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
+        image_format: str = str.RGB,
     ):
         """
         Constructor of detection manager which controls the analyzer

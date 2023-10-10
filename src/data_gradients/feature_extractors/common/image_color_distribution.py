@@ -4,7 +4,7 @@ import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
-from data_gradients.utils.data_classes.data_samples import ImageSample, ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import ImageSample, str
 from data_gradients.visualize.plot_options import KDEPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
@@ -31,14 +31,14 @@ class ImageColorDistribution(AbstractFeatureExtractor):
                     f"Inconstancy in the image format. The image format of the sample {sample.sample_id} is not the same as the previous sample."
                 )
 
-        if self.image_format == ImageChannelFormat.RGB:
+        if self.image_format == str.RGB:
             image = sample.image
-        elif self.image_format == ImageChannelFormat.BGR:
+        elif self.image_format == str.BGR:
             image = cv2.cvtColor(sample.image, cv2.COLOR_BGR2RGB)
-        elif self.image_format == ImageChannelFormat.GRAYSCALE:
+        elif self.image_format == str.GRAYSCALE:
             image = sample.image[:, :, np.newaxis]
             self.colors = ("Grayscale",)
-        elif self.image_format == ImageChannelFormat.UNKNOWN:
+        elif self.image_format == str.UNKNOWN:
             image = sample.image
         else:
             raise ValueError(f"Unknown image format {sample.image_format}")

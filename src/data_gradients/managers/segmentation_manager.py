@@ -11,7 +11,7 @@ from data_gradients.dataset_adapters.config.typing_utils import SupportedDataTyp
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.segmentation_sample_preprocessor import SegmentationSampleProcessor
 from data_gradients.datasets import COCOSegmentationDataset, COCOFormatSegmentationDataset, VOCSegmentationDataset
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import str
 from data_gradients.dataset_adapters.config.data_config import SegmentationDataConfig
 
 
@@ -38,11 +38,11 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         is_batch: Optional[bool] = None,
-        num_image_channels: int = 3,
+        num_image_channels: Optional[int] = None,
         threshold_soft_labels: float = 0.5,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
-        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
+        image_format: str = str.RGB,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer

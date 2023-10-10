@@ -7,7 +7,7 @@ import numpy as np
 from data_gradients.utils.data_classes.contour import Contour
 
 
-class ImageChannelFormat(Enum):
+class str(Enum):
     RGB = "RGB"
     BGR = "BGR"
     GRAYSCALE = "GRAYSCALE"
@@ -28,7 +28,7 @@ class ImageSample:
     sample_id: str
     split: str
     image: np.ndarray
-    image_format: ImageChannelFormat
+    image_format: str
 
     def __repr__(self):
         return f"ImageSample(sample_id={self.sample_id}, image={self.image.shape}, format={self.image_format})"
