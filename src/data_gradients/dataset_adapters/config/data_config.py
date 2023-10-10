@@ -234,22 +234,23 @@ class ImageChannels:
         """
         Validate the channel string based on the following rules:
         1. The string includes at most one 'R', one 'G', and one 'B'.
-        2. The string includes at most one 'L'.
-        3. 'R', 'G', and 'B' are not used along with 'L'.
-        4. No characters outside the set ['R', 'G', 'B', 'L', 'O'] are allowed.
-        5. The string is not empty.
-        6. The string length matches n_channels.
+        2. The string includes at most one 'L' for Grayscale.
+        3. 'R', 'G', and 'B' are not used along with 'L' for Grayscale.
+        4. If 'LAB' is used, all of them must be present and in that order.
+        5. No characters outside the set ['R', 'G', 'B', 'L', 'A', 'O'] are allowed.
+        6. The string is not empty.
+        7. The string length matches n_channels.
 
         :param channels_str: The channel string to validate.
         :param n_channels: Expected number of channels.
         :return: True if the string is valid, raises ValueError otherwise.
         """
 
-        # Check for rule 5
+        # Check for rule 6
         if not channels_str:
             raise ValueError("The channel string is empty.")
 
-        # Check for rule 6
+        # Check for rule 7
         if len(channels_str) != n_channels:
             raise ValueError(f"The channel string length ({len(channels_str)}) does not match the expected number of channels ({n_channels}).")
 
@@ -263,53 +264,49 @@ class ImageChannels:
             raise ValueError("Grayscale ('L') cannot be used in combination with RGB channels.")
 
         # Check for rule 4
-        if any(ch not in ["R", "G", "B", "L", "O"] for ch in channels_str):
-            invalid_chars = ", ".join(set(ch for ch in channels_str if ch not in ["R", "G", "B", "L", "O"]))
-            raise ValueError(f"Invalid characters in channel string: {invalid_chars}. Allowed characters are: R, G, B, L, O.")
+        if any(ch in channels_str for ch in "LAB"):
+            lab_count = sum([ch in channels_str for ch in "LAB"])
+            if 0 < lab_count < 3:
+                raise ValueError("Incomplete LAB channels. All three channels 'L', 'A', 'B' must be present together.")
+            elif "LAB" not in channels_str:
+                raise ValueError("LAB channels are present but not in the correct order.")
+
+        # Check for rule 5
+        if any(ch not in ["R", "G", "B", "L", "A", "O"] for ch in channels_str):
+            invalid_chars = ", ".join(set(ch for ch in channels_str if ch not in ["R", "G", "B", "L", "A", "O"]))
+            raise ValueError(f"Invalid characters in channel string: {invalid_chars}. Allowed characters are: R, G, B, L, A, O.")
 
         return True
 
     @property
     def cv2_format(self) -> ImageFormat:
-        pass
-
-    @property
-    def _is_lab(self) -> bool:
-        return "LAB" in self.channels_str
-
-    @property
-    def _is_grayscale(self) -> bool:
-        return "L" in self.channels_str and not self._is_lab
-
-    def get_visualization_channel_idx(self):
-        """
-        Retrieve the order and indices of color channels, either RGB for RGB/BGR or
-        """
-        if self._include_r_g_b_channels:
-            return
-
-        return [(ch, idx) for idx, ch in enumerate(self.channels_str) if ch in "RGB"]
+        if all(ch in self.channels_str for ch in "RGB"):
+            return ImageFormat.RGB
+        elif all(ch in self.channels_str for ch in "BGR"):
+            return ImageFormat.BGR
+        elif "L" in self.channels_str and not any(ch in self.channels_str for ch in "RGB"):
+            return ImageFormat.GRAYSCALE
+        elif all(ch in self.channels_str for ch in "LAB"):
+            return ImageFormat.LAB
+        else:
+            raise ValueError("Unknown image format.")
 
     def convert_image_to_rgb(self, image):
-        import cv2  # Assuming you're using OpenCV
+        import cv2
 
         format_type = self.cv2_format
 
         if format_type == ImageFormat.RGB:
             return image[:, :, [self.channels_str.index(ch) for ch in "RGB"]]
-
         elif format_type == ImageFormat.BGR:
             bgr_image = image[:, :, [self.channels_str.index(ch) for ch in "BGR"]]
             return cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
-
         elif format_type == ImageFormat.GRAYSCALE:
             grayscale_image = image[:, :, self.channels_str.index("L")]
             return cv2.cvtColor(grayscale_image, cv2.COLOR_GRAY2RGB)
-
         elif format_type == ImageFormat.LAB:
             lab_image = image[:, :, [self.channels_str.index(ch) for ch in "LAB"]]
             return cv2.cvtColor(lab_image, cv2.COLOR_LAB2RGB)
-
         else:
             raise ValueError("Cannot convert the given image format to RGB.")
 
