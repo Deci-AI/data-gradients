@@ -1,9 +1,9 @@
 import sys
 import unittest
 
-from unit_tests.average_brightness_test import AverageBrightnessTest
-from unit_tests.feature_extractors.detection.test_bounding_boxes_area import TestComputeHistogram
-from unit_tests.dataset_output_mapper import TestImageConverter
+from tests.unit_tests.average_brightness_test import AverageBrightnessTest
+from tests.unit_tests.feature_extractors.detection.test_bounding_boxes_area import TestComputeHistogram
+from tests.unit_tests.dataset_output_mapper import TestImageConverter
 
 
 class CoreUnitTestSuiteRunner:
