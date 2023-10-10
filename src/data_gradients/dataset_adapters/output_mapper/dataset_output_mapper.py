@@ -1,4 +1,4 @@
-from typing import Callable, Union, Tuple, List, Mapping
+from typing import Callable, Union, Tuple, List, Mapping, Sequence
 
 import PIL
 import numpy as np
@@ -94,7 +94,7 @@ class DatasetOutputMapper:
         )
 
     @classmethod
-    def _to_torch(cls, data: Union[np.ndarray, PIL.Image.Image, torch.Tensor, str, List[Union[PIL.Image.Image, np.ndarray, str]]]) -> torch.Tensor:
+    def _to_torch(cls, data: Union[np.ndarray, PIL.Image.Image, torch.Tensor, str, Sequence[Union[PIL.Image.Image, np.ndarray, str]]]) -> torch.Tensor:
         """Convert various input types to a PyTorch tensor.
 
         :param data: Input data to be converted. This can be:
@@ -117,7 +117,7 @@ class DatasetOutputMapper:
                 return torch.from_numpy(np.array(img))
         elif np.isscalar(data):
             return torch.tensor(data)
-        elif isinstance(data, list):
+        elif isinstance(data, Sequence):
             tensors = [cls._to_torch(t) for t in data]
 
             # Check if all tensors can be stacked

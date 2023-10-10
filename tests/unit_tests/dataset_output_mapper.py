@@ -51,7 +51,23 @@ class TestImageConverter(unittest.TestCase):
         self.assertIsInstance(output, torch.Tensor)
 
     def test_list_input(self):
-        data = [np.random.rand(100, 100, 3), Image.new("RGB", (100, 100)), self.rbg_image_path, self.rbg_image_path]
+        data = [
+            np.random.rand(100, 100, 3),
+            Image.new("RGB", (100, 100)),
+            self.rbg_image_path,
+            self.rbg_image_path,
+        ]
+        output = DatasetOutputMapper._to_torch(data)
+        self.assertIsInstance(output, torch.Tensor)
+        self.assertEqual(output.shape, (4, 100, 100, 3))
+
+    def test_tuple_input(self):
+        data = (
+            np.random.rand(100, 100, 3),
+            Image.new("RGB", (100, 100)),
+            self.rbg_image_path,
+            self.rbg_image_path,
+        )
         output = DatasetOutputMapper._to_torch(data)
         self.assertIsInstance(output, torch.Tensor)
         self.assertEqual(output.shape, (4, 100, 100, 3))
