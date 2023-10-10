@@ -3,6 +3,7 @@ from typing import Callable, Union, Tuple, List, Mapping, Sequence
 import PIL
 import numpy as np
 import torch
+from omegaconf import ListConfig
 
 from data_gradients.dataset_adapters.output_mapper.tensor_extractor import get_tensor_extractor_options
 from data_gradients.dataset_adapters.config.data_config import DataConfig
@@ -117,7 +118,7 @@ class DatasetOutputMapper:
                 return torch.from_numpy(np.array(img))
         elif np.isscalar(data):
             return torch.tensor(data)
-        elif isinstance(data, Sequence):
+        elif isinstance(data, (list, tuple, ListConfig)):
             tensors = [cls._to_torch(t) for t in data]
 
             # Check if all tensors can be stacked
