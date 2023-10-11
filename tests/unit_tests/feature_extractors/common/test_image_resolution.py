@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from data_gradients.utils.data_classes.data_samples import ImageSample, str
+from data_gradients.utils.data_classes.data_samples import ImageSample
 from data_gradients.feature_extractors.common.image_resolution import ImagesResolution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
@@ -14,7 +14,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_0",
             split="train",
             image=np.zeros((50, 100, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(train_sample)
 
@@ -22,7 +22,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_1",
             split="train",
             image=np.zeros((150, 250, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(train_sample)
 
@@ -30,7 +30,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_2",
             split="train",
             image=np.zeros((150, 200, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(train_sample)
 
@@ -38,7 +38,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_3",
             split="train",
             image=np.zeros((150, 300, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(train_sample)
 
@@ -46,7 +46,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_3",
             split="train",
             image=np.zeros((200, 200, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(train_sample)
 
@@ -54,7 +54,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_4",
             split="valid",
             image=np.zeros((100, 100, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(valid_sample)
 
@@ -62,7 +62,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_4",
             split="valid",
             image=np.zeros((150, 150, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(valid_sample)
 
@@ -70,7 +70,7 @@ class ImageResolutionTest(unittest.TestCase):
             sample_id="sample_4",
             split="valid",
             image=np.zeros((200, 250, 3), dtype=np.uint8),
-            image_format=str.RGB,
+            image_channels=str.RGB,
         )
         self.extractor.update(valid_sample)
 

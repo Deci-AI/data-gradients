@@ -6,7 +6,7 @@ import numpy as np
 from torch.utils.data.dataset import Dataset
 
 from data_gradients.datasets.FolderProcessor import ImageLabelFilesIterator, DEFAULT_IMG_EXTENSIONS
-from data_gradients.datasets.utils import load_image, str
+from data_gradients.datasets.utils import load_image_rgb
 
 
 class BaseImageLabelDirectoryDataset(Dataset, ABC):
@@ -44,7 +44,7 @@ class BaseImageLabelDirectoryDataset(Dataset, ABC):
 
     def load_image(self, path: str) -> np.ndarray:
         """Load an image from the given path into RGB format."""
-        return load_image(path, str.RGB)
+        return load_image_rgb(path)
 
     @abstractmethod
     def load_labels(self, path: str) -> np.ndarray:

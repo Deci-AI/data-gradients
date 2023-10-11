@@ -1,10 +1,9 @@
-import cv2
 import pandas as pd
 import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
-from data_gradients.utils.data_classes.data_samples import ImageSample, str
+from data_gradients.utils.data_classes.data_samples import ImageSample
 from data_gradients.visualize.plot_options import KDEPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
@@ -14,7 +13,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
     """Extracts the distribution of the image 'brightness'."""
 
     def __init__(self):
-        self.image_format = None
+        self.image_channels = None
         self.colors = ("Red", "Green", "Blue")
         self.palette = {"Red": "red", "Green": "green", "Blue": "blue", "Grayscale": "gray"}
         self.pixel_frequency_per_channel_per_split = {}
@@ -23,27 +22,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
 
     def update(self, sample: ImageSample):
 
-        if self.image_format is None:
-            self.image_format = sample.image_format
-        else:
-            if self.image_format != sample.image_format:
-                raise RuntimeError(
-                    f"Inconstancy in the image format. The image format of the sample {sample.sample_id} is not the same as the previous sample."
-                )
-
-        if self.image_format == str.RGB:
-            image = sample.image
-        elif self.image_format == str.BGR:
-            image = cv2.cvtColor(sample.image, cv2.COLOR_BGR2RGB)
-        elif self.image_format == str.GRAYSCALE:
-            image = sample.image[:, :, np.newaxis]
-            self.colors = ("Grayscale",)
-        elif self.image_format == str.UNKNOWN:
-            image = sample.image
-        else:
-            raise ValueError(f"Unknown image format {sample.image_format}")
-
-        sample.image = sample.image.astype(np.uint8)
+        image = sample.image_as_rgb
         pixel_frequency_per_channel = self.pixel_frequency_per_channel_per_split.get(sample.split)
 
         # We need this more complex logic because we cannot directly accumulate the images (this would take too much memory)

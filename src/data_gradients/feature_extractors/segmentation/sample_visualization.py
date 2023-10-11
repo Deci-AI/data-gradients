@@ -1,9 +1,8 @@
-import cv2
 import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.common.sample_visualization import AbstractSampleVisualization
-from data_gradients.utils.data_classes.data_samples import SegmentationSample, str
+from data_gradients.utils.data_classes.data_samples import SegmentationSample
 
 
 @register_feature_extractor()
@@ -26,17 +25,7 @@ class SegmentationSampleVisualization(AbstractSampleVisualization):
         :param sample: Input image sample
         :return: The preprocessed image tensor.
         """
-
-        if sample.image_format == str.RGB:
-            image = sample.image
-        elif sample.image_format == str.BGR:
-            image = cv2.cvtColor(sample.image, cv2.COLOR_BGR2RGB)
-        elif sample.image_format == str.GRAYSCALE:
-            image = cv2.cvtColor(sample.image, cv2.COLOR_GRAY2RGB)
-        elif sample.image_format == str.UNKNOWN:
-            image = sample.image
-        else:
-            raise ValueError(f"Unknown image format {sample.image_format}")
+        image = sample.image_as_rgb
 
         # Onehot to categorical labels
         categorical_labels = np.argmax(sample.mask, axis=0)

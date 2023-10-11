@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from data_gradients.feature_extractors.classification.class_frequency import ClassificationClassFrequency
-from data_gradients.utils.data_classes.data_samples import str, ClassificationSample
+from data_gradients.utils.data_classes.data_samples import ClassificationSample
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 
 
@@ -18,7 +18,7 @@ class ClassificationClassFrequencyTest(unittest.TestCase):
                 sample_id="sample_1",
                 split="train",
                 image=dummy_image,
-                image_format=str.RGB,
+                image_channels=str.RGB,
                 class_id=0,
                 class_names=class_names,
             )
@@ -29,7 +29,7 @@ class ClassificationClassFrequencyTest(unittest.TestCase):
                 sample_id="sample_2",
                 split="train",
                 image=dummy_image,
-                image_format=str.RGB,
+                image_channels=str.RGB,
                 class_id=1,
                 class_names=class_names,
             )
@@ -39,7 +39,7 @@ class ClassificationClassFrequencyTest(unittest.TestCase):
                 sample_id="sample_3",
                 split="train",
                 image=dummy_image,
-                image_format=str.RGB,
+                image_channels=str.RGB,
                 class_id=2,
                 class_names=class_names,
             )
@@ -50,7 +50,7 @@ class ClassificationClassFrequencyTest(unittest.TestCase):
                 sample_id="sample_4",
                 split="valid",
                 image=dummy_image,
-                image_format=str.RGB,
+                image_channels=str.RGB,
                 class_id=3,
                 class_names=class_names,
             )
@@ -60,7 +60,7 @@ class ClassificationClassFrequencyTest(unittest.TestCase):
                 sample_id="sample_5",
                 split="valid",
                 image=dummy_image,
-                image_format=str.RGB,
+                image_channels=str.RGB,
                 class_id=0,
                 class_names=class_names,
             )
