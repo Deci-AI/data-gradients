@@ -17,7 +17,7 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
         self.data = []
 
     def update(self, sample: ImageSample):
-        self.data.append({"split": sample.split, "brightness": sample.image_luminescence})
+        self.data.append({"split": sample.split, "brightness": sample.image_as_lab[0].mean()})
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)

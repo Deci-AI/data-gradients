@@ -34,8 +34,8 @@ class ImageSample:
         return self.image_channels.get_channels_to_visualize(image=self.image)
 
     @property
-    def image_luminescence(self) -> np.ndarray:
-        return self.image_channels.compute_image_luminescence(image=self.image)
+    def image_as_lab(self) -> np.ndarray:
+        return self.image_channels.convert_image_to_lab(image=self.image)
 
 
 @dataclasses.dataclass

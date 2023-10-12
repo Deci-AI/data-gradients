@@ -1,6 +1,7 @@
 import os
 import logging
 
+import numpy as np
 import platformdirs
 import torch
 from abc import ABC
@@ -154,10 +155,7 @@ class DataConfig(ABC):
         if self.class_names_to_use is None:
             self.class_names_to_use = json_dict.get("class_names_to_use")
         if self.image_channels is None:
-            print("IMAGE_CHANNELS: ", self.image_channels)
             self.image_channels = ImageChannels.from_str(json_dict.get("image_channels"))
-        print("DONE")
-        print(self.image_channels)
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -169,10 +167,43 @@ class DataConfig(ABC):
             self.labels_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
 
-    def get_image_channels(self, question: Optional[OpenEndedQuestion] = None, hint: str = "") -> ImageChannels:
+    def get_image_channels(self, image: Union[torch.Tensor, np.ndarray]) -> ImageChannels:
         if self.image_channels is None:
+
+            def _validate_image_channels(channels_str: str) -> bool:
+                if len(channels_str) not in image.shape:
+                    return False
+                try:
+                    ImageChannels.from_str(channels_str=channels_str)
+                    print(f"image_channels_str={channels_str} is valid with {image.shape}")
+                    return True
+                except ValueError:
+                    return False
+
+            question = OpenEndedQuestion(question="Please describe your image channels?", validation=_validate_image_channels)
+            hint = (
+                f"Image Shape: {tuple(image.shape)}\n\n"
+                "Enter the channel format representing your image:\n"
+                "\n"
+                "  > RGB  : Red, Green, Blue\n"
+                "  > BGR  : Blue, Green, Red\n"
+                "  > G    : Grayscale\n"
+                "  > LAB  : Luminance, A and B color channels\n"
+                "\n"
+                "ADDITIONAL CHANNELS?\n"
+                "If your image contains channels other than the standard ones listed above (e.g., Depth, Heat), "
+                "prefix them with 'O'. \n"
+                "For instance:\n"
+                "  > ORGBO: Can represent (Heat, Red, Green, Blue, Depth).\n"
+                "  > OBGR:  Can represent (Alpha, Blue, Green, Red).\n"
+                "  > GO:    Can represent (Gray, Depth).\n\n"
+                f"IMPORTANT: Make sure that your answer represents all the image channels."
+            )
+
             image_channels_str = question.ask(hint=hint)
-            self.image_channels = ImageChannels.from_str(channels_str=image_channels_str)  # TODO: add check
+            print("image_channels_str: ", image_channels_str)
+            self.image_channels = ImageChannels.from_str(channels_str=image_channels_str)
+
         return self.image_channels
 
     def get_is_batch(self, hint: str = "") -> bool:

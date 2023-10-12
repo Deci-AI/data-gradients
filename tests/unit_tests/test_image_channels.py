@@ -28,13 +28,13 @@ class TestImageChannelValidation(unittest.TestCase):
 
     # GrayscaleChannels tests
     def test_valid_grayscale(self):
-        self.assertTrue(GrayscaleChannels.validate_channels("L"))
-        self.assertTrue(GrayscaleChannels.validate_channels("OL"))
+        self.assertTrue(GrayscaleChannels.validate_channels("G"))
+        self.assertTrue(GrayscaleChannels.validate_channels("OG"))
 
     def test_invalid_grayscale(self):
         self.assertFalse(GrayscaleChannels.validate_channels("LAB"))
-        self.assertFalse(GrayscaleChannels.validate_channels("LL"))
-        self.assertFalse(GrayscaleChannels.validate_channels("OLOOOLO"))
+        self.assertFalse(GrayscaleChannels.validate_channels("GG"))
+        self.assertFalse(GrayscaleChannels.validate_channels("OGOOOGO"))
 
     # LABChannels tests
     def test_valid_lab(self):
@@ -52,12 +52,12 @@ class TestImageChannelValidation(unittest.TestCase):
             # Standard cases
             ("RGB", RGBChannels),
             ("BGR", BGRChannels),
-            ("L", GrayscaleChannels),
+            ("G", GrayscaleChannels),
             ("LAB", LABChannels),
             # Including other irrelevant channels
             ("OORGB", RGBChannels),
             ("OBGR", BGRChannels),
-            ("LOOO", GrayscaleChannels),
+            ("GOOO", GrayscaleChannels),
             ("OOLABO", LABChannels),
         ]
 
@@ -67,7 +67,7 @@ class TestImageChannelValidation(unittest.TestCase):
 
     def test_ambiguous_channels(self):
         # Ambiguous cases
-        ambiguous_channels = ["OORGBBGR", "LOOL", "BGRLO", "LABRGB", "RGBOOOOL"]
+        ambiguous_channels = ["OORGBBGR", "GOOG", "BGRLO", "LABRGB", "RGBOOOOL"]
 
         for channels_str in ambiguous_channels:
             with self.assertRaises(ValueError):
@@ -79,6 +79,7 @@ class TestImageChannelValidation(unittest.TestCase):
 
         for channels_str in unsupported_channels:
             with self.assertRaises(ValueError) as context:
+                print(channels_str)
                 image_channel_instance_factory(channels_str)
 
             # Check if the error message indicates unsupported format
@@ -104,7 +105,7 @@ class TestImageChannelValidation(unittest.TestCase):
 
     # GrayscaleChannels conversion tests
     def test_grayscale_conversion(self):
-        channels_instance = GrayscaleChannels("OOLOOO")
+        channels_instance = GrayscaleChannels("OOGOOO")
         image = np.zeros((100, 100, 6), dtype=np.uint8)
         image[:, :, 2] = 128  # Grayscale value
 
