@@ -40,7 +40,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         threshold_soft_labels: float = 0.5,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
-        image_channels: Optional[str] = None,
     ):
         """
         Constructor of semantic-segmentation manager which controls the analyzer
@@ -71,7 +70,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
         data_config = SegmentationDataConfig(
             class_names=class_names,
-            image_channels=image_channels,
             n_classes=n_classes,
             cache_path=cache_path,
             class_names_to_use=class_names_to_use,

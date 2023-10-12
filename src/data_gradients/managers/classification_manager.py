@@ -35,7 +35,6 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         is_batch: Optional[bool] = None,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
-        image_channels: Optional[str] = None,
     ):
         """
         Constructor of detection manager which controls the analyzer
@@ -64,7 +63,6 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
         data_config = ClassificationDataConfig(
             cache_path=cache_path,
-            image_channels=image_channels,
             n_classes=n_classes,
             class_names=class_names,
             images_extractor=images_extractor,
