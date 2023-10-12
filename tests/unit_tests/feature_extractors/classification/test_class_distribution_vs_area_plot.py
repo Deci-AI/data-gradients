@@ -7,6 +7,7 @@ import numpy as np
 from data_gradients.feature_extractors.classification.class_distribution_vs_area_scatter import ClassificationClassDistributionVsAreaPlot
 from data_gradients.utils.data_classes.data_samples import ClassificationSample
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
+from data_gradients.utils.data_classes.image_channels import ImageChannels
 
 
 class ClassificationClassDistributionVsAreaPlotTest(unittest.TestCase):
@@ -21,7 +22,7 @@ class ClassificationClassDistributionVsAreaPlotTest(unittest.TestCase):
                     sample_id=str(uuid.uuid4()),
                     split="train",
                     image=dummy_image,
-                    image_channels=str.RGB,
+                    image_channels=ImageChannels.from_str("RGB"),
                     class_id=0,
                     class_names=class_names,
                 )
@@ -34,7 +35,7 @@ class ClassificationClassDistributionVsAreaPlotTest(unittest.TestCase):
                     sample_id=str(uuid.uuid4()),
                     split="train",
                     image=dummy_image,
-                    image_channels=str.RGB,
+                    image_channels=ImageChannels.from_str("RGB"),
                     class_id=1,
                     class_names=class_names,
                 )
@@ -47,7 +48,7 @@ class ClassificationClassDistributionVsAreaPlotTest(unittest.TestCase):
                     sample_id=str(uuid.uuid4()),
                     split="train",
                     image=dummy_image,
-                    image_channels=str.RGB,
+                    image_channels=ImageChannels.from_str("RGB"),
                     class_id=2,
                     class_names=class_names,
                 )
@@ -60,7 +61,7 @@ class ClassificationClassDistributionVsAreaPlotTest(unittest.TestCase):
                     sample_id=str(uuid.uuid4()),
                     split="valid",
                     image=dummy_image,
-                    image_channels=str.RGB,
+                    image_channels=ImageChannels.from_str("RGB"),
                     class_id=3,
                     class_names=class_names,
                 )
@@ -73,7 +74,7 @@ class ClassificationClassDistributionVsAreaPlotTest(unittest.TestCase):
                     sample_id=str(uuid.uuid4()),
                     split="valid",
                     image=dummy_image,
-                    image_channels=str.RGB,
+                    image_channels=ImageChannels.from_str("RGB"),
                     class_id=0,
                     class_names=class_names,
                 )
