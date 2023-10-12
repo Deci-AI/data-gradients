@@ -14,21 +14,28 @@ class ImageColorDistribution(AbstractFeatureExtractor):
 
     def __init__(self):
         self.image_channels = None
-        self.colors = ("Red", "Green", "Blue")
-        self.palette = {"Red": "red", "Green": "green", "Blue": "blue", "Grayscale": "gray"}
+        self.colors = None
+        self.palette = {"Red": "red", "Green": "green", "Blue": "blue", "Grayscale": "gray", "Luminance": "red", "A": "green", "B": "blue"}
         self.pixel_frequency_per_channel_per_split = {}
         for split in ["train", "val"]:
             self.pixel_frequency_per_channel_per_split[split] = np.zeros(shape=(3, 256), dtype=np.int64)
 
     def update(self, sample: ImageSample):
+        if self.colors is None:
+            self.colors = sample.image_channels.channel_names
+            for channel_name in sample.image_channels.channel_names:
+                if channel_name not in self.palette:
+                    self.palette[channel_name] = "black"
 
-        image = sample.image_as_rgb
+        if self.image_channels is None:
+            self.image_channels = sample.image_channels
+
         pixel_frequency_per_channel = self.pixel_frequency_per_channel_per_split.get(sample.split)
 
         # We need this more complex logic because we cannot directly accumulate the images (this would take too much memory)
         # so we need to iteratively count the frequency per split and per color
         for i, color in enumerate(self.colors):
-            pixel_frequency_per_channel[i] += np.histogram(image[:, :, i], bins=256)[0]
+            pixel_frequency_per_channel[i] += np.histogram(sample.image[:, :, i], bins=256)[0]
 
     def aggregate(self) -> Feature:
         data = [
@@ -77,7 +84,7 @@ class ImageColorDistribution(AbstractFeatureExtractor):
     @property
     def description(self) -> str:
         return (
-            "Here's a comparison of RGB or grayscale intensity intensity (0-255) distributions across the entire dataset, assuming RGB channel ordering. \n"
+            "Here's a comparison of image channel intensity (scaled 0-255) distributions across the entire dataset. \n"
             "It can reveal discrepancies in the image characteristics between the two datasets, as well as potential flaws in the augmentation process. \n"
             "E.g., a notable difference in the mean value of a specific color between the two datasets may indicate an issue with the augmentation process."
         )

@@ -104,7 +104,7 @@ class NestedDataLookup:
 
 
 def extract_keys_from_path(object_path: str) -> List[Union[str, int]]:
-    """Parse the path to an object into a list of indexes.
+    """Parse the path to an object into a list of idx_to_visualize.
 
     >> extract_keys_from_path("field1.field12[0]") # Which originally represents {"field1": {"field12": [<object>, ...], ...}, ...}
     ["field1", "field12", 0]  # Can be used like this: data["field1"]["field12"][0] = <object>

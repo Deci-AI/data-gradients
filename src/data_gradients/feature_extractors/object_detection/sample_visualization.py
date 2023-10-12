@@ -23,6 +23,9 @@ class DetectionSampleVisualization(AbstractSampleVisualization):
         :param sample: Input image sample
         :return: The preprocessed image tensor.
         """
+        if sample.image_as_rgb is None:
+            raise RuntimeError(f"`{self.__class__.__name__}` not compatible with Image format `{sample.image_channels.__class__.__name__}`")
+
         result = draw_bboxes(
             image=sample.image_as_rgb,
             bboxes_xyxy=sample.bboxes_xyxy,
