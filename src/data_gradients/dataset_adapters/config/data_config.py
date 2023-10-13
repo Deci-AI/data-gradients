@@ -1,6 +1,7 @@
 import os
 import logging
 
+import numpy as np
 import platformdirs
 import torch
 from abc import ABC
@@ -13,7 +14,8 @@ from data_gradients.dataset_adapters.config.caching_utils import TensorExtractor
 from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, JSONDict
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
+from data_gradients.utils.data_classes.image_channels import ImageChannels
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,8 +39,7 @@ class DataConfig(ABC):
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     is_batch: Union[None, bool] = None
 
-    n_image_channels: Union[None, int] = None
-    image_format: ImageChannelFormat = ImageChannelFormat.UNKNOWN
+    image_channels: Union[None, str, ImageChannels] = None
 
     n_classes: Union[None, int] = None
     class_names: Union[None, List[str]] = None
@@ -114,8 +115,7 @@ class DataConfig(ABC):
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
-            "n_image_channels": self.n_image_channels,
-            "image_format": self.image_format.value,
+            "image_channels": self.image_channels.channels_str,
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
@@ -154,10 +154,9 @@ class DataConfig(ABC):
             self.class_names = json_dict.get("class_names")
         if self.class_names_to_use is None:
             self.class_names_to_use = json_dict.get("class_names_to_use")
-        if self.n_image_channels is None:
-            self.n_image_channels = json_dict.get("n_image_channels")
-        if self.image_format is None:
-            self.image_format = ImageChannelFormat(json_dict.get("image_format", ImageChannelFormat.UNKNOWN.value))  # Load the string and convert to Enum
+        if self.image_channels is None:
+            if json_dict.get("image_channels"):
+                self.image_channels = ImageChannels.from_str(json_dict.get("image_channels"))
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -168,6 +167,62 @@ class DataConfig(ABC):
         if self.labels_extractor is None:
             self.labels_extractor = question.ask(hint=hint)
         return TensorExtractorResolver.to_callable(tensor_extractor=self.labels_extractor)
+
+    def get_image_channels(self, image: Union[torch.Tensor, np.ndarray]) -> ImageChannels:
+
+        if self.image_channels is None:
+
+            if 1 in image.shape:
+                self.image_channels = ImageChannels.from_str("G")
+
+            elif 3 in image.shape:
+                question = FixedOptionsQuestion(
+                    question="In which format are your images loaded ?",
+                    options={
+                        "RGB": ImageChannels.from_str("RGB"),
+                        "BGR": ImageChannels.from_str("BGR"),
+                        "LAB": ImageChannels.from_str("LAB"),
+                        "Other": ImageChannels.from_str("OOO"),
+                    },
+                )
+                self.image_channels = question.ask()
+
+            else:
+
+                def _validate_image_channels(channels_str: str) -> bool:
+                    if len(channels_str) not in image.shape:
+                        return False
+                    try:
+                        ImageChannels.from_str(channels_str=channels_str)
+                        print(f"image_channels_str={channels_str} is valid with {image.shape}")
+                        return True
+                    except ValueError:
+                        return False
+
+                question = OpenEndedQuestion(question="Please describe your image channels?", validation=_validate_image_channels)
+                hint = (
+                    f"Image Shape: {tuple(image.shape)}\n\n"
+                    "Enter the channel format representing your image:\n"
+                    "\n"
+                    "  > RGB  : Red, Green, Blue\n"
+                    "  > BGR  : Blue, Green, Red\n"
+                    "  > G    : Grayscale\n"
+                    "  > LAB  : Luminance, A and B color channels\n"
+                    "\n"
+                    "ADDITIONAL CHANNELS?\n"
+                    "If your image contains channels other than the standard ones listed above (e.g., Depth, Heat), "
+                    "prefix them with 'O'. \n"
+                    "For instance:\n"
+                    "  > ORGBO: Can represent (Heat, Red, Green, Blue, Depth).\n"
+                    "  > OBGR:  Can represent (Alpha, Blue, Green, Red).\n"
+                    "  > GO:    Can represent (Gray, Depth).\n\n"
+                    f"IMPORTANT: Make sure that your answer represents all the image channels."
+                )
+
+                image_channels_str = question.ask(hint=hint)
+                self.image_channels = ImageChannels.from_str(channels_str=image_channels_str)
+
+        return self.image_channels
 
     def get_is_batch(self, hint: str = "") -> bool:
         if self.is_batch is None:
@@ -205,24 +260,12 @@ class DataConfig(ABC):
         self.n_classes = len(self.class_names)
         self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
 
-    def get_n_image_channels(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> int:
-        if self.n_image_channels is None:
-            self.n_image_channels = question.ask(hint=hint)
-        return self.n_image_channels
 
-    def get_image_format(self, hint: str = "") -> ImageChannelFormat:
-        if self.image_format is None:
-            question = FixedOptionsQuestion(
-                question="With which format were the images loaded ?",
-                options={
-                    "RGB": ImageChannelFormat.RGB,
-                    "BGR": ImageChannelFormat.BGR,
-                    "GRAYSCALE": ImageChannelFormat.GRAYSCALE,
-                    "UNKNOWN": ImageChannelFormat.UNKNOWN,
-                },
-            )
-            self.image_format = question.ask(hint=hint)
-        return self.image_format
+@dataclass
+class ImageChannel:
+    channel_names: List[str]
+    channels_idx_to_visualize: List[str]
+    rgb_converter: Callable[[np.ndarray], np.ndarray]
 
 
 @dataclass

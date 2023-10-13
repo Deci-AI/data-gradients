@@ -3,7 +3,7 @@ from typing import Sequence, Optional
 
 from data_gradients.datasets.base_dataset import BaseImageLabelDirectoryDataset
 from data_gradients.datasets.FolderProcessor import DEFAULT_IMG_EXTENSIONS
-from data_gradients.datasets.utils import load_image, ImageChannelFormat
+from data_gradients.datasets.utils import load_image_rgb
 
 
 class VOCFormatSegmentationDataset(BaseImageLabelDirectoryDataset):
@@ -121,7 +121,7 @@ class VOCFormatSegmentationDataset(BaseImageLabelDirectoryDataset):
         :param path:    Path to the label image file.
         :return:        Mask of the label image, in (H, W) format, where Mij represents the class_id.
         """
-        mask = load_image(path, ImageChannelFormat.RGB)
+        mask = load_image_rgb(path)
         classes = np.zeros_like(mask[:, :, 0], dtype=int)
 
         for class_idx, color in enumerate(self.color_map):

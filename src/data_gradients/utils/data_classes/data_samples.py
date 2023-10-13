@@ -1,18 +1,10 @@
 import dataclasses
-from enum import Enum
 from typing import List
 
 import numpy as np
 
 from data_gradients.utils.data_classes.contour import Contour
-
-
-class ImageChannelFormat(Enum):
-    RGB = "RGB"
-    BGR = "BGR"
-    GRAYSCALE = "GRAYSCALE"
-    UNKNOWN = "UNKNOWN"
-    UNCHANGED = "UNCHANGED"
+from data_gradients.utils.data_classes.image_channels import ImageChannels
 
 
 @dataclasses.dataclass
@@ -28,10 +20,22 @@ class ImageSample:
     sample_id: str
     split: str
     image: np.ndarray
-    image_format: ImageChannelFormat
+    image_channels: ImageChannels  # TODO: rename
 
     def __repr__(self):
-        return f"ImageSample(sample_id={self.sample_id}, image={self.image.shape}, format={self.image_format})"
+        return f"ImageSample(sample_id={self.sample_id}, image={self.image.shape}, format={self.image_channels})"
+
+    @property
+    def image_as_rgb(self) -> np.ndarray:
+        return self.image_channels.convert_image_to_rgb(image=self.image)
+
+    @property
+    def image_channels_to_visualize(self) -> np.ndarray:
+        return self.image_channels.get_channels_to_visualize(image=self.image)
+
+    @property
+    def image_mean_intensity(self) -> float:
+        return self.image_channels.compute_mean_image_intensity(image=self.image)
 
 
 @dataclasses.dataclass

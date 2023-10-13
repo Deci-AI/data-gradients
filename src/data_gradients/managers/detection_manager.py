@@ -11,7 +11,6 @@ from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.detection_sample_preprocessor import DetectionSamplePreprocessor
 from data_gradients.datasets import COCOFormatDetectionDataset, VOCDetectionDataset, COCODetectionDataset
-from data_gradients.utils.data_classes.data_samples import ImageChannelFormat
 from data_gradients.dataset_adapters.config import DetectionDataConfig
 
 
@@ -39,10 +38,8 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         is_batch: Optional[bool] = None,
         is_label_first: Optional[bool] = None,
         bbox_format: Optional[str] = None,
-        n_image_channels: int = 3,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
-        image_format: ImageChannelFormat = ImageChannelFormat.RGB,
     ):
         """
         Constructor of detection manager which controls the analyzer
@@ -65,7 +62,6 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param is_label_first:          Whether the labels are in the first dimension or not.
                                             > (class_id, x, y, w, h) for instance, as opposed to (x, y, w, h, class_id)
         :param bbox_format:             Format of the bounding boxes. 'xyxy', 'xywh' or 'cxcywh'
-        :param n_image_channels:        Number of channels for each image in the dataset
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
         if feature_extractors is not None and config_path is not None:
@@ -76,8 +72,6 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
         data_config = DetectionDataConfig(
             cache_path=cache_path,
-            n_image_channels=n_image_channels,
-            image_format=image_format,
             n_classes=n_classes,
             class_names=class_names,
             class_names_to_use=class_names_to_use,
