@@ -39,7 +39,7 @@ class DataConfig(ABC):
     labels_extractor: Union[None, str, Callable[[SupportedDataType], torch.Tensor]] = None
     is_batch: Union[None, bool] = None
 
-    image_channels: Union[None, str, ImageChannels] = None
+    image_channels: Union[None, ImageChannels] = None
 
     n_classes: Union[None, int] = None
     class_names: Union[None, List[str]] = None
@@ -115,7 +115,7 @@ class DataConfig(ABC):
             "images_extractor": TensorExtractorResolver.to_string(self.images_extractor),
             "labels_extractor": TensorExtractorResolver.to_string(self.labels_extractor),
             "is_batch": self.is_batch,
-            "image_channels": self.image_channels.channels_str,
+            "image_channels": None if self.image_channels is None else self.image_channels.channels_str,
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
