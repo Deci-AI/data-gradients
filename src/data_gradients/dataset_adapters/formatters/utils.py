@@ -1,4 +1,3 @@
-import torch
 from torch import Tensor
 
 from data_gradients.dataset_adapters.utils import channels_last_to_first
@@ -6,21 +5,6 @@ from data_gradients.dataset_adapters.utils import channels_last_to_first
 
 class DatasetFormatError(Exception):
     ...
-
-
-def drop_nan(tensor: Tensor) -> Tensor:
-    """Remove rows containing NaN values from a given PyTorch tensor.
-
-    :param tensor:  Tensor with shape (N, M) where N is the number of rows and M is the number of columns.
-    :return:        Tensor with the same number of columns as the input tensor, but without rows containing NaN.
-    """
-    nans = torch.isnan(tensor)
-    if nans.any():
-        nan_indices = set(nans.nonzero()[:, 0].tolist())
-        all_indices = set(i for i in range(tensor.shape[0]))
-        valid_indices = all_indices - nan_indices
-        return tensor[valid_indices]
-    return tensor
 
 
 def ensure_channel_first(images: Tensor, n_image_channels: int) -> Tensor:

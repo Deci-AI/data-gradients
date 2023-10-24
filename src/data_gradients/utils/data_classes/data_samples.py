@@ -47,7 +47,7 @@ class SegmentationSample(ImageSample):
     :attr sample_id:        The unique identifier of the sample. Could be the image path or the image name.
     :attr split:            The name of the dataset split. Could be "train", "val", "test", etc.
     :attr image:            np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
-    :attr mask:             np.ndarray of shape [N, H, W] representing one-hot encoded mask for each class.
+    :attr mask:             np.ndarray of shape [H, W], categorical representation of the mask.
     :attr contours:         A list of contours for each class in the mask.
     :attr class_names:      List of all class names in the dataset. The index should represent the class_id.
     """
