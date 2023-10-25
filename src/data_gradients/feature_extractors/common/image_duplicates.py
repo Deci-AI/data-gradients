@@ -2,7 +2,6 @@ from typing import List, Optional, Iterable
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
-from imagededup.methods import DHash
 
 import os
 
@@ -116,6 +115,9 @@ class ImageDuplicates(AbstractFeatureExtractor):
         Populates self.train_dups, self.valid_dups, self.intersection_dups and the corresponding appearences count attributes
         self.train_dups_appearences, self.validation_dups_appearences, self.intersection_train_appearnces, self.intersection_val_appearnces.
         """
+        # LOCAL IMPORT TO AVOID DOWNLOADING TRANSFORMER WEIGHTS ON SG/DG IMPORT
+        from imagededup.methods import DHash
+
         dhasher = DHash()
 
         # encodings = { IMAGE_X_FNAME: IMAGE_X_ENCODING,...}
