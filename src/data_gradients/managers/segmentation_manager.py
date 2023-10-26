@@ -49,7 +49,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param class_names:             Either the list of all class names in the dataset OR dictionary mapping of `class_id` -> `class_name`.
                                         The index should represent the class_id. Mutually exclusive with `n_classes`
         :param class_names_to_use:      List of class names that we should use for analysis.
-        :param n_classes:               Number of classes. Mutually exclusive with `class_names`. If set, `class_names` will be a list of `class_ids`.
+        :param n_classes:               Number of classes. Mutually exclusive with `class_id_to_name`. If set, `class_id_to_name` will be a list of `class_ids`.
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used. Mutually exclusive

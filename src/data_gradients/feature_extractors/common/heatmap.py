@@ -20,7 +20,7 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
         self.n_rows = n_rows
         self.n_cols = n_cols
 
-        self.class_names: Dict[int, str] = {}
+        self.class_id_to_name: Dict[int, str] = {}
         self.heatmaps_per_split: Dict[str, np.ndarray] = {}  # Each heatmap should be of shape (n_class, heatmap_shape[0], heatmap_shape[1])
 
     @abstractmethod
@@ -37,7 +37,7 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
         for split, heatmaps in self.heatmaps_per_split.items():
             for class_id, heatmap in enumerate(heatmaps):
                 if class_id in most_used_class_ids:
-                    class_name = self.class_names[class_id]
+                    class_name = self.class_id_to_name[class_id]
                     normalized_heatmaps_per_split_per_cls[class_name][split] = (255 * (heatmap / (heatmap.max() + 1e-6))).astype(np.uint8)
 
         fig = combine_images_per_split_per_class(images_per_split_per_class=normalized_heatmaps_per_split_per_cls, n_cols=self.n_cols)

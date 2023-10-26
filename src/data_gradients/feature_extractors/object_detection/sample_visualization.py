@@ -30,6 +30,6 @@ class DetectionSampleVisualization(AbstractSampleVisualization):
             image=sample.image_as_rgb,
             bboxes_xyxy=sample.bboxes_xyxy,
             bboxes_ids=sample.class_ids,
-            class_names=sample.class_names,
+            class_names=sample.class_id_to_name,
         )
         return result.astype(np.uint8)

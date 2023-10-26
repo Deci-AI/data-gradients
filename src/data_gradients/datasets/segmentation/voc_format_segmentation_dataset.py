@@ -63,7 +63,7 @@ class VOCFormatSegmentationDataset(BaseImageLabelDirectoryDataset):
         root_dir="<path/to/dataset_root>",
         images_subdir="images/train",
         labels_subdir="labels/train",
-        class_names=["background", "class1", "class2"],
+        class_id_to_name=["background", "class1", "class2"],
         color_map=color_map,
         config_path="train.txt"
     )
@@ -71,7 +71,7 @@ class VOCFormatSegmentationDataset(BaseImageLabelDirectoryDataset):
         root_dir="<path/to/dataset_root>",
         images_subdir="images/validation",
         labels_subdir="labels/validation",
-        class_names=["background", "class1", "class2"],
+        class_id_to_name=["background", "class1", "class2"],
         color_map=color_map,
         config_path="validation.txt"
     )

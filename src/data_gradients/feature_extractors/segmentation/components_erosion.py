@@ -16,17 +16,16 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
     def __init__(self):
         self.kernel_shape = (3, 3)
         self.data = []
-        self.class_names = None
 
     def update(self, sample: SegmentationSample):
         from data_gradients.utils.segmentation import mask_to_onehot
 
-        onehot_mask = mask_to_onehot(mask_categorical=sample.mask, n_classes=max(sample.class_names.keys()))
+        onehot_mask = mask_to_onehot(mask_categorical=sample.mask, n_classes=max(sample.class_id_to_name.keys()))
         opened_onehot_mask = self.apply_mask_opening(onehot_mask=onehot_mask, kernel_shape=self.kernel_shape)
         opened_categorical_mask = np.argmax(opened_onehot_mask, axis=-1)
 
         # TODO: This will be removed once we support sparse class representation (e.g. class_ids=[0, 4, 255])
-        contours_after_opening = contours.get_contours(label=opened_categorical_mask, class_ids=list(sample.class_names.keys()))
+        contours_after_opening = contours.get_contours(label=opened_categorical_mask, class_ids=list(sample.class_id_to_name.keys()))
 
         if sample.contours:
             n_components_without_opening = sum(1 for class_channel in sample.contours for _contour in class_channel)

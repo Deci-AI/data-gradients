@@ -25,13 +25,13 @@ class SegmentationSampleProcessor(AbstractSamplePreprocessor):
 
             for image, mask in zip(images, labels):
                 # TODO: This will be removed once we support sparse class representation (e.g. class_ids=[0, 4, 255])
-                contours = get_contours(mask, class_ids=range(len(self.data_config.get_class_names())))
+                contours = get_contours(mask, class_ids=range(len(self.data_config.get_class_id_to_name())))
 
                 yield SegmentationSample(
                     image=image,
                     mask=mask,
                     contours=contours,
-                    class_names=self.data_config.get_class_names(),
+                    class_names=self.data_config.get_class_id_to_name(),
                     split=split,
                     image_channels=self.data_config.get_image_channels(image=image),
                     sample_id=str(time.time()),

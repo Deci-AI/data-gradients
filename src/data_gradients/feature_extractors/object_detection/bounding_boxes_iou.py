@@ -41,9 +41,9 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
                 {
                     "split": sample.split,
                     "class_id": sample.class_ids[i],
-                    "class_name": sample.class_names[sample.class_ids[i]],
+                    "class_name": sample.class_id_to_name[sample.class_ids[i]],
                     "other_class_id": sample.class_ids[j],
-                    "other_class_name": sample.class_names[sample.class_ids[j]],
+                    "other_class_name": sample.class_id_to_name[sample.class_ids[j]],
                     "iou": iou[i, j],
                 }
             )
