@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Iterable, Callable, List, Union
+from typing import Optional, Iterable, Callable, List, Union, Dict
 
 import torch
 from torch.utils.data import DataLoader
@@ -30,7 +30,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         feature_extractors: Optional[FeatureExtractorsType] = None,
         log_dir: Optional[str] = None,
         use_cache: bool = False,
-        class_names: Optional[List[str]] = None,
+        class_names: Union[None, List[str], Dict[int, str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
@@ -45,7 +45,8 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         Constructor of detection manager which controls the analyzer
         :param report_title:            Title of the report. Will be used to save the report
         :param report_subtitle:         Subtitle of the report
-        :param class_names:             List of all class names in the dataset. The index should represent the class_id.
+        :param class_names:             Either the list of all class names in the dataset OR dictionary mapping of `class_id` -> `class_name`.
+                                        The index should represent the class_id. Mutually exclusive with `n_classes`
         :param class_names_to_use:      List of class names that we should use for analysis.
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
