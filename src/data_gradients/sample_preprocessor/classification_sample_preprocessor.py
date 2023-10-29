@@ -27,7 +27,7 @@ class ClassificationSamplePreprocessor(AbstractSamplePreprocessor):
                 sample = ClassificationSample(
                     image=image,
                     class_id=class_id,
-                    class_names=self.data_config.get_class_id_to_name(),
+                    class_id_to_name=self.data_config.get_class_id_to_name(),
                     split=split,
                     image_channels=self.data_config.get_image_channels(image=image),
                     sample_id=str(time.time()),

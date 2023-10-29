@@ -70,7 +70,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
         cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
         data_config = SegmentationDataConfig(
-            class_names=class_names,
+            class_id_to_name=class_names,
             n_classes=n_classes,
             cache_path=cache_path,
             class_names_to_use=class_names_to_use,

@@ -29,7 +29,7 @@ class DetectionSamplePreprocessor(AbstractSamplePreprocessor):
                     image=image,
                     class_ids=class_ids,
                     bboxes_xyxy=bboxes_xyxy,
-                    class_names=self.data_config.get_class_id_to_name(),
+                    class_id_to_name=self.data_config.get_class_id_to_name(),
                     split=split,
                     image_channels=self.data_config.get_image_channels(image=image),
                     sample_id=str(time.time()),

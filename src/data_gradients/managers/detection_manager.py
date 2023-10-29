@@ -74,7 +74,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         data_config = DetectionDataConfig(
             cache_path=cache_path,
             n_classes=n_classes,
-            class_names=class_names,
+            class_id_to_name=class_names,
             class_names_to_use=class_names_to_use,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,

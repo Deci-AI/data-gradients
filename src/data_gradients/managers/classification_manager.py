@@ -65,7 +65,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         data_config = ClassificationDataConfig(
             cache_path=cache_path,
             n_classes=n_classes,
-            class_names=class_names,
+            class_id_to_name=class_names,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_batch=is_batch,
