@@ -24,7 +24,6 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
         opened_onehot_mask = self.apply_mask_opening(onehot_mask=onehot_mask, kernel_shape=self.kernel_shape)
         opened_categorical_mask = np.argmax(opened_onehot_mask, axis=-1)
 
-        # TODO: This will be removed once we support sparse class representation (e.g. class_ids=[0, 4, 255])
         contours_after_opening = contours.get_contours(label=opened_categorical_mask, class_ids=list(sample.class_id_to_name.keys()))
 
         if sample.contours:
