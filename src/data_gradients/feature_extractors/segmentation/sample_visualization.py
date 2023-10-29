@@ -31,11 +31,9 @@ class SegmentationSampleVisualization(AbstractSampleVisualization):
 
         image = sample.image_as_rgb
 
-        # Onehot to categorical labels
-        categorical_labels = np.argmax(sample.mask, axis=0)
-
         # Normalize the labels to the range [0, 255]
-        normalized_labels = np.ceil((categorical_labels * 255) / np.max(categorical_labels))
+        mask = sample.mask.astype(np.float32)
+        normalized_labels = np.ceil((mask * 255) / np.max(mask))
         normalized_labels = normalized_labels[:, :, np.newaxis].repeat(3, axis=-1)
 
         # Stack the image and label color map horizontally or vertically

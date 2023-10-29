@@ -16,10 +16,17 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
     def __init__(self):
         self.kernel_shape = (3, 3)
         self.data = []
+        self.class_names = None
 
     def update(self, sample: SegmentationSample):
-        opened_mask = self.apply_mask_opening(mask=sample.mask, kernel_shape=self.kernel_shape)
-        contours_after_opening = contours.get_contours(opened_mask)
+        from data_gradients.utils.segmentation import mask_to_onehot
+
+        onehot_mask = mask_to_onehot(mask_categorical=sample.mask, n_classes=len(sample.class_names))
+        opened_onehot_mask = self.apply_mask_opening(onehot_mask=onehot_mask, kernel_shape=self.kernel_shape)
+        opened_categorical_mask = np.argmax(opened_onehot_mask, axis=-1)
+
+        # TODO: This will be removed once we support sparse class representation (e.g. class_ids=[0, 4, 255])
+        contours_after_opening = contours.get_contours(label=opened_categorical_mask, class_ids=range(len(sample.class_names)))
 
         if sample.contours:
             n_components_without_opening = sum(1 for class_channel in sample.contours for _contour in class_channel)
@@ -71,7 +78,7 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
         )
         # FIXME: Can this also lead to increase of components, when breaking existing component into 2?
 
-    def apply_mask_opening(self, mask: np.ndarray, kernel_shape: Tuple[int, int]) -> np.ndarray:
+    def apply_mask_opening(self, onehot_mask: np.ndarray, kernel_shape: Tuple[int, int]) -> np.ndarray:
         """Opening is just another name of erosion followed by dilation.
 
         It is useful in removing noise, as we explained above. Here we use the function, cv2.morphologyEx(). See [Official OpenCV documentation](
@@ -81,6 +88,6 @@ class SegmentationComponentsErosion(AbstractFeatureExtractor):
         :param kernel_shape:    Shape of the kernel used for Opening (Eroded + Dilated)
         :return:                Opened (Eroded + Dilated) mask in shape [N, H, W]
         """
-        masks = mask.transpose((1, 2, 0)).astype(np.uint8)
+        masks = onehot_mask.transpose((1, 2, 0)).astype(np.uint8)
         masks = cv2.morphologyEx(masks, cv2.MORPH_OPEN, np.ones(kernel_shape, np.uint8))
         return masks.transpose((2, 0, 1))

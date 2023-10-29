@@ -5,7 +5,7 @@ from torch import Tensor
 
 from data_gradients.dataset_adapters.utils import check_all_integers
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
-from data_gradients.dataset_adapters.formatters.utils import check_images_shape, ensure_channel_first, drop_nan
+from data_gradients.dataset_adapters.formatters.utils import check_images_shape, ensure_channel_first
 from data_gradients.dataset_adapters.config.data_config import DetectionDataConfig
 from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError
 
@@ -60,7 +60,6 @@ class DetectionBatchFormatter(BatchFormatter):
             images *= 255
             images = images.to(torch.uint8)
 
-        labels = drop_nan(labels)
         labels = self.ensure_labels_shape(annotated_bboxes=labels, batch_size=images.shape[0])
 
         # Labels format transformations are only relevant if we have labels
