@@ -45,7 +45,6 @@ class DetectionBatchFormatter(BatchFormatter):
             # This may trigger questions to the user, so we prefer to set it inside `former()` and not `__init__`
             # to avoid asking questions even before the analysis starts.
             classes_to_use = set(self.data_config.get_class_names_to_use())
-            print(classes_to_use)
             self.class_ids_to_use = []
             for class_id, class_name in self.data_config.get_class_id_to_name().items():
                 if class_name in classes_to_use:
