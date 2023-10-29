@@ -57,7 +57,7 @@ class SummaryStats(AbstractFeatureExtractor):
                 basic_stats.annotations_sizes.append(contour.area)
                 basic_stats.classes.append(contour.class_id)
 
-            basic_stats.classes_count = len(sample.class_id_to_name)
+            basic_stats.classes_count = len(sample.class_names)
 
         elif isinstance(sample, DetectionSample):
             labels = sample.class_ids
@@ -67,7 +67,7 @@ class SummaryStats(AbstractFeatureExtractor):
             for box in boxes:
                 basic_stats.annotations_sizes.append((box[2] - box[0]) * (box[3] - box[1]))
 
-            basic_stats.classes_count = len(sample.class_id_to_name)
+            basic_stats.classes_count = len(sample.class_names)
 
     def aggregate(self) -> Feature:
         for basic_stats in self.stats.values():

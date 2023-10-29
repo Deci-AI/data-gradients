@@ -24,13 +24,13 @@ class SegmentationSampleProcessor(AbstractSamplePreprocessor):
             labels = np.uint8(labels.cpu().numpy())
 
             for image, mask in zip(images, labels):
-                contours = get_contours(mask, class_ids=list(self.data_config.get_class_id_to_name().keys()))
+                contours = get_contours(mask, class_ids=list(self.data_config.get_class_names().keys()))
 
                 yield SegmentationSample(
                     image=image,
                     mask=mask,
                     contours=contours,
-                    class_id_to_name=self.data_config.get_class_id_to_name(),
+                    class_names=self.data_config.get_class_names(),
                     split=split,
                     image_channels=self.data_config.get_image_channels(image=image),
                     sample_id=str(time.time()),

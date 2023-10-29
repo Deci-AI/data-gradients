@@ -20,8 +20,8 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
 
     def update(self, sample: SegmentationSample):
 
-        if not self.class_id_to_name:
-            self.class_id_to_name = sample.class_id_to_name
+        if not self.class_names:
+            self.class_names = sample.class_names
 
         # (H, W) -> (C, H, W)
         n_classes = np.max(sample.mask)
@@ -53,7 +53,7 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
 
     @property
     def notice(self) -> Optional[str]:
-        if len(self.class_id_to_name) > self.n_cols * self.n_rows:
+        if len(self.class_names) > self.n_cols * self.n_rows:
             return (
                 f"Only the {self.n_cols * self.n_rows} classes with highest density are shown.<br/>"
                 f"You can increase the number of classes by changing `n_cols` and `n_rows` in the configuration file."

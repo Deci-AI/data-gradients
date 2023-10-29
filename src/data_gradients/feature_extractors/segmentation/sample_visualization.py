@@ -34,7 +34,7 @@ class SegmentationSampleVisualization(AbstractSampleVisualization):
         image = sample.image_as_rgb
         mask = sample.mask
 
-        class_ids = list(sample.class_id_to_name.keys())
+        class_ids = list(sample.class_names.keys())
 
         # Create a color map using the generate_gray_color_mapping function
         colors = generate_gray_color_mapping(len(class_ids) + 1)  # generated colors for each class

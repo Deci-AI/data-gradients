@@ -51,7 +51,7 @@ class TestComputeHistogram(unittest.TestCase):
             image_channels=ImageChannels.from_str("RGB"),
             bboxes_xyxy=np.array([[2, 2, 4, 4], [3, 3, 6, 6], [1, 1, 5, 5], [1, 1, 4, 4], [5, 5, 6, 6], [7, 7, 9, 9]]),
             class_ids=np.array([0, 1, 2, 2, 3, 4]),
-            class_id_to_name={0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
+            class_names={0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
         )
 
         val_sample = DetectionSample(
@@ -67,7 +67,7 @@ class TestComputeHistogram(unittest.TestCase):
                 ]
             ),
             class_ids=np.array([0, 1, 1]),
-            class_id_to_name={0: "A", 1: "B"},
+            class_names={0: "A", 1: "B"},
         )
 
         extractor = DetectionBoundingBoxArea()

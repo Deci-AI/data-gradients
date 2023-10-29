@@ -17,7 +17,7 @@ def write_json(path: str, json_dict: Dict):
         json.dump(json_dict, f, indent=4)
 
 
-def class_id_to_name(mapping, hist: Dict):
+def class_names(mapping, hist: Dict):
     if mapping is None:
         return hist
 

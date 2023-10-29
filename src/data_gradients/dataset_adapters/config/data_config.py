@@ -42,7 +42,7 @@ class DataConfig(ABC):
     image_channels: Union[None, ImageChannels] = None
 
     n_classes: Union[None, int] = None
-    class_id_to_name: Union[None, Dict[int, str]] = None
+    class_names: Union[None, Dict[int, str]] = None
     class_names_to_use: Union[None, List[str]] = None
 
     cache_path: Optional[str] = None
@@ -118,7 +118,7 @@ class DataConfig(ABC):
             "is_batch": self.is_batch,
             "image_channels": None if self.image_channels is None else self.image_channels.channels_str,
             "n_classes": self.n_classes,
-            "class_id_to_name": self.class_id_to_name,
+            "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
         }
         return json_dict
@@ -151,8 +151,8 @@ class DataConfig(ABC):
             self.is_batch = json_dict.get("is_batch")
         if self.n_classes is None:
             self.n_classes = json_dict.get("n_classes")
-        if self.class_id_to_name is None:
-            self.class_id_to_name = json_dict.get("class_id_to_name")
+        if self.class_names is None:
+            self.class_names = json_dict.get("class_names")
         if self.class_names_to_use is None:
             self.class_names_to_use = json_dict.get("class_names_to_use")
         if self.image_channels is None:
@@ -237,10 +237,10 @@ class DataConfig(ABC):
             self.is_batch: bool = question.ask(hint=hint)
         return self.is_batch
 
-    def get_class_id_to_name(self) -> Dict[int, str]:
-        if self.class_id_to_name is None:
+    def get_class_names(self) -> Dict[int, str]:
+        if self.class_names is None:
             self._setup_class_related_params()
-        return self.class_id_to_name
+        return self.class_names
 
     def get_n_classes(self) -> int:
         if self.n_classes is None:
@@ -256,11 +256,11 @@ class DataConfig(ABC):
         """Resolve class related params.
 
         All the parameters are set up together because strongly related -
-        knowing only `class_id_to_name` or `n_classes` is enough to set the values of the other 2.
+        knowing only `class_names` or `n_classes` is enough to set the values of the other 2.
         """
-        self.class_id_to_name = resolve_class_id_to_name(class_id_to_name=self.class_id_to_name, n_classes=self.n_classes)
-        self.n_classes = len(self.class_id_to_name)
-        self.class_names_to_use = resolve_class_names_to_use(class_id_to_name=self.class_id_to_name, class_names_to_use=self.class_names_to_use)
+        self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
+        self.n_classes = len(self.class_names)
+        self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
 
 
 @dataclass
@@ -322,11 +322,11 @@ class DetectionDataConfig(DataConfig):
         return XYXYConverterResolver.to_callable(self.xyxy_converter)
 
 
-def resolve_class_id_to_name(class_id_to_name: Union[List[str], Dict[int, str]], n_classes: int) -> Dict[int, str]:
-    """Ensure that either `class_id_to_name` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
-    if n_classes and class_id_to_name and (len(class_id_to_name) != n_classes):
-        raise RuntimeError(f"`len(class_id_to_name)={len(class_id_to_name)} != n_classes`.")
-    elif n_classes is None and class_id_to_name is None:
+def resolve_class_names(class_names: Union[List[str], Dict[int, str]], n_classes: int) -> Dict[int, str]:
+    """Ensure that either `class_names` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
+    if n_classes and class_names and (len(class_names) != n_classes):
+        raise RuntimeError(f"`len(class_names)={len(class_names)} != n_classes`.")
+    elif n_classes is None and class_names is None:
 
         def _represents_int(s: str) -> bool:
             """Check if a string represents an integer."""
@@ -343,19 +343,19 @@ def resolve_class_id_to_name(class_id_to_name: Union[List[str], Dict[int, str]],
         )
         n_classes = int(question.ask())
         return {f"class_{i}": i for i in range(n_classes)}
-    elif class_id_to_name:
-        if isinstance(class_id_to_name, list):
-            return dict(zip(range(len(class_id_to_name)), class_id_to_name))
-        elif isinstance(class_id_to_name, dict):
-            return class_id_to_name
+    elif class_names:
+        if isinstance(class_names, list):
+            return dict(zip(range(len(class_names)), class_names))
+        elif isinstance(class_names, dict):
+            return class_names
     else:
         return {i: f"class_{i}" for i in range(n_classes)}
 
 
-def resolve_class_names_to_use(class_id_to_name: Dict[int, str], class_names_to_use: List[str]) -> List[str]:
-    """Define `class_names_to_use` from `class_id_to_name` if it is specified. Otherwise, return the list of class names that will be used."""
+def resolve_class_names_to_use(class_names: Dict[int, str], class_names_to_use: List[str]) -> List[str]:
+    """Define `class_names_to_use` from `class_names` if it is specified. Otherwise, return the list of class names that will be used."""
     if class_names_to_use:
-        invalid_class_names_to_use = set(class_names_to_use) - set(class_id_to_name.values())
+        invalid_class_names_to_use = set(class_names_to_use) - set(class_names.values())
         if invalid_class_names_to_use != set():
-            raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_id_to_name`: {invalid_class_names_to_use}")
-    return class_names_to_use or list(class_id_to_name.values())
+            raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
+    return class_names_to_use or list(class_names.values())

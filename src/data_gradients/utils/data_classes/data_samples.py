@@ -49,13 +49,13 @@ class SegmentationSample(ImageSample):
     :attr image:            np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
     :attr mask:             np.ndarray of shape [H, W], categorical representation of the mask.
     :attr contours:         A list of contours for each class in the mask.
-    :attr class_id_to_name:      List of all class names in the dataset. The index should represent the class_id.
+    :attr class_names:      List of all class names in the dataset. The index should represent the class_id.
     """
 
     mask: np.ndarray
 
     contours: List[List[Contour]]
-    class_id_to_name: Dict[int, str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
@@ -72,12 +72,12 @@ class DetectionSample(ImageSample):
     :attr image:        np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
     :attr bboxes_xyxy:  np.ndarray of shape [N, 4] (X, Y, X, Y)
     :attr class_ids:    np.ndarray of shape [N, ]
-    :attr class_id_to_name:  List of all class names in the dataset. The index should represent the class_id.
+    :attr class_names:  List of all class names in the dataset. The index should represent the class_id.
     """
 
     bboxes_xyxy: np.ndarray
     class_ids: np.ndarray
-    class_id_to_name: Dict[int, str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, class_ids={self.class_ids.shape})"
@@ -93,11 +93,11 @@ class ClassificationSample(ImageSample):
     :attr split:        The name of the dataset split. Could be "train", "val", "test", etc.
     :attr image:        np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
     :attr class_label:  Class label (int)
-    :attr class_id_to_name:  List of all class names in the dataset. The index should represent the class_id.
+    :attr class_names:  List of all class names in the dataset. The index should represent the class_id.
     """
 
     class_id: int
-    class_id_to_name: Dict[int, str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, label={self.class_id})"

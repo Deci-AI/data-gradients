@@ -28,7 +28,7 @@ class DetectionClassesPerImageCount(AbstractFeatureExtractor):
 
     def update(self, sample: DetectionSample):
         for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
-            class_name = sample.class_id_to_name[class_id]
+            class_name = sample.class_names[class_id]
             self.data.append(
                 {
                     "split": sample.split,

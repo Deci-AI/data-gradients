@@ -32,7 +32,7 @@ class ClassificationClassFrequency(AbstractFeatureExtractor):
         self.data = []
 
     def update(self, sample: ClassificationSample):
-        class_name = sample.class_id_to_name[sample.class_id]
+        class_name = sample.class_names[sample.class_id]
         self.data.append(
             {
                 "split": sample.split,

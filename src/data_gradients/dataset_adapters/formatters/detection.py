@@ -46,7 +46,7 @@ class DetectionBatchFormatter(BatchFormatter):
             # to avoid asking questions even before the analysis starts.
             classes_to_use = set(self.data_config.get_class_names_to_use())
             self.class_ids_to_use = []
-            for class_id, class_name in self.data_config.get_class_id_to_name().items():
+            for class_id, class_name in self.data_config.get_class_names().items():
                 if class_name in classes_to_use:
                     self.class_ids_to_use.append(class_id)
 

@@ -19,7 +19,7 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
         for j, class_channel in enumerate(sample.contours):
             for contour in class_channel:
                 class_id = contour.class_id
-                class_name = sample.class_id_to_name[class_id]
+                class_name = sample.class_names[class_id]
                 self.data.append(
                     {
                         "split": sample.split,

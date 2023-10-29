@@ -39,7 +39,7 @@ class ClassificationSummaryStats(AbstractFeatureExtractor):
         height, width = sample.image.shape[:2]
         basic_stats.images_resolutions.append([height, width])
         basic_stats.num_samples += 1
-        basic_stats.classes_count = len(sample.class_id_to_name)
+        basic_stats.classes_count = len(sample.class_names)
         basic_stats.classes.append(sample.class_id)
 
     def aggregate(self) -> Feature:

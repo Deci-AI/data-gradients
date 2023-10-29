@@ -42,7 +42,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         :param report_subtitle:         Subtitle of the report
         :param class_names:             Either the list of all class names in the dataset OR dictionary mapping of `class_id` -> `class_name`.
                                         The index should represent the class_id. Mutually exclusive with `n_classes`
-        :param n_classes:               Number of classes. Mutually exclusive with `class_id_to_name`.
+        :param n_classes:               Number of classes. Mutually exclusive with `class_names`.
         :param train_data:              Iterable object contains images and labels of the training dataset
         :param val_data:                Iterable object contains images and labels of the validation dataset
         :param config_path:             Full path the hydra configuration file. If None, the default configuration will be used. Mutually exclusive
@@ -65,7 +65,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         data_config = ClassificationDataConfig(
             cache_path=cache_path,
             n_classes=n_classes,
-            class_id_to_name=class_names,
+            class_names=class_names,
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_batch=is_batch,
