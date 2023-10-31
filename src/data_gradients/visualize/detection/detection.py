@@ -1,4 +1,4 @@
-from typing import List, Tuple, Set
+from typing import Dict, Tuple, Set
 import cv2
 
 import numpy as np
@@ -7,25 +7,28 @@ from data_gradients.visualize.detection.utils import best_text_color, generate_c
 from data_gradients.visualize.utils import resize_and_align_bottom_center
 
 
-def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, bboxes_ids: np.ndarray, class_names: List[str]) -> np.ndarray:
+def draw_bboxes(image: np.ndarray, bboxes_xyxy: np.ndarray, bboxes_ids: np.ndarray, class_names: Dict[int, str]) -> np.ndarray:
     """Draw annotated bboxes on an image.
 
     :param image:       Input image tensor.
     :param bboxes_xyxy: BBoxes, in [N, 4].
     :param bboxes_ids:  Class ids [N].
-    :param class_names: List of class names. (unique, not per bbox)
+    :param class_names: Mapping of class_id -> class_name. (unique, not per bbox)
     :return:            Image with annotated bboxes.
     """
     if len(bboxes_ids) == 0:
         return image
+
     colors = generate_color_mapping(len(class_names) + 1)
+    class_names_list = list(class_names.values())
 
     # Initialize an empty list to store the classes that appear in the image
     classes_in_image_with_color: Set[Tuple[str, Tuple]] = set()
 
     for (x1, y1, x2, y2), class_id in zip(bboxes_xyxy, bboxes_ids):
         class_name: str = class_names[class_id]
-        color = colors[class_names.index(class_name)]
+        color_i = class_names_list.index(class_name)
+        color = colors[color_i]
 
         # If the class is not already in the list, add it
         classes_in_image_with_color.add((class_name, color))

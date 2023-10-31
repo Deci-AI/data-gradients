@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 
@@ -55,7 +55,7 @@ class SegmentationSample(ImageSample):
     mask: np.ndarray
 
     contours: List[List[Contour]]
-    class_names: List[str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
@@ -77,7 +77,7 @@ class DetectionSample(ImageSample):
 
     bboxes_xyxy: np.ndarray
     class_ids: np.ndarray
-    class_names: List[str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, class_ids={self.class_ids.shape})"
@@ -97,7 +97,7 @@ class ClassificationSample(ImageSample):
     """
 
     class_id: int
-    class_names: List[str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, label={self.class_id})"

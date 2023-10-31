@@ -94,7 +94,7 @@ pip install data-gradients
   - Generator that yields image/label pairs
   - Any other iterable you use for model training/validation
 - One of:
-  - **Class Names**: A list of the unique categories present in your dataset.
+  - **Class Names**: Either the list of all class names in the dataset OR dictionary mapping of `class_id` -> `class_name`.
   - **Number of classes**:  Indicate how many unique classes are in your dataset. Ensure this number is greater than the highest class index (e.g., if your highest class index is 9, the number of classes should be at least 10).
 
 Please ensure all the points above are checked before you proceed with **DataGradients**.
@@ -106,6 +106,8 @@ from torchvision.datasets import CocoDetection
 train_data = CocoDetection(...)
 val_data = CocoDetection(...)
 class_names = ["person", "bicycle", "car", "motorcycle", ...]
+# OR
+# class_names = {0: "person", 1:"bicycle", 2:"car", 3: "motorcycle", ...}
 ```
 
 > **Good to Know** - DataGradients will try to find out how the dataset returns images and labels.

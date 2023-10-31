@@ -42,7 +42,7 @@ class DataConfig(ABC):
     image_channels: Union[None, ImageChannels] = None
 
     n_classes: Union[None, int] = None
-    class_names: Union[None, List[str]] = None
+    class_names: Union[None, Dict[int, str]] = None
     class_names_to_use: Union[None, List[str]] = None
 
     cache_path: Optional[str] = None
@@ -53,6 +53,7 @@ class DataConfig(ABC):
             self.update_from_cache_file()
         else:
             logger.info(f"Cache deactivated for `{self.__class__.__name__}`.")
+        self._setup_class_related_params()
 
     def update_from_cache_file(self):
         """Update the values that are not set yet, using the cache file."""
@@ -236,7 +237,7 @@ class DataConfig(ABC):
             self.is_batch: bool = question.ask(hint=hint)
         return self.is_batch
 
-    def get_class_names(self) -> List[str]:
+    def get_class_names(self) -> Dict[int, str]:
         if self.class_names is None:
             self._setup_class_related_params()
         return self.class_names
@@ -254,7 +255,8 @@ class DataConfig(ABC):
     def _setup_class_related_params(self):
         """Resolve class related params.
 
-        All the parameters are set up together because strongly related - knowing only `class_names` or `n_classes` is enough to set the values of the other 2.
+        All the parameters are set up together because strongly related -
+        knowing only `class_names` or `n_classes` is enough to set the values of the other 2.
         """
         self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
         self.n_classes = len(self.class_names)
@@ -320,7 +322,7 @@ class DetectionDataConfig(DataConfig):
         return XYXYConverterResolver.to_callable(self.xyxy_converter)
 
 
-def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
+def resolve_class_names(class_names: Union[List[str], Dict[int, str]], n_classes: int) -> Dict[int, str]:
     """Ensure that either `class_names` or `n_classes` is specified, but not both. Return the list of class names that will be used."""
     if n_classes and class_names and (len(class_names) != n_classes):
         raise RuntimeError(f"`len(class_names)={len(class_names)} != n_classes`.")
@@ -340,14 +342,20 @@ def resolve_class_names(class_names: List[str], n_classes: int) -> List[str]:
             validation=lambda answer: _represents_int(answer) and int(answer) > 0,
         )
         n_classes = int(question.ask())
+        return {f"class_{i}": i for i in range(n_classes)}
+    elif class_names:
+        if isinstance(class_names, list):
+            return dict(zip(range(len(class_names)), class_names))
+        elif isinstance(class_names, dict):
+            return class_names
+    else:
+        return {i: f"class_{i}" for i in range(n_classes)}
 
-    return class_names or list(map(str, range(n_classes)))
 
-
-def resolve_class_names_to_use(class_names: List[str], class_names_to_use: List[str]) -> List[str]:
+def resolve_class_names_to_use(class_names: Dict[int, str], class_names_to_use: List[str]) -> List[str]:
     """Define `class_names_to_use` from `class_names` if it is specified. Otherwise, return the list of class names that will be used."""
     if class_names_to_use:
-        invalid_class_names_to_use = set(class_names_to_use) - set(class_names)
+        invalid_class_names_to_use = set(class_names_to_use) - set(class_names.values())
         if invalid_class_names_to_use != set():
             raise RuntimeError(f"You defined `class_names_to_use` with classes that are not listed in `class_names`: {invalid_class_names_to_use}")
-    return class_names_to_use or class_names
+    return class_names_to_use or list(class_names.values())

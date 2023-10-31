@@ -24,8 +24,7 @@ class SegmentationSampleProcessor(AbstractSamplePreprocessor):
             labels = np.uint8(labels.cpu().numpy())
 
             for image, mask in zip(images, labels):
-                # TODO: This will be removed once we support sparse class representation (e.g. class_ids=[0, 4, 255])
-                contours = get_contours(mask, class_ids=range(len(self.data_config.get_class_names())))
+                contours = get_contours(mask, class_ids=list(self.data_config.get_class_names().keys()))
 
                 yield SegmentationSample(
                     image=image,

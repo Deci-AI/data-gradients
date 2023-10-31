@@ -45,8 +45,12 @@ class SegmentationBatchFormatter(BatchFormatter):
         if self.class_ids_to_ignore is None:
             # This may trigger questions to the user, so we prefer to set it inside `former()` and not `__init__`
             # to avoid asking questions even before the analysis starts.
-            classes_to_ignore = set(self.data_config.get_class_names()) - set(self.data_config.get_class_names_to_use())
-            self.class_ids_to_ignore = [self.data_config.get_class_names().index(class_name_to_ignore) for class_name_to_ignore in classes_to_ignore]
+            classes_to_ignore = set(self.data_config.get_class_names().values()) - set(self.data_config.get_class_names_to_use())
+            self.class_ids_to_ignore = []
+            for class_id, class_name in self.data_config.get_class_names().items():
+                for class_name_to_ignore in classes_to_ignore:
+                    if class_name == class_name_to_ignore:
+                        self.class_ids_to_ignore.append(class_name)
 
         if not self.check_is_batch(images=images, labels=labels):
             images = images.unsqueeze(0)

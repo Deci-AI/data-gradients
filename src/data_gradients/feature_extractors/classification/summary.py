@@ -1,4 +1,3 @@
-import collections
 import dataclasses
 from typing import List
 

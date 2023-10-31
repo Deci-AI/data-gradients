@@ -44,7 +44,11 @@ class DetectionBatchFormatter(BatchFormatter):
         if self.class_ids_to_use is None:
             # This may trigger questions to the user, so we prefer to set it inside `former()` and not `__init__`
             # to avoid asking questions even before the analysis starts.
-            self.class_ids_to_use = [self.data_config.get_class_names().index(class_name) for class_name in self.data_config.get_class_names_to_use()]
+            classes_to_use = set(self.data_config.get_class_names_to_use())
+            self.class_ids_to_use = []
+            for class_id, class_name in self.data_config.get_class_names().items():
+                if class_name in classes_to_use:
+                    self.class_ids_to_use.append(class_id)
 
         if labels.numel() == 0:
             # First thing is to make sure that, if we have empty labels, they are in a correct format
