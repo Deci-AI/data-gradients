@@ -2,19 +2,20 @@ import os
 import abc
 import logging
 import traceback
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Iterable, Sized
 from itertools import zip_longest
 from logging import getLogger
 
 from tqdm import tqdm
 
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.feature_extractors.common import SummaryStats
 from data_gradients.utils.utils import print_in_box
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterables.base import BaseSampleIterable
+from data_gradients.sample_preprocessor.base_sample_preprocessor import AbstractSamplePreprocessor
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,36 +30,37 @@ class AnalysisManagerAbstract(abc.ABC):
     def __init__(
         self,
         *,
-        train_data: BaseSampleIterable,
-        val_data: BaseSampleIterable,
+        train_data: Iterable[SupportedDataType],
+        val_data: Optional[Iterable[SupportedDataType]],
+        sample_preprocessor: AbstractSamplePreprocessor,
         summary_writer: SummaryWriter,
         grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
         """
-        :param train_data:          Iterable object contains images and labels of the training dataset
-        :param val_data:            Iterable object contains images and labels of the validation dataset
+        :param train_data:                  Iterable object contains images and labels of the training dataset
+        :param val_data:                    Iterable object contains images and labels of the validation dataset
         :param grouped_feature_extractors:  List of feature extractors to be used
-        :param batches_early_stop:  Maximum number of batches to run in training (early stop)
-        :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
+        :param batches_early_stop:          Maximum number of batches to run in training (early stop)
+        :param remove_plots_after_report:   Delete the plots from the report directory after the report is generated. By default, True
         """
 
         self.renderer = SeabornRenderer()
         self.summary_writer = summary_writer
+        self.data_config = sample_preprocessor.data_config
 
         # DATA
         if batches_early_stop:
             logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
 
-        self.train_data = train_data
-        self.val_data = val_data
-        self.train_size = len(train_data) if hasattr(train_data, "__len__") else None
-        self.val_size = len(val_data) if hasattr(val_data, "__len__") else None
+        val_data = val_data or iter([])
+        self.train_size = len(train_data) if isinstance(train_data, Sized) else None
+        self.val_size = len(val_data) if isinstance(val_data, Sized) else None
 
-        self.train_iter = iter(train_data)
-        self.val_iter = iter(val_data) if val_data is not None else iter([])
+        self.train_samples_iterator = sample_preprocessor.preprocess_samples(train_data, split="train")
+        self.val_samples_iterator = sample_preprocessor.preprocess_samples(val_data, split="val")
 
         # FEATURES
         self.grouped_feature_extractors = grouped_feature_extractors
@@ -94,7 +96,7 @@ class AnalysisManagerAbstract(abc.ABC):
         )
 
         datasets_tqdm = tqdm(
-            zip_longest(self.train_iter, self.val_iter, fillvalue=None),
+            zip_longest(self.train_samples_iterator, self.val_samples_iterator, fillvalue=None),
             desc="Analyzing... ",
             total=self.n_batches,
         )
@@ -184,24 +186,13 @@ class AnalysisManagerAbstract(abc.ABC):
         print("Dataset successfully analyzed!")
         print("Starting to write the report, this may take around 10 seconds...")
         self.summary_writer.set_pdf_summary(pdf_summary=summary)
-        self.summary_writer.set_data_config(data_config_dict=self.train_data.dataset.data_config.to_json())
+        self.summary_writer.set_data_config(data_config_dict=self.data_config.to_json())
         self.summary_writer.write()
 
         # Cleanup of generated images
         if self._remove_plots_after_report:
             for image_created in images_created:
                 os.remove(image_created)
-
-    def close(self):
-        """Safe logging closing"""
-        self.train_data.close()
-        self.val_data.close()
-        print(f'{"*" * 100}')
-        print("We have finished evaluating your dataset!")
-        print()
-        print("The results can be seen in:")
-        print(f"    - {self.summary_writer.log_dir}")
-        print(f"    - {self.summary_writer.archive_dir}")
 
     def run(self):
         """
@@ -218,17 +209,54 @@ class AnalysisManagerAbstract(abc.ABC):
             logger.info("For HARD Termination - Stop the process again")
             interrupted = e is not None
         self.post_process(interrupted=interrupted)
-        self.close()
+
+        self.data_config.dump_cache_file()
+
+        self.print_summary()
+
+    def print_summary(self):
+        print()
+        print(f'{"=" * 100}')
+        print("Your dataset evaluation has been completed!")
+        print()
+        print(f'{"-" * 100}')
+        print("Training Configuration...")
+        print(self.data_config.get_caching_info())
+        print()
+        print(f'{"-" * 100}')
+        print("Report Location:")
+        print("    - Temporary Folder (will be overwritten next run):")
+        print(f"        └─ {self.summary_writer.log_dir}")
+        print(f"                ├─ {os.path.basename(self.summary_writer.report_archive_path)}")
+        print(f"                └─ {os.path.basename(self.summary_writer.summary_archive_path)}")
+        print("    - Archive Folder:")
+        print(f"        └─ {self.summary_writer.archive_dir}")
+        print(f"                ├─ {os.path.basename(self.summary_writer.report_archive_path)}")
+        print(f"                └─ {os.path.basename(self.summary_writer.summary_archive_path)}")
+        print("")
+        print(f'{"=" * 100}')
+        print("Seen a glitch? Have a suggestion? Visit https://github.com/Deci-AI/data-gradients !")
 
     @property
-    def n_batches(self) -> Optional[int]:
-        """Number of batches to analyze if available, None otherwise."""
-        if self.train_size is None or self.val_size is None:
-            return self.batches_early_stop
+    def n_batches(self):
+        # If either train_size or val_size is None (indicating we don't know its size),
+        # we will prioritize the value we know. If both are unknown, we cannot determine the max.
+        if self.train_size is None and self.val_size is None:
+            # If batches_early_stop is set, return that. Otherwise, it's undeterminable.
+            return self.batches_early_stop if self.batches_early_stop is not None else float("inf")
 
-        n_batches_available = max(self.train_size, self.val_size)
-        n_batches_early_stop = self.batches_early_stop or float("inf")
-        return min(n_batches_early_stop, n_batches_available)
+        if self.train_size is None:
+            max_size = self.val_size
+        elif self.val_size is None:
+            max_size = self.train_size
+        else:
+            max_size = max(self.train_size, self.val_size)
+
+        # If batches_early_stop is set, take the minimum of batches_early_stop and the max_size
+        # Otherwise, return max_size
+        if self.batches_early_stop is not None:
+            return min(max_size, self.batches_early_stop)
+        return max_size
 
     def _create_samples_iterated_warning(self) -> str:
         if self.train_size is None or self._train_batch_size is None:

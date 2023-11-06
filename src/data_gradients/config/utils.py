@@ -6,7 +6,7 @@ from hydra import initialize_config_dir, compose
 from hydra.core.global_hydra import GlobalHydra
 from omegaconf import DictConfig, OmegaConf
 
-from data_gradients.config.data.typing import FeatureExtractorsType
+from data_gradients.dataset_adapters.config.typing_utils import FeatureExtractorsType
 from data_gradients.feature_extractors import AbstractFeatureExtractor
 from data_gradients.common.factories import FeatureExtractorsFactory, ListFactory
 

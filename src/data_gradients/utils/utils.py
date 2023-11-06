@@ -6,13 +6,18 @@ from typing import Dict, Mapping, List
 
 
 def write_json(path: str, json_dict: Dict):
-    dirname = os.path.dirname(path)
+    """Write a json dictionary to a file.
+    :param path:        Path to the file. Can be absolute or relative. Should contain '.json' extension.
+    :param json_dict:   Dictionary to be written to the file. Should be serializable.
+    """
+    full_path = os.path.abspath(path)
+    dirname = os.path.dirname(full_path)
     os.makedirs(dirname, exist_ok=True)
-    with open(path, "w") as f:
+    with open(full_path, "w") as f:
         json.dump(json_dict, f, indent=4)
 
 
-def class_id_to_name(mapping, hist: Dict):
+def class_names(mapping, hist: Dict):
     if mapping is None:
         return hist
 
@@ -83,8 +88,12 @@ def text_to_blue(text: str) -> str:
     return f"\033[34;1m{text}\033[0m"
 
 
-def text_to_yellow(text: str):
+def text_to_yellow(text: str) -> str:
     return f"\033[33;1m{text}\033[0m"
+
+
+def text_to_red(text: str) -> str:
+    return f"\033[31;1m{text}\033[0m"
 
 
 def break_text(text: str, line_length: int):

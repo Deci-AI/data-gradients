@@ -1,13 +1,14 @@
 import unittest
 import numpy as np
 
-from data_gradients.utils.data_classes.data_samples import SegmentationSample, ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import SegmentationSample
 from data_gradients.utils.data_classes.contour import Contour
 from data_gradients.feature_extractors.segmentation.bounding_boxes_area import SegmentationBoundingBoxArea
 from data_gradients.feature_extractors.segmentation.bounding_boxes_resolution import SegmentationBoundingBoxResolution
 from data_gradients.feature_extractors.segmentation.classes_frequency import SegmentationClassesCount
 from data_gradients.feature_extractors.segmentation.classes_frequency_per_image import SegmentationClassesPerImageCount
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
+from data_gradients.utils.data_classes.image_channels import ImageChannels
 
 
 class SegmentationBBoxTest(unittest.TestCase):
@@ -16,7 +17,7 @@ class SegmentationBBoxTest(unittest.TestCase):
             sample_id="sample_1",
             split="train",
             image=np.zeros((100, 100, 3)),
-            image_format=ImageChannelFormat.RGB,
+            image_channels=ImageChannels.from_str("RGB"),
             mask=np.zeros((3, 100, 100)),
             contours=[
                 [
@@ -102,7 +103,7 @@ class SegmentationBBoxTest(unittest.TestCase):
             sample_id="sample_2",
             split="valid",
             image=np.zeros((100, 100, 3)),
-            image_format=ImageChannelFormat.RGB,
+            image_channels=ImageChannels.from_str("RGB"),
             mask=np.zeros((3, 100, 100)),
             contours=[
                 [

@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Sequence
 
 import cv2
 import numpy as np
@@ -6,28 +6,27 @@ import numpy as np
 from data_gradients.utils.data_classes.contour import Contour
 
 
-def get_contours(label: np.ndarray) -> List[list]:
+def get_contours(label: np.ndarray, class_ids: Sequence[int]) -> List[list]:
     """
     Find contours in each class-channel individually, using opencv findContours method
-    :param label: Tensor [N, W, H] where N is number of valid classes
-    :return: List with the shape [N, Nc, P, 1, 2] where N is number of valid classes, Nc are number of contours
+    :param label:       Categorical representation of mask, of shape [H, W]
+    :param class_ids:   List of class-ids.
+    :return:            List with the shape [N, Nc, P, 1, 2] where N is number of valid classes, Nc are number of contours
     per class, P are number of points for each contour and (1, 2) are set of points.
     """
-    if not isinstance(label, np.ndarray):
-        raise TypeError(f"Expected numpy.ndarray, got {type(label)}")
 
     # Type to INT8 as for Index array
     label = label.astype(np.uint8, copy=False)
 
     all_onehot_contour = []
-    # For each class
-    for class_channel in range(label.shape[0]):
-        # Get tensor [class, W, H]
-        onehot = label[class_channel, ...]
+
+    for class_channel in class_ids:
+
+        onehot = (label == class_channel).astype(np.uint8)  # Boolean mask of shape [H, W]
         if np.max(onehot) == 0:
             continue
         # Find contours and return shape of [N, P, 1, 2] where N is number of contours and P list of points
-        onehot_contour, _ = cv2.findContours(onehot, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        onehot_contour, _ = cv2.findContours(onehot * 1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         # Check if contour is OK
         valid_onehot_contours = get_valid_contours(onehot_contour, class_channel)
         if len(valid_onehot_contours):

@@ -1,9 +1,11 @@
-import cv2
+import matplotlib.colors as mcolors
 import numpy as np
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.common.sample_visualization import AbstractSampleVisualization
-from data_gradients.utils.data_classes.data_samples import SegmentationSample, ImageChannelFormat
+from data_gradients.utils.data_classes.data_samples import SegmentationSample
+
+from data_gradients.visualize.detection.utils import generate_gray_color_mapping
 
 
 @register_feature_extractor()
@@ -26,29 +28,30 @@ class SegmentationSampleVisualization(AbstractSampleVisualization):
         :param sample: Input image sample
         :return: The preprocessed image tensor.
         """
+        if sample.image_as_rgb is None:
+            raise RuntimeError(f"`{self.__class__.__name__}` not compatible with Image format `{sample.image_channels.__class__.__name__}`")
 
-        if sample.image_format == ImageChannelFormat.RGB:
-            image = sample.image
-        elif sample.image_format == ImageChannelFormat.BGR:
-            image = cv2.cvtColor(sample.image, cv2.COLOR_BGR2RGB)
-        elif sample.image_format == ImageChannelFormat.GRAYSCALE:
-            image = cv2.cvtColor(sample.image, cv2.COLOR_GRAY2RGB)
-        elif sample.image_format == ImageChannelFormat.UNKNOWN:
-            image = sample.image
-        else:
-            raise ValueError(f"Unknown image format {sample.image_format}")
+        image = sample.image_as_rgb
+        mask = sample.mask
 
-        # Onehot to categorical labels
-        categorical_labels = np.argmax(sample.mask, axis=0)
+        class_ids = list(sample.class_names.keys())
 
-        # Normalize the labels to the range [0, 255]
-        normalized_labels = np.ceil((categorical_labels * 255) / np.max(categorical_labels))
-        normalized_labels = normalized_labels[:, :, np.newaxis].repeat(3, axis=-1)
+        # Create a color map using the generate_gray_color_mapping function
+        colors = generate_gray_color_mapping(len(class_ids) + 1)  # generated colors for each class
+        cmap = mcolors.ListedColormap(colors)
+
+        # Map class IDs to color map index
+        mask_mapped = np.zeros_like(mask, dtype=int)
+        for idx, c_id in enumerate(class_ids):
+            mask_mapped[mask == c_id] = idx + 1  # +1 because 0 is reserved for background (idx=-1)
+
+        # Convert mask_mapped to RGB using the colormap
+        mask_rgb = (cmap(mask_mapped)[:, :, :3] * 255).astype(np.uint8)
 
         # Stack the image and label color map horizontally or vertically
         if self.stack_mask_vertically:
-            result = np.vstack((image, normalized_labels))
+            result = np.vstack((image, mask_rgb))
         else:
-            result = np.hstack((image, normalized_labels))
+            result = np.hstack((image, mask_rgb))
 
         return result.astype(np.uint8)

@@ -1,18 +1,10 @@
 import dataclasses
-from enum import Enum
-from typing import List
+from typing import List, Dict
 
 import numpy as np
 
 from data_gradients.utils.data_classes.contour import Contour
-
-
-class ImageChannelFormat(Enum):
-    RGB = "RGB"
-    BGR = "BGR"
-    GRAYSCALE = "GRAYSCALE"
-    UNKNOWN = "UNKNOWN"
-    UNCHANGED = "UNCHANGED"
+from data_gradients.utils.data_classes.image_channels import ImageChannels
 
 
 @dataclasses.dataclass
@@ -28,10 +20,22 @@ class ImageSample:
     sample_id: str
     split: str
     image: np.ndarray
-    image_format: ImageChannelFormat
+    image_channels: ImageChannels  # TODO: rename
 
     def __repr__(self):
-        return f"ImageSample(sample_id={self.sample_id}, image={self.image.shape}, format={self.image_format})"
+        return f"ImageSample(sample_id={self.sample_id}, image={self.image.shape}, format={self.image_channels})"
+
+    @property
+    def image_as_rgb(self) -> np.ndarray:
+        return self.image_channels.convert_image_to_rgb(image=self.image)
+
+    @property
+    def image_channels_to_visualize(self) -> np.ndarray:
+        return self.image_channels.get_channels_to_visualize(image=self.image)
+
+    @property
+    def image_mean_intensity(self) -> float:
+        return self.image_channels.compute_mean_image_intensity(image=self.image)
 
 
 @dataclasses.dataclass
@@ -43,7 +47,7 @@ class SegmentationSample(ImageSample):
     :attr sample_id:        The unique identifier of the sample. Could be the image path or the image name.
     :attr split:            The name of the dataset split. Could be "train", "val", "test", etc.
     :attr image:            np.ndarray of shape [H,W,C] - The image as a numpy array with channels last.
-    :attr mask:             np.ndarray of shape [N, H, W] representing one-hot encoded mask for each class.
+    :attr mask:             np.ndarray of shape [H, W], categorical representation of the mask.
     :attr contours:         A list of contours for each class in the mask.
     :attr class_names:      List of all class names in the dataset. The index should represent the class_id.
     """
@@ -51,7 +55,7 @@ class SegmentationSample(ImageSample):
     mask: np.ndarray
 
     contours: List[List[Contour]]
-    class_names: List[str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"SegmentationSample(sample_id={self.sample_id}, image={self.image.shape}, mask={self.mask.shape})"
@@ -73,7 +77,7 @@ class DetectionSample(ImageSample):
 
     bboxes_xyxy: np.ndarray
     class_ids: np.ndarray
-    class_names: List[str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, bboxes_xyxy={self.bboxes_xyxy.shape}, class_ids={self.class_ids.shape})"
@@ -93,7 +97,7 @@ class ClassificationSample(ImageSample):
     """
 
     class_id: int
-    class_names: List[str]
+    class_names: Dict[int, str]
 
     def __repr__(self):
         return f"DetectionSample(sample_id={self.sample_id}, image={self.image.shape}, label={self.class_id})"

@@ -20,7 +20,7 @@ class BaseClassHeatmap(AbstractFeatureExtractor, ABC):
         self.n_rows = n_rows
         self.n_cols = n_cols
 
-        self.class_names = []
+        self.class_names: Dict[int, str] = {}
         self.heatmaps_per_split: Dict[str, np.ndarray] = {}  # Each heatmap should be of shape (n_class, heatmap_shape[0], heatmap_shape[1])
 
     @abstractmethod

@@ -1,7 +1,7 @@
 import torch
 import unittest
 from data_gradients.dataset_adapters.formatters.detection import DetectionBatchFormatter
-from data_gradients.config.data import DetectionDataConfig
+from data_gradients.dataset_adapters.config import DetectionDataConfig
 
 
 class DetectionBatchFormatterTest(unittest.TestCase):

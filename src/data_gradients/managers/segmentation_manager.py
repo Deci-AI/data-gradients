@@ -1,14 +1,17 @@
-from typing import Optional, Callable, List, Iterable, Union
+import os
+from typing import Optional, Callable, List, Iterable, Union, Dict
+
 import torch
 from torch.utils.data import DataLoader
 
+from data_gradients.dataset_adapters.config.data_config import get_default_cache_dir
 from data_gradients.config.utils import get_grouped_feature_extractors
 from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
-from data_gradients.config.data.typing import SupportedDataType, FeatureExtractorsType
-from data_gradients.dataset_adapters.segmentation_adapter import SegmentationDatasetAdapter
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType, FeatureExtractorsType
 from data_gradients.utils.summary_writer import SummaryWriter
-from data_gradients.sample_iterables.segmentation import SegmentationSampleIterable
+from data_gradients.sample_preprocessor.segmentation_sample_preprocessor import SegmentationSampleProcessor
 from data_gradients.datasets import COCOSegmentationDataset, COCOFormatSegmentationDataset, VOCSegmentationDataset
+from data_gradients.dataset_adapters.config.data_config import SegmentationDataConfig
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -28,12 +31,12 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         feature_extractors: Optional[FeatureExtractorsType] = None,
         log_dir: Optional[str] = None,
         use_cache: bool = False,
-        class_names: Optional[List[str]] = None,
+        class_names: Union[None, List[str], Dict[int, str]] = None,
         class_names_to_use: Optional[List[str]] = None,
         n_classes: Optional[int] = None,
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
-        num_image_channels: int = 3,
+        is_batch: Optional[bool] = None,
         threshold_soft_labels: float = 0.5,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
@@ -43,7 +46,8 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
 
         :param report_title:            Title of the report. Will be used to save the report
         :param report_subtitle:         Subtitle of the report
-        :param class_names:             List of all class names in the dataset. The index should represent the class_id. Mutually exclusive with `n_classes`
+        :param class_names:             Either the list of all class names in the dataset OR dictionary mapping of `class_id` -> `class_name`.
+                                        The index should represent the class_id. Mutually exclusive with `n_classes`
         :param class_names_to_use:      List of class names that we should use for analysis.
         :param n_classes:               Number of classes. Mutually exclusive with `class_names`. If set, `class_names` will be a list of `class_ids`.
         :param train_data:              Iterable object contains images and labels of the training dataset
@@ -57,7 +61,6 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param use_cache:               Whether to use cache or not for the configuration of the data.
         :param images_extractor:        Function extracting the image(s) out of the data output.
         :param labels_extractor:        Function extracting the label(s) out of the data output.
-        :param num_image_channels:      Number of channels for each image in the dataset
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
@@ -65,44 +68,26 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             raise RuntimeError("`feature_extractors` and `config_path` cannot be specified at the same time")
 
         summary_writer = SummaryWriter(report_title=report_title, report_subtitle=report_subtitle, log_dir=log_dir)
-
-        if not isinstance(train_data, SegmentationDatasetAdapter):
-            train_data = SegmentationDatasetAdapter(
-                data_iterable=train_data,
-                class_names=class_names,
-                cache_filename=f"{summary_writer.run_name}.json" if use_cache else None,
-                class_names_to_use=class_names_to_use,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=num_image_channels,
-                threshold_soft_labels=threshold_soft_labels,
-            )
-
-        if not isinstance(val_data, SegmentationDatasetAdapter):
-            val_data = SegmentationDatasetAdapter(
-                data_iterable=val_data,
-                class_names=class_names,
-                data_config=train_data.data_config,  # We use the same data config for validation as for training to avoid asking questions twice
-                class_names_to_use=class_names_to_use,
-                n_classes=n_classes,
-                images_extractor=images_extractor,
-                labels_extractor=labels_extractor,
-                n_image_channels=num_image_channels,
-                threshold_soft_labels=threshold_soft_labels,
-            )
-
-        grouped_feature_extractors = get_grouped_feature_extractors(
-            default_config_name="segmentation",
-            config_path=config_path,
-            feature_extractors=feature_extractors,
+        cache_path = os.path.join(get_default_cache_dir(), f"{summary_writer.run_name}.json") if use_cache else None
+        data_config = SegmentationDataConfig(
+            class_names=class_names,
+            n_classes=n_classes,
+            cache_path=cache_path,
+            class_names_to_use=class_names_to_use,
+            images_extractor=images_extractor,
+            labels_extractor=labels_extractor,
+            is_batch=is_batch,
         )
 
-        train_sample_iterable = SegmentationSampleIterable(dataset=train_data, class_names=train_data.class_names, split="train")
-        val_sample_iterable = SegmentationSampleIterable(dataset=val_data, class_names=val_data.class_names, split="val")
+        sample_preprocessor = SegmentationSampleProcessor(data_config=data_config, threshold_soft_labels=threshold_soft_labels)
+        grouped_feature_extractors = get_grouped_feature_extractors(
+            default_config_name="segmentation", config_path=config_path, feature_extractors=feature_extractors
+        )
 
         super().__init__(
-            train_data=train_sample_iterable,
-            val_data=val_sample_iterable,
+            train_data=train_data,
+            val_data=val_data,
+            sample_preprocessor=sample_preprocessor,
             summary_writer=summary_writer,
             grouped_feature_extractors=grouped_feature_extractors,
             batches_early_stop=batches_early_stop,

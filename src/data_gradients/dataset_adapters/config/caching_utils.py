@@ -4,7 +4,7 @@ from typing import Optional, Any, Union, Callable
 import torch
 
 from data_gradients.dataset_adapters.output_mapper.tensor_extractor import NestedDataLookup
-from data_gradients.config.data.typing import SupportedDataType
+from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType
 from data_gradients.utils.detection import XYXYConverter
 
 # This is used as a prefix to recognize parameters that are not cachable.
@@ -100,7 +100,7 @@ class TensorExtractorResolver:
                 # but he did not provide a function for this run.
                 # Since we cannot build back the original function, we raise an informative exception.
                 raise CacheLoadingError(key="tensor_extractor", value=tensor_extractor)
-            return CachableParam(NestedDataLookup(tensor_extractor), tensor_extractor)
+            return CachableParam(value=NestedDataLookup(tensor_extractor), name=tensor_extractor)
 
         elif isinstance(tensor_extractor, Callable):
             return CachableParam(value=tensor_extractor, name=f"{NON_CACHABLE_PREFIX} - {tensor_extractor}")

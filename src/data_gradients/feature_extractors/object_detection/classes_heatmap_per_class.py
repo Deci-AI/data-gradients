@@ -24,7 +24,8 @@ class DetectionClassHeatmap(BaseClassHeatmap):
         original_shape = sample.image.shape[:2]
         bboxes_xyxy = scale_bboxes(old_shape=original_shape, new_shape=self.heatmap_shape, bboxes_xyxy=sample.bboxes_xyxy)
 
-        split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((len(sample.class_names), *self.heatmap_shape)))
+        max_class_id = max(sample.class_names.keys())
+        split_heatmap = self.heatmaps_per_split.get(sample.split, np.zeros((max_class_id + 1, *self.heatmap_shape)))
 
         for class_id, (x1, y1, x2, y2) in zip(sample.class_ids, bboxes_xyxy):
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)

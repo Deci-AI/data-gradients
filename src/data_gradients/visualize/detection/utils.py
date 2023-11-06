@@ -35,3 +35,13 @@ def generate_color_mapping(num_classes: int) -> List[Tuple[int, ...]]:
     cmap = plt.cm.get_cmap("gist_rainbow", num_classes)
     colors = [cmap(i, bytes=True)[:3][::-1] for i in range(num_classes)]
     return [tuple(int(v) for v in c) for c in colors]
+
+
+def generate_gray_color_mapping(num_classes: int) -> List[Tuple[int, int, int]]:
+    """Generate a grayscale color mapping for each class.
+
+    :param num_classes: The number of classes in the dataset.
+    :return: List of RGB grayscale colors for each class.
+    """
+    step = 255 / (num_classes - 1) if num_classes > 1 else 255
+    return [(int(i * step), int(i * step), int(i * step)) for i in range(num_classes)]

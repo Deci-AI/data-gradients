@@ -1,13 +1,13 @@
-from typing import Callable, Union, Tuple, List, Mapping
+from typing import Callable, Union, Tuple, List, Mapping, Sequence
 
 import PIL
 import numpy as np
 import torch
-from torchvision.transforms import transforms
+from omegaconf import ListConfig
 
 from data_gradients.dataset_adapters.output_mapper.tensor_extractor import get_tensor_extractor_options
-from data_gradients.config.data.data_config import DataConfig
-from data_gradients.config.data.questions import Question, text_to_yellow
+from data_gradients.dataset_adapters.config.data_config import DataConfig
+from data_gradients.dataset_adapters.config.questions import FixedOptionsQuestion, text_to_yellow
 
 SupportedData = Union[Tuple, List, Mapping, Tuple, List]
 
@@ -26,17 +26,29 @@ class DatasetOutputMapper:
             - images: Batch of images
             - labels: Batch of labels
         """
-        images = self._extract_images(data)
-        labels = self._extract_labels(data)
-        return self._to_torch(images), self._to_torch(labels)
+        images = self._extract_images_as_tensor(data)
+        labels = self._extract_labels_as_tensor(data)
+        return images, labels
 
-    def _extract_images(self, data: SupportedData) -> torch.Tensor:
+    def _extract_images_as_tensor(self, data: SupportedData) -> torch.Tensor:
         images_extractor = self._get_images_extractor(data)
-        return images_extractor(data)
+        images = images_extractor(data)
+        try:
+            return self._to_torch(images)
+        except TypeError:
+            raise TypeError(f"{type(images)} is not a supported format for images!")
+        except Exception as e:
+            raise RuntimeError("Error while loading images!") from e  # Here we want the traceback
 
-    def _extract_labels(self, data: SupportedData) -> torch.Tensor:
+    def _extract_labels_as_tensor(self, data: SupportedData) -> torch.Tensor:
         labels_extractor = self._get_labels_extractor(data)
-        return labels_extractor(data)
+        labels = labels_extractor(data)
+        try:
+            return self._to_torch(labels)
+        except TypeError:
+            raise TypeError(f"{type(labels)} is not a supported format for labels!")
+        except Exception as e:
+            raise RuntimeError("Error while loading labels!") from e  # Here we want the traceback
 
     def _get_images_extractor(self, data: SupportedData) -> Callable[[SupportedData], torch.Tensor]:
         if self.data_config.images_extractor is not None:
@@ -51,7 +63,7 @@ class DatasetOutputMapper:
         # Otherwise, we ask the user how to map data -> image
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
             description, options = get_tensor_extractor_options(data)
-            question = Question(question=f"Which tensor represents your {text_to_yellow('Image(s)')} ?", options=options)
+            question = FixedOptionsQuestion(question=f"Which tensor represents your {text_to_yellow('Image(s)')} ?", options=options)
             return self.data_config.get_images_extractor(question=question, hint=description)
 
         raise NotImplementedError(
@@ -73,7 +85,7 @@ class DatasetOutputMapper:
         # Otherwise, we ask the user how to map data -> labels
         if isinstance(data, (Tuple, List, Mapping, Tuple, List)):
             description, options = get_tensor_extractor_options(data)
-            question = Question(question=f"Which tensor represents your {text_to_yellow('Label(s)')} ?", options=options)
+            question = FixedOptionsQuestion(question=f"Which tensor represents your {text_to_yellow('Label(s)')} ?", options=options)
             return self.data_config.get_labels_extractor(question=question, hint=description)
 
         raise NotImplementedError(
@@ -82,11 +94,41 @@ class DatasetOutputMapper:
             f"You can find more detail about this in our documentation: https://github.com/Deci-AI/data-gradients"
         )
 
-    @staticmethod
-    def _to_torch(tensor: Union[np.ndarray, PIL.Image.Image, torch.Tensor]) -> torch.Tensor:
-        if isinstance(tensor, np.ndarray):
-            return torch.from_numpy(tensor)
-        elif isinstance(tensor, PIL.Image.Image):
-            return transforms.ToTensor()(tensor)
+    @classmethod
+    def _to_torch(cls, data: Union[np.ndarray, PIL.Image.Image, torch.Tensor, str, Sequence[Union[PIL.Image.Image, np.ndarray, str]]]) -> torch.Tensor:
+        """Convert various input types to a PyTorch tensor.
+
+        :param data: Input data to be converted. This can be:
+            - PyTorch tensor (in which case the function simply returns it)
+            - numpy ndarray
+            - PIL Image
+            - string representing the path to an image file
+            - list containing any combination of the above three types
+
+        :return: The input data converted (or simply returned if already) as a PyTorch tensor.
+        """
+        if isinstance(data, torch.Tensor):
+            return data
+        elif isinstance(data, np.ndarray):
+            return torch.from_numpy(data)
+        elif isinstance(data, PIL.Image.Image):
+            return torch.from_numpy(np.array(data))
+        elif isinstance(data, str):
+            with PIL.Image.open(data) as img:
+                return torch.from_numpy(np.array(img))
+        elif np.isscalar(data):
+            return torch.tensor(data)
+        elif isinstance(data, (list, tuple, ListConfig)):
+            tensors = [cls._to_torch(t) for t in data]
+
+            # Check if all tensors can be stacked
+            reference_shape = tensors[0].shape
+            for idx, t in enumerate(tensors[1:], 1):  # Start from the second tensor
+                if t.shape != reference_shape:
+                    raise RuntimeError(
+                        f"Error while attempting to stack tensors. Tensor at index 0 has shape {reference_shape} "
+                        f"while tensor at index {idx} has shape {t.shape}. All tensors must have the same shape to be stacked."
+                    )
+            return torch.stack(tensors)
         else:
-            return tensor
+            raise TypeError(f"Unsupported input type: {type(data)}")

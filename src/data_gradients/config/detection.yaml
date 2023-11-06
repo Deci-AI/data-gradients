@@ -7,10 +7,10 @@ report_sections:
       - ImagesAverageBrightness
   - name: Object Detection Features
     features:
-      - DetectionSampleVisualization:
-          n_rows: 3
-          n_cols: 4
-          stack_splits_vertically: True
+#      - DetectionSampleVisualization:
+#          n_rows: 3
+#          n_cols: 4
+#          stack_splits_vertically: True
       - DetectionClassHeatmap:
           n_rows: 6
           n_cols: 2
