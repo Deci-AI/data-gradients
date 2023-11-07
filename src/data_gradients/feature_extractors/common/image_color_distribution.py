@@ -10,7 +10,13 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
 @register_feature_extractor()
 class ImageColorDistribution(AbstractFeatureExtractor):
-    """Extracts the distribution of the image 'brightness'."""
+    """
+    Analyzes and presents the color intensity distribution across image datasets.
+
+    This feature assesses the distribution of color intensities in images and provides detailed visualizations for each
+    color channel. It is designed to highlight differences and consistencies in color usage between training and
+    validation datasets, which can be critical for adjusting image preprocessing parameters or for enhancing data augmentation techniques.
+    """
 
     def __init__(self):
         self.image_channels = None
@@ -75,9 +81,10 @@ class ImageColorDistribution(AbstractFeatureExtractor):
             json=json,
             title="Color Distribution",
             description=(
-                "Here's a comparison of image channel intensity (scaled 0-255) distributions across the entire dataset. \n"
-                "It can reveal discrepancies in the image characteristics between the two datasets, as well as potential flaws in the augmentation process. \n"
-                "E.g., a notable difference in the mean value of a specific color between the two datasets may indicate an issue with the augmentation process."
+                "Visualize the spread of color intensities with a frequency distribution for each channel, delineated from darkest (0) to brightest (255). "
+                "By comparing these distributions between training and validation sets, you can identify any significant variations that might affect model "
+                "performance. "
+                "For instance, if one dataset shows a higher concentration of darker values, it could suggest a need for lighting correction in preprocessing."
             ),
         )
         return feature

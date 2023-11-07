@@ -10,6 +10,14 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
+    """
+    Evaluates and illustrates the frequency of class instances within individual images.
+
+    By showing the number of times classes are seen in each image, this feature helps identify which classes are common or rare in a typical image.
+
+    This provides information such as "The class 'Human' usually appears 2 to 20 times per image".
+    """
+
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
         :param topk:                How many rows (per split) to show.

@@ -10,7 +10,12 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
 @register_feature_extractor()
 class ImagesResolution(AbstractFeatureExtractor):
-    """Extracts the distribution image Height and Width."""
+    """
+    Analyzes the distribution of image dimensions within a dataset.
+
+    This feature extractor records and summarizes the height and width of images, highlighting the range and commonality of different resolutions.
+    This analysis is beneficial for understanding the dataset’s composition and preparing for any necessary image preprocessing.
+    """
 
     def __init__(self):
         super().__init__()

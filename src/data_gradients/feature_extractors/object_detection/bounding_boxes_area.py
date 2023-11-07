@@ -13,7 +13,13 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class DetectionBoundingBoxArea(AbstractFeatureExtractor):
-    """Feature Extractor to compute the area covered Bounding Boxes."""
+    """
+    Analyzes and visualizes the size distribution of objects across dataset splits.
+
+    This feature extractor calculates the area occupied by objects in images and displays a comparison
+    across different dataset splits. It helps in understanding the diversity in object sizes within the dataset
+    and flags potential disparities between training and validation sets that could impact model performance.
+    """
 
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
@@ -86,10 +92,10 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             json=json,
             title="Distribution of Bounding Box Area",
             description=(
-                "This graph shows the frequency of each class's appearance in the dataset. "
-                "This can highlight distribution gap in object size between the training and validation splits, which can harm the model's performance. \n"
-                "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
-                "low resolution that is not appropriate for your objects."
+                "This chart displays the size of bounding boxes relative to their images, "
+                "offering a clear view of object size variability within the training and validation datasets. "
+                "It's particularly useful for spotting size imbalances or unusually small or large objects "
+                "that could affect detection accuracy."
             ),
         )
         return feature

@@ -32,8 +32,12 @@ DEFAULT_AREA_THRESHOLDS = [1, 4, 9, 16, 64]
 
 @register_feature_extractor()
 class DetectionResizeImpact(AbstractFeatureExtractor):
-    """Analyze the impact of image resizing on the visibility of bounding boxes.
-    The extractor evaluates the bounding box sizes upon varying the image resizing dimensions and records how many bounding boxes shrink below a certain size.
+    """
+    Examines the influence of image resizing on bounding box visibility within datasets.
+
+    By assessing changes in bounding box sizes at various image dimensions, this feature quantifies the ratio of bounding boxes that would become smaller than
+    predefined size thresholds.
+    This analysis is crucial for determining resizing practices that prevent the loss of objects during image preprocessing.
     """
 
     def __init__(self, resizing_sizes: Optional[List[Tuple[int, int]]] = None, area_thresholds: Optional[List[int]] = None, include_median_size: bool = True):

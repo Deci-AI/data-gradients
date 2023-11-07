@@ -9,7 +9,15 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class DetectionClassFrequency(AbstractFeatureExtractor):
-    """Feature Extractor to count the number of instance of each class."""
+    """
+    Analyzes and visualizes the distribution of class instances across dataset splits.
+
+    This feature extractor quantifies the frequency of each class's occurrence in the dataset,
+    providing a visual comparison between training and validation splits. Such analysis can
+    reveal class imbalances that may necessitate rebalancing techniques or inform the necessity
+    of targeted data collection to enhance model robustness and prevent overfitting or underfitting
+    to particular classes.
+    """
 
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """

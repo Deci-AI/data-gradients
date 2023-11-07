@@ -9,8 +9,20 @@ from data_gradients.visualize.plot_options import ScatterPlotOptions
 
 @register_feature_extractor()
 class ClassificationClassDistributionVsAreaPlot(AbstractFeatureExtractor):
-    """Feature Extractor to show scatter plot of width & height distribution
-    with breakdown along image class and split."""
+    """
+    Visualizes the spread of image widths and heights within each class and across data splits.
+
+    This feature extractor creates a scatter plot to graphically represent the diversity of image dimensions associated with each class label and split
+    in the dataset.
+    By visualizing this data, users can quickly assess whether certain classes or splits contain images that are consistently larger or smaller than others,
+    potentially indicating a need for data preprocessing or augmentation strategies to ensure model robustness.
+
+    Key Uses:
+
+    - Identifying classes with notably different average image sizes that may influence model training.
+    - Detecting splits in the dataset where image size distribution is uneven, prompting the need for more careful split strategies or
+    tailored data augmentation.
+    """
 
     def __init__(self):
         self.data = []

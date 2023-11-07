@@ -10,7 +10,12 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class DetectionBoundingBoxSize(AbstractFeatureExtractor):
-    """Feature Extractor to gather the size (Height x Width) of Bounding Boxes."""
+    """
+    Feature Extractor to gather and analyze the relative size of Bounding Boxes within images.
+
+    It computes each bounding box's width and height as a percentage of the image's width and height,
+    respectively, allowing for a scale-invariant analysis of object sizes.
+    """
 
     def __init__(self):
         self.data = []

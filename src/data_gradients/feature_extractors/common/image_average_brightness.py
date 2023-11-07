@@ -10,7 +10,13 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
 @register_feature_extractor()
 class ImagesAverageBrightness(AbstractFeatureExtractor):
-    """Extracts the distribution of the image 'brightness'."""
+    """
+    Provides a graphical representation of image brightness distribution.
+
+    This feature quantifies the brightness of images and plots the distribution per data split, aiding in the detection of
+    variances like uniform lighting conditions. Useful for comparing training and validation sets to ensure model robustness
+    against varying brightness levels.
+    """
 
     def __init__(self):
         self.image_channels = None

@@ -10,6 +10,14 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
+    """
+    Analyzes the scale variation of object dimensions across the dataset.
+
+    This extractor calculates the height and width of objects as a percentage of the image's total height and width, respectively.
+    This approach provides a scale-invariant analysis of object dimensions, facilitating an understanding of the diversity in object size and
+    aspect ratio within the dataset, regardless of the original image dimensions.
+    """
+
     def __init__(self):
         self.data = []
 

@@ -12,7 +12,12 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class ClassificationClassFrequency(AbstractFeatureExtractor):
-    """Feature Extractor to count the number of labels of each class."""
+    """
+    Analyzes and visualizes the frequency of each class label across different dataset splits.
+
+    This feature extractor computes the frequency of occurrence for each class label in the dataset, providing insights into the
+    balance or imbalance of class distribution across training and validation.
+    """
 
     def __init__(self, topk: Optional[int] = None, prioritization_mode: str = "train_val_diff"):
         """

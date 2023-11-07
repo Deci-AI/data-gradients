@@ -10,7 +10,19 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class ClassificationClassDistributionVsArea(AbstractFeatureExtractor):
-    """Feature Extractor to show image area vs image class violin plot."""
+    """
+    Summarizes how average image dimensions vary among classes and data splits.
+
+    This feature extractor calculates the mean image size (width and height) for each label within the provided splits of the dataset.
+    It highlights potential discrepancies in image resolutions across different classes and dataset splits, which could impact model performance.
+    Disparities in image sizes could indicate a need for more uniform data collection or preprocessing to avoid model biases and ensure consistent
+    performance across all classes and splits.
+
+    Key Uses:
+
+    - Pinpointing classes with significant variations in image resolution to inform data collection and preprocessing.
+    - Assessing the consistency of image resolutions across dataset splits to guide training strategies and augmentation techniques.
+    """
 
     def __init__(self):
         self.data = []

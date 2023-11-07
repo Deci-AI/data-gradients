@@ -13,6 +13,14 @@ from data_gradients.visualize.images import stack_split_images_to_fig, combine_i
 
 @register_feature_extractor()
 class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
+    """
+    Constructs a visual grid of image samples from different dataset splits.
+
+    This feature assembles a grid layout to visually compare groups of images, sorted by their respective dataset splits.
+    It's designed to help users quickly identify and assess variations in sample distribution.
+    The visualization is configurable in terms of the number of images per row and column, as well as the orientation of split grouping.
+    """
+
     def __init__(self, n_rows: int = 3, n_cols: int = 3, stack_splits_vertically: bool = True):
         """
         :param n_rows:                  Number of rows to use per split

@@ -11,8 +11,11 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 @register_feature_extractor()
 class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     """
-    Semantic Segmentation task feature extractor -
-    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
+    Visualizes the distribution of object bounding box areas in segmentation tasks.
+
+    This extractor analyzes bounding box sizes relative to the image area, revealing insights about the object size distribution across different
+    dataset splits.
+    It helps to identify potential size biases and supports better model generalization by ensuring a balanced representation of object scales.
     """
 
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):

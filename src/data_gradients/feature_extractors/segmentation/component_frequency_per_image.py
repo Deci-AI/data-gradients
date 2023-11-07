@@ -10,6 +10,16 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
+    """
+    Calculates and visualizes the number of distinct segmented components per image across different dataset splits.
+
+    This feature extractor counts the total number of segmented components (objects) in each image, which can provide insights into the complexity of
+    the scenes within the dataset. It can help identify if there is a balance or imbalance in the number of objects per image across the training and
+    validation sets.
+    Understanding this distribution is important for adjusting model hyperparameters that may depend on the expected number of objects in a scene,
+    such as Non-Max Suppression (NMS) thresholds or maximum detections per image.
+    """
+
     def __init__(self):
         self.data = []
 
@@ -48,7 +58,7 @@ class SegmentationComponentsPerImageCount(AbstractFeatureExtractor):
             json=json,
             title="Distribution of Objects per Image",
             description=(
-                "These graphs shows how many different objects appear in images. \n"
+                "These graphs show how many different objects appear in images. \n"
                 "This can typically be valuable to know when you observe a very high number of objects per image, "
                 "as some models include a parameter to filter the top k results."
             ),

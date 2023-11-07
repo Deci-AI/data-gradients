@@ -13,6 +13,14 @@ from data_gradients.sample_preprocessor.utils import contours
 
 @register_feature_extractor()
 class SegmentationComponentsErosion(AbstractFeatureExtractor):
+    """
+    Analyzes the impact of morphological operations on the segmentation mask components within a dataset, quantifying the change in
+    the number of components post-erosion.
+
+    This feature useful for identifying and quantifying noise or small artifacts ('sprinkles') in segmentation masks,
+    which may otherwise affect the performance of segmentation models.
+    """
+
     def __init__(self):
         self.kernel_shape = (3, 3)
         self.data = []

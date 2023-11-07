@@ -32,7 +32,13 @@ class BasicStatistics:
 
 @register_feature_extractor()
 class SummaryStats(AbstractFeatureExtractor):
-    """Extracts general summary statistics from images."""
+    """
+    Gathers basic statistical data from the dataset.
+
+    This extractor compiles essential statistics from the image samples. It counts the number of images, annotations, and classes,
+    assesses the diversity of image resolutions, and measures the size of annotations. This data is crucial for getting a high-level
+    overview of the dataset's characteristics and composition.
+    """
 
     def __init__(self):
         super().__init__()

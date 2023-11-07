@@ -10,6 +10,12 @@ from data_gradients.sample_preprocessor.utils import contours
 
 @register_feature_extractor()
 class SegmentationComponentsConvexity(AbstractFeatureExtractor):
+    """
+    Assesses the convexity of segmented objects within images of a dataset and presents the distribution across dataset splits.
+
+    Higher convexity values suggest complex structures that may pose challenges for accurate segmentation.
+    """
+
     def __init__(self):
         self.data = []
 

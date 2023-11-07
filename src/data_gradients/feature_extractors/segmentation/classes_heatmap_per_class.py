@@ -10,6 +10,13 @@ from data_gradients.utils.segmentation import mask_to_onehot
 
 @register_feature_extractor()
 class SegmentationClassHeatmap(BaseClassHeatmap):
+    """
+    Provides a visual representation of object distribution across images in the dataset using heatmaps.
+
+    It helps identify common areas where objects are frequently detected, allowing insights into potential
+    biases in object placement or dataset collection.
+    """
+
     def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_shape: Tuple[int, int] = (200, 200)):
         """
         :param n_rows:          How many rows per split.

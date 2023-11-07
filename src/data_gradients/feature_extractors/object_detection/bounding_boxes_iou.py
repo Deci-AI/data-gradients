@@ -14,13 +14,17 @@ from data_gradients.visualize.plot_options import HeatmapOptions
 
 @register_feature_extractor()
 class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
-    """Feature Extractor to compute the pairwise IoU of bounding boxes per image.
-    This feature extractor helps to identify duplicate/highly overlapping bounding boxes."""
+    """Computes the pairwise Intersection over Union (IoU) for bounding boxes within each image to
+    identify potential duplicate or highly overlapping annotations.
+
+    The computed IoU can be aggregated across classes (class-agnostic) or within the same class,
+    providing insights into annotation quality and potential issues with overlapping objects.
+    """
 
     def __init__(self, num_bins: int = 10, class_agnostic: bool = True):
         """
-        :param num_bins: Number of bins to use for the heatmap plot.
-        :param class_agnostic: If True, only check IoU of bounding boxes of the same class.
+        :param num_bins:        Number of bins to use for the heatmap plot.
+        :param class_agnostic:  If True, only check IoU of bounding boxes of the same class.
         """
         self.data = []
         self.num_bins = num_bins
