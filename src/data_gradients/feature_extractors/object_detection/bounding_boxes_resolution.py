@@ -10,7 +10,12 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class DetectionBoundingBoxSize(AbstractFeatureExtractor):
-    """Feature Extractor to gather the size (Height x Width) of Bounding Boxes."""
+    """
+    Feature Extractor to gather and analyze the relative size of Bounding Boxes within images.
+
+    It computes each bounding box's width and height as a percentage of the image's width and height,
+    respectively, allowing for a scale-invariant analysis of object sizes.
+    """
 
     def __init__(self):
         self.data = []
@@ -37,7 +42,6 @@ class DetectionBoundingBoxSize(AbstractFeatureExtractor):
             x_label_name="Width (in % of image)",
             y_label_key="relative_height",
             y_label_name="Height (in % of image)",
-            title=self.title,
             x_lim=(0, 100),
             y_lim=(0, 100),
             x_ticks_rotation=None,
@@ -59,16 +63,10 @@ class DetectionBoundingBoxSize(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Distribution of Bounding Box Width and Height",
+            description=(
+                "These heat maps illustrate the distribution of bounding box width and height per class. \n"
+                "Large variations in object size can affect the model's ability to accurately recognize objects."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Bounding Box Width and Height"
-
-    @property
-    def description(self) -> str:
-        return (
-            "These heat maps illustrate the distribution of bounding box width and height per class. \n"
-            "Large variations in object size can affect the model's ability to accurately recognize objects."
-        )

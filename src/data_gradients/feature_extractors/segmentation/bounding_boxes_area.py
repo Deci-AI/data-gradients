@@ -11,8 +11,11 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 @register_feature_extractor()
 class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
     """
-    Semantic Segmentation task feature extractor -
-    Get all Bounding Boxes areas and plot them as a percentage of the whole image.
+    Visualizes the distribution of object bounding box areas in segmentation tasks.
+
+    This extractor analyzes bounding box sizes relative to the image area, revealing insights about the object size distribution across different
+    dataset splits.
+    It helps to identify potential size biases and supports better model generalization by ensuring a balanced representation of object scales.
     """
 
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
@@ -60,7 +63,6 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
-            title=self.title,
             figsize=(figsize_x, figsize_y),
             x_lim=(0, max_area),
             x_ticks_rotation=None,
@@ -74,18 +76,12 @@ class SegmentationBoundingBoxArea(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Distribution of Object Area",
+            description=(
+                "This graph shows the frequency of each class's appearance in the dataset. "
+                "This can highlight distribution gap in object size between the training and validation splits, which can harm the model's performance. \n"
+                "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
+                "low resolution that is not appropriate for your objects."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Object Area"
-
-    @property
-    def description(self) -> str:
-        return (
-            "This graph shows the frequency of each class's appearance in the dataset. "
-            "This can highlight distribution gap in object size between the training and validation splits, which can harm the model's performance. \n"
-            "Another thing to keep in mind is that having too many very small objects may indicate that your are downsizing your original image to a "
-            "low resolution that is not appropriate for your objects."
-        )

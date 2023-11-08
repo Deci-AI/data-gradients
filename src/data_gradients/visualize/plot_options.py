@@ -7,7 +7,7 @@ import pandas as pd
 
 @dataclasses.dataclass
 class CommonPlotOptions(ABC):
-    title: str
+    pass
 
 
 @dataclasses.dataclass

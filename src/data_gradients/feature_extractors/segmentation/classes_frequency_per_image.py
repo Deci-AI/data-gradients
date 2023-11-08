@@ -10,6 +10,14 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
+    """
+    Evaluates and illustrates the frequency of class instances within individual images.
+
+    By showing the number of times classes are seen in each image, this feature helps identify which classes are common or rare in a typical image.
+
+    This provides information such as "The class 'Human' usually appears 2 to 20 times per image".
+    """
+
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
         :param topk:                How many rows (per split) to show.
@@ -60,7 +68,6 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             y_label_key="class_name",
             y_label_name="Class Names",
             order_key="class_id",
-            title=self.title,
             x_lim=(0, max_n_appearance * 1.2),  # Cut the max_x at 120% of the highest max n_appearance to increase readability
             figsize=(figsize_x, figsize_y),
             bandwidth=0.4,
@@ -75,17 +82,11 @@ class SegmentationClassesPerImageCount(AbstractFeatureExtractor):
             data=df_class_count,
             plot_options=plot_options,
             json=json,
+            title="Distribution of Class Frequency per Image",
+            description=(
+                "This graph shows how many times each class appears in an image. "
+                "It highlights whether each class has a constant number of appearances per image, "
+                "or whether there is variability in the number of appearances from image to image."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Class Frequency per Image"
-
-    @property
-    def description(self) -> str:
-        return (
-            "This graph shows how many times each class appears in an image. "
-            "It highlights whether each class has a constant number of appearances per image, "
-            "or whether there is variability in the number of appearances from image to image."
-        )

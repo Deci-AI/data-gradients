@@ -8,6 +8,13 @@ from data_gradients.utils.detection import scale_bboxes
 
 @register_feature_extractor()
 class DetectionClassHeatmap(BaseClassHeatmap):
+    """
+    Provides a visual representation of object distribution across images in the dataset using heatmaps.
+
+    It helps identify common areas where objects are frequently detected, allowing insights into potential
+    biases in object placement or dataset collection.
+    """
+
     def __init__(self, n_rows: int = 12, n_cols: int = 2, heatmap_shape: Tuple[int, int] = (200, 200)):
         """
         :param n_rows:          How many rows per split.
@@ -33,12 +40,10 @@ class DetectionClassHeatmap(BaseClassHeatmap):
 
         self.heatmaps_per_split[sample.split] = split_heatmap
 
-    @property
-    def title(self) -> str:
+    def _generate_title(self) -> str:
         return "Bounding Box Density"
 
-    @property
-    def description(self) -> str:
+    def _generate_description(self) -> str:
         return (
             "The heatmap represents areas of high object density within the images, providing insights into the spatial distribution of objects. "
             "By examining the heatmap, you can quickly detect whether objects are predominantly concentrated in specific regions or if they are evenly "
@@ -48,8 +53,7 @@ class DetectionClassHeatmap(BaseClassHeatmap):
             "This is done to focus on localization of objects in the scene (e.g. top-right, center, ...) independently of the original image sizes."
         )
 
-    @property
-    def notice(self) -> Optional[str]:
+    def _generate_notice(self) -> Optional[str]:
         if len(self.class_names) > self.n_cols * self.n_rows:
             return (
                 f"Only the {self.n_cols * self.n_rows} classes with highest density are shown.<br/>"

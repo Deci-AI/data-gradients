@@ -10,6 +10,14 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Abstrac
 
 @register_feature_extractor()
 class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
+    """
+    Analyzes the scale variation of object dimensions across the dataset.
+
+    This extractor calculates the height and width of objects as a percentage of the image's total height and width, respectively.
+    This approach provides a scale-invariant analysis of object dimensions, facilitating an understanding of the diversity in object size and
+    aspect ratio within the dataset, regardless of the original image dimensions.
+    """
+
     def __init__(self):
         self.data = []
 
@@ -37,7 +45,6 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
             x_label_name="Width (in % of image)",
             y_label_key="height",
             y_label_name="Height (in % of image)",
-            title=self.title,
             x_lim=(0, 100),
             y_lim=(0, 100),
             x_ticks_rotation=None,
@@ -60,16 +67,10 @@ class SegmentationBoundingBoxResolution(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Distribution of Object Width and Height",
+            description=(
+                "These heat maps illustrate the distribution of objects width and height per class. \n"
+                "Large variations in object size can affect the model's ability to accurately recognize objects."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Distribution of Object Width and Height"
-
-    @property
-    def description(self) -> str:
-        return (
-            "These heat maps illustrate the distribution of objects width and height per class. \n"
-            "Large variations in object size can affect the model's ability to accurately recognize objects."
-        )

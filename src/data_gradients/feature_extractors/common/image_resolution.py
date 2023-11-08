@@ -10,7 +10,12 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
 @register_feature_extractor()
 class ImagesResolution(AbstractFeatureExtractor):
-    """Extracts the distribution image Height and Width."""
+    """
+    Analyzes the distribution of image dimensions within a dataset.
+
+    This feature extractor records and summarizes the height and width of images, highlighting the range and commonality of different resolutions.
+    This analysis is beneficial for understanding the dataset’s composition and preparing for any necessary image preprocessing.
+    """
 
     def __init__(self):
         super().__init__()
@@ -32,7 +37,6 @@ class ImagesResolution(AbstractFeatureExtractor):
                 x_label_name="Width",
                 y_label_key="height",
                 y_label_name="Height",
-                title=self.title,
                 x_lim=(0, max_size + 100),
                 y_lim=(0, max_size + 100),
                 x_ticks_rotation=None,
@@ -48,7 +52,6 @@ class ImagesResolution(AbstractFeatureExtractor):
                 x_label_name="Width",
                 y_label_key="height",
                 y_label_name="Height",
-                title=self.title,
                 x_lim=(0, max_size + 100),
                 y_lim=(0, max_size + 100),
                 x_ticks_rotation=None,
@@ -71,17 +74,11 @@ class ImagesResolution(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Image Width and Height Distribution",
+            description=(
+                "These histograms depict the distributions of image height and width. "
+                "It's important to note that if certain images have been rescaled or padded, the histograms will represent the size after "
+                "these operations."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Image Width and Height Distribution"
-
-    @property
-    def description(self) -> str:
-        return (
-            "These histograms depict the distributions of image height and width. "
-            "It's important to note that if certain images have been rescaled or padded, the histograms will represent the size after "
-            "these operations."
-        )
