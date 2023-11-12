@@ -19,11 +19,12 @@ class ClassificationSamplePreprocessor(AbstractSamplePreprocessor):
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[ClassificationSample]:
         for data in dataset:
             images, labels = self.adapter.adapt(data)
-            images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
             for image, target in zip(images, labels):
                 class_id = int(target)
 
+                # TODO: Introduce the Image class to the samples (and drop the line below)
+                image = np.uint8(np.transpose(image.to_uint8().as_numpy, (1, 2, 0)))
                 sample = ClassificationSample(
                     image=image,
                     class_id=class_id,

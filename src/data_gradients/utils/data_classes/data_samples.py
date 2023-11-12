@@ -1,10 +1,50 @@
 import dataclasses
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import numpy as np
+import torch
 
 from data_gradients.utils.data_classes.contour import Contour
 from data_gradients.utils.data_classes.image_channels import ImageChannels
+from data_gradients.dataset_adapters.formatters.utils import ImageFormat, Uint8ImageFormat, FloatImageFormat, ScaledFloatImageFormat
+from dataclasses import dataclass
+
+
+@dataclass
+class Image:
+    data: Union[torch.Tensor, np.ndarray]
+    format: ImageFormat
+
+    def __post_init__(self):
+        self.data = self.format.convert_image_to_float(self.data)
+
+    def to_uint8(self) -> "Image":
+        return self._to_format(target_format=Uint8ImageFormat())
+
+    def to_float(self) -> "Image":
+        return self._to_format(target_format=FloatImageFormat())
+
+    def to_scaled_float(self, mean: List[float], std: List[float]) -> "Image":
+        return self._to_format(target_format=ScaledFloatImageFormat(mean=mean, std=std))
+
+    def _to_format(self, target_format: ImageFormat) -> "Image":
+        if isinstance(target_format, type(self.format)):
+            return self
+        else:
+            float_image = self.format.convert_image_to_float(images=self.data)
+            return Image(data=target_format.convert_image_from_float(images=float_image), format=target_format)
+
+    @property
+    def as_numpy(self) -> np.ndarray:
+        if isinstance(self.data, torch.Tensor):
+            return self.data.cpu().numpy()
+        return self.data
+
+    @property
+    def as_torch(self) -> torch.Tensor:
+        if isinstance(self.data, np.ndarray):
+            return torch.from_numpy(self.data)
+        return self.data
 
 
 @dataclasses.dataclass

@@ -19,12 +19,13 @@ class DetectionSamplePreprocessor(AbstractSamplePreprocessor):
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[DetectionSample]:
         for data in dataset:
             images, labels = self.adapter.adapt(data)
-            images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
             for image, target in zip(images, labels):
                 target = target.cpu().numpy().astype(int)
                 class_ids, bboxes_xyxy = target[:, 0], target[:, 1:]
 
+                # TODO: Introduce the Image class to the samples (and drop the line below)
+                image = np.uint8(np.transpose(image.to_uint8().as_numpy, (1, 2, 0)))
                 yield DetectionSample(
                     image=image,
                     class_ids=class_ids,

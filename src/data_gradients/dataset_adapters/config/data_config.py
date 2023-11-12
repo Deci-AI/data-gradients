@@ -15,7 +15,7 @@ from data_gradients.dataset_adapters.config.typing_utils import SupportedDataTyp
 from data_gradients.utils.detection import XYXYConverter
 from data_gradients.utils.utils import safe_json_load, write_json
 from data_gradients.utils.data_classes.image_channels import ImageChannels
-
+from data_gradients.dataset_adapters.formatters.utils import ImageFormat, Uint8ImageFormat, FloatImageFormat, ScaledFloatImageFormat, ImageFormatFactory
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -40,6 +40,7 @@ class DataConfig(ABC):
     is_batch: Union[None, bool] = None
 
     image_channels: Union[None, ImageChannels] = None
+    image_normalizer: Union[None, ImageFormat] = None
 
     n_classes: Union[None, int] = None
     class_names: Union[None, Dict[int, str]] = None
@@ -120,6 +121,7 @@ class DataConfig(ABC):
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
+            "image_normalizer": self.image_normalizer.to_json(),
         }
         return json_dict
 
@@ -158,6 +160,8 @@ class DataConfig(ABC):
         if self.image_channels is None:
             if json_dict.get("image_channels"):
                 self.image_channels = ImageChannels.from_str(json_dict.get("image_channels"))
+        if self.image_normalizer is None:
+            self.image_normalizer = ImageFormatFactory.get_normalizer_from_cache(json_data=json_dict.get("image_normalizer"))
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -261,6 +265,50 @@ class DataConfig(ABC):
         self.class_names = resolve_class_names(class_names=self.class_names, n_classes=self.n_classes)
         self.n_classes = len(self.class_names)
         self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
+
+    def get_image_normalizer(self, images: Union[torch.Tensor, np.ndarray]) -> ImageFormat:
+        if self.image_normalizer is not None:
+            return self.image_normalizer
+
+        # Check if images are already in the range 0-1
+        if 0 <= images.min() and images.max() <= 1:
+            self.image_normalizer = FloatImageFormat()
+            return self.image_normalizer
+
+        # Check if images are in the range 0-255
+        elif 0 <= images.min() and images.max() <= 255:
+            self.image_normalizer = Uint8ImageFormat()
+            return self.image_normalizer
+
+        # For standardized normalizer, we need to ask user for mean and std
+        else:
+            question = OpenEndedQuestion(
+                question="Enter the mean values for image normalization (comma-separated, e.g., 0.485, 0.456, 0.406):", validation=_validate_float_list
+            )
+            mean_str = question.ask()
+            mean = [float(x.strip()) for x in mean_str.split(",")]
+            logger.debug("std: ", mean)
+            print("mean: ", mean)
+
+            question = OpenEndedQuestion(
+                question="Enter the std deviation values for image normalization (comma-separated, e.g., `0.229, 0.224, 0.225`):",
+                validation=_validate_float_list,
+            )
+            std_str = question.ask()
+            std = [float(x.strip()) for x in std_str.split(",")]
+            logger.debug("std: ", std)
+            print("std: ", std)
+
+            self.image_normalizer = ScaledFloatImageFormat(mean=mean, std=std)
+            return self.image_normalizer
+
+
+def _validate_float_list(value_str: str) -> bool:
+    try:
+        values = [float(x.strip()) for x in value_str.split(",")]
+        return len(values) > 0
+    except ValueError:
+        return False
 
 
 @dataclass

@@ -20,12 +20,13 @@ class SegmentationSampleProcessor(AbstractSamplePreprocessor):
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[SegmentationSample]:
         for data in dataset:
             images, labels = self.adapter.adapt(data)
-            images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
             labels = np.uint8(labels.cpu().numpy())
 
             for image, mask in zip(images, labels):
                 contours = get_contours(mask, class_ids=list(self.data_config.get_class_names().keys()))
 
+                # TODO: Introduce the Image class to the samples (and drop the line below)
+                image = np.uint8(np.transpose(image.to_uint8().as_numpy, (1, 2, 0)))
                 yield SegmentationSample(
                     image=image,
                     mask=mask,
