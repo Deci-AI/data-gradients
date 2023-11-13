@@ -154,7 +154,10 @@ class DataConfig(ABC):
         if self.n_classes is None:
             self.n_classes = json_dict.get("n_classes")
         if self.class_names is None:
-            self.class_names = json_dict.get("class_names")
+            class_names = json_dict.get("class_names")
+            if isinstance(class_names, dict):
+                class_names = {int(k): v for k, v in class_names.items()}
+            self.class_names = class_names
         if self.class_names_to_use is None:
             self.class_names_to_use = json_dict.get("class_names_to_use")
         if self.image_channels is None:
@@ -390,7 +393,7 @@ def resolve_class_names(class_names: Union[List[str], Dict[int, str]], n_classes
             validation=lambda answer: _represents_int(answer) and int(answer) > 0,
         )
         n_classes = int(question.ask())
-        return {f"class_{i}": i for i in range(n_classes)}
+        return {i: f"class_{i}" for i in range(n_classes)}
     elif class_names:
         if isinstance(class_names, list):
             return dict(zip(range(len(class_names)), class_names))
