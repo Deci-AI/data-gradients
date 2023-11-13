@@ -14,9 +14,7 @@ from dataclasses import dataclass
 class Image:
     data: Union[torch.Tensor, np.ndarray]
     format: ImageFormat
-
-    def __post_init__(self):
-        self.data = self.format.convert_image_to_float(self.data)
+    channels: ImageChannels
 
     def to_uint8(self) -> "Image":
         return self._to_format(target_format=Uint8ImageFormat())
@@ -32,7 +30,11 @@ class Image:
             return self
         else:
             float_image = self.format.convert_image_to_float(images=self.data)
-            return Image(data=target_format.convert_image_from_float(images=float_image), format=target_format)
+            return Image(data=target_format.convert_image_from_float(images=float_image), format=target_format, channels=self.channels)
+
+    @property
+    def shape(self):
+        return self.data.shape
 
     @property
     def as_numpy(self) -> np.ndarray:
@@ -45,6 +47,24 @@ class Image:
         if isinstance(self.data, np.ndarray):
             return torch.from_numpy(self.data)
         return self.data
+
+    @property
+    def as_rgb(self) -> np.ndarray:
+        if not isinstance(self.data, np.ndarray):
+            raise ValueError(f"`image_as_rgb` is only available for numpy arrays. Got `{type(self.data)}`.")
+        return self.channels.convert_image_to_rgb(image=self.to_uint8().data)
+
+    @property
+    def channels_to_visualize(self) -> np.ndarray:
+        if not isinstance(self.data, np.ndarray):
+            raise ValueError(f"`channels_to_visualize` is only available for numpy arrays. Got `{type(self.data)}`.")
+        return self.channels.get_channels_to_visualize(image=self.to_uint8().data)
+
+    @property
+    def mean_intensity(self) -> float:
+        if not isinstance(self.data, np.ndarray):
+            raise ValueError(f"`mean_intensity` is only available for numpy arrays. Got `{type(self.data)}`.")
+        return self.channels.compute_mean_image_intensity(image=self.to_uint8().data)
 
 
 @dataclasses.dataclass
@@ -59,23 +79,10 @@ class ImageSample:
 
     sample_id: str
     split: str
-    image: np.ndarray
-    image_channels: ImageChannels  # TODO: rename
+    image: Image
 
     def __repr__(self):
-        return f"ImageSample(sample_id={self.sample_id}, image={self.image.shape}, format={self.image_channels})"
-
-    @property
-    def image_as_rgb(self) -> np.ndarray:
-        return self.image_channels.convert_image_to_rgb(image=self.image)
-
-    @property
-    def image_channels_to_visualize(self) -> np.ndarray:
-        return self.image_channels.get_channels_to_visualize(image=self.image)
-
-    @property
-    def image_mean_intensity(self) -> float:
-        return self.image_channels.compute_mean_image_intensity(image=self.image)
+        return f"ImageSample(sample_id={self.sample_id}, image={self.image.data.shape}, format={self.image_channels})"
 
 
 @dataclasses.dataclass

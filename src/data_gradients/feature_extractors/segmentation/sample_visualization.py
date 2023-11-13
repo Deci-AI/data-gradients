@@ -28,10 +28,10 @@ class SegmentationSampleVisualization(AbstractSampleVisualization):
         :param sample: Input image sample
         :return: The preprocessed image tensor.
         """
-        if sample.image_as_rgb is None:
-            raise RuntimeError(f"`{self.__class__.__name__}` not compatible with Image format `{sample.image_channels.__class__.__name__}`")
+        if sample.image.as_rgb is None:
+            raise RuntimeError(f"`{self.__class__.__name__}` not compatible with Image format `{sample.image.channels.__class__.__name__}`")
 
-        image = sample.image_as_rgb
+        image = sample.image.as_rgb
         mask = sample.mask
 
         class_ids = list(sample.class_names.keys())

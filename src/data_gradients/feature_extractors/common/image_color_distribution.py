@@ -28,20 +28,20 @@ class ImageColorDistribution(AbstractFeatureExtractor):
 
     def update(self, sample: ImageSample):
         if self.colors is None:
-            self.colors = sample.image_channels.channel_names
-            for channel_name in sample.image_channels.channel_names:
+            self.colors = sample.image.channels.channel_names
+            for channel_name in sample.image.channels.channel_names:
                 if channel_name not in self.palette:
                     self.palette[channel_name] = "black"
 
         if self.image_channels is None:
-            self.image_channels = sample.image_channels
+            self.image_channels = sample.image.channels
 
         pixel_frequency_per_channel = self.pixel_frequency_per_channel_per_split.get(sample.split)
 
         # We need this more complex logic because we cannot directly accumulate the images (this would take too much memory)
         # so we need to iteratively count the frequency per split and per color
         for i, color in enumerate(self.colors):
-            pixel_frequency_per_channel[i] += np.histogram(sample.image[:, :, i], bins=256)[0]
+            pixel_frequency_per_channel[i] += np.histogram(sample.image.data[:, :, i], bins=256)[0]
 
     def aggregate(self) -> Feature:
         data = [

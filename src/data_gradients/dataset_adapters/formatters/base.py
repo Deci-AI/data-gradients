@@ -35,5 +35,6 @@ class BatchFormatter(ABC):
         images = ensure_channel_first(images, n_image_channels=self.get_n_image_channels(images=images))
         images = check_images_shape(images, n_image_channels=self.get_n_image_channels(images=images))
 
-        image_format = self.data_config.get_image_normalizer(images=images)
-        return [Image(data=image, format=image_format).to_uint8() for image in images]
+        image_format = self.data_config.get_image_format(images=images)
+        image_channels = self.data_config.get_image_channels(image=images[0])
+        return [Image(data=image, format=image_format, channels=image_channels).to_uint8() for image in images]

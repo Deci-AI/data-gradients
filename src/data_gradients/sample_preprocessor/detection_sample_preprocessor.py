@@ -24,14 +24,13 @@ class DetectionSamplePreprocessor(AbstractSamplePreprocessor):
                 target = target.cpu().numpy().astype(int)
                 class_ids, bboxes_xyxy = target[:, 0], target[:, 1:]
 
-                # TODO: Introduce the Image class to the samples (and drop the line below)
-                image = np.uint8(np.transpose(image.to_uint8().as_numpy, (1, 2, 0)))
+                # TODO: Abstract the fact the images are channel last/first and add it to the Image class
+                image.data = np.uint8(np.transpose(image.as_numpy, (1, 2, 0)))
                 yield DetectionSample(
                     image=image,
                     class_ids=class_ids,
                     bboxes_xyxy=bboxes_xyxy,
                     class_names=self.data_config.get_class_names(),
                     split=split,
-                    image_channels=self.data_config.get_image_channels(image=image),
                     sample_id=str(time.time()),
                 )

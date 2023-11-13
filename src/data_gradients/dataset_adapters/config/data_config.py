@@ -40,7 +40,7 @@ class DataConfig(ABC):
     is_batch: Union[None, bool] = None
 
     image_channels: Union[None, ImageChannels] = None
-    image_normalizer: Union[None, ImageFormat] = None
+    image_format: Union[None, ImageFormat] = None
 
     n_classes: Union[None, int] = None
     class_names: Union[None, Dict[int, str]] = None
@@ -121,7 +121,7 @@ class DataConfig(ABC):
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
-            "image_normalizer": None if self.image_normalizer is None else self.image_normalizer.to_json(),
+            "image_format": None if self.image_format is None else self.image_format.to_json(),
         }
         return json_dict
 
@@ -163,8 +163,8 @@ class DataConfig(ABC):
         if self.image_channels is None:
             if json_dict.get("image_channels"):
                 self.image_channels = ImageChannels.from_str(json_dict.get("image_channels"))
-        if self.image_normalizer is None:
-            self.image_normalizer = ImageFormatFactory.get_normalizer_from_cache(json_data=json_dict.get("image_normalizer", {}))
+        if self.image_format is None:
+            self.image_format = ImageFormatFactory.get_normalizer_from_cache(json_data=json_dict.get("image_format", {}))
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
@@ -269,29 +269,28 @@ class DataConfig(ABC):
         self.n_classes = len(self.class_names)
         self.class_names_to_use = resolve_class_names_to_use(class_names=self.class_names, class_names_to_use=self.class_names_to_use)
 
-    def get_image_normalizer(self, images: Union[torch.Tensor, np.ndarray]) -> ImageFormat:
-        if self.image_normalizer is not None:
-            return self.image_normalizer
+    def get_image_format(self, images: Union[torch.Tensor, np.ndarray]) -> ImageFormat:
+        if self.image_format is not None:
+            return self.image_format
 
         # Check if images are already in the range 0-1
         if 0 <= images.min() and images.max() <= 1:
-            self.image_normalizer = FloatImageFormat()
-            return self.image_normalizer
+            self.image_format = FloatImageFormat()
+            return self.image_format
 
         # Check if images are in the range 0-255
         elif 0 <= images.min() and images.max() <= 255:
-            self.image_normalizer = Uint8ImageFormat()
-            return self.image_normalizer
+            self.image_format = Uint8ImageFormat()
+            return self.image_format
 
         # For standardized normalizer, we need to ask user for mean and std
         else:
             question = OpenEndedQuestion(
-                question="Enter the mean values for image normalization (comma-separated, e.g., 0.485, 0.456, 0.406):", validation=_validate_float_list
+                question="Enter the mean values for image normalization (comma-separated, e.g., `0.485, 0.456, 0.406`):", validation=_validate_float_list
             )
             mean_str = question.ask()
             mean = [float(x.strip()) for x in mean_str.split(",")]
             logger.debug("std: ", mean)
-            print("mean: ", mean)
 
             question = OpenEndedQuestion(
                 question="Enter the std deviation values for image normalization (comma-separated, e.g., `0.229, 0.224, 0.225`):",
@@ -300,10 +299,9 @@ class DataConfig(ABC):
             std_str = question.ask()
             std = [float(x.strip()) for x in std_str.split(",")]
             logger.debug("std: ", std)
-            print("std: ", std)
 
-            self.image_normalizer = ScaledFloatImageFormat(mean=mean, std=std)
-            return self.image_normalizer
+            self.image_format = ScaledFloatImageFormat(mean=mean, std=std)
+            return self.image_format
 
 
 def _validate_float_list(value_str: str) -> bool:
