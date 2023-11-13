@@ -121,7 +121,7 @@ class DataConfig(ABC):
             "n_classes": self.n_classes,
             "class_names": self.class_names,
             "class_names_to_use": self.class_names_to_use,
-            "image_normalizer": self.image_normalizer.to_json(),
+            "image_normalizer": None if self.image_normalizer is None else self.image_normalizer.to_json(),
         }
         return json_dict
 
@@ -161,7 +161,7 @@ class DataConfig(ABC):
             if json_dict.get("image_channels"):
                 self.image_channels = ImageChannels.from_str(json_dict.get("image_channels"))
         if self.image_normalizer is None:
-            self.image_normalizer = ImageFormatFactory.get_normalizer_from_cache(json_data=json_dict.get("image_normalizer"))
+            self.image_normalizer = ImageFormatFactory.get_normalizer_from_cache(json_data=json_dict.get("image_normalizer", {}))
 
     def get_images_extractor(self, question: Optional[FixedOptionsQuestion] = None, hint: str = "") -> Callable[[SupportedDataType], torch.Tensor]:
         if self.images_extractor is None:
