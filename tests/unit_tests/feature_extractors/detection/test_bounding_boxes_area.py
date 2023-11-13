@@ -4,8 +4,9 @@ import numpy as np
 import pandas as pd
 
 from data_gradients.feature_extractors.object_detection.bounding_boxes_area import DetectionBoundingBoxArea
-from data_gradients.utils.data_classes.data_samples import DetectionSample
+from data_gradients.utils.data_classes.data_samples import DetectionSample, Image
 from data_gradients.utils.data_classes.image_channels import ImageChannels
+from data_gradients.dataset_adapters.formatters.utils import Uint8ImageFormat
 
 
 class TestComputeHistogram(unittest.TestCase):
@@ -47,8 +48,7 @@ class TestComputeHistogram(unittest.TestCase):
         train_sample = DetectionSample(
             sample_id="sample_1",
             split="train",
-            image=np.zeros((100, 100, 3)),
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=np.zeros((100, 100, 3)), format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
             bboxes_xyxy=np.array([[2, 2, 4, 4], [3, 3, 6, 6], [1, 1, 5, 5], [1, 1, 4, 4], [5, 5, 6, 6], [7, 7, 9, 9]]),
             class_ids=np.array([0, 1, 2, 2, 3, 4]),
             class_names={0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
@@ -57,8 +57,7 @@ class TestComputeHistogram(unittest.TestCase):
         val_sample = DetectionSample(
             sample_id="sample_2",
             split="val",
-            image=np.zeros((100, 100, 3)),
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=np.zeros((100, 100, 3)), format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
             bboxes_xyxy=np.array(
                 [
                     [1, 1, 3, 3],
