@@ -281,7 +281,7 @@ def image_channel_instance_factory(channels_str: str) -> ImageChannels:
     if len(potential_channel_classes) == 1:
         return potential_channel_classes[0]
     if len(potential_channel_classes) > 1:
-        formats_str = ", ".join([channel_class._format_str for channel_class in potential_channel_classes])
+        formats_str = ", ".join([channel_class.__class__.__name__ for channel_class in potential_channel_classes])
         raise ValueError(
             f"Image channel representation `channels_str={channels_str}` is ambiguous between the following formats: {formats_str}\n"
             f"Please make sure to provide a channel representation that is not ambiguous."
