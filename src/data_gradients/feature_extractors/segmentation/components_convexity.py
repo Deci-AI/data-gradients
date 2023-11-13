@@ -10,6 +10,12 @@ from data_gradients.sample_preprocessor.utils import contours
 
 @register_feature_extractor()
 class SegmentationComponentsConvexity(AbstractFeatureExtractor):
+    """
+    Assesses the convexity of segmented objects within images of a dataset and presents the distribution across dataset splits.
+
+    Higher convexity values suggest complex structures that may pose challenges for accurate segmentation.
+    """
+
     def __init__(self):
         self.data = []
 
@@ -32,7 +38,6 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
         plot_options = KDEPlotOptions(
             x_label_key="convexity_measure",
             x_label_name="Convexity",
-            title=self.title,
             x_ticks_rotation=None,
             labels_key="split",
             common_norm=False,
@@ -46,16 +51,10 @@ class SegmentationComponentsConvexity(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Object Convexity",
+            description=(
+                "This graph depicts the convexity distribution of objects in both training and validation sets. \n"
+                "Higher convexity values suggest complex structures that may pose challenges for accurate segmentation."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Object Convexity"
-
-    @property
-    def description(self) -> str:
-        return (
-            "This graph depicts the convexity distribution of objects in both training and validation sets. \n"
-            "Higher convexity values suggest complex structures that may pose challenges for accurate segmentation."
-        )

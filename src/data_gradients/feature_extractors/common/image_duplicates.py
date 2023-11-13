@@ -231,19 +231,17 @@ class ImageDuplicates(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
         self._find_duplicates()
+        json = {"Train duplicates": self.train_dups, "Validation duplicates": self.valid_dups, "Intersection duplicates": self.intersection_dups}
         feature = Feature(
             data=None,
             plot_options=None,
-            json={"Train duplicates": self.train_dups, "Validation duplicates": self.valid_dups, "Intersection duplicates": self.intersection_dups},
+            json=json,
+            title="Image Duplicates",
+            description=self._generate_description(),
         )
         return feature
 
-    @property
-    def title(self) -> str:
-        return "Image Duplicates"
-
-    @property
-    def description(self) -> str:
+    def _generate_description(self) -> str:
         if self.train_dups:
             desc = self._get_split_description(self.train_dups, "Train", self.train_dups_appearences)
             if self.valid_image_dir is not None:

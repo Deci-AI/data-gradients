@@ -9,7 +9,15 @@ from data_gradients.feature_extractors.utils import MostImportantValuesSelector
 
 @register_feature_extractor()
 class DetectionClassFrequency(AbstractFeatureExtractor):
-    """Feature Extractor to count the number of instance of each class."""
+    """
+    Analyzes and visualizes the distribution of class instances across dataset splits.
+
+    This feature extractor quantifies the frequency of each class's occurrence in the dataset,
+    providing a visual comparison between training and validation splits. Such analysis can
+    reveal class imbalances that may necessitate rebalancing techniques or inform the necessity
+    of targeted data collection to enhance model robustness and prevent overfitting or underfitting
+    to particular classes.
+    """
 
     def __init__(self, topk: int = 30, prioritization_mode: str = "train_val_diff"):
         """
@@ -57,7 +65,6 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
             y_label_key="class_name",
             y_label_name="Class",
             order_key="class_id",
-            title=self.title,
             figsize=(figsize_x, figsize_y),
             x_ticks_rotation=None,
             labels_key="split",
@@ -71,17 +78,11 @@ class DetectionClassFrequency(AbstractFeatureExtractor):
             data=df_class_count,
             plot_options=plot_options,
             json=json,
+            title="Class Frequency",
+            description=(
+                "Frequency of appearance of each class. This may highlight class distribution gap between training and validation splits. \n"
+                "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
+                "learn to predict that class."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Class Frequency"
-
-    @property
-    def description(self) -> str:
-        return (
-            "Frequency of appearance of each class. This may highlight class distribution gap between training and validation splits. \n"
-            "For instance, if one of the class only appears in the validation set, you know in advance that your model won't be able to "
-            "learn to predict that class."
-        )

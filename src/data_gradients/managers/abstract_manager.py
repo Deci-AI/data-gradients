@@ -141,17 +141,18 @@ class AnalysisManagerAbstract(abc.ABC):
         for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
+                feature_name = feature_extractor.__class__.__name__
                 try:
                     feature = feature_extractor.aggregate()
                     f = self.renderer.render(feature.data, feature.plot_options)
                     feature_json = feature.json
                     feature_error = ""
                 except Exception as e:
-                    f = None
+                    feature, f = None, None
                     error_description = traceback.format_exception(type(e), e, e.__traceback__)
                     feature_json = {"error": error_description}
                     feature_error = f"Feature extraction error. Check out the log file for more details:<br/>" f"<em>{self.summary_writer.errors_path}</em>"
-                    self.summary_writer.add_error(title=feature_extractor.title, error=error_description)
+                    self.summary_writer.add_error(title=feature_name, error=error_description)
                     logger.error(f"Feature extractor {feature_extractor} error: {error_description}")
 
                 if f is not None:
@@ -162,22 +163,22 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     image_path = None
 
-                self.summary_writer.add_feature_stats(title=feature_extractor.title, stats=feature_json)
+                self.summary_writer.add_feature_stats(title=feature_name, stats=feature_json)
 
                 if feature_error:
                     warning = feature_error
                 elif isinstance(feature_extractor, SummaryStats) and (interrupted or (self.batches_early_stop and self._stopped_early)):
                     warning = self._create_samples_iterated_warning()
                 else:
-                    warning = feature_extractor.warning
+                    warning = feature.warning
 
                 section.add_feature(
                     FeatureSummary(
-                        name=feature_extractor.title,
-                        description=self._format_feature_description(feature_extractor.description),
+                        name=feature.title,
+                        description=self._format_feature_description(feature.description),
                         image_path=image_path,
                         warning=warning,
-                        notice=feature_extractor.notice,
+                        notice=feature.notice,
                     )
                 )
             summary.add_section(section)

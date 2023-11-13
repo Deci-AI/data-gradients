@@ -13,6 +13,14 @@ from data_gradients.visualize.images import stack_split_images_to_fig, combine_i
 
 @register_feature_extractor()
 class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
+    """
+    Constructs a visual grid of image samples from different dataset splits.
+
+    This feature assembles a grid layout to visually compare groups of images, sorted by their respective dataset splits.
+    It's designed to help users quickly identify and assess variations in sample distribution.
+    The visualization is configurable in terms of the number of images per row and column, as well as the orientation of split grouping.
+    """
+
     def __init__(self, n_rows: int = 3, n_cols: int = 3, stack_splits_vertically: bool = True):
         """
         :param n_rows:                  Number of rows to use per split
@@ -42,7 +50,7 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
         ...
 
     def aggregate(self) -> Feature:
-        plot_options = FigureRenderer(title=self.title)
+        plot_options = FigureRenderer()
 
         # Generate a single image per split
         combined_images_per_split = {
@@ -57,23 +65,18 @@ class AbstractSampleVisualization(AbstractFeatureExtractor, ABC):
             stack_vertically=self.stack_splits_vertically,
         )
 
-        feature = Feature(data=fig, plot_options=plot_options, json={})
+        feature = Feature(
+            data=fig,
+            plot_options=plot_options,
+            json={},
+            title="Visualization of Samples",
+            description=(
+                "The sample visualization feature provides a visual representation of images and labels. "
+                "This visualization aids in understanding of the composition of the dataset."
+            ),
+            notice=(
+                f"Only {self.n_cols * self.n_rows} random samples are shown.<br/>"
+                f"You can increase the number of images by changing `n_cols` and `n_rows` in the configuration file."
+            ),
+        )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Visualization of Samples"
-
-    @property
-    def description(self) -> str:
-        return (
-            "The sample visualization feature provides a visual representation of images and labels. "
-            "This visualization aids in understanding of the composition of the dataset."
-        )
-
-    @property
-    def notice(self) -> str:
-        return (
-            f"Only {self.n_cols * self.n_rows} random samples are shown.<br/>"
-            f"You can increase the number of images by changing `n_cols` and `n_rows` in the configuration file."
-        )

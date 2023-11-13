@@ -10,7 +10,13 @@ from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 
 @register_feature_extractor()
 class ImagesAverageBrightness(AbstractFeatureExtractor):
-    """Extracts the distribution of the image 'brightness'."""
+    """
+    Provides a graphical representation of image brightness distribution.
+
+    This feature quantifies the brightness of images and plots the distribution per data split, aiding in the detection of
+    variances like uniform lighting conditions. Useful for comparing training and validation sets to ensure model robustness
+    against varying brightness levels.
+    """
 
     def __init__(self):
         self.image_channels = None
@@ -30,7 +36,6 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
                 x_label_name="Split",
                 y_label_key="brightness",
                 y_label_name="Average Brightness",
-                title=self.title,
                 x_ticks_rotation=None,
                 orient="v",
                 show_values=False,
@@ -39,7 +44,6 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
             plot_options = KDEPlotOptions(
                 x_label_key="brightness",
                 x_label_name="Average Brightness of Images",
-                title=self.title,
                 x_lim=(0, 255),
                 x_ticks_rotation=None,
                 labels_key="split",
@@ -54,17 +58,11 @@ class ImagesAverageBrightness(AbstractFeatureExtractor):
             data=df,
             plot_options=plot_options,
             json=json,
+            title="Image Brightness Distribution",
+            description=(
+                "This graph shows the distribution of the brightness levels across all images. \n"
+                "This may for instance uncover differences between the training and validation sets, "
+                "such as the presence of exclusively daytime images in the training set and nighttime images in the validation set."
+            ),
         )
         return feature
-
-    @property
-    def title(self) -> str:
-        return "Image Brightness Distribution"
-
-    @property
-    def description(self) -> str:
-        return (
-            "This graph shows the distribution of the brightness levels across all images. \n"
-            "This may for instance uncover differences between the training and validation sets, "
-            "such as the presence of exclusively daytime images in the training set and nighttime images in the validation set."
-        )
