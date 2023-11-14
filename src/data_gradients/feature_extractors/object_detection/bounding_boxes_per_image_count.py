@@ -5,8 +5,10 @@ from data_gradients.utils.common import LABELS_PALETTE
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.plot_options import Hist2DPlotOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
+from data_gradients.common.registry.registry import register_feature_extractor
 
 
+@register_feature_extractor()
 class DetectionBoundingBoxPerImageCount(AbstractFeatureExtractor):
     """
     Feature Extractor to count the number of Bounding Boxes per Image.
