@@ -1,4 +1,4 @@
-from data_gradients.feature_extractors import common, object_detection, segmentation
+from data_gradients.feature_extractors import common, object_detection, segmentation, classification
 import inspect
 
 
@@ -19,8 +19,8 @@ def class_to_github_url(class_obj: type) -> str:
     return github_base_url + module_path
 
 
-tasks = ["Image Features", "Object Detection Features", "Segmentation Features"]
-modules = [common, object_detection, segmentation]
+tasks = ["Image Features", "Object Detection Features", "Segmentation Features", "Classification Features"]
+modules = [common, object_detection, segmentation, classification]
 
 CLASSES_TO_IGNORE = ["SummaryStats"]
 
@@ -41,12 +41,13 @@ for task, module in zip(tasks, modules):
     class_objects = inspect.getmembers(module, inspect.isclass)
     class_objects = [(class_name, class_obj) for class_name, class_obj in class_objects if class_name not in CLASSES_TO_IGNORE]
     for i, (class_name, class_obj) in enumerate(class_objects):
-        feature = class_obj()
+        # Instead of creating an instance, use the class name and docstring directly
+        class_doc = inspect.getdoc(class_obj) or "No description available."
 
-        feature_title = f"{i+1}. {feature.title}"
+        feature_title = f"{i + 1}. {class_name}"  # Use the class name as the title
         table_of_contents += f"    - {section_name_to_md_link(feature_title)}\n"
         feature_descriptions += f"#### {feature_title}\n\n"
-        feature_descriptions += f"{feature.description}\n\n"
+        feature_descriptions += f"{class_doc}\n\n"  # Use the class docstring as the description
         feature_descriptions += f"*[source code]({class_to_github_url(class_obj)})*\n\n<br/>\n\n"
 
     # Add empty line between modules
