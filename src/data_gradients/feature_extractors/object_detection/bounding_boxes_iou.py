@@ -66,9 +66,6 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
 
     def aggregate(self) -> Feature:
 
-        if not len(self.data):  # No overlap at all
-            return Feature(data=None, plot_options=None, json={}, title="Intersection of Bounding Boxes", description="Error")
-
         df = pd.DataFrame(self.data).sort_values(by="class_id")
 
         bins = np.linspace(0, 1, self.num_bins + 1)
@@ -100,7 +97,7 @@ class DetectionBoundingBoxIoU(AbstractFeatureExtractor):
         xticklabels = [f"IoU < {bins[x]:.2f}" for x in range(1, len(bins))]
 
         if not data:
-            return Feature(data=None, plot_options=None, json={}, title="Intersection of Bounding Boxes", description="Error")
+            return Feature(data=None, plot_options=None, json={}, title="Intersection of Bounding Boxes", description="No Overlap between any class")
 
         # Height of the plot is proportional to the number of classes
         figsize_x = min(max(10, len(bins)), 25)
