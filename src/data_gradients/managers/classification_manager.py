@@ -10,6 +10,7 @@ from data_gradients.managers.abstract_manager import AnalysisManagerAbstract
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.classification_sample_preprocessor import ClassificationSamplePreprocessor
 from data_gradients.dataset_adapters.config.data_config import ClassificationDataConfig
+from data_gradients.utils.data_classes.image_channels import ImageChannels
 
 
 class ClassificationAnalysisManager(AnalysisManagerAbstract):
@@ -33,6 +34,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         is_batch: Optional[bool] = None,
+        image_channels: Optional[ImageChannels] = None,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
     ):
@@ -54,6 +56,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
         :param use_cache:               Whether to use cache or not for the configuration of the data.
         :param images_extractor:        Function extracting the image(s) out of the data output.
         :param labels_extractor:        Function extracting the label(s) out of the data output.
+        :param image_channels:          Image channels to use.
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
 
@@ -69,6 +72,7 @@ class ClassificationAnalysisManager(AnalysisManagerAbstract):
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_batch=is_batch,
+            image_channels=image_channels,
         )
 
         sample_preprocessor = ClassificationSamplePreprocessor(data_config=data_config)
