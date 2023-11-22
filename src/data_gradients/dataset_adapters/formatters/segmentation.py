@@ -81,7 +81,7 @@ class SegmentationBatchFormatter(BatchFormatter):
         return images
 
     def _format_labels(self, labels: Tensor) -> Tensor:
-        labels = labels.squeeze((1, -1))  # If (BS, 1, H, W) or (BS, H, W, 1) -> (BS, H, W)
+        labels = labels.squeeze(1).squeeze(-1)  # If (BS, 1, H, W) or (BS, H, W, 1) -> (BS, H, W)
         if labels.ndim == 3:
             labels = ensure_hard_labels(labels, n_classes=self.data_config.get_n_classes(), threshold_value=self.threshold_value)
         elif labels.ndim == 4:

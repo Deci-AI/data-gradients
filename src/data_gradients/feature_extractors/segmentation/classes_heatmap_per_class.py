@@ -31,7 +31,7 @@ class SegmentationClassHeatmap(BaseClassHeatmap):
             self.class_names = sample.class_names
 
         # (H, W) -> (C, H, W)
-        n_classes = np.max(sample.mask)
+        n_classes = np.max(list(sample.class_names.keys()))
         mask_onehot = mask_to_onehot(mask_categorical=sample.mask, n_classes=n_classes)
         mask_onehot = mask_onehot.transpose((1, 2, 0))  # H, W, C -> C, H, W
 
