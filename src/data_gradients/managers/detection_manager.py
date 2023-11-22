@@ -12,6 +12,7 @@ from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.detection_sample_preprocessor import DetectionSamplePreprocessor
 from data_gradients.datasets import COCOFormatDetectionDataset, VOCDetectionDataset, COCODetectionDataset
 from data_gradients.dataset_adapters.config import DetectionDataConfig
+from data_gradients.utils.data_classes.image_channels import ImageChannels
 
 
 class DetectionAnalysisManager(AnalysisManagerAbstract):
@@ -36,6 +37,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         images_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         is_batch: Optional[bool] = None,
+        image_channels: Optional[ImageChannels] = None,
         is_label_first: Optional[bool] = None,
         bbox_format: Optional[str] = None,
         batches_early_stop: Optional[int] = None,
@@ -60,6 +62,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
         :param use_cache:               Whether to use cache or not for the configuration of the data.
         :param images_extractor:        Function extracting the image(s) out of the data output.
         :param labels_extractor:        Function extracting the label(s) out of the data output.
+        :param image_channels:          Image channels to use.
         :param is_label_first:          Whether the labels are in the first dimension or not.
                                             > (class_id, x, y, w, h) for instance, as opposed to (x, y, w, h, class_id)
         :param bbox_format:             Format of the bounding boxes. 'xyxy', 'xywh' or 'cxcywh'
@@ -79,6 +82,7 @@ class DetectionAnalysisManager(AnalysisManagerAbstract):
             images_extractor=images_extractor,
             labels_extractor=labels_extractor,
             is_batch=is_batch,
+            image_channels=image_channels,
             is_label_first=is_label_first,
             xyxy_converter=bbox_format,
         )
