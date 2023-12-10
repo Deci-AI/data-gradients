@@ -6,7 +6,7 @@ import platformdirs
 import torch
 from abc import ABC
 from dataclasses import dataclass
-from typing import Dict, Optional, Callable, Union, List
+from typing import Dict, Optional, Callable, Union, List, Mapping
 
 import data_gradients
 from data_gradients.dataset_adapters.config.questions import FixedOptionsQuestion, OpenEndedQuestion, text_to_yellow
@@ -155,7 +155,7 @@ class DataConfig(ABC):
             self.n_classes = json_dict.get("n_classes")
         if self.class_names is None:
             class_names = json_dict.get("class_names")
-            if isinstance(class_names, dict):
+            if isinstance(class_names, Mapping):
                 class_names = {int(k): v for k, v in class_names.items()}
             self.class_names = class_names
         if self.class_names_to_use is None:

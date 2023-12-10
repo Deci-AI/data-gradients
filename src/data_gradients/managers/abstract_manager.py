@@ -172,15 +172,16 @@ class AnalysisManagerAbstract(abc.ABC):
                 else:
                     warning = feature.warning
 
-                section.add_feature(
-                    FeatureSummary(
-                        name=feature.title,
-                        description=self._format_feature_description(feature.description),
-                        image_path=image_path,
-                        warning=warning,
-                        notice=feature.notice,
+                if not feature_error:
+                    section.add_feature(
+                        FeatureSummary(
+                            name=feature.title,
+                            description=self._format_feature_description(feature.description),
+                            image_path=image_path,
+                            warning=warning,
+                            notice=feature.notice,
+                        )
                     )
-                )
             summary.add_section(section)
 
         print("Dataset successfully analyzed!")
