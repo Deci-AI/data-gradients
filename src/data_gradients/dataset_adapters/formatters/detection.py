@@ -63,6 +63,15 @@ class DetectionBatchFormatter(BatchFormatter):
 
         # Labels format transformations are only relevant if we have labels
         if labels.numel() > 0:
+
+            if self.label_first is None:
+                # If possible, we try to infer the value of `label_first`.
+                first_col, last_col = labels[..., :1], labels[..., -1:]
+                if check_all_integers(first_col) and not check_all_integers(last_col):
+                    self.label_first = True
+                elif not check_all_integers(first_col) and check_all_integers(last_col):
+                    self.label_first = False
+
             # This condition is not required because self.data_config caches answers,
             # But adding this condition avoids unnecessary compute.
             if self.label_first is None or self.xyxy_converter is None:
@@ -142,7 +151,14 @@ class DetectionBatchFormatter(BatchFormatter):
             labels, bboxes = annotated_bboxes[..., -1:], annotated_bboxes[..., :-1]
 
         if not check_all_integers(labels):
-            raise RuntimeError(f"Labels should all be integers, but got {labels}")
+            label_order_str = "label is first" if label_first else "label is last"
+            raise ValueError(
+                f"Labels should all be integers. Found non-integer labels.\n"
+                f"Annotations=\n{annotated_bboxes}\n"
+                f"It was previously said that '{label_order_str}', so Labels=\n{labels}."
+                f"If the labels are another column of your annotations, please re-run and answer properly the question on that topic. "
+                f"Otherwise, please make sure that your dataset encodes your labels (class ids) in `int` format."
+            )
 
         xyxy_bboxes = xyxy_converter(bboxes)
 
