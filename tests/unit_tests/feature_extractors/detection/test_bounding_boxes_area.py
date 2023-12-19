@@ -18,28 +18,28 @@ class TestComputeHistogram(unittest.TestCase):
             }
         )
 
-        result = DetectionBoundingBoxArea._compute_histogram(test_df, transform_name="sqrt")
+        result = DetectionBoundingBoxArea._compute_histogram(test_df, name="bbox_area_sqrt")
 
         expected_result = {
-            "train": {"transform": "sqrt", "bin_width": 1, "max_value": 3, "histograms": {"A": [0, 1, 0, 2], "B": [0, 0, 1, 0]}},
-            "val": {"transform": "sqrt", "bin_width": 1, "max_value": 3, "histograms": {"A": [0, 0, 1, 0], "B": [0, 0, 0, 1], "C": [0, 0, 0, 1]}},
+            "train": {"transform": "bbox_area_sqrt", "bin_width": 1, "max_value": 3, "histograms": {"A": [0, 1, 0, 2], "B": [0, 0, 1, 0]}},
+            "val": {"transform": "bbox_area_sqrt", "bin_width": 1, "max_value": 3, "histograms": {"A": [0, 0, 1, 0], "B": [0, 0, 0, 1], "C": [0, 0, 0, 1]}},
         }
 
         self.assertEqual(result, expected_result)
 
     def test_single_data_point(self):
         test_df = pd.DataFrame({"bbox_area_sqrt": [1], "split": ["train"], "class_name": ["A"]})
-        result = DetectionBoundingBoxArea._compute_histogram(test_df, transform_name="sqrt")
+        result = DetectionBoundingBoxArea._compute_histogram(test_df, name="bbox_area_sqrt")
 
-        expected_result = {"train": {"transform": "sqrt", "bin_width": 1, "max_value": 1, "histograms": {"A": [0, 1]}}}
+        expected_result = {"train": {"transform": "bbox_area_sqrt", "bin_width": 1, "max_value": 1, "histograms": {"A": [0, 1]}}}
 
         self.assertEqual(result, expected_result)
 
     def test_minimum_maximum_values(self):
         test_df = pd.DataFrame({"bbox_area_sqrt": [1, 100], "split": ["val", "val"], "class_name": ["A", "A"]})
-        result = DetectionBoundingBoxArea._compute_histogram(test_df, transform_name="sqrt")
+        result = DetectionBoundingBoxArea._compute_histogram(test_df, name="bbox_area_sqrt")
 
-        expected_result = {"val": {"transform": "sqrt", "bin_width": 1, "max_value": 100, "histograms": {"A": [0] + [1] + [0] * 98 + [1]}}}
+        expected_result = {"val": {"transform": "bbox_area_sqrt", "bin_width": 1, "max_value": 100, "histograms": {"A": [0] + [1] + [0] * 98 + [1]}}}
 
         self.assertEqual(result, expected_result)
 
@@ -75,17 +75,17 @@ class TestComputeHistogram(unittest.TestCase):
         extractor.update(val_sample)
         feature = extractor.aggregate()
 
-        histogram_dict_train = feature.json["train"]["histogram_per_class"]
-        histogram_dict_val = feature.json["val"]["histogram_per_class"]
+        histogram_dict_train = feature.json["train"]["histogram_per_class_area"]
+        histogram_dict_val = feature.json["val"]["histogram_per_class_area"]
 
         expected_result_train = {
-            "transform": "sqrt",
+            "transform": "bbox_area_sqrt",
             "bin_width": 1,
             "max_value": 4,
             "histograms": {"A": [0, 0, 1, 0, 0], "B": [0, 0, 0, 1, 0], "C": [0, 0, 0, 1, 1], "D": [0, 1, 0, 0, 0], "E": [0, 0, 1, 0, 0]},
         }
 
-        expected_result_val = {"transform": "sqrt", "bin_width": 1, "max_value": 4, "histograms": {"A": [0, 0, 1, 0, 0], "B": [0, 1, 0, 1, 0]}}
+        expected_result_val = {"transform": "bbox_area_sqrt", "bin_width": 1, "max_value": 4, "histograms": {"A": [0, 0, 1, 0, 0], "B": [0, 1, 0, 1, 0]}}
 
         self.assertEqual(histogram_dict_train, expected_result_train)
         self.assertEqual(histogram_dict_val, expected_result_val)

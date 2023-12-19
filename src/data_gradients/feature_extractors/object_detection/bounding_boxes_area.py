@@ -89,7 +89,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             basic_stats = dict(df[df["split"] == split]["relative_bbox_area"].describe())
             json[split] = {**basic_stats,
                            "histogram_per_class_area": dict_bincount_area[split],
-                           "histogram_per_class_a_p": dict_bincount_area_perimeter[split]}
+                           "histogram_per_class_area_perimeter": dict_bincount_area_perimeter[split]}
 
         feature = Feature(
             data=df,
