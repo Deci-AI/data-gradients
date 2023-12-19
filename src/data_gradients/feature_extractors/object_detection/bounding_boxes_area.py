@@ -43,6 +43,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         for class_id, bbox_xyxy in zip(sample.class_ids, sample.bboxes_xyxy):
             class_name = sample.class_names[class_id]
             bbox_area = (bbox_xyxy[2] - bbox_xyxy[0]) * (bbox_xyxy[3] - bbox_xyxy[1])
+            bbox_perimeter = 2 * ((bbox_xyxy[2] - bbox_xyxy[0]) + (bbox_xyxy[3] - bbox_xyxy[1]))
             self.data.append(
                 {
                     "split": sample.split,
@@ -50,13 +51,15 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                     "class_name": class_name,
                     "relative_bbox_area": 100 * (bbox_area / image_area),
                     f"bbox_area_{self.hist_transform_name}": self.hist_transform(bbox_area),
+                    f"bbox_area_perimeter": int((bbox_area / bbox_perimeter)),
                 }
             )
 
     def aggregate(self) -> Feature:
         df = pd.DataFrame(self.data)
 
-        dict_bincount = self._compute_histogram(df=df, transform_name=self.hist_transform_name)
+        dict_bincount_area = self._compute_histogram(df=df, name="bbox_area_sqrt")
+        dict_bincount_area_perimeter = self._compute_histogram(df=df, name="bbox_area_perimeter")
 
         df = self.value_extractor.select(df=df, id_col="class_id", split_col="split", value_col="relative_bbox_area")
 
@@ -84,7 +87,9 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         json = {}
         for split in df["split"].unique():
             basic_stats = dict(df[df["split"] == split]["relative_bbox_area"].describe())
-            json[split] = {**basic_stats, "histogram_per_class": dict_bincount[split]}
+            json[split] = {**basic_stats,
+                           "histogram_per_class_area": dict_bincount_area[split],
+                           "histogram_per_class_a_p": dict_bincount_area_perimeter[split]}
 
         feature = Feature(
             data=df,
@@ -101,7 +106,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         return feature
 
     @staticmethod
-    def _compute_histogram(df: pd.DataFrame, transform_name: str) -> dict:
+    def _compute_histogram(df: pd.DataFrame, name: str) -> dict:
         """
         Compute histograms for bounding box areas per class.
 
@@ -122,7 +127,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                 'val': ...
         }
         """
-        max_value = df[f"bbox_area_{transform_name}"].max()
+        max_value = df[f"{name}"].max()
         max_value = int(max_value)
 
         dict_bincount = {}
@@ -131,7 +136,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             split_data = df[df["split"] == split]
 
             dict_bincount[split] = {
-                "transform": transform_name,
+                "transform": name,
                 "bin_width": 1,
                 "max_value": max_value,
                 "histograms": {},
@@ -141,7 +146,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                 class_data = split_data[split_data["class_name"] == class_label]
 
                 # Compute histograms for bin_width = 1
-                bin_counts = np.bincount(class_data[f"bbox_area_{transform_name}"], minlength=max_value + 1)
+                bin_counts = np.bincount(class_data[f"{name}"], minlength=max_value + 1)
                 histogram = bin_counts.tolist()
 
                 dict_bincount[split]["histograms"][class_label] = histogram
