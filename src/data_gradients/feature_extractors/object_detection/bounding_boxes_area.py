@@ -51,7 +51,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
                     "class_name": class_name,
                     "relative_bbox_area": 100 * (bbox_area / image_area),
                     f"bbox_area_{self.hist_transform_name}": self.hist_transform(bbox_area),
-                    f"bbox_area_perimeter": int((bbox_area / bbox_perimeter)),
+                    "bbox_area_perimeter": int((bbox_area / bbox_perimeter)),
                 }
             )
 
@@ -87,9 +87,11 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
         json = {}
         for split in df["split"].unique():
             basic_stats = dict(df[df["split"] == split]["relative_bbox_area"].describe())
-            json[split] = {**basic_stats,
-                           "histogram_per_class_area": dict_bincount_area[split],
-                           "histogram_per_class_area_perimeter": dict_bincount_area_perimeter[split]}
+            json[split] = {
+                **basic_stats,
+                "histogram_per_class_area": dict_bincount_area[split],
+                "histogram_per_class_area_perimeter": dict_bincount_area_perimeter[split],
+            }
 
         feature = Feature(
             data=df,
@@ -136,7 +138,7 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             split_data = df[df["split"] == split]
 
             dict_bincount[split] = {
-                "transform": name,
+                "name": name,
                 "bin_width": 1,
                 "max_value": max_value,
                 "histograms": {},
