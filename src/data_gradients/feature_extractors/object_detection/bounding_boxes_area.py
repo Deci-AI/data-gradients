@@ -118,10 +118,10 @@ class DetectionBoundingBoxArea(AbstractFeatureExtractor):
             Example:
             {
                 'train': {
-                    'transform': 'sqrt', # Transformation applied to the bbox area
-                    'bin_width': 1,      # width between histogram bins. This depends on how the histogram is created.
-                    'max_value': 3,      # max (transformed) area value included in the histogram
-                    'histograms': {      # Dictionary of class name and its corresponding histogram
+                    'name': 'bbox_area_sqrt',   # Name of the histogram data
+                    'bin_width': 1,             # width between histogram bins. This depends on how the histogram is created.
+                    'max_value': 3,             # max (transformed) area value included in the histogram
+                    'histograms': {             # Dictionary of class name and its corresponding histogram
                         'A': [0, 1, 0, 2],
                         'B': [0, 0, 1, 0]
                     }
