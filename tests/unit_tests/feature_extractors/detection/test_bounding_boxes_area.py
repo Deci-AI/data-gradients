@@ -93,8 +93,7 @@ class TestComputeHistogram(unittest.TestCase):
         train_sample = DetectionSample(
             sample_id="sample_1",
             split="train",
-            image=np.zeros((100, 100, 3)),
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=np.zeros((100, 100, 3)), format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
             bboxes_xyxy=np.array([[2, 2, 4, 4], [30, 30, 60, 60], [20, 20, 30, 80], [1, 20, 40, 40], [50, 5, 90, 6], [17, 27, 79, 39]]),
             class_ids=np.array([0, 1, 2, 2, 3, 4]),
             class_names={0: "A", 1: "B", 2: "C", 3: "D", 4: "E"},
@@ -103,8 +102,7 @@ class TestComputeHistogram(unittest.TestCase):
         val_sample = DetectionSample(
             sample_id="sample_2",
             split="val",
-            image=np.zeros((100, 100, 3)),
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=np.zeros((100, 100, 3)), format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
             bboxes_xyxy=np.array(
                 [
                     [1, 1, 3, 3],
