@@ -1,5 +1,6 @@
 from .abstract_feature_extractor import AbstractFeatureExtractor
 from .common import ImagesAverageBrightness, ImageColorDistribution, ImagesResolution, SummaryStats, ImageDuplicates
+from .object_detection.similarity import DetectionClassSimilarity
 from .segmentation import (
     SegmentationBoundingBoxArea,
     SegmentationBoundingBoxResolution,
@@ -59,4 +60,5 @@ __all__ = [
     "ClassificationSummaryStats",
     "ClassificationClassDistributionVsArea",
     "ClassificationClassDistributionVsAreaPlot",
+    "DetectionClassSimilarity",
 ]
