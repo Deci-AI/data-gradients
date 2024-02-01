@@ -26,7 +26,7 @@ class SegmentationSampleProcessor(AbstractSamplePreprocessor):
                 contours = get_contours(mask, class_ids=list(self.data_config.get_class_names().keys()))
 
                 # TODO: Abstract the fact the images are channel last/first and add it to the Image class
-                image.data = np.uint8(np.transpose(image.as_numpy, (1, 2, 0)))
+                image.data = np.uint8(np.transpose(image.as_numpy(), (1, 2, 0)))
                 yield SegmentationSample(
                     image=image,
                     mask=mask,

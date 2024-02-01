@@ -24,7 +24,7 @@ class ClassificationSamplePreprocessor(AbstractSamplePreprocessor):
                 class_id = int(target)
 
                 # TODO: Abstract the fact the images are channel last/first and add it to the Image class
-                image.data = np.uint8(np.transpose(image.as_numpy, (1, 2, 0)))
+                image.data = np.uint8(np.transpose(image.as_numpy(), (1, 2, 0)))
                 sample = ClassificationSample(
                     image=image,
                     class_id=class_id,

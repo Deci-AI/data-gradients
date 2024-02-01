@@ -36,19 +36,16 @@ class Image:
     def shape(self):
         return self.data.shape
 
-    @property
     def as_numpy(self) -> np.ndarray:
         if isinstance(self.data, torch.Tensor):
             return self.data.cpu().numpy()
         return self.data
 
-    @property
     def as_torch(self) -> torch.Tensor:
         if isinstance(self.data, np.ndarray):
             return torch.from_numpy(self.data)
         return self.data
 
-    @property
     def as_rgb(self) -> np.ndarray:
         if not isinstance(self.data, np.ndarray):
             raise ValueError(f"`image_as_rgb` is only available for numpy arrays. Got `{type(self.data)}`.")

@@ -25,7 +25,7 @@ class DetectionSamplePreprocessor(AbstractSamplePreprocessor):
                 class_ids, bboxes_xyxy = target[:, 0], target[:, 1:]
 
                 # TODO: Abstract the fact the images are channel last/first and add it to the Image class
-                image.data = np.uint8(np.transpose(image.as_numpy, (1, 2, 0)))
+                image.data = np.uint8(np.transpose(image.as_numpy(), (1, 2, 0)))
                 yield DetectionSample(
                     image=image,
                     class_ids=class_ids,
