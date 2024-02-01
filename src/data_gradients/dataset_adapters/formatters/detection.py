@@ -5,9 +5,9 @@ from torch import Tensor
 
 from data_gradients.dataset_adapters.utils import check_all_integers
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
-from data_gradients.dataset_adapters.formatters.utils import check_images_shape, ensure_channel_first
 from data_gradients.dataset_adapters.config.data_config import DetectionDataConfig
 from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError
+from data_gradients.utils.data_classes.data_samples import Image
 
 
 class UnsupportedDetectionBatchFormatError(DatasetFormatError):
@@ -31,13 +31,13 @@ class DetectionBatchFormatter(BatchFormatter):
         self.label_first = None
         super().__init__(data_config=data_config)
 
-    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, List[Tensor]]:
+    def format(self, images: Tensor, labels: Tensor) -> Tuple[List[Image], List[Tensor]]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
 
         :param images: Batch of images, in (BS, ...) format
         :param labels: Batch of labels, in (BS, N, 5) format
         :return:
-            - images: Batch of images already formatted into (BS, C, H, W)
+            - images: List of images
             - labels: List of bounding boxes, each of shape (N_i, 5 [label_xyxy]) with N_i being the number of bounding boxes with class_id in class_ids
         """
 
@@ -58,12 +58,7 @@ class DetectionBatchFormatter(BatchFormatter):
             images = images.unsqueeze(0)
             labels = labels.unsqueeze(0)
 
-        images = ensure_channel_first(images, n_image_channels=self.get_n_image_channels(images=images))
-        images = check_images_shape(images, n_image_channels=self.get_n_image_channels(images=images))
-        if 0 <= images.min() and images.max() <= 1:
-            images *= 255
-            images = images.to(torch.uint8)
-
+        image_formatted = self._format_images(images)
         labels = self.ensure_labels_shape(annotated_bboxes=labels, batch_size=images.shape[0])
 
         # Labels format transformations are only relevant if we have labels
@@ -95,7 +90,7 @@ class DetectionBatchFormatter(BatchFormatter):
             )
             labels = self.filter_non_relevant_annotations(bboxes=labels, class_ids_to_use=self.class_ids_to_use)
 
-        return images, labels
+        return image_formatted, labels
 
     def check_is_batch(self, images: Tensor, labels: Tensor) -> bool:
         if images.ndim == 4:

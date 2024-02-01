@@ -1,11 +1,12 @@
 import unittest
 import numpy as np
 
-from data_gradients.utils.data_classes.data_samples import ImageSample
+from data_gradients.utils.data_classes.data_samples import ImageSample, Image
 from data_gradients.feature_extractors.common.image_average_brightness import ImagesAverageBrightness
 from data_gradients.feature_extractors.common.image_color_distribution import ImageColorDistribution
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.data_classes.image_channels import ImageChannels
+from data_gradients.dataset_adapters.formatters.utils import Uint8ImageFormat
 
 
 class ImageBrightnessTest(unittest.TestCase):
@@ -17,8 +18,7 @@ class ImageBrightnessTest(unittest.TestCase):
         train_sample = ImageSample(
             sample_id="sample_1",
             split="train",
-            image=train_image,
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=train_image, format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
         )
         self.average_brightness.update(train_sample)
         self.color_distribution.update(train_sample)
@@ -29,8 +29,7 @@ class ImageBrightnessTest(unittest.TestCase):
         train_sample = ImageSample(
             sample_id="sample_2",
             split="train",
-            image=train_image,
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=train_image, format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
         )
         self.average_brightness.update(train_sample)
         self.color_distribution.update(train_sample)
@@ -40,8 +39,7 @@ class ImageBrightnessTest(unittest.TestCase):
         train_sample = ImageSample(
             sample_id="sample_3",
             split="train",
-            image=train_image,
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=train_image, format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
         )
         self.average_brightness.update(train_sample)
         self.color_distribution.update(train_sample)
@@ -51,8 +49,7 @@ class ImageBrightnessTest(unittest.TestCase):
         train_sample = ImageSample(
             sample_id="sample_3",
             split="train",
-            image=train_image,
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=train_image, format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
         )
         self.average_brightness.update(train_sample)
         self.color_distribution.update(train_sample)
@@ -62,9 +59,8 @@ class ImageBrightnessTest(unittest.TestCase):
         valid_image[1, :80, :] = 250
         valid_sample = ImageSample(
             sample_id="sample_4",
-            split="valid",
-            image=valid_image,
-            image_channels=ImageChannels.from_str("RGB"),
+            split="val",
+            image=Image(data=valid_image, format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
         )
         self.average_brightness.update(valid_sample)
         self.color_distribution.update(valid_sample)
@@ -74,9 +70,8 @@ class ImageBrightnessTest(unittest.TestCase):
         valid_image[1, :80, :] = 250
         valid_sample = ImageSample(
             sample_id="sample_4",
-            split="valid",
-            image=valid_image,
-            image_channels=ImageChannels.from_str("RGB"),
+            split="val",
+            image=Image(data=valid_image, format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
         )
         self.average_brightness.update(valid_sample)
         self.color_distribution.update(valid_sample)
@@ -86,9 +81,8 @@ class ImageBrightnessTest(unittest.TestCase):
         valid_image[1, :80, :] = 50
         valid_sample = ImageSample(
             sample_id="sample_5",
-            split="valid",
-            image=valid_image,
-            image_channels=ImageChannels.from_str("RGB"),
+            split="val",
+            image=Image(data=valid_image, format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
         )
         self.average_brightness.update(valid_sample)
         self.color_distribution.update(valid_sample)
@@ -98,18 +92,31 @@ class ImageBrightnessTest(unittest.TestCase):
         output_json = self.average_brightness.aggregate().json
 
         expected_json = {
-            "count": 7.0,
-            "mean": 93.3667,
-            "std": 9.501169,
-            "min": 85.333333,
-            "25%": 85.333333,
-            "50%": 94.166667,
-            "75%": 95.866667,
-            "max": 111.66667,
+            "train": {
+                "count": 4.0,
+                "mean": 87.54166666666666,
+                "std": 4.416666666666671,
+                "min": 85.33333333333333,
+                "25%": 85.33333333333333,
+                "50%": 85.33333333333333,
+                "75%": 87.54166666666666,
+                "max": 94.16666666666667,
+            },
+            "val": {
+                "count": 3.0,
+                "mean": 101.13333333333333,
+                "std": 9.122134253196094,
+                "min": 95.86666666666666,
+                "25%": 95.86666666666666,
+                "50%": 95.86666666666666,
+                "75%": 103.76666666666667,
+                "max": 111.66666666666667,
+            },
         }
 
-        for key in output_json.keys():
-            self.assertEqual(round(output_json[key], 4), round(expected_json[key], 4))
+        for split in output_json.keys():
+            for key in output_json[split].keys():
+                self.assertEqual(round(output_json[split][key], 4), round(expected_json[split][key], 4))
 
     def test_plot(self):
         feature = self.average_brightness.aggregate()

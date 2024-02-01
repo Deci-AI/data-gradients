@@ -19,18 +19,18 @@ class DetectionSamplePreprocessor(AbstractSamplePreprocessor):
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[DetectionSample]:
         for data in dataset:
             images, labels = self.adapter.adapt(data)
-            images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
             for image, target in zip(images, labels):
                 target = target.cpu().numpy().astype(int)
                 class_ids, bboxes_xyxy = target[:, 0], target[:, 1:]
 
+                # TODO: Abstract the fact the images are channel last/first and add it to the Image class
+                image.data = np.uint8(np.transpose(image.as_numpy(), (1, 2, 0)))
                 yield DetectionSample(
                     image=image,
                     class_ids=class_ids,
                     bboxes_xyxy=bboxes_xyxy,
                     class_names=self.data_config.get_class_names(),
                     split=split,
-                    image_channels=self.data_config.get_image_channels(image=image),
                     sample_id=str(time.time()),
                 )

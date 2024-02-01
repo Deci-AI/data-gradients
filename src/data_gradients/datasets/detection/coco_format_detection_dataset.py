@@ -76,7 +76,7 @@ class COCOFormatDetectionDataset:
         self.class_ids = self.base_dataset.coco.getCatIds()
 
         categories = self.base_dataset.coco.loadCats(self.class_ids)
-        self.class_names = [category["name"] for category in categories]
+        self.class_names = {class_id: category["name"] for class_id, category in zip(self.class_ids, categories)}
 
     def __len__(self) -> int:
         return len(self.base_dataset)
