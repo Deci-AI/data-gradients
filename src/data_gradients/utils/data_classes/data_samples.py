@@ -79,7 +79,7 @@ class ImageSample:
     image: Image
 
     def __repr__(self):
-        return f"ImageSample(sample_id={self.sample_id}, image={self.image.data.shape}, format={self.image_channels})"
+        return f"ImageSample(sample_id={self.sample_id}, image={self.image.data.shape}, format={self.image.channels})"
 
 
 @dataclasses.dataclass
