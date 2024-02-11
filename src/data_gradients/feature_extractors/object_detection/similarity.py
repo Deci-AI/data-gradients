@@ -1,17 +1,17 @@
 from typing import List, Optional
 
 import numpy as np
-from super_gradients.training.processing.processing import default_vit_imagenet_processing_params
+from torch.nn import Identity
+from torchvision.models import swin_v2_b, Swin_V2_B_Weights
 
 from data_gradients.common.registry.registry import register_feature_extractor
 from data_gradients.feature_extractors.abstract_feature_extractor import Feature
 from data_gradients.utils.data_classes import DetectionSample
 from data_gradients.visualize.plot_options import HeatmapOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
-from super_gradients.training import models
-from super_gradients.common.object_names import Models
 import torch
 from torchvision.ops import box_iou
+from data_gradients.utils.data_classes.image_channels import BGRChannels, RGBChannels, ImageChannels
 
 
 @register_feature_extractor("DetectionClassSimilarity")
@@ -34,27 +34,33 @@ class DetectionClassSimilarity(AbstractFeatureExtractor):
 
         :param iou_threshold: Optional[float]. IoU threshold to exclude overlapping bounding boxes. If None, no filtering is applied.
         """
-        self.model = models.get(Models.VIT_BASE, pretrained_weights="imagenet")
+        self.model = swin_v2_b(weights=Swin_V2_B_Weights.IMAGENET1K_V1)
         self.model.eval()
-        self.model.backbone_mode = True
-        self.image_preprocessor = default_vit_imagenet_processing_params()["image_processor"]
+        self.model.head = Identity()
+        self.image_preprocessor = Swin_V2_B_Weights.IMAGENET1K_V1.transforms()
+
         self.features = []
         self.instances_class_ids = []
         self.all_classes_list = None
         self.iou_threshold = iou_threshold
 
-    def extract_features(self, cropped_images: List[np.ndarray]):
+    def extract_features(self, cropped_images: List[np.ndarray], image_channels: ImageChannels):
         """
         Extracts feature vectors from a list of cropped images using the pre-trained model.
 
         :param cropped_images: List[np.ndarray]. List of cropped images from detected objects.
+        :param image_channels: ImageChannels. When BGRChannels, will reverse the channels.
         :return: List[torch.Tensor]. Extracted feature vectors for each image.
         """
-        cropped_images = [c.astype(np.uint8)[:, :, ::-1] for c in cropped_images]
-        preprocessed_cropped_images = [self.image_preprocessor.preprocess_image(cropped_image)[0] for cropped_image in cropped_images]
-        preprocessed_cropped_images = torch.tensor(np.array(preprocessed_cropped_images))
+        # Process each image individually since crops are of varying sizes
+        if isinstance(image_channels, BGRChannels):
+            cropped_images = [c[:, :, ::-1].copy() for c in cropped_images]
+        cropped_images = [torch.from_numpy(c.transpose((2, 0, 1))).type(torch.FloatTensor) for c in cropped_images]
+        cropped_images = [c / 255 for c in cropped_images]
+        cropped_images = [self.image_preprocessor(c) for c in cropped_images]
+        cropped_images = torch.stack(cropped_images)
         with torch.no_grad():
-            extracted_features = self.model(preprocessed_cropped_images)
+            extracted_features = self.model(cropped_images)
         return extracted_features
 
     def update(self, sample: DetectionSample):
@@ -68,6 +74,9 @@ class DetectionClassSimilarity(AbstractFeatureExtractor):
         cropped_images = []
         class_ids = []
         iou_matrix = None
+        image_channels = sample.image_channels
+        if not isinstance(image_channels, BGRChannels) and not isinstance(image_channels, RGBChannels):
+            raise RuntimeError(f"Similarity feature only works with RGB and BGR samples, got {image_channels}")
 
         if self.all_classes_list is None:
             self.all_classes_list = sample.class_names
@@ -85,7 +94,7 @@ class DetectionClassSimilarity(AbstractFeatureExtractor):
                 cropped_images.append(cropped_image)
                 class_ids.append(class_id)
         if len(cropped_images):
-            extracted_features = self.extract_features(cropped_images)
+            extracted_features = self.extract_features(cropped_images, image_channels)
             self.features.append(extracted_features)
             self.instances_class_ids.extend(class_ids)
 
