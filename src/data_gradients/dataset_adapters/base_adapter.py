@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Tuple
+from typing import Tuple, List
 
 import torch
 
@@ -8,6 +8,7 @@ from data_gradients.dataset_adapters.config.data_config import DataConfig
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.output_mapper.dataset_output_mapper import DatasetOutputMapper
 from data_gradients.dataset_adapters.config.typing_utils import SupportedDataType
+from data_gradients.utils.data_classes.data_samples import Image
 
 
 class BaseDatasetAdapter(ABC):
@@ -30,7 +31,7 @@ class BaseDatasetAdapter(ABC):
         self.dataset_output_mapper = dataset_output_mapper
         self.formatter = formatter
 
-    def adapt(self, data: SupportedDataType) -> Tuple[torch.Tensor, torch.Tensor]:
+    def adapt(self, data: SupportedDataType) -> Tuple[List[Image], torch.Tensor]:
         """Adapt an input data (Batch or Sample) into a standard format.
 
         :param data:     Input data to be adapted.
@@ -38,7 +39,7 @@ class BaseDatasetAdapter(ABC):
                             - Can be structured in a wide range of formats. (list, dict, ...)
                             - Can be formatted in a wide range of formats. (image: HWC, CHW, ... - label: label_cxcywh, xyxy_label, ...)
         :return:         Tuple of images and labels.
-                            - Image will be formatted to (BS, H, W, C) - BS = 1 if original data is a single sample
+                            - List of Image
                             - Label will be formatted to a standard format that depends on the task.
         """
         images, labels = self.dataset_output_mapper.extract(data)

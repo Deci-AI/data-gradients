@@ -13,6 +13,7 @@ from data_gradients.sample_preprocessor.segmentation_sample_preprocessor import 
 from data_gradients.datasets import COCOSegmentationDataset, COCOFormatSegmentationDataset, VOCSegmentationDataset
 from data_gradients.dataset_adapters.config.data_config import SegmentationDataConfig
 from data_gradients.utils.data_classes.image_channels import ImageChannels
+from data_gradients.dataset_adapters.formatters.utils import ImageFormat
 
 
 class SegmentationAnalysisManager(AnalysisManagerAbstract):
@@ -39,6 +40,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         labels_extractor: Optional[Callable[[SupportedDataType], torch.Tensor]] = None,
         is_batch: Optional[bool] = None,
         image_channels: Optional[ImageChannels] = None,
+        image_format: Optional[ImageFormat] = None,
         threshold_soft_labels: float = 0.5,
         batches_early_stop: Optional[int] = None,
         remove_plots_after_report: Optional[bool] = True,
@@ -64,6 +66,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
         :param images_extractor:        Function extracting the image(s) out of the data output.
         :param labels_extractor:        Function extracting the label(s) out of the data output.
         :param image_channels:          Image channels to use.
+        :param image_format:            Image format to use. Can be Uint8ImageFormat, FloatImageFormat, ScaledFloatImageFormat.
         :param threshold_soft_labels:   Threshold for converting soft labels to binary labels
         :param remove_plots_after_report:  Delete the plots from the report directory after the report is generated. By default, True
         """
@@ -81,6 +84,7 @@ class SegmentationAnalysisManager(AnalysisManagerAbstract):
             labels_extractor=labels_extractor,
             is_batch=is_batch,
             image_channels=image_channels,
+            image_format=image_format,
         )
 
         sample_preprocessor = SegmentationSampleProcessor(data_config=data_config, threshold_soft_labels=threshold_soft_labels)

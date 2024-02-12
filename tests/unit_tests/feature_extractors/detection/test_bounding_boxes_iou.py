@@ -4,15 +4,16 @@ import unittest
 import numpy as np
 
 from data_gradients.feature_extractors.object_detection.bounding_boxes_iou import DetectionBoundingBoxIoU
-from data_gradients.utils.data_classes.data_samples import DetectionSample
+from data_gradients.utils.data_classes.data_samples import DetectionSample, Image
 from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.data_classes.image_channels import ImageChannels
+from data_gradients.dataset_adapters.formatters.utils import Uint8ImageFormat
 
 
 class BoundingBoxesIoUTest(unittest.TestCase):
     def generate_random_dataset(self, num_classes, num_samples, average_number_of_bboxes_per_sample):
         samples = []
-        class_names = np.array([f"class_{i}" for i in range(num_classes)])
+        class_names = {i: f"class_{i}" for i in range(num_classes)}
         for sample_index in range(num_samples):
             num_boxes = random.randint(0, average_number_of_bboxes_per_sample)
             class_ids = np.random.randint(0, num_classes, size=num_boxes)
@@ -22,8 +23,7 @@ class BoundingBoxesIoUTest(unittest.TestCase):
             train_sample = DetectionSample(
                 sample_id=str(sample_index),
                 split="train" if random.random() < 0.8 else "val",
-                image=np.zeros((640, 640, 3)),
-                image_channels=ImageChannels.from_str("RGB"),
+                image=Image(data=np.zeros((640, 640, 3)), format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
                 bboxes_xyxy=bboxes_xyxy,
                 class_ids=class_ids,
                 class_names=class_names,
@@ -35,8 +35,7 @@ class BoundingBoxesIoUTest(unittest.TestCase):
         train_sample = DetectionSample(
             sample_id="sample_1",
             split="train",
-            image=np.zeros((100, 100, 3)),
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=np.zeros((100, 100, 3)), format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
             bboxes_xyxy=np.array(
                 [
                     [10, 10, 20, 20],
@@ -48,14 +47,13 @@ class BoundingBoxesIoUTest(unittest.TestCase):
                 ]
             ),
             class_ids=np.array([0, 1, 2, 2, 3, 4]),
-            class_names=["class_1", "class_2", "class_3", "class_4", "class_5"],
+            class_names={0: "class_1", 1: "class_2", 2: "class_3", 3: "class_4", 4: "class_5"},
         )
 
         valid_sample = DetectionSample(
             sample_id="sample_1",
             split="valid",
-            image=np.zeros((100, 100, 3)),
-            image_channels=ImageChannels.from_str("RGB"),
+            image=Image(data=np.zeros((100, 100, 3)), format=Uint8ImageFormat(), channels=ImageChannels.from_str("RGB")),
             bboxes_xyxy=np.array(
                 [
                     [40, 40, 50, 50],
@@ -65,7 +63,7 @@ class BoundingBoxesIoUTest(unittest.TestCase):
                 ]
             ),
             class_ids=np.array([0, 1, 2, 2]),
-            class_names=["class_1", "class_2", "class_3", "class_4"],
+            class_names={0: "class_1", 1: "class_2", 2: "class_3", 3: "class_4"},
         )
 
         extractor = DetectionBoundingBoxIoU(num_bins=20, class_agnostic=True)

@@ -1,5 +1,4 @@
-import warnings
-from typing import Tuple
+from typing import Tuple, List
 
 import torch
 from torch import Tensor
@@ -8,6 +7,7 @@ from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError, check_images_shape
 from data_gradients.dataset_adapters.formatters.utils import ensure_channel_first
 from data_gradients.dataset_adapters.config.data_config import ClassificationDataConfig
+from data_gradients.utils.data_classes.data_samples import Image
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -29,7 +29,7 @@ class ClassificationBatchFormatter(BatchFormatter):
 
         super().__init__(data_config=data_config)
 
-    def format(self, images: Tensor, labels: Tensor) -> Tuple[Tensor, Tensor]:
+    def format(self, images: Tensor, labels: Tensor) -> Tuple[List[Image], Tensor]:
         """Validate batch images and labels format, and ensure that they are in the relevant format for detection.
 
         :param images: Batch of images, in (BS, ...) format
@@ -47,23 +47,8 @@ class ClassificationBatchFormatter(BatchFormatter):
         images = check_images_shape(images, n_image_channels=self.get_n_image_channels(images=images))
 
         labels = self.ensure_labels_shape(images=images, labels=labels)
-
-        if 0 <= images.min() and images.max() <= 1:
-            images *= 255
-            images = images.to(torch.uint8)
-        elif images.min() < 0:  # images were normalized with some unknown mean and std
-            images -= images.min()
-            images /= images.max()
-            images *= 255
-            images = images.to(torch.uint8)
-
-            warnings.warn(
-                "Images were normalized with some unknown mean and std. "
-                "For visualization needs and color distribution plots Data Gradients will try to scale them to [0, 255] range. "
-                "This normalization will use min-max scaling per batch with may make the images look brighter/darker than they should be. "
-            )
-
-        return images, labels
+        image_formatted = self._format_images(images)
+        return image_formatted, labels
 
     def check_is_batch(self, images: Tensor, labels: Tensor) -> bool:
         if images.ndim == 4:
