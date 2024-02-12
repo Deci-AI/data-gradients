@@ -11,7 +11,7 @@ from data_gradients.visualize.plot_options import HeatmapOptions
 from data_gradients.feature_extractors.abstract_feature_extractor import AbstractFeatureExtractor
 import torch
 from torchvision.ops import box_iou
-from data_gradients.utils.data_classes.image_channels import BGRChannels, RGBChannels, ImageChannels
+from data_gradients.utils.data_classes.image_channels import BGRChannels, RGBChannels, ImageChannels, GrayscaleChannels
 
 
 @register_feature_extractor("DetectionClassSimilarity")
@@ -55,6 +55,8 @@ class DetectionClassSimilarity(AbstractFeatureExtractor):
         # Process each image individually since crops are of varying sizes
         if isinstance(image_channels, BGRChannels):
             cropped_images = [c[:, :, ::-1].copy() for c in cropped_images]
+        elif isinstance(image_channels, GrayscaleChannels):
+            cropped_images = [np.repeat(c[..., np.newaxis] if c.ndim == 2 else c, 3, axis=2) for c in cropped_images]
         cropped_images = [torch.from_numpy(c.transpose((2, 0, 1))).type(torch.FloatTensor) for c in cropped_images]
         cropped_images = [c / 255 for c in cropped_images]
         cropped_images = [self.image_preprocessor(c) for c in cropped_images]
@@ -75,8 +77,8 @@ class DetectionClassSimilarity(AbstractFeatureExtractor):
         class_ids = []
         iou_matrix = None
         image_channels = sample.image_channels
-        if not isinstance(image_channels, BGRChannels) and not isinstance(image_channels, RGBChannels):
-            raise RuntimeError(f"Similarity feature only works with RGB and BGR samples, got {image_channels}")
+        if not isinstance(image_channels, BGRChannels) and not isinstance(image_channels, RGBChannels) and not isinstance(image_channels, GrayscaleChannels):
+            raise RuntimeError(f"Similarity feature only works with RGB, BGR or Greyscale samples, got {image_channels}")
 
         if self.all_classes_list is None:
             self.all_classes_list = sample.class_names
