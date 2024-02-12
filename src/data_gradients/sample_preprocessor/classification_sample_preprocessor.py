@@ -19,17 +19,17 @@ class ClassificationSamplePreprocessor(AbstractSamplePreprocessor):
     def preprocess_samples(self, dataset: Iterable[SupportedDataType], split: str) -> Iterator[ClassificationSample]:
         for data in dataset:
             images, labels = self.adapter.adapt(data)
-            images = np.uint8(np.transpose(images.cpu().numpy(), (0, 2, 3, 1)))
 
             for image, target in zip(images, labels):
                 class_id = int(target)
 
+                # TODO: Abstract the fact the images are channel last/first and add it to the Image class
+                image.data = np.uint8(np.transpose(image.as_numpy(), (1, 2, 0)))
                 sample = ClassificationSample(
                     image=image,
                     class_id=class_id,
                     class_names=self.data_config.get_class_names(),
                     split=split,
-                    image_channels=self.data_config.get_image_channels(image=image),
                     sample_id=str(time.time()),
                 )
                 yield sample
