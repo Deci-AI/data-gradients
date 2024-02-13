@@ -7,7 +7,7 @@ opencv-python
 Pillow
 tensorboard
 torch
-torchvision
+torchvision>=0.16
 numpy
 matplotlib
 scipy
