@@ -3,6 +3,7 @@
 <p align="center">
   <a href="https://github.com/Deci-AI/super-gradients#prerequisites"><img src="https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue" /></a>
   <a href="https://pypi.org/project/data-gradients/"><img src="https://img.shields.io/pypi/v/data-gradients" /></a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FDeci-AI%2Fdata-gradients?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FDeci-AI%2Fdata-gradients.svg?type=shield"/></a>
   <a href="https://github.com/Deci-AI/data-gradients/releases"><img src="https://img.shields.io/github/v/release/Deci-AI/data-gradients" /></a>
   <a href="https://github.com/Deci-AI/data-gradients/blob/master/LICENSE.md"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" /></a>
 </p>   
@@ -12,6 +13,9 @@
 DataGradients is an open-source python based library designed for **computer vision dataset analysis**. 
 
 Extract **valuable insights** from your datasets and get **comprehensive reports effortlessly**.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FDeci-AI%2Fdata-gradients.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FDeci-AI%2Fdata-gradients?ref=badge_large)
 
 ### 🔍 Detect Common Data Issues
 - Corrupted data
