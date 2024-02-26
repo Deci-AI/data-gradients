@@ -4,7 +4,7 @@ pygments>=2.13.0
 tqdm>=4.64.1
 platformdirs>=2.5.2
 opencv-python
-Pillow>=10.0.0
+Pillow>=10.2.0
 tensorboard
 torch
 torchvision>=0.16
