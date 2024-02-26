@@ -17,3 +17,4 @@ seaborn
 xhtml2pdf==0.2.15
 jinja2
 imagededup
+fonttools>=4.43.0
