@@ -71,12 +71,12 @@ class DetectionClassSimilarity(AbstractFeatureExtractor):
 
         :param sample: DetectionSample. The new sample to process, containing image data and bounding boxes.
         """
-        image = sample.image  # np.ndarray of shape [H, W, C] - The image as a numpy array with channels last
+        image = sample.image.data  # np.ndarray of shape [H, W, C] - The image as a numpy array with channels last
         image_height, image_width = image.shape[:2]
         cropped_images = []
         class_ids = []
         iou_matrix = None
-        image_channels = sample.image_channels
+        image_channels = sample.image.channels
         if not isinstance(image_channels, BGRChannels) and not isinstance(image_channels, RGBChannels) and not isinstance(image_channels, GrayscaleChannels):
             raise RuntimeError(f"Similarity feature only works with RGB, BGR or Greyscale samples, got {image_channels}")
 
