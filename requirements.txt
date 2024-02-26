@@ -19,3 +19,4 @@ xhtml2pdf==0.2.15
 jinja2
 imagededup
 fonttools>=4.43.0
+wheel>=0.38.0 # not directly required, pinned by Snyk to avoid a vulnerability
