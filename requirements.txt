@@ -5,6 +5,7 @@ tqdm>=4.64.1
 platformdirs>=2.5.2
 opencv-python
 Pillow>=10.2.0
+werkzeug==2.3.8
 tensorboard
 torch
 torchvision>=0.16
