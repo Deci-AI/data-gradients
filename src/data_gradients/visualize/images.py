@@ -96,6 +96,8 @@ def combine_images_per_split_per_class(images_per_split_per_class: Dict[str, Dic
 
         # This plot is for a single class, which is made of at least 1 split
         class_fig, class_axs = plt.subplots(nrows=1, ncols=len(images_per_split), figsize=(10, 6))
+        # A hack to make sure class_axs is iterable. When is len(images_per_split) == 1, class_axs is not a list
+        class_axs = [class_axs] if len(images_per_split) == 1 else class_axs
         class_fig.subplots_adjust(top=0.9)
         class_fig.suptitle(f"Class: {class_name}", fontsize=36)
 

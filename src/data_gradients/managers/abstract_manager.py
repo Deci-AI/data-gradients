@@ -16,6 +16,7 @@ from data_gradients.visualize.seaborn_renderer import SeabornRenderer
 from data_gradients.utils.pdf_writer import ResultsContainer, Section, FeatureSummary
 from data_gradients.utils.summary_writer import SummaryWriter
 from data_gradients.sample_preprocessor.base_sample_preprocessor import AbstractSamplePreprocessor
+from data_gradients.dataset_adapters.exceptions import NonFiniteValuesError
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,15 +29,15 @@ class AnalysisManagerAbstract(abc.ABC):
     """
 
     def __init__(
-        self,
-        *,
-        train_data: Iterable[SupportedDataType],
-        val_data: Optional[Iterable[SupportedDataType]],
-        sample_preprocessor: AbstractSamplePreprocessor,
-        summary_writer: SummaryWriter,
-        grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
-        batches_early_stop: Optional[int] = None,
-        remove_plots_after_report: Optional[bool] = True,
+            self,
+            *,
+            train_data: Iterable[SupportedDataType],
+            val_data: Optional[Iterable[SupportedDataType]],
+            sample_preprocessor: AbstractSamplePreprocessor,
+            summary_writer: SummaryWriter,
+            grouped_feature_extractors: Dict[str, List[AbstractFeatureExtractor]],
+            batches_early_stop: Optional[int] = None,
+            remove_plots_after_report: Optional[bool] = True,
     ):
         """
         :param train_data:                  Iterable object contains images and labels of the training dataset
@@ -52,7 +53,8 @@ class AnalysisManagerAbstract(abc.ABC):
 
         # DATA
         if batches_early_stop:
-            logger.info(f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
+            logger.info(
+                f"Running with `batches_early_stop={batches_early_stop}`: Only the first {batches_early_stop} batches will be analyzed.")
         self.batches_early_stop = batches_early_stop
 
         val_data = val_data or iter([])
@@ -95,38 +97,88 @@ class AnalysisManagerAbstract(abc.ABC):
             "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0"
         )
 
-        datasets_tqdm = tqdm(
-            zip_longest(self.train_samples_iterator, self.val_samples_iterator, fillvalue=None),
-            desc="Analyzing... ",
-            total=self.n_batches,
-        )
+        # datasets_tqdm = iter(tqdm(
+        #     zip_longest(self.train_samples_iterator, self.val_samples_iterator, fillvalue=None),
+        #     desc="Analyzing... ",
+        #     total=self.n_batches,
+        # ))
+
+        train_samples_iterator = iter(self.train_samples_iterator)
+        val_samples_iterator = iter(self.val_samples_iterator)
 
         self._train_iters_done, self._val_iters_done = 0, 0
         self._stopped_early = False
 
-        for i, (train_sample, val_sample) in enumerate(datasets_tqdm):
+        non_finite_train_samples = 0
+        non_finite_train_samples_example = ""
+        non_finite_val_samples = 0
+        non_finite_val_samples_example = ""
 
-            if i == self.batches_early_stop:
-                self._stopped_early = True
-                break
+        with tqdm(total=self.n_batches, desc="Analyzing... ") as datasets_tqdm:
+            i = 0
+            while True:
+                if i == self.batches_early_stop:
+                    self._stopped_early = True
+                    break
 
-            if train_sample is not None:
-                for feature_extractors in self.grouped_feature_extractors.values():
-                    for feature_extractor in feature_extractors:
-                        feature_extractor.update(train_sample)
-                self._train_iters_done += 1
+                try:
+                    train_sample = None
+                    train_sample = next(train_samples_iterator)
 
-            if self._train_batch_size is None:
-                self._train_batch_size = self._train_iters_done
+                    if train_sample is not None:
+                        for feature_extractors in self.grouped_feature_extractors.values():
+                            for feature_extractor in feature_extractors:
+                                feature_extractor.update(train_sample)
+                        self._train_iters_done += 1
 
-            if val_sample is not None:
-                for feature_extractors in self.grouped_feature_extractors.values():
-                    for feature_extractor in feature_extractors:
-                        feature_extractor.update(val_sample)
-                self._val_iters_done += 1
+                    if self._train_batch_size is None:
+                        self._train_batch_size = self._train_iters_done
 
-            if self._val_batch_size is None:
-                self._val_batch_size = self._val_iters_done
+                except StopIteration:
+                    train_sample = None
+                except NonFiniteValuesError as e:
+                    logger.error(f"Train sample {self._train_iters_done} contains non-finite values: {e}")
+                    non_finite_train_samples += 1
+                    non_finite_train_samples_example = str(e)
+
+                try:
+                    val_sample = None
+                    val_sample = next(val_samples_iterator)
+
+                    if val_sample is not None:
+                        for feature_extractors in self.grouped_feature_extractors.values():
+                            for feature_extractor in feature_extractors:
+                                feature_extractor.update(val_sample)
+                        self._val_iters_done += 1
+
+                    if self._val_batch_size is None:
+                        self._val_batch_size = self._val_iters_done
+
+                except StopIteration:
+                    val_sample = None
+                except NonFiniteValuesError as e:
+                    logger.error(f"Val sample {self._val_iters_done} contains non-finite values: {e}")
+                    non_finite_val_samples += 1
+                    non_finite_val_samples_example = str(e)
+
+                i += 1
+                datasets_tqdm.update()
+                if train_sample is None and val_sample is None:
+                    break
+
+        if non_finite_train_samples > 0 or non_finite_val_samples > 0:
+            message = ""
+            if non_finite_train_samples > 0:
+                message += f"There are {non_finite_train_samples} samples with non-finite values found in train dataset.<br />"
+                message += f"Example: {non_finite_train_samples_example}<br />"
+
+            if non_finite_val_samples > 0:
+                message += f"There are {non_finite_val_samples} samples with non-finite values found in validation dataset.<br />"
+                message += f"Example: {non_finite_val_samples_example}<br />"
+
+            message += "This most likely indicate you have a bug in your dataset class / annotation files."
+
+            self.summary_writer.add_error("Non-finite values", message)
 
     def post_process(self, interrupted=False):
         """
@@ -138,6 +190,13 @@ class AnalysisManagerAbstract(abc.ABC):
         images_created = []
 
         summary = ResultsContainer()
+        if self.summary_writer._errors:
+            errors_section = Section("Errors")
+            for error in self.summary_writer._errors:
+                errors_section.add_feature(
+                    FeatureSummary(name=error["title"], description=error["error"], image_path=None))
+            summary.add_section(errors_section)
+
         for section_name, feature_extractors in tqdm(self.grouped_feature_extractors.items(), desc="Summarizing... "):
             section = Section(section_name)
             for feature_extractor in feature_extractors:
@@ -167,7 +226,8 @@ class AnalysisManagerAbstract(abc.ABC):
 
                 if feature_error:
                     warning = feature_error
-                elif isinstance(feature_extractor, SummaryStats) and (interrupted or (self.batches_early_stop and self._stopped_early)):
+                elif isinstance(feature_extractor, SummaryStats) and (
+                        interrupted or (self.batches_early_stop and self._stopped_early)):
                     warning = self._create_samples_iterated_warning()
                 else:
                     warning = feature.warning
@@ -265,7 +325,7 @@ class AnalysisManagerAbstract(abc.ABC):
             portion_train = ""
         else:
             total_train_samples = self.train_size * self._train_batch_size
-            portion_train = f" ({self._train_iters_done/total_train_samples:.1%})"
+            portion_train = f" ({self._train_iters_done / total_train_samples:.1%})"
 
         if self.val_size is None or self._val_batch_size is None:
             total_val_samples = "unknown amount of "
@@ -273,7 +333,7 @@ class AnalysisManagerAbstract(abc.ABC):
 
         else:
             total_val_samples = self.val_size * self._val_batch_size
-            portion_val = f" ({self._val_iters_done/total_val_samples:.1%})"
+            portion_val = f" ({self._val_iters_done / total_val_samples:.1%})"
 
         msg_head = "The results presented in this report cover only a subset of the data.\n"
         msg_train = f"Train set: {self._train_iters_done} out of {total_train_samples} samples were analyzed{portion_train}.\n"
