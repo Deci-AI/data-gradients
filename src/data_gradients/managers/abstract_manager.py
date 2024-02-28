@@ -97,12 +97,6 @@ class AnalysisManagerAbstract(abc.ABC):
             "computer vision datasets. click here: https://hubs.ly/Q01XpHBT0"
         )
 
-        # datasets_tqdm = iter(tqdm(
-        #     zip_longest(self.train_samples_iterator, self.val_samples_iterator, fillvalue=None),
-        #     desc="Analyzing... ",
-        #     total=self.n_batches,
-        # ))
-
         train_samples_iterator = iter(self.train_samples_iterator)
         val_samples_iterator = iter(self.val_samples_iterator)
 
@@ -117,10 +111,6 @@ class AnalysisManagerAbstract(abc.ABC):
         with tqdm(total=self.n_batches, desc="Analyzing... ") as datasets_tqdm:
             i = 0
             while True:
-                if i == self.batches_early_stop:
-                    self._stopped_early = True
-                    break
-
                 try:
                     train_sample = None
                     train_sample = next(train_samples_iterator)
@@ -163,7 +153,15 @@ class AnalysisManagerAbstract(abc.ABC):
 
                 i += 1
                 datasets_tqdm.update()
+
+                # Check for exit conditions
+                # If both train & validation iterators are exhausted, exit the loop
                 if train_sample is None and val_sample is None:
+                    break
+
+                # If the target number of batches has been reached, exit the loop
+                if i == self.batches_early_stop:
+                    self._stopped_early = True
                     break
 
         if non_finite_train_samples > 0 or non_finite_val_samples > 0:
