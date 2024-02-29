@@ -1,0 +1,2 @@
+class NonFiniteValuesError(ValueError):
+    pass
