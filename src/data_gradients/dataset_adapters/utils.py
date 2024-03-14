@@ -11,6 +11,13 @@ def channels_last_to_first(tensors: torch.Tensor) -> torch.Tensor:
     return tensors.permute(0, 3, 1, 2)
 
 
+def check_all_finite(tensor: torch.Tensor) -> bool:
+    """
+    Check if all elements in the tensor are finite (not NaN or Inf).
+    """
+    return torch.all(torch.isfinite(tensor)).item()
+
+
 def check_all_integers(tensor: torch.Tensor) -> bool:
     return torch.all(torch.eq(tensor, tensor.to(torch.int))).item()
 
