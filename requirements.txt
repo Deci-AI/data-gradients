@@ -4,7 +4,7 @@ pygments>=2.13.0
 tqdm>=4.64.1
 platformdirs>=2.5.2
 opencv-python
-Pillow>=10.2.0
+pillow>=10.2.0
 werkzeug==2.3.8
 tensorboard
 torch
@@ -19,3 +19,4 @@ xhtml2pdf==0.2.15
 jinja2
 imagededup
 fonttools>=4.43.0
+wheel>=0.38.0 # not directly required, pinned by Snyk to avoid a vulnerability

@@ -3,11 +3,12 @@ from typing import Tuple, Callable, List, Optional
 import torch
 from torch import Tensor
 
-from data_gradients.dataset_adapters.utils import check_all_integers
+from data_gradients.dataset_adapters.utils import check_all_integers, check_all_finite
 from data_gradients.dataset_adapters.formatters.base import BatchFormatter
 from data_gradients.dataset_adapters.config.data_config import DetectionDataConfig
 from data_gradients.dataset_adapters.formatters.utils import DatasetFormatError
 from data_gradients.utils.data_classes.data_samples import Image
+from data_gradients.dataset_adapters.exceptions import NonFiniteValuesError
 
 
 class UnsupportedDetectionBatchFormatError(DatasetFormatError):
@@ -134,7 +135,8 @@ class DetectionBatchFormatter(BatchFormatter):
             return annotated_bboxes
 
     @staticmethod
-    def convert_to_label_xyxy(annotated_bboxes: Tensor, image_shape: Tuple[int, int], xyxy_converter: Callable[[Tensor], Tensor], label_first: bool):
+    def convert_to_label_xyxy(annotated_bboxes: Tensor, image_shape: Tuple[int, int],
+                              xyxy_converter: Callable[[Tensor], Tensor], label_first: bool):
         """Convert a tensor of annotated bounding boxes to the 'label_xyxy' format.
 
         :param annotated_bboxes:    Annotated bounding boxes, in (BS, N, 5) format. Could be any format.
@@ -149,6 +151,11 @@ class DetectionBatchFormatter(BatchFormatter):
             labels, bboxes = annotated_bboxes[..., :1], annotated_bboxes[..., 1:]
         else:
             labels, bboxes = annotated_bboxes[..., -1:], annotated_bboxes[..., :-1]
+
+        if not check_all_finite(labels):
+            raise NonFiniteValuesError(f"{annotated_bboxes}")
+        if not check_all_finite(bboxes):
+            raise NonFiniteValuesError(f"{annotated_bboxes}")
 
         if not check_all_integers(labels):
             label_order_str = "label is first" if label_first else "label is last"
